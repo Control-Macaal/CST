@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Control de Traslados</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-hover: #3a56d4;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --dark: #1b263b;
+            --light: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #2b2d42;
+            --text-light: #8d99ae;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --border-radius: 16px;
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--light);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+            min-height: 100vh;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        /* Safe area para dispositivos con notch */
+        @supports (padding: max(0px)) {
+            body {
+                padding-left: max(1rem, env(safe-area-inset-left));
+                padding-right: max(1rem, env(safe-area-inset-right));
+                padding-bottom: max(1rem, env(safe-area-inset-bottom));
+            }
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .app-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding-top: 1rem;
+        }
+
+        .app-title {
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .app-subtitle {
+            color: var(--text-light);
+            font-weight: 400;
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Main Grid */
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.03);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            padding: 1.25rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .card-header i {
+            font-size: 1.25rem;
+        }
+
+        .card-body {
+            padding: 1.25rem;
+        }
+
+        /* Buttons - Optimizados para touch */
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            border: none;
+            font-size: 1rem;
+            text-align: left;
+            touch-action: manipulation;
+            user-select: none;
+            min-height: 56px; /* Tamaño mínimo para touch */
+        }
+
+        .btn i {
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+            width: 24px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:active {
+            background-color: var(--primary-hover);
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        .btn-secondary:active {
+            background-color: #3d82d6;
+            transform: scale(0.98);
+        }
+
+        /* Modal - Adaptado para móviles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(5px);
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal {
+            background: white;
+            border-radius: var(--border-radius);
+            width: 100%;
+            max-width: 400px;
+            padding: 1.5rem;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--dark);
+        }
+
+        .pin-input {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.5rem;
+            text-align: center;
+            border: 2px solid #e9ecef;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            letter-spacing: 0.5rem;
+            transition: border-color 0.3s;
+            -webkit-appearance: none;
+        }
+
+        .pin-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .pin-error {
+            color: var(--danger);
+            min-height: 1.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1rem;
+        }
+
+        .modal-btn:active {
+            background: var(--primary-hover);
+            transform: scale(0.98);
+        }
+
+        /* Mejoras específicas para iOS */
+        @supports (-webkit-touch-callout: none) {
+            .btn {
+                padding: 1.1rem;
+            }
+            
+            input, textarea, select {
+                font-size: 16px !important;
+            }
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .app-grid {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Responsive para móviles pequeños */
+        @media (max-width: 480px) {
+            .app-container {
+                padding: 1rem;
+            }
+            
+            .card-header, .card-body {
+                padding: 1rem;
+            }
+            
+            .btn {
+                padding: 0.9rem;
+                min-height: 52px;
+            }
+            
+            .modal {
+                padding: 1.25rem;
+            }
+        }
+
+        /* Evitar zoom en inputs en iOS */
+        @media screen and (-webkit-min-device-pixel-ratio:0) {
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1 class="app-title">
+                <i class="fas fa-truck-loading"></i>
+                Control de Traslados
+            </h1>
+            <p class="app-subtitle">Sistema de Gestión Salidas por Traslado Macaal.</p>
+        </header>
+
+        <main class="app-grid">
+            <!-- Card para Crear Registros -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-plus-circle"></i>
+                    <h2>Crear Registros</h2>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group">
+                        <button onclick="requestPin('th1')" class="btn btn-primary">
+                            <i class="fas fa-file-import"></i>
+                            Formulario Salidas Todo Hogar 1
+                        </button>
+                        
+                        <button onclick="requestPin('th2')" class="btn btn-primary">
+                            <i class="fas fa-file-import"></i>
+                            Formulario Salidas Todo Hogar 2
+                        </button>
+                        
+                        <button onclick="requestPin('eplastik')" class="btn btn-primary">
+                            <i class="fas fa-file-import"></i>
+                            Formulario Salidas Eplastik
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card para Visualizar Registros -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-search"></i>
+                    <h2>Visualizar Registros</h2>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group">
+                        <button onclick="window.open('https://drive.google.com/drive/folders/1CzeWbDpsRtVorL5vLq3K6CRnkqAe8O0F?usp=sharing', '_blank')" 
+                                class="btn btn-secondary">
+                            <i class="fas fa-file-alt"></i>
+                            Ver Salidas Todo Hogar 1
+                        </button>
+                        
+                        <button onclick="window.open('https://drive.google.com/drive/folders/1uZew6baLcXot5RxytNAjilkzDeoySVJK?usp=sharing', '_blank')" 
+                                class="btn btn-secondary">
+                            <i class="fas fa-file-alt"></i>
+                            Ver Salidas Todo Hogar 2
+                        </button>
+                        
+                        <button onclick="window.open('https://drive.google.com/drive/folders/15t0p44lnSNqXb0jKIkenNkKFPqFe9i_g?usp=sharing', '_blank')" 
+                                class="btn btn-secondary">
+                            <i class="fas fa-file-alt"></i>
+                            Ver Salidas Eplastik
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de PIN Moderno -->
+    <div id="pinModal" class="modal-overlay">
+        <div class="modal">
+            <button class="modal-close" onclick="closePinModal()">&times;</button>
+            <h2 class="modal-title">
+                <i class="fas fa-lock"></i>
+                Ingrese el PIN
+            </h2>
+            <input type="password" id="pinInput" class="pin-input" maxlength="4" placeholder="••••" inputmode="numeric" pattern="[0-9]*">
+            <div id="pinError" class="pin-error"></div>
+            <button class="modal-btn" onclick="checkPin()">Verificar</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuración
+        const CORRECT_PIN = '2109';
+        const MAX_ATTEMPTS = 3;
+        let failedAttempts = 0;
+        let blockedUntil = 0;
+        let currentAction = '';
+        
+        // URLs de formularios
+        const FORM_URLS = {
+            th1: 'https://tally.so/r/nPkaye',
+            th2: 'https://tally.so/r/wbv0ML',
+            eplastik: 'https://tally.so/r/3161Yp'
+        };
+        
+        // Funciones principales
+        function requestPin(action) {
+            if (Date.now() < blockedUntil) {
+                const remaining = Math.ceil((blockedUntil - Date.now()) / 60000);
+                showError(`Demasiados intentos. Espere ${remaining} minuto(s)`);
+                return;
+            }
+            
+            currentAction = action;
+            document.getElementById('pinInput').value = '';
+            document.getElementById('pinError').textContent = '';
+            document.getElementById('pinModal').classList.add('active');
+            setTimeout(() => {
+                document.getElementById('pinInput').focus();
+            }, 300); // Pequeño retraso para asegurar el foco en móviles
+        }
+        
+        function checkPin() {
+            const pin = document.getElementById('pinInput').value;
+            const errorElement = document.getElementById('pinError');
+            
+            if (!/^\d{4}$/.test(pin)) {
+                errorElement.textContent = 'El PIN debe tener 4 dígitos';
+                return;
+            }
+            
+            if (pin === CORRECT_PIN) {
+                closePinModal();
+                window.open(FORM_URLS[currentAction], '_blank');
+            } else {
+                failedAttempts++;
+                if (failedAttempts >= MAX_ATTEMPTS) {
+                    blockedUntil = Date.now() + 300000; // 5 minutos
+                    errorElement.textContent = 'Demasiados intentos. Espere 5 minutos.';
+                    updateBlockedTime();
+                } else {
+                    errorElement.textContent = `PIN incorrecto (${MAX_ATTEMPTS - failedAttempts} intentos restantes)`;
+                    shakeModal();
+                }
+            }
+        }
+        
+        function closePinModal() {
+            document.getElementById('pinModal').classList.remove('active');
+        }
+        
+        function updateBlockedTime() {
+            if (Date.now() < blockedUntil) {
+                const remaining = Math.ceil((blockedUntil - Date.now()) / 1000);
+                const minutes = Math.floor(remaining / 60);
+                const seconds = remaining % 60;
+                document.getElementById('pinError').textContent = 
+                    `Espere ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                setTimeout(updateBlockedTime, 1000);
+            } else {
+                failedAttempts = 0;
+                closePinModal();
+            }
+        }
+        
+        function showError(message) {
+            const errorElement = document.getElementById('pinError');
+            errorElement.textContent = message;
+            errorElement.style.color = 'var(--danger)';
+        }
+        
+        function shakeModal() {
+            const modal = document.querySelector('.modal');
+            modal.style.animation = 'none';
+            setTimeout(() => {
+                modal.style.animation = 'shake 0.5s';
+            }, 10);
+        }
+
+        // Manejar el teclado virtual en móviles
+        function handleVirtualKeyboard() {
+            if ('visualViewport' in window) {
+                const modal = document.querySelector('.modal');
+                const viewport = window.visualViewport;
+                
+                viewport.addEventListener('resize', () => {
+                    if (document.getElementById('pinModal').classList.contains('active')) {
+                        modal.style.bottom = `${window.innerHeight - viewport.height}px`;
+                    }
+                });
+            }
+        }
+        
+        // Event listeners
+        document.getElementById('pinInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkPin();
+        });
+        
+        document.getElementById('pinInput').addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+        });
+
+        // Inicialización
+        handleVirtualKeyboard();
+    </script>
+</body>
+</html>
