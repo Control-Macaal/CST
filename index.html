@@ -44,7 +44,6 @@
             -webkit-text-size-adjust: 100%;
         }
 
-        /* Safe area para dispositivos con notch */
         @supports (padding: max(0px)) {
             body {
                 padding-left: max(1rem, env(safe-area-inset-left));
@@ -58,6 +57,70 @@
             margin: 0 auto;
             padding: 1.5rem;
             min-height: 100vh;
+        }
+
+        /* Login Screen */
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .login-box {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .login-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+        }
+        
+        .login-input {
+            width: 100%;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+        
+        .login-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .login-error {
+            color: var(--danger);
+            margin-bottom: 1rem;
+            min-height: 1.5rem;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1rem;
+        }
+        
+        .login-btn:active {
+            background: var(--primary-hover);
+            transform: scale(0.98);
         }
 
         /* Header */
@@ -124,7 +187,7 @@
             padding: 1.25rem;
         }
 
-        /* Buttons - Optimizados para touch */
+        /* Buttons */
         .btn-group {
             display: flex;
             flex-direction: column;
@@ -174,7 +237,7 @@
             transform: scale(0.98);
         }
 
-        /* Modal - Adaptado para móviles */
+        /* Modals */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -285,7 +348,7 @@
             transform: scale(0.98);
         }
 
-        /* Modal Fullscreen */
+        /* Fullscreen Modal */
         .fullscreen-modal {
             padding: 0;
             align-items: stretch;
@@ -321,7 +384,7 @@
             border: none;
         }
 
-        /* Animación de carga */
+        /* Loader */
         .loader-container {
             position: fixed;
             top: 0;
@@ -359,7 +422,6 @@
             100% { transform: rotate(360deg); }
         }
         
-        /* Ocultar iframe inicialmente */
         #formFrame {
             opacity: 0;
             transition: opacity 0.3s ease;
@@ -369,18 +431,7 @@
             opacity: 1;
         }
 
-        /* Mejoras específicas para iOS */
-        @supports (-webkit-touch-callout: none) {
-            .btn {
-                padding: 1.1rem;
-            }
-            
-            input, textarea, select {
-                font-size: 16px !important;
-            }
-        }
-
-        /* Animaciones */
+        /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -396,7 +447,7 @@
             animation: fadeIn 0.5s ease-out;
         }
 
-        /* Responsive para móviles pequeños */
+        /* Responsive */
         @media (max-width: 480px) {
             .app-container {
                 padding: 1rem;
@@ -414,9 +465,12 @@
             .modal {
                 padding: 1.25rem;
             }
+            
+            .login-box {
+                padding: 1.5rem;
+            }
         }
 
-        /* Evitar zoom en inputs en iOS */
         @media screen and (-webkit-min-device-pixel-ratio:0) {
             input, select, textarea {
                 font-size: 16px !important;
@@ -425,7 +479,24 @@
     </style>
 </head>
 <body>
-    <div class="app-container">
+    <!-- Pantalla de Login -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-box">
+            <h1 class="login-title">
+                <i class="fas fa-truck-loading"></i>
+                Control de Traslados
+            </h1>
+            <input type="password" id="loginInput" class="login-input" placeholder="Ingrese la contraseña">
+            <div id="loginError" class="login-error"></div>
+            <button class="login-btn" onclick="checkLogin()">
+                <i class="fas fa-sign-in-alt"></i>
+                Ingresar
+            </button>
+        </div>
+    </div>
+
+    <!-- Contenido de la Aplicación (oculto inicialmente) -->
+    <div id="appContent" class="app-container" style="display: none;">
         <header class="app-header">
             <h1 class="app-title">
                 <i class="fas fa-truck-loading"></i>
@@ -435,7 +506,7 @@
         </header>
 
         <main class="app-grid">
-            <!-- Card para Crear Registros - Ahora en modal fullscreen -->
+            <!-- Card para Crear Registros -->
             <div class="card">
                 <div class="card-header">
                     <i class="fas fa-plus-circle"></i>
@@ -461,7 +532,7 @@
                 </div>
             </div>
 
-            <!-- Card para Visualizar Registros - CON PROTECCIÓN DE PIN -->
+            <!-- Card para Visualizar Registros -->
             <div class="card">
                 <div class="card-header">
                     <i class="fas fa-search"></i>
@@ -489,13 +560,13 @@
         </main>
     </div>
 
-    <!-- Modal de PIN Moderno -->
+    <!-- Modal de PIN para visualización -->
     <div id="pinModal" class="modal-overlay">
         <div class="modal">
             <button class="modal-close" onclick="closePinModal()">&times;</button>
             <h2 class="modal-title">
                 <i class="fas fa-lock"></i>
-                Ingrese el PIN
+                Ingrese el PIN de visualización
             </h2>
             <input type="password" id="pinInput" class="pin-input" maxlength="4" placeholder="••••" inputmode="numeric" pattern="[0-9]*">
             <div id="pinError" class="pin-error"></div>
@@ -517,7 +588,8 @@
 
     <script>
         // Configuración
-        const CORRECT_PIN = '1901';
+        const CORRECT_PASSWORDS = ['Hogar', 'hogar']; // Contraseñas para ingresar a la app
+        const VIEW_PIN = '1901'; // PIN para visualizar registros
         const MAX_ATTEMPTS = 3;
         let failedAttempts = 0;
         let blockedUntil = 0;
@@ -536,7 +608,118 @@
             view_th2: 'https://drive.google.com/drive/folders/1uZew6baLcXot5RxytNAjilkzDeoySVJK?usp=sharing',
             view_eplastik: 'https://drive.google.com/drive/folders/15t0p44lnSNqXb0jKIkenNkKFPqFe9i_g?usp=sharing'
         };
+
+        // Función para verificar login inicial
+        function checkLogin() {
+            const password = document.getElementById('loginInput').value;
+            const errorElement = document.getElementById('loginError');
+            
+            if (Date.now() < blockedUntil) {
+                const remaining = Math.ceil((blockedUntil - Date.now()) / 60000);
+                errorElement.textContent = `Demasiados intentos. Espere ${remaining} minuto(s)`;
+                return;
+            }
+            
+            if (CORRECT_PASSWORDS.includes(password)) {
+                // Login exitoso
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('appContent').style.display = 'block';
+                failedAttempts = 0;
+            } else {
+                // Login fallido
+                failedAttempts++;
+                if (failedAttempts >= MAX_ATTEMPTS) {
+                    blockedUntil = Date.now() + 300000; // 5 minutos
+                    errorElement.textContent = 'Demasiados intentos. Espere 5 minutos.';
+                    updateBlockedTime();
+                } else {
+                    errorElement.textContent = `Contraseña incorrecta (${MAX_ATTEMPTS - failedAttempts} intentos restantes)`;
+                    shakeLoginBox();
+                }
+            }
+        }
         
+        function updateBlockedTime() {
+            if (Date.now() < blockedUntil) {
+                const remaining = Math.ceil((blockedUntil - Date.now()) / 1000);
+                const minutes = Math.floor(remaining / 60);
+                const seconds = remaining % 60;
+                document.getElementById('loginError').textContent = 
+                    `Espere ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                setTimeout(updateBlockedTime, 1000);
+            } else {
+                failedAttempts = 0;
+            }
+        }
+        
+        function shakeLoginBox() {
+            const loginBox = document.querySelector('.login-box');
+            loginBox.style.animation = 'none';
+            setTimeout(() => {
+                loginBox.style.animation = 'shake 0.5s';
+            }, 10);
+        }
+
+        // Funciones para el PIN de visualización
+        function requestPin(action) {
+            if (Date.now() < blockedUntil) {
+                const remaining = Math.ceil((blockedUntil - Date.now()) / 60000);
+                showPinError(`Demasiados intentos. Espere ${remaining} minuto(s)`);
+                return;
+            }
+            
+            currentAction = action;
+            document.getElementById('pinInput').value = '';
+            document.getElementById('pinError').textContent = '';
+            document.getElementById('pinModal').classList.add('active');
+            setTimeout(() => {
+                document.getElementById('pinInput').focus();
+            }, 300);
+        }
+        
+        function checkPin() {
+            const pin = document.getElementById('pinInput').value;
+            const errorElement = document.getElementById('pinError');
+            
+            if (!/^\d{4}$/.test(pin)) {
+                errorElement.textContent = 'El PIN debe tener 4 dígitos';
+                return;
+            }
+            
+            if (pin === VIEW_PIN) {
+                closePinModal();
+                window.open(VIEW_URLS[currentAction], '_blank');
+            } else {
+                failedAttempts++;
+                if (failedAttempts >= MAX_ATTEMPTS) {
+                    blockedUntil = Date.now() + 300000;
+                    errorElement.textContent = 'Demasiados intentos. Espere 5 minutos.';
+                    updateBlockedTime();
+                } else {
+                    errorElement.textContent = `PIN incorrecto (${MAX_ATTEMPTS - failedAttempts} intentos restantes)`;
+                    shakeModal();
+                }
+            }
+        }
+        
+        function closePinModal() {
+            document.getElementById('pinModal').classList.remove('active');
+        }
+        
+        function showPinError(message) {
+            const errorElement = document.getElementById('pinError');
+            errorElement.textContent = message;
+            errorElement.style.color = 'var(--danger)';
+        }
+        
+        function shakeModal() {
+            const modal = document.querySelector('.modal');
+            modal.style.animation = 'none';
+            setTimeout(() => {
+                modal.style.animation = 'shake 0.5s';
+            }, 10);
+        }
+
         // Funciones para formularios en modal fullscreen
         function openFormModal(formType) {
             const modal = document.getElementById('formModal');
@@ -579,98 +762,14 @@
             modal.classList.remove('active');
             document.body.style.overflow = '';
         }
-        
-        // Funciones para PIN
-        function requestPin(action) {
-            if (Date.now() < blockedUntil) {
-                const remaining = Math.ceil((blockedUntil - Date.now()) / 60000);
-                showError(`Demasiados intentos. Espere ${remaining} minuto(s)`);
-                return;
-            }
-            
-            currentAction = action;
-            document.getElementById('pinInput').value = '';
-            document.getElementById('pinError').textContent = '';
-            document.getElementById('pinModal').classList.add('active');
-            setTimeout(() => {
-                document.getElementById('pinInput').focus();
-            }, 300);
-        }
-        
-        function checkPin() {
-            const pin = document.getElementById('pinInput').value;
-            const errorElement = document.getElementById('pinError');
-            
-            if (!/^\d{4}$/.test(pin)) {
-                errorElement.textContent = 'El PIN debe tener 4 dígitos';
-                return;
-            }
-            
-            if (pin === CORRECT_PIN) {
-                closePinModal();
-                window.open(VIEW_URLS[currentAction], '_blank');
-            } else {
-                failedAttempts++;
-                if (failedAttempts >= MAX_ATTEMPTS) {
-                    blockedUntil = Date.now() + 300000; // 5 minutos
-                    errorElement.textContent = 'Demasiados intentos. Espere 5 minutos.';
-                    updateBlockedTime();
-                } else {
-                    errorElement.textContent = `PIN incorrecto (${MAX_ATTEMPTS - failedAttempts} intentos restantes)`;
-                    shakeModal();
-                }
-            }
-        }
-        
-        function closePinModal() {
-            document.getElementById('pinModal').classList.remove('active');
-        }
-        
-        function updateBlockedTime() {
-            if (Date.now() < blockedUntil) {
-                const remaining = Math.ceil((blockedUntil - Date.now()) / 1000);
-                const minutes = Math.floor(remaining / 60);
-                const seconds = remaining % 60;
-                document.getElementById('pinError').textContent = 
-                    `Espere ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-                setTimeout(updateBlockedTime, 1000);
-            } else {
-                failedAttempts = 0;
-                closePinModal();
-            }
-        }
-        
-        function showError(message) {
-            const errorElement = document.getElementById('pinError');
-            errorElement.textContent = message;
-            errorElement.style.color = 'var(--danger)';
-        }
-        
-        function shakeModal() {
-            const modal = document.querySelector('.modal');
-            modal.style.animation = 'none';
-            setTimeout(() => {
-                modal.style.animation = 'shake 0.5s';
-            }, 10);
-        }
 
         // Event listeners
-        document.getElementById('pinInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') checkPin();
+        document.getElementById('loginInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkLogin();
         });
         
-        document.getElementById('pinInput').addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
-        });
-
-        // Cerrar modal al hacer clic fuera del contenido
-        document.querySelectorAll('.modal-overlay').forEach(modal => {
-            modal.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    if (modal.id === 'pinModal') closePinModal();
-                    if (modal.id === 'formModal') closeFormModal();
-                }
-            });
+        document.getElementById('pinInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkPin();
         });
     </script>
 </body>
