@@ -226,6 +226,9 @@
             touch-action: manipulation;
             user-select: none;
             min-height: 56px;
+            position: relative;
+            overflow: hidden;
+            transform: translate3d(0, 0, 0);
         }
 
         .btn i {
@@ -252,6 +255,35 @@
         .btn-secondary:active {
             background-color: #3d82d6;
             transform: scale(0.98);
+        }
+
+        /* Efecto Ripple (Onda) para botones */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.4);
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(2.5);
+                opacity: 0;
+            }
+        }
+
+        /* Efecto hover para dispositivos con mouse */
+        @media (hover: hover) {
+            .btn:hover {
+                filter: brightness(1.05);
+                transform: translateY(-1px);
+            }
+            
+            .btn:active {
+                transform: translateY(1px);
+            }
         }
 
         /* Modals */
@@ -630,6 +662,41 @@
             view_th2: 'https://drive.google.com/drive/folders/1uZew6baLcXot5RxytNAjilkzDeoySVJK?usp=sharing',
             view_eplastik: 'https://drive.google.com/drive/folders/15t0p44lnSNqXb0jKIkenNkKFPqFe9i_g?usp=sharing'
         };
+
+        // Función para crear efecto ripple en los botones
+        function createRipple(event) {
+            const button = event.currentTarget;
+            
+            // Crear elemento ripple
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple');
+            
+            // Posicionar ripple
+            const diameter = Math.max(button.clientWidth, button.clientHeight);
+            const radius = diameter / 2;
+            
+            // Para eventos táctiles
+            const clientX = event.clientX || event.touches[0].clientX;
+            const clientY = event.clientY || event.touches[0].clientY;
+            
+            ripple.style.width = ripple.style.height = `${diameter}px`;
+            ripple.style.left = `${clientX - button.getBoundingClientRect().left - radius}px`;
+            ripple.style.top = `${clientY - button.getBoundingClientRect().top - radius}px`;
+            
+            // Añadir ripple al botón
+            button.appendChild(ripple);
+            
+            // Eliminar ripple después de la animación
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        }
+
+        // Aplicar efecto ripple a todos los botones
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', createRipple);
+            button.addEventListener('touchstart', createRipple);
+        });
 
         // Función para verificar login inicial
         function checkLogin() {
