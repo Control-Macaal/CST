@@ -480,6 +480,32 @@
             opacity: 1;
         }
 
+        /* Version Modal Styles */
+        .version-info {
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        .version-info strong {
+            display: block;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        
+        .version-info small {
+            color: var(--text-light);
+            display: block;
+            margin-bottom: 1rem;
+        }
+        
+        .version-info .developer {
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed #eee;
+        }
+
         /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -628,6 +654,23 @@
         </div>
     </div>
 
+    <!-- Modal de Versión -->
+    <div id="versionModal" class="modal-overlay">
+        <div class="modal">
+            <button class="modal-close" onclick="closeVersionModal()">&times;</button>
+            <h2 class="modal-title">
+                <i class="fas fa-info-circle"></i>
+                Información de Versión
+            </h2>
+            <div class="version-info">
+                <strong>Versión 1.2.2 Stable</strong>
+                <small>Lanzamiento: 17/04/2025</small>
+                <div class="developer">Desarrollado por <strong>Luis El Crack</strong> 💻</div>
+            </div>
+            <button class="modal-btn" onclick="closeVersionModal()">Cerrar</button>
+        </div>
+    </div>
+
     <!-- Modal Fullscreen para Formularios -->
     <div id="formModal" class="modal-overlay fullscreen-modal">
         <div class="modal fullscreen-modal-content">
@@ -700,8 +743,15 @@
 
         // Función para verificar login inicial
         function checkLogin() {
-            const password = document.getElementById('loginInput').value;
+            const password = document.getElementById('loginInput').value.trim();
             const errorElement = document.getElementById('loginError');
+            
+            // Verificar si se ingresó "version" (case insensitive)
+            if (password.toLowerCase() === "version") {
+                showVersionModal();
+                document.getElementById('loginInput').value = ''; // Limpiar campo
+                return; // Salir de la función sin verificar contraseña
+            }
             
             if (Date.now() < blockedUntil) {
                 const remaining = Math.ceil((blockedUntil - Date.now()) / 60000);
@@ -747,6 +797,16 @@
             setTimeout(() => {
                 loginBox.style.animation = 'shake 0.5s';
             }, 10);
+        }
+
+        // Mostrar modal de versión
+        function showVersionModal() {
+            document.getElementById('versionModal').classList.add('active');
+        }
+        
+        // Cerrar modal de versión
+        function closeVersionModal() {
+            document.getElementById('versionModal').classList.remove('active');
         }
 
         // Funciones para el PIN de visualización
