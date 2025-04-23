@@ -194,6 +194,29 @@
             transform: scale(1.1);
         }
 
+        /* Mensaje de logout */
+        .logout-message {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logout-message.show {
+            opacity: 1;
+        }
+
         /* Main Grid */
         .app-grid {
             display: grid;
@@ -754,6 +777,12 @@
         </div>
     </div>
 
+    <!-- Mensaje de logout -->
+    <div id="logoutMessage" class="logout-message">
+        <i class="fas fa-check-circle"></i>
+        Sesión cerrada correctamente
+    </div>
+
     <script>
         // Configuración
         const CORRECT_PASSWORDS = ['Hogar', 'hogar']; // Contraseñas para ingresar a la app
@@ -785,6 +814,44 @@
             document.getElementById('loginScreen').style.display = 'flex';
             document.getElementById('loginInput').value = '';
             document.getElementById('loginInput').focus();
+            
+            // Mostrar mensaje de confirmación
+            const logoutMsg = document.getElementById('logoutMessage');
+            logoutMsg.classList.add('show');
+            
+            // Ocultar después de 3 segundos
+            setTimeout(() => {
+                logoutMsg.classList.remove('show');
+            }, 3000);
+        }
+
+        // Función para crear efecto ripple en los botones
+        function createRipple(event) {
+            const button = event.currentTarget;
+            
+            // Crear elemento ripple
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple');
+            
+            // Posicionar ripple
+            const diameter = Math.max(button.clientWidth, button.clientHeight);
+            const radius = diameter / 2;
+            
+            // Para eventos táctiles
+            const clientX = event.clientX || event.touches[0].clientX;
+            const clientY = event.clientY || event.touches[0].clientY;
+            
+            ripple.style.width = ripple.style.height = `${diameter}px`;
+            ripple.style.left = `${clientX - button.getBoundingClientRect().left - radius}px`;
+            ripple.style.top = `${clientY - button.getBoundingClientRect().top - radius}px`;
+            
+            // Añadir ripple al botón
+            button.appendChild(ripple);
+            
+            // Eliminar ripple después de la animación
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
         }
 
         // Verificar autenticación al cargar
@@ -797,36 +864,12 @@
             
             // Configurar evento para el botón de logout
             document.getElementById('logoutBtn').addEventListener('click', logout);
-        });
 
-        // Función para crear efecto ripple en los botones
-        function createRipple(event) {
-            const button = event.currentTarget;
-            
-            const ripple = document.createElement('span');
-            ripple.classList.add('ripple');
-            
-            const diameter = Math.max(button.clientWidth, button.clientHeight);
-            const radius = diameter / 2;
-            
-            const clientX = event.clientX || event.touches[0].clientX;
-            const clientY = event.clientY || event.touches[0].clientY;
-            
-            ripple.style.width = ripple.style.height = `${diameter}px`;
-            ripple.style.left = `${clientX - button.getBoundingClientRect().left - radius}px`;
-            ripple.style.top = `${clientY - button.getBoundingClientRect().top - radius}px`;
-            
-            button.appendChild(ripple);
-            
-            setTimeout(() => {
-                ripple.remove();
-            }, 600);
-        }
-
-        // Aplicar efecto ripple a todos los botones
-        document.querySelectorAll('.btn').forEach(button => {
-            button.addEventListener('click', createRipple);
-            button.addEventListener('touchstart', createRipple);
+            // Aplicar efecto ripple a todos los botones
+            document.querySelectorAll('.btn').forEach(button => {
+                button.addEventListener('click', createRipple);
+                button.addEventListener('touchstart', createRipple);
+            });
         });
 
         // Función para verificar login inicial
@@ -961,19 +1004,24 @@
             const frame = document.getElementById('formFrame');
             const loader = document.getElementById('loader');
             
+            // Mostrar loader
             loader.style.display = 'flex';
             frame.classList.remove('loaded');
             
+            // Abrir modal
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
             
+            // Configurar iframe
             frame.src = FORM_URLS[formType];
             
+            // Cuando el iframe carga, ocultar loader
             frame.onload = function() {
                 loader.style.display = 'none';
                 frame.classList.add('loaded');
             };
             
+            // Manejar errores
             frame.onerror = function() {
                 loader.innerHTML = '<div style="color: var(--danger); text-align: center;"><i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem;"></i><p>Error al cargar el formulario</p><button onclick="closeFormModal()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: var(--danger); color: white; border: none; border-radius: var(--border-radius);">Cerrar</button></div>';
             };
