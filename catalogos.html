@@ -52,6 +52,7 @@
             max-width: 1200px;
             margin: 0 auto;
             width: 100%;
+            position: relative;
         }
 
         header {
@@ -104,6 +105,14 @@
             position: relative;
             width: 100%;
             margin-bottom: 1.5rem;
+            transition: var(--transition);
+            max-height: 60px;
+            overflow: hidden;
+        }
+
+        .search-container.collapsed {
+            max-height: 0;
+            margin-bottom: 0;
         }
 
         .search-input {
@@ -130,6 +139,36 @@
             transform: translateY(-50%);
             color: var(--text-light);
             font-size: 1rem;
+        }
+
+        /* Botón de búsqueda flotante para móviles */
+        .floating-search-btn {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 56px;
+            height: 56px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 900;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .floating-search-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .floating-search-btn i {
+            font-size: 1.25rem;
         }
 
         .catalog-grid {
@@ -238,7 +277,7 @@
             color: var(--text-light);
         }
 
-        /* Modal Pantalla Completa */
+        /* Modal Pantalla Completa - Optimizado para PDFs en móviles */
         .fullscreen-modal {
             position: fixed;
             top: 0;
@@ -253,39 +292,77 @@
         }
 
         .fullscreen-modal.active {
-            display: block;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1002;
+        }
+
+        .modal-title {
+            font-weight: 500;
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 80%;
         }
 
         .modal-close {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: var(--primary);
-            color: white;
+            background: none;
             border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            font-size: 1.25rem;
+            color: white;
+            font-size: 1.5rem;
             cursor: pointer;
-            z-index: 1002;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            transition: var(--transition);
-            border: 2px solid white;
+            padding: 0.5rem;
         }
 
-        .modal-close:hover {
-            background: var(--primary-hover);
-            transform: scale(1.1);
+        .pdf-container {
+            flex: 1;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
         }
 
-        .modal-content {
+        .pdf-viewer {
             width: 100%;
             height: 100%;
             border: none;
+            background: white;
+        }
+
+        .pdf-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 0.5rem;
+            background: var(--light);
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .pdf-control-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .pdf-control-btn:hover {
+            background: var(--primary-hover);
         }
 
         /* Overlay para cuando el PDF esté cargando */
@@ -296,9 +373,10 @@
             width: 100%;
             height: 100%;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.9);
             z-index: 1001;
         }
 
@@ -309,6 +387,12 @@
             border-radius: 50%;
             border-top-color: transparent;
             animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        .loading-text {
+            color: var(--text);
+            font-weight: 500;
         }
 
         @keyframes spin {
@@ -337,10 +421,11 @@
         @media (max-width: 768px) {
             body {
                 padding: 0.75rem;
+                padding-bottom: 5rem; /* Espacio para el botón flotante */
             }
             
             .catalog-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
                 gap: 0.75rem;
             }
             
@@ -354,25 +439,63 @@
             
             .search-container {
                 margin-bottom: 1rem;
+                position: absolute;
+                top: -100px;
+                left: 0;
+                width: 100%;
+                background: var(--light);
+                z-index: 800;
+                padding: 0.5rem;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                border-radius: 0 0 var(--border-radius) var(--border-radius);
+                transition: top 0.3s ease;
+            }
+            
+            .search-container.visible {
+                top: 0;
             }
             
             .catalog-card {
                 padding: 1rem;
                 gap: 0.75rem;
-                min-height: 130px;
+                min-height: 140px;
             }
             
             .catalog-card h3 {
-                font-size: 1rem;
+                font-size: 0.95rem;
             }
             
             .card-category {
-                font-size: 0.65rem;
+                font-size: 0.6rem;
                 padding: 0.2rem 0.4rem;
             }
             
             .catalog-btn {
-                padding: 0.65rem;
+                padding: 0.6rem;
+                font-size: 0.8rem;
+            }
+            
+            .floating-search-btn {
+                display: flex;
+            }
+            
+            /* Optimización específica para visualización de PDF en móviles */
+            .modal-header {
+                padding: 0.75rem;
+            }
+            
+            .modal-title {
+                font-size: 0.9rem;
+            }
+            
+            .pdf-controls {
+                padding: 0.5rem;
+            }
+            
+            .pdf-control-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
             }
         }
 
@@ -386,29 +509,22 @@
                 justify-content: center;
             }
             
-            .modal-close {
-                top: 10px;
-                right: 10px;
-                width: 35px;
-                height: 35px;
-                font-size: 1.1rem;
+            .floating-search-btn {
+                bottom: 1rem;
+                right: 1rem;
+                width: 50px;
+                height: 50px;
             }
             
-            .search-input {
-                padding-left: 2.25rem;
-            }
-            
-            .search-icon {
-                left: 0.65rem;
-            }
-            
-            .card-header {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            
-            .card-category {
-                align-self: flex-start;
+            /* Ajustes adicionales para pantallas muy pequeñas */
+            @media (max-width: 360px) {
+                .catalog-grid {
+                    grid-template-columns: 1fr;
+                }
+                
+                .modal-title {
+                    font-size: 0.8rem;
+                }
             }
         }
 
@@ -417,6 +533,12 @@
             body {
                 padding-bottom: constant(safe-area-inset-bottom);
                 padding-bottom: env(safe-area-inset-bottom);
+            }
+            
+            .pdf-viewer {
+                /* Ajuste específico para iOS para visualización de PDF */
+                -webkit-overflow-scrolling: touch;
+                overflow: auto;
             }
         }
     </style>
@@ -435,7 +557,7 @@
         </header>
 
         <!-- Barra de búsqueda con lupa -->
-        <div class="search-container">
+        <div class="search-container" id="searchContainer">
             <i class="fas fa-search search-icon"></i>
             <input type="text" class="search-input" id="searchInput" placeholder="Buscar catálogo..." autocorrect="off" autocapitalize="off">
         </div>
@@ -527,13 +649,30 @@
         </div>
     </div>
 
-    <!-- Modal Pantalla Completa -->
+    <!-- Botón de búsqueda flotante para móviles -->
+    <button class="floating-search-btn" id="floatingSearchBtn">
+        <i class="fas fa-search"></i>
+    </button>
+
+    <!-- Modal Pantalla Completa - Optimizado para móviles -->
     <div class="fullscreen-modal" id="pdfModal">
-        <button class="modal-close" id="modalClose">&times;</button>
-        <div class="pdf-loading" id="pdfLoading">
-            <div class="spinner"></div>
+        <div class="modal-header">
+            <div class="modal-title" id="pdfModalTitle">Cargando catálogo...</div>
+            <button class="modal-close" id="modalClose">&times;</button>
         </div>
-        <iframe class="modal-content" id="pdfViewer" frameborder="0"></iframe>
+        <div class="pdf-container">
+            <div class="pdf-loading" id="pdfLoading">
+                <div class="spinner"></div>
+                <div class="loading-text">Cargando PDF...</div>
+            </div>
+            <iframe class="pdf-viewer" id="pdfViewer" frameborder="0"></iframe>
+        </div>
+        <div class="pdf-controls">
+            <button class="pdf-control-btn" id="pdfZoomIn" title="Acercar"><i class="fas fa-search-plus"></i></button>
+            <button class="pdf-control-btn" id="pdfZoomOut" title="Alejar"><i class="fas fa-search-minus"></i></button>
+            <button class="pdf-control-btn" id="pdfActualSize" title="Tamaño real"><i class="fas fa-expand"></i></button>
+            <button class="pdf-control-btn" id="pdfDownload" title="Descargar"><i class="fas fa-download"></i></button>
+        </div>
     </div>
 
     <script>
@@ -546,6 +685,19 @@
             const catalogGrid = document.getElementById('catalogGrid');
             const noResults = document.getElementById('noResults');
             const catalogCards = document.querySelectorAll('.catalog-card:not(.no-results)');
+            const searchContainer = document.getElementById('searchContainer');
+            const floatingSearchBtn = document.getElementById('floatingSearchBtn');
+            const pdfModalTitle = document.getElementById('pdfModalTitle');
+            const pdfZoomIn = document.getElementById('pdfZoomIn');
+            const pdfZoomOut = document.getElementById('pdfZoomOut');
+            const pdfActualSize = document.getElementById('pdfActualSize');
+            const pdfDownload = document.getElementById('pdfDownload');
+            
+            let currentPdfUrl = '';
+            let currentScale = 1;
+            const scaleStep = 0.25;
+            const maxScale = 3;
+            const minScale = 0.5;
             
             // Configurar botón de cerrar
             modalClose.addEventListener('click', closeModal);
@@ -558,7 +710,9 @@
             });
             
             // Función para abrir el modal
-            function openFullscreenModal(url) {
+            function openFullscreenModal(url, title) {
+                currentPdfUrl = url;
+                pdfModalTitle.textContent = title || 'Catálogo';
                 pdfModal.classList.add('active');
                 document.body.style.overflow = 'hidden';
                 
@@ -566,8 +720,16 @@
                 pdfLoading.style.display = 'flex';
                 pdfViewer.style.display = 'none';
                 
+                // Resetear escala
+                currentScale = 1;
+                updatePdfViewerScale();
+                
                 // Cargar el contenido
-                pdfViewer.src = url;
+                if (url.includes('.pdf')) {
+                    pdfViewer.src = url;
+                } else {
+                    pdfViewer.src = url;
+                }
                 
                 // Cuando el contenido esté listo
                 pdfViewer.onload = function() {
@@ -590,6 +752,45 @@
                 document.body.style.overflow = '';
                 pdfViewer.src = '';
             }
+            
+            // Función para actualizar la escala del PDF
+            function updatePdfViewerScale() {
+                pdfViewer.style.transform = `scale(${currentScale})`;
+                pdfViewer.style.transformOrigin = '0 0';
+                pdfViewer.style.width = `${100 / currentScale}%`;
+                pdfViewer.style.height = `${100 / currentScale}%`;
+            }
+            
+            // Controles de zoom
+            pdfZoomIn.addEventListener('click', function() {
+                if (currentScale < maxScale) {
+                    currentScale += scaleStep;
+                    updatePdfViewerScale();
+                }
+            });
+            
+            pdfZoomOut.addEventListener('click', function() {
+                if (currentScale > minScale) {
+                    currentScale -= scaleStep;
+                    updatePdfViewerScale();
+                }
+            });
+            
+            pdfActualSize.addEventListener('click', function() {
+                currentScale = 1;
+                updatePdfViewerScale();
+            });
+            
+            pdfDownload.addEventListener('click', function() {
+                if (currentPdfUrl) {
+                    const link = document.createElement('a');
+                    link.href = currentPdfUrl;
+                    link.download = currentPdfUrl.split('/').pop() || 'catalogo.pdf';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            });
             
             // Función para buscar catálogos
             function searchCatalogs() {
@@ -635,18 +836,19 @@
                     const pdfUrl = btn.dataset.pdfUrl;
                     const webUrl = btn.dataset.webUrl;
                     const url = pdfUrl || webUrl;
+                    const title = card.querySelector('h3').textContent.trim();
                     
                     if (url) {
                         // Configurar evento click para el botón
                         btn.addEventListener('click', (e) => {
                             e.stopPropagation();
-                            openFullscreenModal(url);
+                            openFullscreenModal(url, title);
                         });
                         
                         // Configurar evento click para toda la tarjeta
                         card.addEventListener('click', function(e) {
                             if (e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON') {
-                                openFullscreenModal(url);
+                                openFullscreenModal(url, title);
                             }
                         });
                         
@@ -654,11 +856,74 @@
                         card.addEventListener('keydown', (e) => {
                             if (e.key === 'Enter' || e.key === ' ') {
                                 e.preventDefault();
-                                openFullscreenModal(url);
+                                openFullscreenModal(url, title);
                             }
                         });
                     }
                 }
+            });
+            
+            // Manejo del botón de búsqueda flotante
+            if (floatingSearchBtn) {
+                floatingSearchBtn.addEventListener('click', function() {
+                    searchContainer.classList.toggle('visible');
+                    if (searchContainer.classList.contains('visible')) {
+                        searchInput.focus();
+                    }
+                });
+                
+                // Cerrar la búsqueda al hacer clic fuera
+                document.addEventListener('click', function(e) {
+                    if (!searchContainer.contains(e.target) && 
+                        e.target !== floatingSearchBtn && 
+                        !floatingSearchBtn.contains(e.target)) {
+                        searchContainer.classList.remove('visible');
+                    }
+                });
+            }
+            
+            // Detectar cambios en el tamaño de la pantalla
+            function handleResize() {
+                if (window.innerWidth > 768) {
+                    searchContainer.classList.remove('visible');
+                }
+            }
+            
+            window.addEventListener('resize', handleResize);
+            
+            // Manejar gestos táctiles para zoom en móviles
+            let initialDistance = null;
+            
+            pdfViewer.addEventListener('touchstart', function(e) {
+                if (e.touches.length === 2) {
+                    e.preventDefault();
+                    initialDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                }
+            }, { passive: false });
+            
+            pdfViewer.addEventListener('touchmove', function(e) {
+                if (e.touches.length === 2 && initialDistance) {
+                    e.preventDefault();
+                    const currentDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    
+                    if (initialDistance > 0) {
+                        const newScale = currentDistance / initialDistance * currentScale;
+                        if (newScale > minScale && newScale < maxScale) {
+                            currentScale = newScale;
+                            updatePdfViewerScale();
+                        }
+                    }
+                }
+            }, { passive: false });
+            
+            pdfViewer.addEventListener('touchend', function() {
+                initialDistance = null;
             });
         });
     </script>
