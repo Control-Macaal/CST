@@ -277,7 +277,7 @@
             color: var(--text-light);
         }
 
-        /* Modal Pantalla Completa - Optimizado para PDFs en móviles */
+        /* Modal Pantalla Completa */
         .fullscreen-modal {
             position: fixed;
             top: 0;
@@ -292,77 +292,39 @@
         }
 
         .fullscreen-modal.active {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .modal-header {
-            padding: 1rem;
-            background: var(--primary);
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1002;
-        }
-
-        .modal-title {
-            font-weight: 500;
-            font-size: 1rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 80%;
+            display: block;
         }
 
         .modal-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0.5rem;
-        }
-
-        .pdf-container {
-            flex: 1;
-            width: 100%;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .pdf-viewer {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: white;
-        }
-
-        .pdf-controls {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            padding: 0.5rem;
-            background: var(--light);
-            border-top: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
-        .pdf-control-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
             background: var(--primary);
             color: white;
             border: none;
-            border-radius: 50%;
             width: 40px;
             height: 40px;
+            border-radius: 50%;
+            font-size: 1.25rem;
+            cursor: pointer;
+            z-index: 1002;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
             transition: var(--transition);
+            border: 2px solid white;
         }
 
-        .pdf-control-btn:hover {
+        .modal-close:hover {
             background: var(--primary-hover);
+            transform: scale(1.1);
+        }
+
+        .modal-content {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
 
         /* Overlay para cuando el PDF esté cargando */
@@ -373,10 +335,9 @@
             width: 100%;
             height: 100%;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.8);
             z-index: 1001;
         }
 
@@ -387,12 +348,6 @@
             border-radius: 50%;
             border-top-color: transparent;
             animation: spin 1s linear infinite;
-            margin-bottom: 1rem;
-        }
-
-        .loading-text {
-            color: var(--text);
-            font-weight: 500;
         }
 
         @keyframes spin {
@@ -425,7 +380,7 @@
             }
             
             .catalog-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(2, 1fr); /* 2 columnas en móviles */
                 gap: 0.75rem;
             }
             
@@ -462,40 +417,21 @@
             }
             
             .catalog-card h3 {
-                font-size: 0.95rem;
+                font-size: 0.95rem; /* Tamaño de fuente ligeramente más pequeño */
             }
             
             .card-category {
-                font-size: 0.6rem;
+                font-size: 0.6rem; /* Tamaño de fuente más pequeño para categorías */
                 padding: 0.2rem 0.4rem;
             }
             
             .catalog-btn {
                 padding: 0.6rem;
-                font-size: 0.8rem;
+                font-size: 0.8rem; /* Tamaño de fuente más pequeño para botones */
             }
             
             .floating-search-btn {
                 display: flex;
-            }
-            
-            /* Optimización específica para visualización de PDF en móviles */
-            .modal-header {
-                padding: 0.75rem;
-            }
-            
-            .modal-title {
-                font-size: 0.9rem;
-            }
-            
-            .pdf-controls {
-                padding: 0.5rem;
-            }
-            
-            .pdf-control-btn {
-                width: 36px;
-                height: 36px;
-                font-size: 0.9rem;
             }
         }
 
@@ -509,6 +445,31 @@
                 justify-content: center;
             }
             
+            .modal-close {
+                top: 10px;
+                right: 10px;
+                width: 35px;
+                height: 35px;
+                font-size: 1.1rem;
+            }
+            
+            .search-input {
+                padding-left: 2.25rem;
+            }
+            
+            .search-icon {
+                left: 0.65rem;
+            }
+            
+            .card-header {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .card-category {
+                align-self: flex-start;
+            }
+            
             .floating-search-btn {
                 bottom: 1rem;
                 right: 1rem;
@@ -519,11 +480,7 @@
             /* Ajustes adicionales para pantallas muy pequeñas */
             @media (max-width: 360px) {
                 .catalog-grid {
-                    grid-template-columns: 1fr;
-                }
-                
-                .modal-title {
-                    font-size: 0.8rem;
+                    grid-template-columns: 1fr; /* Volver a 1 columna en pantallas muy pequeñas */
                 }
             }
         }
@@ -533,12 +490,6 @@
             body {
                 padding-bottom: constant(safe-area-inset-bottom);
                 padding-bottom: env(safe-area-inset-bottom);
-            }
-            
-            .pdf-viewer {
-                /* Ajuste específico para iOS para visualización de PDF */
-                -webkit-overflow-scrolling: touch;
-                overflow: auto;
             }
         }
     </style>
@@ -654,25 +605,13 @@
         <i class="fas fa-search"></i>
     </button>
 
-    <!-- Modal Pantalla Completa - Optimizado para móviles -->
+    <!-- Modal Pantalla Completa -->
     <div class="fullscreen-modal" id="pdfModal">
-        <div class="modal-header">
-            <div class="modal-title" id="pdfModalTitle">Cargando catálogo...</div>
-            <button class="modal-close" id="modalClose">&times;</button>
+        <button class="modal-close" id="modalClose">&times;</button>
+        <div class="pdf-loading" id="pdfLoading">
+            <div class="spinner"></div>
         </div>
-        <div class="pdf-container">
-            <div class="pdf-loading" id="pdfLoading">
-                <div class="spinner"></div>
-                <div class="loading-text">Cargando PDF...</div>
-            </div>
-            <iframe class="pdf-viewer" id="pdfViewer" frameborder="0"></iframe>
-        </div>
-        <div class="pdf-controls">
-            <button class="pdf-control-btn" id="pdfZoomIn" title="Acercar"><i class="fas fa-search-plus"></i></button>
-            <button class="pdf-control-btn" id="pdfZoomOut" title="Alejar"><i class="fas fa-search-minus"></i></button>
-            <button class="pdf-control-btn" id="pdfActualSize" title="Tamaño real"><i class="fas fa-expand"></i></button>
-            <button class="pdf-control-btn" id="pdfDownload" title="Descargar"><i class="fas fa-download"></i></button>
-        </div>
+        <iframe class="modal-content" id="pdfViewer" frameborder="0"></iframe>
     </div>
 
     <script>
@@ -687,17 +626,6 @@
             const catalogCards = document.querySelectorAll('.catalog-card:not(.no-results)');
             const searchContainer = document.getElementById('searchContainer');
             const floatingSearchBtn = document.getElementById('floatingSearchBtn');
-            const pdfModalTitle = document.getElementById('pdfModalTitle');
-            const pdfZoomIn = document.getElementById('pdfZoomIn');
-            const pdfZoomOut = document.getElementById('pdfZoomOut');
-            const pdfActualSize = document.getElementById('pdfActualSize');
-            const pdfDownload = document.getElementById('pdfDownload');
-            
-            let currentPdfUrl = '';
-            let currentScale = 1;
-            const scaleStep = 0.25;
-            const maxScale = 3;
-            const minScale = 0.5;
             
             // Configurar botón de cerrar
             modalClose.addEventListener('click', closeModal);
@@ -710,9 +638,7 @@
             });
             
             // Función para abrir el modal
-            function openFullscreenModal(url, title) {
-                currentPdfUrl = url;
-                pdfModalTitle.textContent = title || 'Catálogo';
+            function openFullscreenModal(url) {
                 pdfModal.classList.add('active');
                 document.body.style.overflow = 'hidden';
                 
@@ -720,16 +646,8 @@
                 pdfLoading.style.display = 'flex';
                 pdfViewer.style.display = 'none';
                 
-                // Resetear escala
-                currentScale = 1;
-                updatePdfViewerScale();
-                
                 // Cargar el contenido
-                if (url.includes('.pdf')) {
-                    pdfViewer.src = url;
-                } else {
-                    pdfViewer.src = url;
-                }
+                pdfViewer.src = url;
                 
                 // Cuando el contenido esté listo
                 pdfViewer.onload = function() {
@@ -752,45 +670,6 @@
                 document.body.style.overflow = '';
                 pdfViewer.src = '';
             }
-            
-            // Función para actualizar la escala del PDF
-            function updatePdfViewerScale() {
-                pdfViewer.style.transform = `scale(${currentScale})`;
-                pdfViewer.style.transformOrigin = '0 0';
-                pdfViewer.style.width = `${100 / currentScale}%`;
-                pdfViewer.style.height = `${100 / currentScale}%`;
-            }
-            
-            // Controles de zoom
-            pdfZoomIn.addEventListener('click', function() {
-                if (currentScale < maxScale) {
-                    currentScale += scaleStep;
-                    updatePdfViewerScale();
-                }
-            });
-            
-            pdfZoomOut.addEventListener('click', function() {
-                if (currentScale > minScale) {
-                    currentScale -= scaleStep;
-                    updatePdfViewerScale();
-                }
-            });
-            
-            pdfActualSize.addEventListener('click', function() {
-                currentScale = 1;
-                updatePdfViewerScale();
-            });
-            
-            pdfDownload.addEventListener('click', function() {
-                if (currentPdfUrl) {
-                    const link = document.createElement('a');
-                    link.href = currentPdfUrl;
-                    link.download = currentPdfUrl.split('/').pop() || 'catalogo.pdf';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                }
-            });
             
             // Función para buscar catálogos
             function searchCatalogs() {
@@ -836,19 +715,18 @@
                     const pdfUrl = btn.dataset.pdfUrl;
                     const webUrl = btn.dataset.webUrl;
                     const url = pdfUrl || webUrl;
-                    const title = card.querySelector('h3').textContent.trim();
                     
                     if (url) {
                         // Configurar evento click para el botón
                         btn.addEventListener('click', (e) => {
                             e.stopPropagation();
-                            openFullscreenModal(url, title);
+                            openFullscreenModal(url);
                         });
                         
                         // Configurar evento click para toda la tarjeta
                         card.addEventListener('click', function(e) {
                             if (e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON') {
-                                openFullscreenModal(url, title);
+                                openFullscreenModal(url);
                             }
                         });
                         
@@ -856,7 +734,7 @@
                         card.addEventListener('keydown', (e) => {
                             if (e.key === 'Enter' || e.key === ' ') {
                                 e.preventDefault();
-                                openFullscreenModal(url, title);
+                                openFullscreenModal(url);
                             }
                         });
                     }
@@ -890,41 +768,6 @@
             }
             
             window.addEventListener('resize', handleResize);
-            
-            // Manejar gestos táctiles para zoom en móviles
-            let initialDistance = null;
-            
-            pdfViewer.addEventListener('touchstart', function(e) {
-                if (e.touches.length === 2) {
-                    e.preventDefault();
-                    initialDistance = Math.hypot(
-                        e.touches[0].clientX - e.touches[1].clientX,
-                        e.touches[0].clientY - e.touches[1].clientY
-                    );
-                }
-            }, { passive: false });
-            
-            pdfViewer.addEventListener('touchmove', function(e) {
-                if (e.touches.length === 2 && initialDistance) {
-                    e.preventDefault();
-                    const currentDistance = Math.hypot(
-                        e.touches[0].clientX - e.touches[1].clientX,
-                        e.touches[0].clientY - e.touches[1].clientY
-                    );
-                    
-                    if (initialDistance > 0) {
-                        const newScale = currentDistance / initialDistance * currentScale;
-                        if (newScale > minScale && newScale < maxScale) {
-                            currentScale = newScale;
-                            updatePdfViewerScale();
-                        }
-                    }
-                }
-            }, { passive: false });
-            
-            pdfViewer.addEventListener('touchend', function() {
-                initialDistance = null;
-            });
         });
     </script>
 </body>
