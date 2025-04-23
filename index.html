@@ -57,6 +57,7 @@
             margin: 0 auto;
             padding: 1.5rem;
             min-height: 100vh;
+            position: relative;
         }
 
         /* Login Screen */
@@ -145,6 +146,7 @@
             text-align: center;
             margin-bottom: 2.5rem;
             padding-top: 1rem;
+            position: relative;
         }
 
         .app-title {
@@ -163,6 +165,33 @@
             font-size: clamp(0.9rem, 3vw, 1.1rem);
             max-width: 600px;
             margin: 0 auto;
+        }
+
+        /* Botón de cerrar sesión mejorado */
+        .logout-btn {
+            position: fixed;
+            top: 1.25rem;
+            right: 1.25rem;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            color: var(--text-light);
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .logout-btn:hover {
+            color: var(--danger);
+            background: rgba(247, 37, 133, 0.9);
+            transform: scale(1.1);
         }
 
         /* Main Grid */
@@ -523,6 +552,20 @@
         }
 
         /* Responsive */
+        @media (max-width: 768px) {
+            .logout-btn {
+                top: 0.75rem;
+                right: 0.75rem;
+                width: 38px;
+                height: 38px;
+                background: rgba(255, 255, 255, 0.95);
+            }
+            
+            .app-header {
+                padding-top: 2.5rem;
+            }
+        }
+
         @media (max-width: 480px) {
             .app-container {
                 padding: 1rem;
@@ -543,6 +586,14 @@
             
             .login-box {
                 padding: 1.5rem;
+            }
+
+            .logout-btn {
+                top: 0.5rem;
+                right: 0.5rem;
+                width: 36px;
+                height: 36px;
+                font-size: 1.1rem;
             }
         }
 
@@ -583,6 +634,10 @@
                 Control de Traslados
             </h1>
             <p class="app-subtitle">Sistema de Gestión Salidas por Traslado Macaal.</p>
+            <!-- Botón de cerrar sesión mejorado -->
+            <button id="logoutBtn" class="logout-btn" aria-label="Cerrar sesión" title="Cerrar sesión">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
         </header>
 
         <main class="app-grid">
@@ -637,6 +692,22 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Card para Otras Funciones -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-cogs"></i>
+                    <h2>Otras Funciones</h2>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group">
+                        <button onclick="window.open('catalogos.html', '_self')" class="btn btn-secondary">
+                            <i class="fas fa-book"></i>
+                            Catálogos de Productos
+                        </button>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -663,8 +734,8 @@
                 Información de Versión
             </h2>
             <div class="version-info">
-                <strong>Versión 1.2.2 Stable</strong>
-                <small>Lanzamiento: 17/04/2025</small>
+                <strong>Versión 1.2.3 Stable</strong>
+                <small>Lanzamiento: 23/04/2025</small>
                 <div class="developer">Desarrollado por <strong>Luis El Crack</strong> 💻</div>
             </div>
             <button class="modal-btn" onclick="closeVersionModal()">Cerrar</button>
@@ -688,6 +759,7 @@
         const CORRECT_PASSWORDS = ['Hogar', 'hogar']; // Contraseñas para ingresar a la app
         const VIEW_PIN = '1901'; // PIN para visualizar registros
         const MAX_ATTEMPTS = 3;
+        const STORAGE_KEY = 'traslados_auth';
         let failedAttempts = 0;
         let blockedUntil = 0;
         let currentAction = '';
@@ -706,19 +778,37 @@
             view_eplastik: 'https://drive.google.com/drive/folders/15t0p44lnSNqXb0jKIkenNkKFPqFe9i_g?usp=sharing'
         };
 
+        // Función para cerrar sesión
+        function logout() {
+            localStorage.removeItem(STORAGE_KEY);
+            document.getElementById('appContent').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('loginInput').value = '';
+            document.getElementById('loginInput').focus();
+        }
+
+        // Verificar autenticación al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedAuth = localStorage.getItem(STORAGE_KEY);
+            if (savedAuth && CORRECT_PASSWORDS.includes(savedAuth)) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('appContent').style.display = 'block';
+            }
+            
+            // Configurar evento para el botón de logout
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+        });
+
         // Función para crear efecto ripple en los botones
         function createRipple(event) {
             const button = event.currentTarget;
             
-            // Crear elemento ripple
             const ripple = document.createElement('span');
             ripple.classList.add('ripple');
             
-            // Posicionar ripple
             const diameter = Math.max(button.clientWidth, button.clientHeight);
             const radius = diameter / 2;
             
-            // Para eventos táctiles
             const clientX = event.clientX || event.touches[0].clientX;
             const clientY = event.clientY || event.touches[0].clientY;
             
@@ -726,10 +816,8 @@
             ripple.style.left = `${clientX - button.getBoundingClientRect().left - radius}px`;
             ripple.style.top = `${clientY - button.getBoundingClientRect().top - radius}px`;
             
-            // Añadir ripple al botón
             button.appendChild(ripple);
             
-            // Eliminar ripple después de la animación
             setTimeout(() => {
                 ripple.remove();
             }, 600);
@@ -746,11 +834,10 @@
             const password = document.getElementById('loginInput').value.trim();
             const errorElement = document.getElementById('loginError');
             
-            // Verificar si se ingresó "version" (case insensitive)
             if (password.toLowerCase() === "version") {
                 showVersionModal();
-                document.getElementById('loginInput').value = ''; // Limpiar campo
-                return; // Salir de la función sin verificar contraseña
+                document.getElementById('loginInput').value = '';
+                return;
             }
             
             if (Date.now() < blockedUntil) {
@@ -760,15 +847,14 @@
             }
             
             if (CORRECT_PASSWORDS.includes(password)) {
-                // Login exitoso
+                localStorage.setItem(STORAGE_KEY, password);
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('appContent').style.display = 'block';
                 failedAttempts = 0;
             } else {
-                // Login fallido
                 failedAttempts++;
                 if (failedAttempts >= MAX_ATTEMPTS) {
-                    blockedUntil = Date.now() + 300000; // 5 minutos
+                    blockedUntil = Date.now() + 300000;
                     errorElement.textContent = 'Demasiados intentos. Espere 5 minutos.';
                     updateBlockedTime();
                 } else {
@@ -875,24 +961,19 @@
             const frame = document.getElementById('formFrame');
             const loader = document.getElementById('loader');
             
-            // Mostrar loader
             loader.style.display = 'flex';
             frame.classList.remove('loaded');
             
-            // Abrir modal
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
             
-            // Configurar iframe
             frame.src = FORM_URLS[formType];
             
-            // Cuando el iframe carga, ocultar loader
             frame.onload = function() {
                 loader.style.display = 'none';
                 frame.classList.add('loaded');
             };
             
-            // Manejar errores
             frame.onerror = function() {
                 loader.innerHTML = '<div style="color: var(--danger); text-align: center;"><i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem;"></i><p>Error al cargar el formulario</p><button onclick="closeFormModal()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: var(--danger); color: white; border: none; border-radius: var(--border-radius);">Cerrar</button></div>';
             };
@@ -903,7 +984,6 @@
             const frame = document.getElementById('formFrame');
             const loader = document.getElementById('loader');
             
-            // Resetear estado
             loader.style.display = 'none';
             loader.innerHTML = '<div class="loader"></div><div class="loader-text">Cargando formulario...</div>';
             frame.src = '';
