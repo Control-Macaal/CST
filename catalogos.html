@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Dashboard centralizado de catálogos de productos para empresas de plásticos">
+    <title>Dashboard de Catálogos | Acceso rápido a catálogos de proveedores</title>
+    <!-- Preconexión para mejorar performance -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
+    <!-- Hojas de estilo -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-hover: #3a56d4;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --dark: #1b263b;
+            --light: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #2b2d42;
+            --text-light: #8d99ae;
+            --danger: #f72585;
+            --border-radius: 16px;
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --plastic-color: #3a86ff;
+            --disposable-color: #4cc9f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light);
+            color: var(--text);
+            padding: 1rem;
+            min-height: 100vh;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            white-space: nowrap;
+        }
+
+        .back-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            font-size: 0.9rem;
+            flex-shrink: 0;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        /* Barra de búsqueda */
+        .search-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            font-size: 0.95rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            -webkit-appearance: none;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .catalog-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.25rem;
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            min-height: 140px;
+        }
+
+        .catalog-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .catalog-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0;
+            font-size: 1.1rem;
+            flex: 1;
+        }
+
+        .catalog-card h3 i {
+            font-size: 1rem;
+        }
+
+        .card-category {
+            background-color: rgba(58, 134, 255, 0.1);
+            color: var(--plastic-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            white-space: nowrap;
+        }
+
+        .card-category.disposable {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--disposable-color);
+        }
+
+        .card-category i {
+            font-size: 0.6rem;
+        }
+
+        .catalog-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: auto;
+            font-size: 0.9rem;
+        }
+
+        .catalog-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .catalog-btn.disabled {
+            background: var(--text-light);
+            cursor: not-allowed;
+            opacity: 0.7;
+            position: relative;
+        }
+
+        .catalog-btn.disabled::after {
+            content: "Próximamente";
+            position: absolute;
+            bottom: -20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 0.65rem;
+            color: var(--text-light);
+        }
+
+        /* Modal Pantalla Completa */
+        .fullscreen-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--light);
+            z-index: 1000;
+            display: none;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .fullscreen-modal.active {
+            display: block;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.25rem;
+            cursor: pointer;
+            z-index: 1002;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+            border: 2px solid white;
+        }
+
+        .modal-close:hover {
+            background: var(--primary-hover);
+            transform: scale(1.1);
+        }
+
+        .modal-content {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Overlay para cuando el PDF esté cargando */
+        .pdf-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 1001;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--primary);
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mejoras de focus para accesibilidad */
+        button:focus, .catalog-card:focus, .search-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3);
+        }
+
+        /* Efecto para elementos no encontrados */
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Mejoras específicas para móviles */
+        @media (max-width: 768px) {
+            body {
+                padding: 0.75rem;
+            }
+            
+            .catalog-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+            
+            header {
+                margin-bottom: 1rem;
+            }
+            
+            .header-title h1 {
+                font-size: 1.3rem;
+            }
+            
+            .search-container {
+                margin-bottom: 1rem;
+            }
+            
+            .catalog-card {
+                padding: 1rem;
+                gap: 0.75rem;
+                min-height: 130px;
+            }
+            
+            .catalog-card h3 {
+                font-size: 1rem;
+            }
+            
+            .card-category {
+                font-size: 0.65rem;
+                padding: 0.2rem 0.4rem;
+            }
+            
+            .catalog-btn {
+                padding: 0.65rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .back-btn {
+                width: 100%;
+            }
+            
+            .header-title {
+                min-width: 100%;
+                justify-content: center;
+            }
+            
+            .modal-close {
+                top: 10px;
+                right: 10px;
+                width: 35px;
+                height: 35px;
+                font-size: 1.1rem;
+            }
+            
+            .search-input {
+                padding-left: 2.25rem;
+            }
+            
+            .search-icon {
+                left: 0.65rem;
+            }
+            
+            .card-header {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .card-category {
+                align-self: flex-start;
+            }
+        }
+
+        /* Soporte para Safari iOS */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                padding-bottom: constant(safe-area-inset-bottom);
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <div class="header-title">
+                <i class="fas fa-boxes"></i>
+                <h1>Dashboard de Catálogos</h1>
+            </div>
+            <a href="index.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                Volver
+            </a>
+        </header>
+
+        <!-- Barra de búsqueda con lupa -->
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" id="searchInput" placeholder="Buscar catálogo..." autocorrect="off" autocapitalize="off">
+        </div>
+
+        <div class="catalog-grid" id="catalogGrid">
+            <!-- Catálogo 1 -->
+            <div class="catalog-card" data-search="stampo internacional plastico productos">
+                <div class="card-header">
+                    <h3><i class="fas fa-file-pdf"></i> Stampo Internacional</h3>
+                    <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
+                </div>
+                <button class="catalog-btn" 
+                        data-pdf-url="https://www.stampointernacional.com/_files/ugd/f83a37_e4786e1874b1465ab9d0db2b43360625.pdf">
+                    <i class="fas fa-external-link-alt"></i>
+                    Abrir Catálogo
+                </button>
+            </div>
+
+            <!-- Catálogo 2 -->
+            <div class="catalog-card" data-search="sparta plast productos catalogo plastico">
+                <div class="card-header">
+                    <h3><i class="fas fa-file-pdf"></i> Sparta Plast</h3>
+                    <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
+                </div>
+                <button class="catalog-btn" 
+                        data-pdf-url="https://www.spartaplast.com/wp-content/uploads/2024/06/Catalago-Spartaplast-Junio-2024.pdf">
+                    <i class="fas fa-external-link-alt"></i>
+                    Abrir Catálogo
+                </button>
+            </div>
+
+            <!-- Catálogo 3 -->
+            <div class="catalog-card" data-search="prini productos plastico guatemala">
+                <div class="card-header">
+                    <h3><i class="fas fa-box-open"></i> Prini</h3>
+                    <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
+                </div>
+                <button class="catalog-btn" 
+                        data-web-url="https://www.prini.com.gt/index.php/nuestros-productos">
+                    <i class="fas fa-external-link-alt"></i>
+                    Ver Catálogo
+                </button>
+            </div>
+
+            <!-- Catálogo 4 -->
+            <div class="catalog-card" data-search="plastikito alteplast productos plastico">
+                <div class="card-header">
+                    <h3><i class="fas fa-boxes"></i> Plastikito (Alteplast)</h3>
+                    <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
+                </div>
+                <button class="catalog-btn" 
+                        data-web-url="https://www.plastikito.com/php/categorias/menu_categorias.php">
+                    <i class="fas fa-external-link-alt"></i>
+                    Ver Catálogo
+                </button>
+            </div>
+
+            <!-- Catálogo 5 - Plasticentro (Suplicentro) -->
+            <div class="catalog-card" data-search="plasticentro suplicentro desechable productos">
+                <div class="card-header">
+                    <h3><i class="fas fa-utensils"></i> Plasticentro (Suplicentro)</h3>
+                    <span class="card-category disposable"><i class="fas fa-tag"></i> Desechable</span>
+                </div>
+                <button class="catalog-btn" 
+                        data-pdf-url="https://suplicentro.com.gt/wp-content/uploads/2022/07/Catálogo-Suplicentro.pdf">
+                    <i class="fas fa-external-link-alt"></i>
+                    Abrir Catálogo
+                </button>
+            </div>
+
+            <!-- Catálogo 6 -->
+            <div class="catalog-card" data-search="neoplast plastico productos no disponible">
+                <div class="card-header">
+                    <h3><i class="fas fa-ban"></i> Neoplast</h3>
+                    <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
+                </div>
+                <button class="catalog-btn disabled" disabled>
+                    <i class="fas fa-times-circle"></i>
+                    No disponible
+                </button>
+            </div>
+            
+            <!-- Mensaje cuando no hay resultados -->
+            <div class="no-results hidden" id="noResults">
+                <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                <h3>No se encontraron resultados</h3>
+                <p>Intenta con otros términos de búsqueda</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Pantalla Completa -->
+    <div class="fullscreen-modal" id="pdfModal">
+        <button class="modal-close" id="modalClose">&times;</button>
+        <div class="pdf-loading" id="pdfLoading">
+            <div class="spinner"></div>
+        </div>
+        <iframe class="modal-content" id="pdfViewer" frameborder="0"></iframe>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const pdfModal = document.getElementById('pdfModal');
+            const pdfViewer = document.getElementById('pdfViewer');
+            const modalClose = document.getElementById('modalClose');
+            const pdfLoading = document.getElementById('pdfLoading');
+            const searchInput = document.getElementById('searchInput');
+            const catalogGrid = document.getElementById('catalogGrid');
+            const noResults = document.getElementById('noResults');
+            const catalogCards = document.querySelectorAll('.catalog-card:not(.no-results)');
+            
+            // Configurar botón de cerrar
+            modalClose.addEventListener('click', closeModal);
+            
+            // Cerrar modal con ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && pdfModal.classList.contains('active')) {
+                    closeModal();
+                }
+            });
+            
+            // Función para abrir el modal
+            function openFullscreenModal(url) {
+                pdfModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                
+                // Mostrar loader
+                pdfLoading.style.display = 'flex';
+                pdfViewer.style.display = 'none';
+                
+                // Cargar el contenido
+                pdfViewer.src = url;
+                
+                // Cuando el contenido esté listo
+                pdfViewer.onload = function() {
+                    pdfLoading.style.display = 'none';
+                    pdfViewer.style.display = 'block';
+                };
+                
+                // Manejar errores
+                pdfViewer.onerror = function() {
+                    pdfLoading.style.display = 'none';
+                    alert('Error al cargar el contenido. Se abrirá en una nueva pestaña.');
+                    closeModal();
+                    window.open(url, '_blank');
+                };
+            }
+            
+            // Función para cerrar el modal
+            function closeModal() {
+                pdfModal.classList.remove('active');
+                document.body.style.overflow = '';
+                pdfViewer.src = '';
+            }
+            
+            // Función para buscar catálogos
+            function searchCatalogs() {
+                const searchTerm = searchInput.value.toLowerCase();
+                let hasResults = false;
+                
+                catalogCards.forEach(card => {
+                    const searchData = card.getAttribute('data-search').toLowerCase();
+                    const cardTitle = card.querySelector('h3').textContent.toLowerCase();
+                    const cardCategory = card.querySelector('.card-category').textContent.toLowerCase();
+                    
+                    if (searchData.includes(searchTerm) || 
+                        cardTitle.includes(searchTerm) || 
+                        cardCategory.includes(searchTerm)) {
+                        card.style.display = 'flex';
+                        hasResults = true;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+                
+                // Mostrar u ocultar mensaje de no resultados
+                if (hasResults || searchTerm === '') {
+                    noResults.classList.add('hidden');
+                } else {
+                    noResults.classList.remove('hidden');
+                }
+            }
+            
+            // Evento de búsqueda al escribir
+            searchInput.addEventListener('input', searchCatalogs);
+            
+            // Manejo de tarjetas clickeables
+            catalogCards.forEach(card => {
+                const btn = card.querySelector('.catalog-btn:not(.disabled)');
+                
+                if (btn) {
+                    card.style.cursor = 'pointer';
+                    card.setAttribute('tabindex', '0');
+                    card.setAttribute('role', 'button');
+                    
+                    // Obtener URL del catálogo (PDF o web)
+                    const pdfUrl = btn.dataset.pdfUrl;
+                    const webUrl = btn.dataset.webUrl;
+                    const url = pdfUrl || webUrl;
+                    
+                    if (url) {
+                        // Configurar evento click para el botón
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            openFullscreenModal(url);
+                        });
+                        
+                        // Configurar evento click para toda la tarjeta
+                        card.addEventListener('click', function(e) {
+                            if (e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON') {
+                                openFullscreenModal(url);
+                            }
+                        });
+                        
+                        // Configurar evento de teclado para accesibilidad
+                        card.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                openFullscreenModal(url);
+                            }
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
