@@ -117,7 +117,7 @@
 
         .search-input {
             width: 100%;
-            padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+            padding: 0.75rem 2.5rem 0.75rem 2.5rem;
             border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: var(--border-radius);
             font-size: 0.95rem;
@@ -139,6 +139,25 @@
             transform: translateY(-50%);
             color: var(--text-light);
             font-size: 1rem;
+        }
+
+        .search-close-btn {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            font-size: 1rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: var(--transition);
+            z-index: 1;
+        }
+
+        .search-container.visible .search-close-btn {
+            opacity: 1;
         }
 
         /* Botón de búsqueda flotante para móviles */
@@ -409,6 +428,10 @@
             .search-container.visible {
                 top: 0;
             }
+
+            .search-input {
+                padding-right: 2.5rem !important;
+            }
             
             .catalog-card {
                 padding: 1rem;
@@ -417,17 +440,17 @@
             }
             
             .catalog-card h3 {
-                font-size: 0.95rem; /* Tamaño de fuente ligeramente más pequeño */
+                font-size: 0.95rem;
             }
             
             .card-category {
-                font-size: 0.6rem; /* Tamaño de fuente más pequeño para categorías */
+                font-size: 0.6rem;
                 padding: 0.2rem 0.4rem;
             }
             
             .catalog-btn {
                 padding: 0.6rem;
-                font-size: 0.8rem; /* Tamaño de fuente más pequeño para botones */
+                font-size: 0.8rem;
             }
             
             .floating-search-btn {
@@ -480,7 +503,7 @@
             /* Ajustes adicionales para pantallas muy pequeñas */
             @media (max-width: 360px) {
                 .catalog-grid {
-                    grid-template-columns: 1fr; /* Volver a 1 columna en pantallas muy pequeñas */
+                    grid-template-columns: 1fr;
                 }
             }
         }
@@ -507,10 +530,13 @@
             </a>
         </header>
 
-        <!-- Barra de búsqueda con lupa -->
+        <!-- Barra de búsqueda con lupa y botón de cerrar -->
         <div class="search-container" id="searchContainer">
             <i class="fas fa-search search-icon"></i>
             <input type="text" class="search-input" id="searchInput" placeholder="Buscar catálogo..." autocorrect="off" autocapitalize="off">
+            <button class="search-close-btn" id="searchCloseBtn">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
 
         <div class="catalog-grid" id="catalogGrid">
@@ -626,8 +652,9 @@
             const catalogCards = document.querySelectorAll('.catalog-card:not(.no-results)');
             const searchContainer = document.getElementById('searchContainer');
             const floatingSearchBtn = document.getElementById('floatingSearchBtn');
+            const searchCloseBtn = document.getElementById('searchCloseBtn');
             
-            // Configurar botón de cerrar
+            // Configurar botón de cerrar modal
             modalClose.addEventListener('click', closeModal);
             
             // Cerrar modal con ESC
@@ -701,6 +728,30 @@
             
             // Evento de búsqueda al escribir
             searchInput.addEventListener('input', searchCatalogs);
+            
+            // Función para cerrar la búsqueda en móviles
+            function closeSearch() {
+                searchContainer.classList.remove('visible');
+                searchInput.value = '';
+                searchCatalogs();
+            }
+            
+            // Evento para el botón de cerrar búsqueda
+            searchCloseBtn.addEventListener('click', closeSearch);
+            
+            // Cerrar búsqueda al presionar "Esc"
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeSearch();
+            });
+            
+            // Mostrar/ocultar botón de cerrar según contenido
+            searchInput.addEventListener('input', function() {
+                if (this.value.length > 0) {
+                    searchCloseBtn.style.display = 'block';
+                } else {
+                    searchCloseBtn.style.display = 'none';
+                }
+            });
             
             // Manejo de tarjetas clickeables
             catalogCards.forEach(card => {
