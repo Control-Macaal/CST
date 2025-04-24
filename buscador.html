@@ -2,20 +2,13 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buscador de Productos</title>
-    <!-- Preconexión para mejorar performance -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔍</text></svg>">
-    <!-- Hojas de estilo -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #4361ee;
-            --primary-hover: #3a56d4;
             --text: #2b2d42;
             --text-light: #8d99ae;
             --border: #e9ecef;
@@ -26,13 +19,11 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg);
-            color: var(--text);
             padding: 1rem;
             line-height: 1.5;
         }
@@ -40,7 +31,6 @@
         .container {
             max-width: 800px;
             margin: 0 auto;
-            width: 100%;
         }
 
         header {
@@ -71,17 +61,11 @@
             border: none;
             padding: 0.5rem 1rem;
             border-radius: 6px;
-            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 0.5rem;
             font-size: 0.9rem;
             text-decoration: none;
-            transition: background 0.2s;
-        }
-
-        .back-btn:hover {
-            background: var(--primary-hover);
         }
 
         /* Barra de búsqueda */
@@ -99,12 +83,6 @@
             background-color: white;
         }
 
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
-        }
-
         .search-icon {
             position: absolute;
             left: 1rem;
@@ -113,42 +91,54 @@
             color: var(--text-light);
         }
 
-        /* Resultados en lista */
+        /* Resultados con imágenes */
         #results {
             width: 100%;
             background: white;
             border-radius: 6px;
             border: 1px solid var(--border);
-            overflow: hidden;
         }
 
         .result-item {
             padding: 1rem;
             border-bottom: 1px solid var(--border);
-            transition: background 0.2s;
             display: flex;
+            align-items: center;
             gap: 1rem;
-            align-items: baseline;
         }
 
         .result-item:last-child {
             border-bottom: none;
         }
 
-        .result-item:hover {
+        .product-image {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            border-radius: 4px;
             background: #f8f9fa;
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .product-info {
+            flex: 1;
+            min-width: 0;
         }
 
         .sku {
             font-weight: 600;
             color: var(--primary);
             font-size: 0.85rem;
-            min-width: 80px;
+            display: block;
+            margin-bottom: 0.25rem;
         }
 
         .product-name {
-            flex: 1;
             font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .no-results {
@@ -158,7 +148,7 @@
         }
 
         .hidden {
-            display: none !important;
+            display: none;
         }
 
         .results-count {
@@ -170,29 +160,15 @@
             gap: 0.5rem;
         }
 
-        /* Loading spinner */
-        .loading {
-            display: inline-block;
-            width: 1rem;
-            height: 1rem;
-            border: 2px solid rgba(0,0,0,0.1);
-            border-radius: 50%;
-            border-top-color: var(--primary);
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Mobile */
         @media (max-width: 600px) {
-            .result-item {
-                flex-direction: column;
-                gap: 0.25rem;
+            .product-image {
+                width: 50px;
+                height: 50px;
             }
-            .sku {
-                min-width: auto;
+            
+            .result-item {
+                padding: 0.75rem;
+                gap: 0.75rem;
             }
         }
     </style>
@@ -204,7 +180,7 @@
                 <i class="fas fa-search"></i>
                 <h1>Buscador Sparta</h1>
             </div>
-            <a href="index.html" class="back-btn" id="backBtn">
+            <a href="index.html" class="back-btn">
                 <i class="fas fa-arrow-left"></i>
                 Volver
             </a>
@@ -235,9 +211,8 @@
             const resultsDiv = document.getElementById('results');
             const resultsCount = document.getElementById('resultsCount');
             const countSpan = document.getElementById('count');
-            const backBtn = document.getElementById('backBtn');
             
-            // Función debounce para optimizar búsquedas
+            // Función debounce
             function debounce(func, wait) {
                 let timeout;
                 return function(...args) {
@@ -246,23 +221,26 @@
                 };
             }
             
-            // Cargar datos con caché
-            let productosCache = null;
+            // Cargar datos
             const loadData = async () => {
-                if (productosCache) return productosCache;
-                
                 try {
-                    backBtn.innerHTML = `<span class="loading"></span> Cargando...`;
-                    const response = await fetch('data/sparta.json'); // Ajusta la ruta según tu estructura
+                    const response = await fetch('data/products.json'); // Cambia a tu archivo JSON
                     if (!response.ok) throw new Error("Error al cargar los datos");
-                    productosCache = await response.json();
-                    return productosCache;
+                    return await response.json();
                 } catch (error) {
                     console.error("Error:", error);
                     throw error;
-                } finally {
-                    backBtn.innerHTML = `<i class="fas fa-arrow-left"></i> Volver`;
                 }
+            };
+            
+            // Mostrar imagen o placeholder
+            const getProductImage = (product) => {
+                if (product.imagen) {
+                    return `<img src="${product.imagen}" class="product-image" alt="${product.nombre}">`;
+                }
+                return `<div class="product-image" style="display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-box-open" style="color: var(--text-light); font-size: 1.5rem;"></i>
+                </div>`;
             };
             
             // Función de búsqueda
@@ -284,8 +262,8 @@
                 try {
                     const productos = await loadData();
                     const filtered = productos.filter(p => 
-                        p.sku.toLowerCase().includes(term) || 
-                        p.nombre.toLowerCase().includes(term)
+                        (p.sku && p.sku.toLowerCase().includes(term)) || 
+                        (p.nombre && p.nombre.toLowerCase().includes(term))
                     );
                     
                     countSpan.textContent = filtered.length;
@@ -294,8 +272,11 @@
                     if (filtered.length > 0) {
                         resultsDiv.innerHTML = filtered.map(p => `
                             <div class="result-item" data-sku="${p.sku}">
-                                <div class="sku">${p.sku}</div>
-                                <div class="product-name">${p.nombre}</div>
+                                ${getProductImage(p)}
+                                <div class="product-info">
+                                    <span class="sku">${p.sku || 'Sin SKU'}</span>
+                                    <div class="product-name">${p.nombre}</div>
+                                </div>
                             </div>
                         `).join('');
                     } else {
@@ -313,9 +294,6 @@
                             <i class="fas fa-exclamation-triangle"></i>
                             <h3>Error al cargar los datos</h3>
                             <p>${error.message}</p>
-                            <button onclick="window.location.reload()" class="back-btn" style="margin-top: 1rem;">
-                                <i class="fas fa-sync-alt"></i> Recargar
-                            </button>
                         </div>
                     `;
                 }
@@ -323,16 +301,6 @@
             
             // Eventos
             searchInput.addEventListener('input', debounce(searchProducts, 300));
-            
-            // Clic en resultados
-            resultsDiv.addEventListener('click', (e) => {
-                const item = e.target.closest('.result-item');
-                if (item) {
-                    const sku = item.getAttribute('data-sku');
-                    // Aquí puedes redirigir a una página de detalle o mostrar un modal
-                    console.log('Producto seleccionado:', sku);
-                }
-            });
         });
     </script>
 </body>
