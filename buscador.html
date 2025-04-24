@@ -2,77 +2,344 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buscador Sparta - GitHub Pages</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Buscador de Productos</title>
+    <!-- Preconexión para mejorar performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔍</text></svg>">
+    <!-- Hojas de estilo -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #4361ee;
+            --primary-hover: #3a56d4;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --dark: #1b263b;
+            --light: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #2b2d42;
+            --text-light: #8d99ae;
+            --danger: #f72585;
+            --success: #4cc9f0;
+            --border-radius: 12px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light);
+            color: var(--text);
+            padding: 1rem;
+            min-height: 100vh;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .container {
             max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-        }
-        #search {
             width: 100%;
-            padding: 12px;
-            margin: 20px 0;
-            border: 2px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
         }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            white-space: nowrap;
+            color: var(--dark);
+        }
+
+        .back-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            font-size: 0.9rem;
+            flex-shrink: 0;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        /* Barra de búsqueda mejorada */
+        .search-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 0.75rem 0.75rem 3rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            -webkit-appearance: none;
+            background-color: var(--card-bg);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        /* Resultados */
+        #results {
+            display: grid;
+            gap: 0.75rem;
+            width: 100%;
+        }
+
         .result-item {
-            background: white;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.25rem;
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            cursor: pointer;
         }
+
+        .result-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-color: rgba(67, 97, 238, 0.2);
+        }
+
         .sku {
-            font-weight: bold;
-            color: #e74c3c;
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 0.9rem;
+            background: rgba(67, 97, 238, 0.1);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-name {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            color: var(--dark);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            grid-column: 1 / -1;
+        }
+
+        .no-results i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--text-light);
+            opacity: 0.5;
+        }
+
+        /* Contador de resultados */
+        .results-count {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Mejoras para móviles */
+        @media (max-width: 768px) {
+            body {
+                padding: 0.75rem;
+            }
+            
+            .header-title h1 {
+                font-size: 1.3rem;
+            }
+            
+            .search-input {
+                padding-left: 2.75rem;
+            }
+            
+            .result-item {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-title {
+                min-width: 100%;
+            }
+            
+            .search-icon {
+                left: 0.85rem;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>🔍 Buscador de Productos Sparta</h1>
-    <input type="text" id="search" placeholder="Buscar por SKU o nombre..." autofocus>
-    <div id="results"></div>
+    <div class="container">
+        <header>
+            <div class="header-title">
+                <i class="fas fa-search"></i>
+                <h1>Buscador Sparta</h1>
+            </div>
+            <a href="index.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                Volver
+            </a>
+        </header>
+
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" id="search" placeholder="Buscar por SKU o nombre..." autofocus>
+        </div>
+
+        <div class="results-count hidden" id="resultsCount">
+            <i class="fas fa-box-open"></i>
+            <span id="count">0</span> productos encontrados
+        </div>
+
+        <div id="results">
+            <!-- Los resultados se cargarán aquí dinámicamente -->
+            <div class="no-results">
+                <i class="fas fa-search"></i>
+                <h3>Ingresa un término de búsqueda</h3>
+                <p>Intenta Con Nombre o Codigo"</p>
+            </div>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // Carga desde la misma ubicación que tu HTML
-                const response = await fetch('sparta.json');
-                if (!response.ok) throw new Error("Error al cargar datos");
-                const productos = await response.json();
-                
+                // Elementos del DOM
                 const searchInput = document.getElementById('search');
                 const resultsDiv = document.getElementById('results');
+                const resultsCount = document.getElementById('resultsCount');
+                const countSpan = document.getElementById('count');
                 
-                searchInput.addEventListener('input', () => {
-                    const term = searchInput.value.toLowerCase();
+                // Carga de datos (ajusta la ruta según tu estructura)
+                const response = await fetch('sparta.json');
+                if (!response.ok) throw new Error("Error al cargar los datos");
+                const productos = await response.json();
+                
+                // Función de búsqueda
+                const searchProducts = () => {
+                    const term = searchInput.value.trim().toLowerCase();
+                    
+                    if (term === '') {
+                        resultsDiv.innerHTML = `
+                            <div class="no-results">
+                                <i class="fas fa-search"></i>
+                                <h3>Ingresa un término de búsqueda</h3>
+                                <p>Intenta Con Nombre o Codigo</p>
+                            </div>
+                        `;
+                        resultsCount.classList.add('hidden');
+                        return;
+                    }
+                    
                     const filtered = productos.filter(p => 
                         p.sku.toLowerCase().includes(term) || 
                         p.nombre.toLowerCase().includes(term)
                     );
                     
-                    resultsDiv.innerHTML = filtered.length ? 
-                        filtered.map(p => `
-                            <div class="result-item">
-                                <span class="sku">${p.sku}</span> - ${p.nombre}
+                    // Actualizar contador
+                    countSpan.textContent = filtered.length;
+                    resultsCount.classList.remove('hidden');
+                    
+                    // Mostrar resultados
+                    if (filtered.length > 0) {
+                        resultsDiv.innerHTML = filtered.map(p => `
+                            <div class="result-item" data-sku="${p.sku}">
+                                <div class="sku">${p.sku}</div>
+                                <div class="product-name">${p.nombre}</div>
+                                ${p.descripcion ? `<div class="product-desc">${p.descripcion}</div>` : ''}
                             </div>
-                        `).join('') : 
-                        '<p>No se encontraron productos</p>';
+                        `).join('');
+                    } else {
+                        resultsDiv.innerHTML = `
+                            <div class="no-results">
+                                <i class="fas fa-times-circle"></i>
+                                <h3>No se encontraron productos</h3>
+                                <p>Intenta con otro término de búsqueda</p>
+                            </div>
+                        `;
+                    }
+                };
+                
+                // Eventos
+                searchInput.addEventListener('input', searchProducts);
+                
+                // Clic en resultados (puedes ampliar esta funcionalidad)
+                resultsDiv.addEventListener('click', (e) => {
+                    const item = e.target.closest('.result-item');
+                    if (item) {
+                        const sku = item.getAttribute('data-sku');
+                        alert(`SKU seleccionado: ${sku}\nAquí puedes abrir un modal con más detalles`);
+                        // Ejemplo: window.open(`detalle.html?sku=${sku}`, '_blank');
+                    }
                 });
                 
             } catch (error) {
                 console.error("Error:", error);
-                document.getElementById('results').innerHTML = 
-                    '<p style="color:red">Error al cargar los datos. Verifica la consola.</p>';
+                resultsDiv.innerHTML = `
+                    <div class="no-results" style="color: var(--danger);">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Error al cargar los datos</h3>
+                        <p>Por favor, recarga la página o intenta más tarde</p>
+                    </div>
+                `;
             }
         });
     </script>
