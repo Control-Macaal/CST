@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador Sparta - GitHub Pages</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        #search {
+            width: 100%;
+            padding: 12px;
+            margin: 20px 0;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .result-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .sku {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Buscador de Productos Sparta</h1>
+    <input type="text" id="search" placeholder="Buscar por SKU o nombre..." autofocus>
+    <div id="results"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Carga desde la misma ubicación que tu HTML
+                const response = await fetch('sparta.json');
+                if (!response.ok) throw new Error("Error al cargar datos");
+                const productos = await response.json();
+                
+                const searchInput = document.getElementById('search');
+                const resultsDiv = document.getElementById('results');
+                
+                searchInput.addEventListener('input', () => {
+                    const term = searchInput.value.toLowerCase();
+                    const filtered = productos.filter(p => 
+                        p.sku.toLowerCase().includes(term) || 
+                        p.nombre.toLowerCase().includes(term)
+                    );
+                    
+                    resultsDiv.innerHTML = filtered.length ? 
+                        filtered.map(p => `
+                            <div class="result-item">
+                                <span class="sku">${p.sku}</span> - ${p.nombre}
+                            </div>
+                        `).join('') : 
+                        '<p>No se encontraron productos</p>';
+                });
+                
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById('results').innerHTML = 
+                    '<p style="color:red">Error al cargar los datos. Verifica la consola.</p>';
+            }
+        });
+    </script>
+</body>
+</html>
