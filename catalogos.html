@@ -8,13 +8,11 @@
     <!-- Preconexión para mejorar performance -->
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <!-- Preload de fuentes críticas -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"></noscript>
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
     <!-- Hojas de estilo -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #4361ee;
@@ -318,9 +316,9 @@
         }
 
         /* Mejoras de focus para accesibilidad */
-        button:focus-visible, .catalog-card:focus-visible, .search-input:focus-visible {
-            outline: 2px solid var(--primary);
-            outline-offset: 2px;
+        button:focus, .catalog-card:focus, .search-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3);
         }
 
         /* Efecto para elementos no encontrados */
@@ -333,19 +331,6 @@
 
         .hidden {
             display: none;
-        }
-
-        /* Clase para solo lectores de pantalla */
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
         }
 
         /* Mejoras específicas para móviles */
@@ -449,12 +434,10 @@
             </a>
         </header>
 
-        <!-- Barra de búsqueda con accesibilidad mejorada -->
-        <div class="search-container" role="search">
-            <label for="searchInput" class="sr-only">Buscar catálogo</label>
+        <!-- Barra de búsqueda con lupa -->
+        <div class="search-container">
             <i class="fas fa-search search-icon"></i>
-            <input type="text" class="search-input" id="searchInput" placeholder="Buscar catálogo..." 
-                   aria-label="Buscar catálogo" autocorrect="off" autocapitalize="off">
+            <input type="text" class="search-input" id="searchInput" placeholder="Buscar catálogo..." autocorrect="off" autocapitalize="off">
         </div>
 
         <div class="catalog-grid" id="catalogGrid">
@@ -465,8 +448,7 @@
                     <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
                 </div>
                 <button class="catalog-btn" 
-                        data-pdf-url="catmedia/stampo.pdf"
-                        aria-label="Abrir catálogo de Stampo Internacional">
+                        data-pdf-url="catmedia/stampo.pdf">
                     <i class="fas fa-external-link-alt"></i>
                     Abrir Catálogo
                 </button>
@@ -479,8 +461,7 @@
                     <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
                 </div>
                 <button class="catalog-btn" 
-                        data-pdf-url="catmedia/sparta.pdf"
-                        aria-label="Abrir catálogo de Sparta Plast">
+                        data-pdf-url="catmedia/sparta.pdf">
                     <i class="fas fa-external-link-alt"></i>
                     Abrir Catálogo
                 </button>
@@ -493,8 +474,7 @@
                     <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
                 </div>
                 <button class="catalog-btn" 
-                        data-web-url="https://www.prini.com.gt/index.php/nuestros-productos"
-                        aria-label="Ver catálogo de Prini">
+                        data-web-url="https://www.prini.com.gt/index.php/nuestros-productos">
                     <i class="fas fa-external-link-alt"></i>
                     Ver Catálogo
                 </button>
@@ -507,24 +487,9 @@
                     <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
                 </div>
                 <button class="catalog-btn" 
-                        data-web-url="https://www.plastikito.com/php/categorias/menu_categorias.php"
-                        aria-label="Ver catálogo de Plastikito">
+                        data-web-url="https://www.plastikito.com/php/categorias/menu_categorias.php">
                     <i class="fas fa-external-link-alt"></i>
                     Ver Catálogo
-                </button>
-            </div>
-
-            <!-- Catálogo 5 - Plasticentro (Suplicentro) -->
-            <div class="catalog-card" data-search="plasticentro suplicentro desechable productos">
-                <div class="card-header">
-                    <h3><i class="fas fa-utensils"></i> Plasticentro (Suplicentro)</h3>
-                    <span class="card-category disposable"><i class="fas fa-tag"></i> Desechable</span>
-                </div>
-                <button class="catalog-btn" 
-                        data-pdf-url="https://suplicentro.com.gt/wp-content/uploads/2022/07/Catálogo-Suplicentro.pdf"
-                        aria-label="Abrir catálogo de Plasticentro">
-                    <i class="fas fa-external-link-alt"></i>
-                    Abrir Catálogo
                 </button>
             </div>
 
@@ -535,8 +500,7 @@
                     <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
                 </div>
                 <button class="catalog-btn" 
-                        data-pdf-url="catmedia/neoplast.pdf"
-                        aria-label="Abrir catálogo de Neoplast">
+                        data-pdf-url="catmedia/neoplast.pdf">
                     <i class="fas fa-external-link-alt"></i>
                     Abrir Catálogo
                 </button>
@@ -549,8 +513,7 @@
                     <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
                 </div>
                 <button class="catalog-btn" 
-                        data-web-url="https://www.doriplast.com/hogar"
-                        aria-label="Ver catálogo de Doriplast">
+                        data-web-url="https://www.doriplast.com/hogar">
                     <i class="fas fa-external-link-alt"></i>
                     Ver Catálogo
                 </button>
@@ -563,8 +526,7 @@
                     <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
                 </div>
                 <button class="catalog-btn" 
-                        data-web-url="https://diprossa.company.site/Hogar-c56298343"
-                        aria-label="Ver catálogo de Diprossa">
+                        data-web-url="https://diprossa.company.site/Hogar-c56298343">
                     <i class="fas fa-external-link-alt"></i>
                     Ver Catálogo
                 </button>
@@ -577,8 +539,7 @@
                     <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
                 </div>
                 <button class="catalog-btn" 
-                        data-pdf-url="catmedia/induplastik.pdf"
-                        aria-label="Abrir catálogo de Induplastik">
+                        data-pdf-url="catmedia/induplastik.pdf">
                     <i class="fas fa-external-link-alt"></i>
                     Abrir Catálogo
                 </button>
@@ -591,13 +552,59 @@
                     <span class="card-category disposable"><i class="fas fa-tag"></i> Cocina</span>
                 </div>
                 <button class="catalog-btn" 
-                        data-web-url="https://www.houseandgreen.com.gt/catalogo.php"
-                        aria-label="Ver catálogo de House & Green">
+                        data-web-url="https://www.houseandgreen.com.gt/catalogo.php">
                     <i class="fas fa-external-link-alt"></i>
                     Ver Catálogo
                 </button>
             </div>
-            
+            <!-- Catálogo - Guateplast -->
+<div class="catalog-card" data-search="guateplast plastico productos catalogo">
+    <div class="card-header">
+        <h3><i class="fas fa-file-pdf"></i> Guateplast</h3>
+        <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
+    </div>
+    <button class="catalog-btn" data-pdf-url="catmedia/guateplast.pdf">
+        <i class="fas fa-external-link-alt"></i>
+        Abrir Catálogo
+    </button>
+</div>
+
+<!-- Catálogo - Inix S.A -->
+<div class="catalog-card" data-search="inix desechable productos catalogo">
+    <div class="card-header">
+        <h3><i class="fas fa-file-pdf"></i> Inix S.A</h3>
+        <span class="card-category disposable"><i class="fas fa-tag"></i> Desechable</span>
+    </div>
+    <button class="catalog-btn" data-pdf-url="catmedia/inix.pdf">
+        <i class="fas fa-external-link-alt"></i>
+        Abrir Catálogo
+    </button>
+</div>
+
+<!-- Catálogo - Plastifar S.A -->
+<div class="catalog-card" data-search="plastifar desechable productos catalogo">
+    <div class="card-header">
+        <h3><i class="fas fa-file-pdf"></i> Plastifar S.A</h3>
+        <span class="card-category disposable"><i class="fas fa-tag"></i> Desechable</span>
+    </div>
+    <button class="catalog-btn" data-pdf-url="catmedia/plastifar.pdf">
+        <i class="fas fa-external-link-alt"></i>
+        Abrir Catálogo
+    </button>
+</div>
+
+<!-- Catálogo Plasticentro -->
+<div class="catalog-card" data-search="plasticentro suplicentro desechable productos">
+    <div class="card-header">
+        <h3><i class="fas fa-utensils"></i> Plasticentro (Suplicentro)</h3>
+        <span class="card-category disposable"><i class="fas fa-tag"></i> Desechable</span>
+    </div>
+    <button class="catalog-btn" data-pdf-url="catmedia/plasticentro.pdf">
+        <i class="fas fa-external-link-alt"></i>
+        Abrir Catálogo
+    </button>
+</div>
+
             <!-- Mensaje cuando no hay resultados -->
             <div class="no-results hidden" id="noResults">
                 <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 1rem;"></i>
@@ -609,11 +616,11 @@
 
     <!-- Modal Pantalla Completa -->
     <div class="fullscreen-modal" id="pdfModal">
-        <button class="modal-close" id="modalClose" aria-label="Cerrar visor de PDF">&times;</button>
+        <button class="modal-close" id="modalClose">&times;</button>
         <div class="pdf-loading" id="pdfLoading">
             <div class="spinner"></div>
         </div>
-        <iframe class="modal-content" id="pdfViewer" frameborder="0" loading="lazy" title="Visor de PDF"></iframe>
+        <iframe class="modal-content" id="pdfViewer" frameborder="0"></iframe>
     </div>
 
     <script>
@@ -627,12 +634,6 @@
             const noResults = document.getElementById('noResults');
             const catalogCards = document.querySelectorAll('.catalog-card:not(.no-results)');
             
-            // Detectar iOS/iPadOS
-            function isIOS() {
-                return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPadOS 13+
-            }
-            
             // Configurar botón de cerrar
             modalClose.addEventListener('click', closeModal);
             
@@ -643,34 +644,32 @@
                 }
             });
             
-            // Función para abrir el modal o visor nativo en iOS
+            // Función para abrir el modal
             function openFullscreenModal(url) {
-                // Si es iOS y es un PDF, abrir en nueva pestaña (visor nativo)
-                if (isIOS() && (url.includes('.pdf') || url.endsWith('.pdf'))) {
-                    const absoluteUrl = url.startsWith('http') ? url : 
-                                    `${window.location.origin}/${url.replace(/^\/?/, '')}`;
-                    window.open(absoluteUrl, '_blank');
-                    return;
-                }
-
-                // Modal original para otros casos
                 pdfModal.classList.add('active');
                 document.body.style.overflow = 'hidden';
+                
+                // Mostrar loader
                 pdfLoading.style.display = 'flex';
                 pdfViewer.style.display = 'none';
-
+                
+                // Manejar URLs locales (catmedia) y remotas
                 const finalUrl = url.startsWith('http') ? url : 
                                `${window.location.pathname.replace(/\/[^/]*$/, '')}/${url}`;
-
+                
+                // Cargar el contenido
                 pdfViewer.src = finalUrl;
+                
+                // Cuando el contenido esté listo
                 pdfViewer.onload = function() {
                     pdfLoading.style.display = 'none';
                     pdfViewer.style.display = 'block';
                 };
-
+                
+                // Manejar errores
                 pdfViewer.onerror = function() {
                     pdfLoading.style.display = 'none';
-                    alert('Error al cargar. Se abrirá en nueva pestaña.');
+                    alert('Error al cargar el contenido. Se abrirá en una nueva pestaña.');
                     closeModal();
                     window.open(finalUrl, '_blank');
                 };
@@ -683,25 +682,32 @@
                 pdfViewer.src = '';
             }
             
-            // Función para buscar catálogos con coincidencias parciales
+            // Función para buscar catálogos
             function searchCatalogs() {
-                const searchTerm = searchInput.value.toLowerCase().trim();
-                const terms = searchTerm.split(' '); // Divide la búsqueda en términos
+                const searchTerm = searchInput.value.toLowerCase();
                 let hasResults = false;
-
+                
                 catalogCards.forEach(card => {
                     const searchData = card.getAttribute('data-search').toLowerCase();
                     const cardTitle = card.querySelector('h3').textContent.toLowerCase();
                     const cardCategory = card.querySelector('.card-category').textContent.toLowerCase();
-                    const allText = `${searchData} ${cardTitle} ${cardCategory}`;
-
-                    // Verifica si TODOS los términos están presentes
-                    const match = terms.every(term => allText.includes(term));
-                    card.style.display = match ? 'flex' : 'none';
-                    if (match) hasResults = true;
+                    
+                    if (searchData.includes(searchTerm) || 
+                        cardTitle.includes(searchTerm) || 
+                        cardCategory.includes(searchTerm)) {
+                        card.style.display = 'flex';
+                        hasResults = true;
+                    } else {
+                        card.style.display = 'none';
+                    }
                 });
-
-                noResults.classList.toggle('hidden', hasResults || !searchTerm);
+                
+                // Mostrar u ocultar mensaje de no resultados
+                if (hasResults || searchTerm === '') {
+                    noResults.classList.add('hidden');
+                } else {
+                    noResults.classList.remove('hidden');
+                }
             }
             
             // Evento de búsqueda al escribir
