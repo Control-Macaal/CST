@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<!-- Generado con RealFaviconGenerator -->
+    
+    <!-- Favicon generado con RealFaviconGenerator -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -15,6 +16,7 @@
     <meta name="application-name" content="CONTROL TRASLADOS">
     <meta name="msapplication-TileColor" content="#4361ee">
     <meta name="theme-color" content="#ffffff">
+
     <title>Control de Traslados</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -131,6 +133,7 @@
             color: var(--danger);
             margin-bottom: 1rem;
             min-height: 1.5rem;
+            text-align: center;
         }
         
         .login-btn {
@@ -232,6 +235,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
             gap: 1.5rem;
+            animation: fadeIn 0.5s ease-out;
         }
 
         /* Cards */
@@ -580,10 +584,6 @@
             20%, 40%, 60%, 80% { transform: translateX(5px); }
         }
 
-        .app-grid {
-            animation: fadeIn 0.5s ease-out;
-        }
-
         /* Responsive */
         @media (max-width: 768px) {
             .logout-btn {
@@ -793,12 +793,25 @@
         Sesión cerrada correctamente
     </div>
 
+    <!-- Mensaje de permisos -->
+    <div id="permissionMessage" class="logout-message" style="background-color: var(--danger); display: none;">
+        <i class="fas fa-exclamation-triangle"></i>
+        No tiene permisos para esta función
+    </div>
+
     <script>
         // Configuración
-        const CORRECT_PASSWORDS = ['Hogar', 'hogar']; // Contraseñas para ingresar a la app
-        const VIEW_PIN = '1901'; // PIN para visualizar registros
+        const USER_PERMISSIONS = {
+            'hogar': 'admin',
+            'Hogar': 'admin',
+            'bodega': 'viewer',
+            'Bodega': 'viewer'
+        };
+        
+        const VIEW_PIN = '1901';
         const MAX_ATTEMPTS = 3;
         const STORAGE_KEY = 'traslados_auth';
+        let currentUserRole = '';
         let failedAttempts = 0;
         let blockedUntil = 0;
         let currentAction = '';
@@ -867,9 +880,13 @@
         // Verificar autenticación al cargar
         document.addEventListener('DOMContentLoaded', function() {
             const savedAuth = localStorage.getItem(STORAGE_KEY);
-            if (savedAuth && CORRECT_PASSWORDS.includes(savedAuth)) {
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('appContent').style.display = 'block';
+            if (savedAuth) {
+                const { auth, role } = JSON.parse(savedAuth);
+                if (USER_PERMISSIONS[auth]) {
+                    currentUserRole = role;
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('appContent').style.display = 'block';
+                }
             }
             
             // Configurar evento para el botón de logout
@@ -899,8 +916,12 @@
                 return;
             }
             
-            if (CORRECT_PASSWORDS.includes(password)) {
-                localStorage.setItem(STORAGE_KEY, password);
+            if (USER_PERMISSIONS[password]) {
+                currentUserRole = USER_PERMISSIONS[password];
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    auth: password,
+                    role: currentUserRole
+                }));
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('appContent').style.display = 'block';
                 failedAttempts = 0;
@@ -946,6 +967,20 @@
         // Cerrar modal de versión
         function closeVersionModal() {
             document.getElementById('versionModal').classList.remove('active');
+        }
+
+        // Mostrar mensaje de permisos
+        function showPermissionError() {
+            const permissionMsg = document.getElementById('permissionMessage');
+            permissionMsg.style.display = 'flex';
+            permissionMsg.classList.add('show');
+            
+            setTimeout(() => {
+                permissionMsg.classList.remove('show');
+                setTimeout(() => {
+                    permissionMsg.style.display = 'none';
+                }, 300);
+            }, 3000);
         }
 
         // Funciones para el PIN de visualización
@@ -1010,6 +1045,11 @@
 
         // Funciones para formularios en modal fullscreen
         function openFormModal(formType) {
+            if (currentUserRole === 'viewer') {
+                showPermissionError();
+                return;
+            }
+            
             const modal = document.getElementById('formModal');
             const frame = document.getElementById('formFrame');
             const loader = document.getElementById('loader');
