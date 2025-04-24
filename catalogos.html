@@ -441,33 +441,33 @@
         </div>
 
         <div class="catalog-grid" id="catalogGrid">
-            <!-- Catálogo 1 -->
+            <!-- Catálogo 1 - Stampo Internacional (Local) -->
             <div class="catalog-card" data-search="stampo internacional plastico productos">
                 <div class="card-header">
                     <h3><i class="fas fa-file-pdf"></i> Stampo Internacional</h3>
                     <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
                 </div>
                 <button class="catalog-btn" 
-                        data-pdf-url="https://www.stampointernacional.com/_files/ugd/f83a37_e4786e1874b1465ab9d0db2b43360625.pdf">
+                        data-pdf-url="catmedia/stampo.pdf">
                     <i class="fas fa-external-link-alt"></i>
                     Abrir Catálogo
                 </button>
             </div>
 
-            <!-- Catálogo 2 -->
+            <!-- Catálogo 2 - Sparta Plast (Local) -->
             <div class="catalog-card" data-search="sparta plast productos catalogo plastico">
                 <div class="card-header">
                     <h3><i class="fas fa-file-pdf"></i> Sparta Plast</h3>
                     <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
                 </div>
                 <button class="catalog-btn" 
-                        data-pdf-url="https://www.spartaplast.com/wp-content/uploads/2024/06/Catalago-Spartaplast-Junio-2024.pdf">
+                        data-pdf-url="catmedia/sparta.pdf">
                     <i class="fas fa-external-link-alt"></i>
                     Abrir Catálogo
                 </button>
             </div>
 
-            <!-- Catálogo 3 -->
+            <!-- Catálogo 3 - Prini -->
             <div class="catalog-card" data-search="prini productos plastico guatemala">
                 <div class="card-header">
                     <h3><i class="fas fa-box-open"></i> Prini</h3>
@@ -480,7 +480,7 @@
                 </button>
             </div>
 
-            <!-- Catálogo 4 -->
+            <!-- Catálogo 4 - Plastikito (Alteplast) -->
             <div class="catalog-card" data-search="plastikito alteplast productos plastico">
                 <div class="card-header">
                     <h3><i class="fas fa-boxes"></i> Plastikito (Alteplast)</h3>
@@ -506,15 +506,68 @@
                 </button>
             </div>
 
-            <!-- Catálogo 6 -->
-            <div class="catalog-card" data-search="neoplast plastico productos no disponible">
+            <!-- Catálogo 6 - Neoplast (Local) -->
+            <div class="catalog-card" data-search="neoplast plastico productos catalogo">
                 <div class="card-header">
-                    <h3><i class="fas fa-ban"></i> Neoplast</h3>
+                    <h3><i class="fas fa-file-pdf"></i> Neoplast</h3>
                     <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
                 </div>
-                <button class="catalog-btn disabled" disabled>
-                    <i class="fas fa-times-circle"></i>
-                    No disponible
+                <button class="catalog-btn" 
+                        data-pdf-url="catmedia/neoplast.pdf">
+                    <i class="fas fa-external-link-alt"></i>
+                    Abrir Catálogo
+                </button>
+            </div>
+
+            <!-- Catálogo 7 - Doriplast S.A -->
+            <div class="catalog-card" data-search="doriplast plastico productos hogar">
+                <div class="card-header">
+                    <h3><i class="fas fa-home"></i> Doriplast S.A</h3>
+                    <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
+                </div>
+                <button class="catalog-btn" 
+                        data-web-url="https://www.doriplast.com/hogar">
+                    <i class="fas fa-external-link-alt"></i>
+                    Ver Catálogo
+                </button>
+            </div>
+
+            <!-- Catálogo 8 - Diprossa -->
+            <div class="catalog-card" data-search="diprossa plastico productos hogar">
+                <div class="card-header">
+                    <h3><i class="fas fa-home"></i> Diprossa</h3>
+                    <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
+                </div>
+                <button class="catalog-btn" 
+                        data-web-url="https://diprossa.company.site/Hogar-c56298343">
+                    <i class="fas fa-external-link-alt"></i>
+                    Ver Catálogo
+                </button>
+            </div>
+
+            <!-- Catálogo 9 - Induplastik S.A (Local) -->
+            <div class="catalog-card" data-search="induplastik plastico productos catalogo">
+                <div class="card-header">
+                    <h3><i class="fas fa-file-pdf"></i> Induplastik S.A</h3>
+                    <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
+                </div>
+                <button class="catalog-btn" 
+                        data-pdf-url="catmedia/induplastik.pdf">
+                    <i class="fas fa-external-link-alt"></i>
+                    Abrir Catálogo
+                </button>
+            </div>
+
+            <!-- Catálogo 10 - House & Green -->
+            <div class="catalog-card" data-search="house green cocina productos catalogo">
+                <div class="card-header">
+                    <h3><i class="fas fa-utensils"></i> House & Green</h3>
+                    <span class="card-category disposable"><i class="fas fa-tag"></i> Cocina</span>
+                </div>
+                <button class="catalog-btn" 
+                        data-web-url="https://www.houseandgreen.com.gt/catalogo.php">
+                    <i class="fas fa-external-link-alt"></i>
+                    Ver Catálogo
                 </button>
             </div>
             
@@ -566,8 +619,12 @@
                 pdfLoading.style.display = 'flex';
                 pdfViewer.style.display = 'none';
                 
+                // Manejar URLs locales (catmedia) y remotas
+                const finalUrl = url.startsWith('http') ? url : 
+                               `${window.location.pathname.replace(/\/[^/]*$/, '')}/${url}`;
+                
                 // Cargar el contenido
-                pdfViewer.src = url;
+                pdfViewer.src = finalUrl;
                 
                 // Cuando el contenido esté listo
                 pdfViewer.onload = function() {
@@ -580,7 +637,7 @@
                     pdfLoading.style.display = 'none';
                     alert('Error al cargar el contenido. Se abrirá en una nueva pestaña.');
                     closeModal();
-                    window.open(url, '_blank');
+                    window.open(finalUrl, '_blank');
                 };
             }
             
