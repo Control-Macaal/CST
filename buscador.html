@@ -16,18 +16,10 @@
         :root {
             --primary: #4361ee;
             --primary-hover: #3a56d4;
-            --secondary: #3f37c9;
-            --accent: #4895ef;
-            --dark: #1b263b;
-            --light: #f8f9fa;
-            --card-bg: #ffffff;
             --text: #2b2d42;
             --text-light: #8d99ae;
-            --danger: #f72585;
-            --success: #4cc9f0;
-            --border-radius: 12px;
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --border: #e9ecef;
+            --bg: #f8f9fa;
         }
 
         * {
@@ -39,11 +31,10 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--light);
+            background-color: var(--bg);
             color: var(--text);
             padding: 1rem;
-            min-height: 100vh;
-            -webkit-text-size-adjust: 100%;
+            line-height: 1.5;
         }
 
         .container {
@@ -58,7 +49,7 @@
             align-items: center;
             margin-bottom: 1.5rem;
             padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid var(--border);
             flex-wrap: wrap;
             gap: 1rem;
         }
@@ -67,54 +58,45 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            flex: 1;
-            min-width: 200px;
         }
 
         .header-title h1 {
             font-size: 1.5rem;
-            white-space: nowrap;
-            color: var(--dark);
+            color: var(--text);
         }
 
         .back-btn {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 0.75rem 1rem;
-            border-radius: var(--border-radius);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            transition: var(--transition);
             font-size: 0.9rem;
-            flex-shrink: 0;
             text-decoration: none;
+            transition: background 0.2s;
         }
 
         .back-btn:hover {
             background: var(--primary-hover);
-            transform: translateY(-2px);
         }
 
-        /* Barra de búsqueda mejorada */
+        /* Barra de búsqueda */
         .search-container {
             position: relative;
-            width: 100%;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
 
         .search-input {
             width: 100%;
             padding: 0.75rem 0.75rem 0.75rem 3rem;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            border-radius: var(--border-radius);
+            border: 1px solid var(--border);
+            border-radius: 6px;
             font-size: 1rem;
-            transition: var(--transition);
-            box-shadow: var(--shadow);
-            -webkit-appearance: none;
-            background-color: var(--card-bg);
+            background-color: white;
         }
 
         .search-input:focus {
@@ -129,99 +111,88 @@
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-light);
-            font-size: 1.1rem;
         }
 
-        /* Resultados */
+        /* Resultados en lista */
         #results {
-            display: grid;
-            gap: 0.75rem;
             width: 100%;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            overflow: hidden;
         }
 
         .result-item {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            padding: 1.25rem;
-            transition: var(--transition);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            cursor: pointer;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+            display: flex;
+            gap: 1rem;
+            align-items: baseline;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
         }
 
         .result-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            border-color: rgba(67, 97, 238, 0.2);
+            background: #f8f9fa;
         }
 
         .sku {
-            font-weight: 700;
+            font-weight: 600;
             color: var(--primary);
-            font-size: 0.9rem;
-            background: rgba(67, 97, 238, 0.1);
-            padding: 0.25rem 0.5rem;
-            border-radius: 6px;
-            display: inline-block;
-            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            min-width: 80px;
         }
 
         .product-name {
+            flex: 1;
             font-weight: 500;
-            margin-bottom: 0.25rem;
-            color: var(--dark);
         }
 
         .no-results {
-            text-align: center;
             padding: 2rem;
+            text-align: center;
             color: var(--text-light);
-            grid-column: 1 / -1;
         }
 
-        .no-results i {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: var(--text-light);
-            opacity: 0.5;
+        .hidden {
+            display: none !important;
         }
 
-        /* Contador de resultados */
         .results-count {
             font-size: 0.85rem;
             color: var(--text-light);
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        /* Mejoras para móviles */
-        @media (max-width: 768px) {
-            body {
-                padding: 0.75rem;
-            }
-            
-            .header-title h1 {
-                font-size: 1.3rem;
-            }
-            
-            .search-input {
-                padding-left: 2.75rem;
-            }
-            
-            .result-item {
-                padding: 1rem;
-            }
+        /* Loading spinner */
+        .loading {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
         }
 
-        @media (max-width: 480px) {
-            .header-title {
-                min-width: 100%;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mobile */
+        @media (max-width: 600px) {
+            .result-item {
+                flex-direction: column;
+                gap: 0.25rem;
             }
-            
-            .search-icon {
-                left: 0.85rem;
+            .sku {
+                min-width: auto;
             }
         }
     </style>
@@ -233,7 +204,7 @@
                 <i class="fas fa-search"></i>
                 <h1>Buscador Sparta</h1>
             </div>
-            <a href="index.html" class="back-btn">
+            <a href="index.html" class="back-btn" id="backBtn">
                 <i class="fas fa-arrow-left"></i>
                 Volver
             </a>
@@ -250,61 +221,81 @@
         </div>
 
         <div id="results">
-            <!-- Los resultados se cargarán aquí dinámicamente -->
             <div class="no-results">
                 <i class="fas fa-search"></i>
                 <h3>Ingresa un término de búsqueda</h3>
-                <p>Intenta Con Nombre o Codigo"</p>
+                <p>Busca por nombre o código de producto</p>
             </div>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                // Elementos del DOM
-                const searchInput = document.getElementById('search');
-                const resultsDiv = document.getElementById('results');
-                const resultsCount = document.getElementById('resultsCount');
-                const countSpan = document.getElementById('count');
+            const searchInput = document.getElementById('search');
+            const resultsDiv = document.getElementById('results');
+            const resultsCount = document.getElementById('resultsCount');
+            const countSpan = document.getElementById('count');
+            const backBtn = document.getElementById('backBtn');
+            
+            // Función debounce para optimizar búsquedas
+            function debounce(func, wait) {
+                let timeout;
+                return function(...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), wait);
+                };
+            }
+            
+            // Cargar datos con caché
+            let productosCache = null;
+            const loadData = async () => {
+                if (productosCache) return productosCache;
                 
-                // Carga de datos (ajusta la ruta según tu estructura)
-                const response = await fetch('sparta.json');
-                if (!response.ok) throw new Error("Error al cargar los datos");
-                const productos = await response.json();
+                try {
+                    backBtn.innerHTML = `<span class="loading"></span> Cargando...`;
+                    const response = await fetch('data/sparta.json'); // Ajusta la ruta según tu estructura
+                    if (!response.ok) throw new Error("Error al cargar los datos");
+                    productosCache = await response.json();
+                    return productosCache;
+                } catch (error) {
+                    console.error("Error:", error);
+                    throw error;
+                } finally {
+                    backBtn.innerHTML = `<i class="fas fa-arrow-left"></i> Volver`;
+                }
+            };
+            
+            // Función de búsqueda
+            const searchProducts = async () => {
+                const term = searchInput.value.trim().toLowerCase();
                 
-                // Función de búsqueda
-                const searchProducts = () => {
-                    const term = searchInput.value.trim().toLowerCase();
-                    
-                    if (term === '') {
-                        resultsDiv.innerHTML = `
-                            <div class="no-results">
-                                <i class="fas fa-search"></i>
-                                <h3>Ingresa un término de búsqueda</h3>
-                                <p>Intenta Con Nombre o Codigo</p>
-                            </div>
-                        `;
-                        resultsCount.classList.add('hidden');
-                        return;
-                    }
-                    
+                if (term === '') {
+                    resultsDiv.innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-search"></i>
+                            <h3>Ingresa un término de búsqueda</h3>
+                            <p>Busca por nombre o código de producto</p>
+                        </div>
+                    `;
+                    resultsCount.classList.add('hidden');
+                    return;
+                }
+                
+                try {
+                    const productos = await loadData();
                     const filtered = productos.filter(p => 
                         p.sku.toLowerCase().includes(term) || 
                         p.nombre.toLowerCase().includes(term)
                     );
                     
-                    // Actualizar contador
                     countSpan.textContent = filtered.length;
                     resultsCount.classList.remove('hidden');
                     
-                    // Mostrar resultados
                     if (filtered.length > 0) {
                         resultsDiv.innerHTML = filtered.map(p => `
                             <div class="result-item" data-sku="${p.sku}">
                                 <div class="sku">${p.sku}</div>
                                 <div class="product-name">${p.nombre}</div>
-                                ${p.descripcion ? `<div class="product-desc">${p.descripcion}</div>` : ''}
                             </div>
                         `).join('');
                     } else {
@@ -316,31 +307,32 @@
                             </div>
                         `;
                     }
-                };
-                
-                // Eventos
-                searchInput.addEventListener('input', searchProducts);
-                
-                // Clic en resultados (puedes ampliar esta funcionalidad)
-                resultsDiv.addEventListener('click', (e) => {
-                    const item = e.target.closest('.result-item');
-                    if (item) {
-                        const sku = item.getAttribute('data-sku');
-                        alert(`SKU seleccionado: ${sku}\nAquí puedes abrir un modal con más detalles`);
-                        // Ejemplo: window.open(`detalle.html?sku=${sku}`, '_blank');
-                    }
-                });
-                
-            } catch (error) {
-                console.error("Error:", error);
-                resultsDiv.innerHTML = `
-                    <div class="no-results" style="color: var(--danger);">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <h3>Error al cargar los datos</h3>
-                        <p>Por favor, recarga la página o intenta más tarde</p>
-                    </div>
-                `;
-            }
+                } catch (error) {
+                    resultsDiv.innerHTML = `
+                        <div class="no-results" style="color: #dc3545;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Error al cargar los datos</h3>
+                            <p>${error.message}</p>
+                            <button onclick="window.location.reload()" class="back-btn" style="margin-top: 1rem;">
+                                <i class="fas fa-sync-alt"></i> Recargar
+                            </button>
+                        </div>
+                    `;
+                }
+            };
+            
+            // Eventos
+            searchInput.addEventListener('input', debounce(searchProducts, 300));
+            
+            // Clic en resultados
+            resultsDiv.addEventListener('click', (e) => {
+                const item = e.target.closest('.result-item');
+                if (item) {
+                    const sku = item.getAttribute('data-sku');
+                    // Aquí puedes redirigir a una página de detalle o mostrar un modal
+                    console.log('Producto seleccionado:', sku);
+                }
+            });
         });
     </script>
 </body>
