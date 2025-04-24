@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="Dashboard centralizado de catálogos de productos para empresas de plásticos">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Catálogos de Productos</title>
     <!-- Preconexión para mejorar performance -->
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
@@ -644,29 +645,35 @@
                 }
             });
             
-            // Función para abrir el modal
+            // Función para abrir el modal o visor nativo en iOS
             function openFullscreenModal(url) {
+                // Detectar si es un dispositivo iOS
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+                
+                // Si es iOS y es un PDF, abrir en nueva pestaña (visor nativo)
+                if (isIOS && url.endsWith('.pdf')) {
+                    window.open(url, '_blank');
+                    return;
+                }
+                
+                // Para otros dispositivos o web URLs, usar el modal como antes
                 pdfModal.classList.add('active');
                 document.body.style.overflow = 'hidden';
                 
-                // Mostrar loader
                 pdfLoading.style.display = 'flex';
                 pdfViewer.style.display = 'none';
                 
-                // Manejar URLs locales (catmedia) y remotas
                 const finalUrl = url.startsWith('http') ? url : 
                                `${window.location.pathname.replace(/\/[^/]*$/, '')}/${url}`;
                 
-                // Cargar el contenido
                 pdfViewer.src = finalUrl;
                 
-                // Cuando el contenido esté listo
                 pdfViewer.onload = function() {
                     pdfLoading.style.display = 'none';
                     pdfViewer.style.display = 'block';
                 };
                 
-                // Manejar errores
                 pdfViewer.onerror = function() {
                     pdfLoading.style.display = 'none';
                     alert('Error al cargar el contenido. Se abrirá en una nueva pestaña.');
