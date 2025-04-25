@@ -1,8 +1,8 @@
 [
   {"sku": "ALC004", "nombre": "GAVETERO #2 6 GAVETAS SPART", "imagen": "images/sparta/ALC004.jpg"},
-  {"sku": "FIE035", "nombre": "MACETA PREMIUM RED C/P #1", "imagen": "images/sparta/FIE035.jpg"},
-  {"sku": "FIE037", "nombre": "MACETA PREMIUM RED C/P #2 SPA", "imagen": "images/sparta/FIE037.jpg"},
-  {"sku": "FIE039", "nombre": "MACETA PREMIUM #3 RED C/P SPA", "imagen": "images/sparta/FIE039.jpg"},
+  {"sku": "FIE035", "nombre": "MACETA PREMIUM RED C/P #1", "imagen": "https://www.spartaplast.com/wp-content/uploads/2023/10/Maceta-Premiun-redonda-c-plato.png"},
+  {"sku": "FIE037", "nombre": "MACETA PREMIUM RED C/P #2 SPA", "imagen": "https://www.spartaplast.com/wp-content/uploads/2023/10/Maceta-Premiun-redonda-c-plato.png"},
+  {"sku": "FIE039", "nombre": "MACETA PREMIUM #3 RED C/P SPA", "imagen": "https://www.spartaplast.com/wp-content/uploads/2023/10/Maceta-Premiun-redonda-c-plato.png"},
   {"sku": "FIE040", "nombre": "MACETA PREMIUM CUADRADA #1", "imagen": "images/sparta/FIE040.jpg"},
   {"sku": "FIE041", "nombre": "MACETA PREMIUM CUAD #2 SPA", "imagen": "images/sparta/FIE041.jpg"},
   {"sku": "FIE042", "nombre": "MACETA PREMIUM CUAD #3 SPA", "imagen": "images/sparta/FIE042.jpg"},
