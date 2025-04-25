@@ -224,7 +224,7 @@
             // Cargar datos
             const loadData = async () => {
                 try {
-                    const response = await fetch('data/products.json'); // Cambia a tu archivo JSON
+                    const response = await fetch('data/sparta.json'); // Cambia a tu archivo JSON
                     if (!response.ok) throw new Error("Error al cargar los datos");
                     return await response.json();
                 } catch (error) {
