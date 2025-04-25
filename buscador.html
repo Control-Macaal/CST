@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Buscador de Productos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -13,12 +13,14 @@
             --text-light: #8d99ae;
             --border: #e9ecef;
             --bg: #f8f9fa;
+            --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -26,11 +28,13 @@
             background-color: var(--bg);
             padding: 1rem;
             line-height: 1.5;
+            padding-bottom: calc(1rem + var(--safe-area-inset-bottom));
         }
 
         .container {
             max-width: 800px;
             margin: 0 auto;
+            width: 100%;
         }
 
         header {
@@ -51,7 +55,7 @@
         }
 
         .header-title h1 {
-            font-size: 1.5rem;
+            font-size: clamp(1.25rem, 4vw, 1.5rem);
             color: var(--text);
         }
 
@@ -66,6 +70,7 @@
             gap: 0.5rem;
             font-size: 0.9rem;
             text-decoration: none;
+            white-space: nowrap;
         }
 
         /* Barra de búsqueda */
@@ -81,6 +86,13 @@
             border-radius: 6px;
             font-size: 1rem;
             background-color: white;
+            -webkit-appearance: none;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
         }
 
         .search-icon {
@@ -89,6 +101,7 @@
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-light);
+            pointer-events: none;
         }
 
         /* Resultados con imágenes */
@@ -97,6 +110,7 @@
             background: white;
             border-radius: 6px;
             border: 1px solid var(--border);
+            overflow: hidden;
         }
 
         .result-item {
@@ -105,6 +119,11 @@
             display: flex;
             align-items: center;
             gap: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .result-item:active {
+            background-color: rgba(0, 0, 0, 0.05);
         }
 
         .result-item:last-child {
@@ -166,6 +185,12 @@
             gap: 0.5rem;
         }
 
+        .loading {
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-light);
+        }
+
         /* Modal para imagen en pantalla completa */
         .image-modal {
             display: none;
@@ -179,6 +204,8 @@
             justify-content: center;
             align-items: center;
             animation: fadeIn 0.3s;
+            touch-action: manipulation;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
 
         @keyframes fadeIn {
@@ -187,18 +214,28 @@
         }
 
         .modal-content {
-            max-width: 90%;
-            max-height: 90%;
+            max-width: 95%;
+            max-height: 95%;
             object-fit: contain;
+            -webkit-user-drag: none;
+            user-select: none;
         }
 
         .close-modal {
             position: absolute;
-            top: 20px;
-            right: 30px;
+            top: max(20px, env(safe-area-inset-top));
+            right: max(30px, env(safe-area-inset-right));
             color: white;
             font-size: 2rem;
             cursor: pointer;
+            z-index: 1001;
+            background: rgba(0, 0, 0, 0.5);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .no-image {
@@ -210,7 +247,13 @@
             background: var(--bg);
         }
 
+        /* Mejoras específicas para móviles */
         @media (max-width: 600px) {
+            body {
+                padding: 0.75rem;
+                padding-bottom: calc(0.75rem + var(--safe-area-inset-bottom));
+            }
+
             .product-image {
                 width: 50px;
                 height: 50px;
@@ -226,13 +269,39 @@
             }
             
             .search-input {
-                padding-left: 2.5rem;
-                font-size: 0.9rem;
+                padding: 0.65rem 0.65rem 0.65rem 2.8rem;
+                font-size: 0.95rem;
             }
             
             .search-icon {
-                left: 0.75rem;
-                font-size: 0.9rem;
+                left: 0.8rem;
+                font-size: 0.95rem;
+            }
+
+            .back-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.85rem;
+            }
+
+            .modal-content {
+                max-width: 100%;
+                max-height: 80vh;
+            }
+        }
+
+        /* Para pantallas muy pequeñas */
+        @media (max-width: 400px) {
+            .product-image {
+                width: 45px;
+                height: 45px;
+            }
+
+            .product-name {
+                font-size: 0.95rem;
+            }
+
+            .sku {
+                font-size: 0.8rem;
             }
         }
     </style>
@@ -252,7 +321,7 @@
 
         <div class="search-container">
             <i class="fas fa-search search-icon"></i>
-            <input type="text" class="search-input" id="search" placeholder="Buscar por SKU o nombre..." autofocus>
+            <input type="search" class="search-input" id="search" placeholder="Buscar por SKU o nombre..." autofocus inputmode="search">
         </div>
 
         <div class="results-count hidden" id="resultsCount">
@@ -283,21 +352,22 @@
             const resultsCount = document.getElementById('resultsCount');
             const countSpan = document.getElementById('count');
             
-            // Función debounce
-            function debounce(func, wait, immediate) {
+            // Evitar zoom en input en iOS
+            searchInput.addEventListener('touchstart', function(e) {
+                this.style.fontSize = '16px';
+            });
+            
+            // Función debounce optimizada para móviles
+            function debounce(func, wait) {
                 let timeout;
                 return function() {
                     const context = this, args = arguments;
                     clearTimeout(timeout);
-                    timeout = setTimeout(() => {
-                        timeout = null;
-                        if (!immediate) func.apply(context, args);
-                    }, wait);
-                    if (immediate && !timeout) func.apply(context, args);
+                    timeout = setTimeout(() => func.apply(context, args), wait);
                 };
             }
             
-            // Cargar datos con caché simple
+            // Cargar datos con caché y manejo offline
             let cachedData = null;
             const loadData = async () => {
                 if (cachedData) return cachedData;
@@ -311,10 +381,26 @@
                         throw new Error("Formato de datos inválido");
                     }
                     
+                    // Guardar en caché y en localStorage como respaldo
                     cachedData = data;
+                    try {
+                        localStorage.setItem('productosCache', JSON.stringify(data));
+                    } catch (e) {
+                        console.warn("No se pudo guardar en localStorage", e);
+                    }
+                    
                     return data;
                 } catch (error) {
                     console.error("Error:", error);
+                    // Intentar recuperar de localStorage si hay error de red
+                    try {
+                        const cached = localStorage.getItem('productosCache');
+                        if (cached) {
+                            return JSON.parse(cached);
+                        }
+                    } catch (e) {
+                        console.warn("Error al leer localStorage", e);
+                    }
                     throw error;
                 }
             };
@@ -322,7 +408,7 @@
             // Mostrar imagen o placeholder
             const getProductImage = (product) => {
                 if (product.imagen) {
-                    return `<img src="${product.imagen}" class="product-image" alt="${product.nombre}" onclick="openImageModal('${product.imagen}')">`;
+                    return `<img src="${product.imagen}" class="product-image" alt="${product.nombre}" onclick="openImageModal('${product.imagen}')" loading="lazy">`;
                 }
                 return `<div class="product-image no-image">
                     <i class="fas fa-box-open"></i>
@@ -334,13 +420,19 @@
                 const modal = document.getElementById('imageModal');
                 const modalImg = document.getElementById('modalImage');
                 
+                // Prevenir scroll de fondo
+                document.body.style.overflow = 'hidden';
+                document.documentElement.style.overflow = 'hidden';
+                
                 modal.style.display = "flex";
                 modalImg.src = imageUrl;
                 
                 // Cierra al hacer clic fuera de la imagen
                 modal.onclick = function(e) {
-                    if (e.target !== modalImg) {
+                    if (e.target !== modalImg && e.target.className !== 'close-modal') {
                         modal.style.display = "none";
+                        document.body.style.overflow = '';
+                        document.documentElement.style.overflow = '';
                     }
                 }
             };
@@ -350,12 +442,16 @@
                 const modal = document.getElementById('imageModal');
                 if (e.key === "Escape" && modal.style.display === "flex") {
                     modal.style.display = "none";
+                    document.body.style.overflow = '';
+                    document.documentElement.style.overflow = '';
                 }
             });
             
             // Cierra al hacer clic en la X
             document.querySelector('.close-modal').addEventListener('click', function() {
                 document.getElementById('imageModal').style.display = "none";
+                document.body.style.overflow = '';
+                document.documentElement.style.overflow = '';
             });
             
             // Para móviles - cerrar con swipe
@@ -363,28 +459,46 @@
             const modal = document.getElementById('imageModal');
             
             modal.addEventListener('touchstart', function(e) {
-                touchStartY = e.changedTouches[0].screenY;
-            }, false);
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
             
-            modal.addEventListener('touchend', function(e) {
-                const touchEndY = e.changedTouches[0].screenY;
-                if (Math.abs(touchEndY - touchStartY) > 100) {
+            modal.addEventListener('touchmove', function(e) {
+                const touchY = e.touches[0].clientY;
+                const diff = touchY - touchStartY;
+                
+                if (diff > 50) { // Umbral de swipe
                     modal.style.display = "none";
+                    document.body.style.overflow = '';
+                    document.documentElement.style.overflow = '';
                 }
-            }, false);
+            }, { passive: true });
             
-            // Mostrar resultados
+            // Mostrar resultados optimizado
             const displayResults = (products) => {
                 if (products.length > 0) {
-                    resultsDiv.innerHTML = products.map(p => `
-                        <div class="result-item" data-sku="${p.sku}">
-                            ${getProductImage(p)}
-                            <div class="product-info">
-                                <span class="sku">${p.sku || 'Sin SKU'}</span>
-                                <div class="product-name">${p.nombre}</div>
+                    let html = '';
+                    // Limitar a 100 resultados iniciales para mejor rendimiento
+                    const limitedProducts = products.slice(0, 100);
+                    
+                    limitedProducts.forEach(p => {
+                        html += `
+                            <div class="result-item" data-sku="${p.sku}">
+                                ${getProductImage(p)}
+                                <div class="product-info">
+                                    <span class="sku">${p.sku || 'Sin SKU'}</span>
+                                    <div class="product-name">${p.nombre}</div>
+                                </div>
                             </div>
-                        </div>
-                    `).join('');
+                        `;
+                    });
+                    
+                    if (products.length > 100) {
+                        html += `<div class="result-item" style="justify-content: center; color: var(--text-light);">
+                            +${products.length - 100} resultados más
+                        </div>`;
+                    }
+                    
+                    resultsDiv.innerHTML = html;
                 } else {
                     resultsDiv.innerHTML = `
                         <div class="no-results">
@@ -396,7 +510,7 @@
                 }
             };
             
-            // Función de búsqueda
+            // Función de búsqueda optimizada para móviles
             const searchProducts = debounce(async () => {
                 const term = searchInput.value.trim().toLowerCase();
                 
@@ -440,8 +554,14 @@
                 }
             }, 300);
             
-            // Eventos
+            // Eventos optimizados para móviles
             searchInput.addEventListener('input', searchProducts);
+            searchInput.addEventListener('search', searchProducts);
+            
+            // Enfocar el input al cargar (con retraso para evitar problemas en iOS)
+            setTimeout(() => {
+                searchInput.focus();
+            }, 300);
         });
     </script>
 </body>
