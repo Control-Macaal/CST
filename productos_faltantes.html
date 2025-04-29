@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Productos Faltantes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-hover: #3a56d4;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --dark: #1b263b;
+            --light: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #2b2d42;
+            --text-light: #8d99ae;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --success: #4cc9f0;
+            --border-radius: 12px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light);
+            color: var(--text);
+            padding: 1rem;
+            min-height: 100vh;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            white-space: nowrap;
+            color: var(--dark);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+        }
+
+        .btn-success {
+            background: var(--success);
+        }
+
+        /* Filtros y búsqueda */
+        .filters-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--card-bg);
+            padding: 1.25rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .search-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 0.75rem 0.75rem 3rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            -webkit-appearance: none;
+            background-color: var(--card-bg);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        /* Resultados */
+        #results {
+            display: grid;
+            gap: 0.75rem;
+            width: 100%;
+        }
+
+        .result-item {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.25rem;
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .result-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-color: rgba(67, 97, 238, 0.2);
+        }
+
+        .product-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .sku {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 0.9rem;
+            background: rgba(67, 97, 238, 0.1);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            display: inline-block;
+            width: fit-content;
+        }
+
+        .product-name {
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .product-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .product-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .status-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .status-critical {
+            background-color: rgba(248, 37, 133, 0.1);
+            color: var(--danger);
+        }
+
+        .status-warning {
+            background-color: rgba(248, 150, 30, 0.1);
+            color: var(--warning);
+        }
+
+        .status-normal {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--success);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            grid-column: 1 / -1;
+        }
+
+        .no-results i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--text-light);
+            opacity: 0.5;
+        }
+
+        /* Stats */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .stat-critical .stat-value {
+            color: var(--danger);
+        }
+
+        .stat-warning .stat-value {
+            color: var(--warning);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            width: 90%;
+            max-width: 500px;
+            padding: 1.5rem;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+
+        /* Mejoras para móviles */
+        @media (max-width: 768px) {
+            body {
+                padding: 0.75rem;
+            }
+            
+            .header-title h1 {
+                font-size: 1.3rem;
+            }
+            
+            .result-item {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .product-actions {
+                justify-content: flex-end;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-title {
+                min-width: 100%;
+            }
+            
+            .search-icon {
+                left: 0.85rem;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-title">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h1>Productos Faltantes</h1>
+            </div>
+            <div class="header-actions">
+                <button class="btn" id="addMissingBtn">
+                    <i class="fas fa-plus"></i>
+                    Agregar
+                </button>
+                <a href="index.html" class="btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver
+                </a>
+            </div>
+        </header>
+
+        <!-- Estadísticas -->
+        <div class="stats-container">
+            <div class="stat-card stat-critical">
+                <div class="stat-value" id="criticalCount">0</div>
+                <div class="stat-label">Críticos</div>
+            </div>
+            <div class="stat-card stat-warning">
+                <div class="stat-value" id="warningCount">0</div>
+                <div class="stat-label">Por agotarse</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalCount">0</div>
+                <div class="stat-label">Total faltantes</div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters-container">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" id="search" placeholder="Buscar por SKU o nombre..." autofocus>
+            </div>
+            <select class="form-control" id="statusFilter">
+                <option value="all">Todos los estados</option>
+                <option value="critical">Crítico</option>
+                <option value="warning">Por agotarse</option>
+                <option value="normal">En reposición</option>
+            </select>
+            <select class="form-control" id="categoryFilter">
+                <option value="all">Todas las categorías</option>
+                <option value="macetas">Macetas</option>
+                <option value="organizacion">Organización</option>
+                <option value="hogar">Hogar</option>
+                <option value="jardin">Jardín</option>
+            </select>
+        </div>
+
+        <!-- Resultados -->
+        <div id="results">
+            <!-- Los resultados se cargarán aquí dinámicamente -->
+            <div class="no-results">
+                <i class="fas fa-box-open"></i>
+                <h3>Cargando productos...</h3>
+                <p>Espera un momento mientras se cargan los datos</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para agregar/editar -->
+    <div class="modal" id="missingModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Agregar producto faltante</h2>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <form id="missingForm">
+                <input type="hidden" id="productId">
+                <div class="form-group">
+                    <label for="productSku">SKU del producto</label>
+                    <input type="text" class="form-control" id="productSku" required>
+                </div>
+                <div class="form-group">
+                    <label for="productName">Nombre del producto</label>
+                    <input type="text" class="form-control" id="productName" required>
+                </div>
+                <div class="form-group">
+                    <label for="productCategory">Categoría</label>
+                    <select class="form-control" id="productCategory" required>
+                        <option value="">Seleccionar categoría</option>
+                        <option value="macetas">Macetas</option>
+                        <option value="organizacion">Organización</option>
+                        <option value="hogar">Hogar</option>
+                        <option value="jardin">Jardín</option>
+                        <option value="otros">Otros</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="missingQuantity">Cantidad faltante</label>
+                    <input type="number" class="form-control" id="missingQuantity" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="missingStatus">Estado</label>
+                    <select class="form-control" id="missingStatus" required>
+                        <option value="critical">Crítico (agotado)</option>
+                        <option value="warning">Por agotarse</option>
+                        <option value="normal">En reposición</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="missingNotes">Notas</label>
+                    <textarea class="form-control" id="missingNotes" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn" style="width: 100%; margin-top: 1rem;">
+                    <i class="fas fa-save"></i>
+                    Guardar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Configuración de Firebase (reemplaza con tus propios datos)
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_vGhJItABa8s62qyHsVTWmTGmWZWF6mY",
+            authDomain: "inventario-productos-faltantes.firebaseapp.com",
+            projectId: "inventario-productos-faltantes",
+            storageBucket: "inventario-productos-faltantes.appspot.com",
+            messagingSenderId: "324827723523",
+            appId: "1:324827723523:web:09519c3cacff88759c9b36",
+            measurementId: "G-VX2Z79123W"
+        };
+
+        // Inicializa Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Datos de la aplicación
+        let missingProducts = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Elementos del DOM
+            const searchInput = document.getElementById('search');
+            const statusFilter = document.getElementById('statusFilter');
+            const categoryFilter = document.getElementById('categoryFilter');
+            const resultsDiv = document.getElementById('results');
+            const criticalCount = document.getElementById('criticalCount');
+            const warningCount = document.getElementById('warningCount');
+            const totalCount = document.getElementById('totalCount');
+            const addMissingBtn = document.getElementById('addMissingBtn');
+            const missingModal = document.getElementById('missingModal');
+            const modalClose = document.getElementById('modalClose');
+            const modalTitle = document.getElementById('modalTitle');
+            const missingForm = document.getElementById('missingForm');
+            const productIdInput = document.getElementById('productId');
+            const productSkuInput = document.getElementById('productSku');
+            const productNameInput = document.getElementById('productName');
+            const productCategoryInput = document.getElementById('productCategory');
+            const missingQuantityInput = document.getElementById('missingQuantity');
+            const missingStatusInput = document.getElementById('missingStatus');
+            const missingNotesInput = document.getElementById('missingNotes');
+
+            // Mostrar productos
+            function renderProducts(products) {
+                if (products.length === 0) {
+                    resultsDiv.innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-box-open"></i>
+                            <h3>No se encontraron productos</h3>
+                            <p>No hay productos que coincidan con tus filtros</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                resultsDiv.innerHTML = products.map(product => `
+                    <div class="result-item">
+                        <div class="product-info">
+                            <span class="sku">${product.sku}</span>
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-meta">
+                                <span><i class="fas fa-layer-group"></i> ${product.category}</span>
+                                <span><i class="fas fa-cubes"></i> Faltan: ${product.missingQuantity}</span>
+                                <span><i class="fas fa-calendar-alt"></i> ${product.lastOrderDate}</span>
+                            </div>
+                            ${product.notes ? `<div class="product-meta"><i class="fas fa-comment"></i> ${product.notes}</div>` : ''}
+                        </div>
+                        <span class="status-badge ${getStatusClass(product.status)}">
+                            <i class="fas ${getStatusIcon(product.status)}"></i>
+                            ${getStatusText(product.status)}
+                        </span>
+                        <div class="product-actions">
+                            <button class="btn btn-success" onclick="markAsRestocked('${product.id}')">
+                                <i class="fas fa-check"></i>
+                                Repuesto
+                            </button>
+                            <button class="btn" onclick="editProduct('${product.id}')">
+                                <i class="fas fa-edit"></i>
+                                Editar
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Actualizar estadísticas
+                updateStats();
+            }
+
+            // Funciones de ayuda
+            function getStatusClass(status) {
+                return {
+                    critical: 'status-critical',
+                    warning: 'status-warning',
+                    normal: 'status-normal'
+                }[status] || '';
+            }
+
+            function getStatusIcon(status) {
+                return {
+                    critical: 'fa-exclamation-circle',
+                    warning: 'fa-exclamation-triangle',
+                    normal: 'fa-clock'
+                }[status] || 'fa-question';
+            }
+
+            function getStatusText(status) {
+                return {
+                    critical: 'Crítico',
+                    warning: 'Por agotarse',
+                    normal: 'En reposición'
+                }[status] || 'Desconocido';
+            }
+
+            function updateStats() {
+                const critical = missingProducts.filter(p => p.status === 'critical').length;
+                const warning = missingProducts.filter(p => p.status === 'warning').length;
+                
+                criticalCount.textContent = critical;
+                warningCount.textContent = warning;
+                totalCount.textContent = missingProducts.length;
+            }
+
+            // Filtrar productos
+            function filterProducts() {
+                const term = searchInput.value.trim().toLowerCase();
+                const status = statusFilter.value;
+                const category = categoryFilter.value;
+
+                let filtered = missingProducts;
+
+                if (term) {
+                    filtered = filtered.filter(p => 
+                        p.sku.toLowerCase().includes(term) || 
+                        p.name.toLowerCase().includes(term)
+                    );
+                }
+
+                if (status !== 'all') {
+                    filtered = filtered.filter(p => p.status === status);
+                }
+
+                if (category !== 'all') {
+                    filtered = filtered.filter(p => p.category === category);
+                }
+
+                renderProducts(filtered);
+            }
+
+            // Manejo del modal
+            function openModal(product = null) {
+                if (product) {
+                    modalTitle.textContent = 'Editar producto faltante';
+                    productIdInput.value = product.id;
+                    productSkuInput.value = product.sku;
+                    productNameInput.value = product.name;
+                    productCategoryInput.value = product.category;
+                    missingQuantityInput.value = product.missingQuantity;
+                    missingStatusInput.value = product.status;
+                    missingNotesInput.value = product.notes || '';
+                } else {
+                    modalTitle.textContent = 'Agregar producto faltante';
+                    missingForm.reset();
+                    productIdInput.value = '';
+                }
+                missingModal.style.display = 'flex';
+            }
+
+            function closeModal() {
+                missingModal.style.display = 'none';
+            }
+
+            // Cargar productos desde Firestore
+            function loadProducts() {
+                db.collection("inventario").doc("productosFaltantes")
+                    .get()
+                    .then((doc) => {
+                        if (doc.exists) {
+                            missingProducts = doc.data().products || [];
+                            renderProducts(missingProducts);
+                            filterProducts();
+                        } else {
+                            // Si no existe el documento, lo creamos con un array vacío
+                            db.collection("inventario").doc("productosFaltantes")
+                                .set({ products: [] });
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error al cargar productos:", error);
+                        resultsDiv.innerHTML = `
+                            <div class="no-results">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <h3>Error al cargar los datos</h3>
+                                <p>Por favor, recarga la página o verifica tu conexión</p>
+                            </div>
+                        `;
+                    });
+            }
+
+            // Guardar productos en Firestore
+            function saveProducts() {
+                db.collection("inventario").doc("productosFaltantes")
+                    .set({
+                        products: missingProducts,
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                    })
+                    .then(() => {
+                        console.log("Productos guardados correctamente");
+                    })
+                    .catch((error) => {
+                        console.error("Error al guardar productos:", error);
+                        alert("Ocurrió un error al guardar. Por favor, intenta nuevamente.");
+                    });
+            }
+
+            // Funciones globales para los botones
+            window.markAsRestocked = function(id) {
+                if (confirm('¿Marcar este producto como repuesto?')) {
+                    missingProducts = missingProducts.filter(p => p.id !== id);
+                    saveProducts();
+                    filterProducts();
+                }
+            }
+
+            window.editProduct = function(id) {
+                const product = missingProducts.find(p => p.id === id);
+                if (product) openModal(product);
+            }
+
+            // Eventos
+            searchInput.addEventListener('input', filterProducts);
+            statusFilter.addEventListener('change', filterProducts);
+            categoryFilter.addEventListener('change', filterProducts);
+            addMissingBtn.addEventListener('click', () => openModal());
+            modalClose.addEventListener('click', closeModal);
+
+            missingForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const productData = {
+                    id: productIdInput.value || Date.now().toString(),
+                    sku: productSkuInput.value,
+                    name: productNameInput.value,
+                    category: productCategoryInput.value,
+                    missingQuantity: parseInt(missingQuantityInput.value),
+                    status: missingStatusInput.value,
+                    lastOrderDate: new Date().toISOString().split('T')[0],
+                    notes: missingNotesInput.value
+                };
+
+                if (productIdInput.value) {
+                    // Editar producto existente
+                    const index = missingProducts.findIndex(p => p.id === productIdInput.value);
+                    if (index !== -1) {
+                        missingProducts[index] = productData;
+                    }
+                } else {
+                    // Agregar nuevo producto
+                    missingProducts.push(productData);
+                }
+
+                saveProducts();
+                closeModal();
+                filterProducts();
+            });
+
+            // Cerrar modal al hacer clic fuera del contenido
+            missingModal.addEventListener('click', (e) => {
+                if (e.target === missingModal) {
+                    closeModal();
+                }
+            });
+
+            // Escuchar cambios en tiempo real
+            db.collection("inventario").doc("productosFaltantes")
+                .onSnapshot((doc) => {
+                    if (doc.exists) {
+                        missingProducts = doc.data().products || [];
+                        renderProducts(missingProducts);
+                        filterProducts();
+                    }
+                });
+
+            // Cargar productos inicialmente
+            loadProducts();
+        });
+    </script>
+</body>
+</html>
