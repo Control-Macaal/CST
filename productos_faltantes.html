@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Control de Productos Faltantes</title>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -482,7 +486,7 @@
     <div class="modal" id="missingModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modalTitle">Agregar producto</h2>
+                <h2 id="modalTitle">Agregar producto faltante</h2>
                 <button class="modal-close" id="modalClose">&times;</button>
             </div>
             <form id="missingForm">
@@ -504,6 +508,10 @@
                     <input type="number" class="form-control" id="missingQuantity" min="1" required>
                 </div>
                 <div class="form-group">
+                    <label for="reportedBy">Reportado por</label>
+                    <input type="text" class="form-control" id="reportedBy" required placeholder="Tu nombre">
+                </div>
+                <div class="form-group">
                     <label for="missingStatus">Estado</label>
                     <select class="form-control" id="missingStatus" required>
                         <option value="unreported">Sin Reportar</option>
@@ -512,7 +520,7 @@
                 </div>
                 <div class="form-group">
                     <label for="missingNotes">Notas</label>
-                    <textarea class="form-control" id="missingNotes" rows="3"></textarea>
+                    <textarea class="form-control" id="missingNotes" rows="3" placeholder="Información adicional..."></textarea>
                 </div>
                 <button type="submit" class="btn" style="width: 100%; margin-top: 0.5rem;">
                     <i class="fas fa-save"></i>
@@ -563,6 +571,7 @@
             const productNameInput = document.getElementById('productName');
             const productSupplierInput = document.getElementById('productSupplier');
             const missingQuantityInput = document.getElementById('missingQuantity');
+            const reportedByInput = document.getElementById('reportedBy');
             const missingStatusInput = document.getElementById('missingStatus');
             const missingNotesInput = document.getElementById('missingNotes');
 
@@ -587,6 +596,7 @@
                             <div class="product-meta">
                                 <span><i class="fas fa-truck"></i> ${product.supplier || 'Sin proveedor'}</span>
                                 <span><i class="fas fa-cubes"></i> Faltan: ${product.missingQuantity}</span>
+                                <span><i class="fas fa-user"></i> Reportado por: ${product.reportedBy || 'No especificado'}</span>
                                 <span><i class="fas fa-calendar-alt"></i> ${product.lastOrderDate}</span>
                             </div>
                             ${product.notes ? `<div class="product-meta"><i class="fas fa-comment"></i> ${product.notes}</div>` : ''}
@@ -659,7 +669,8 @@
                     filtered = filtered.filter(p => 
                         p.sku.toLowerCase().includes(term) || 
                         p.name.toLowerCase().includes(term) ||
-                        (p.supplier && p.supplier.toLowerCase().includes(term))
+                        (p.supplier && p.supplier.toLowerCase().includes(term)) ||
+                        (p.reportedBy && p.reportedBy.toLowerCase().includes(term))
                     );
                 }
 
@@ -673,16 +684,17 @@
             // Manejo del modal
             function openModal(product = null) {
                 if (product) {
-                    modalTitle.textContent = 'Editar producto';
+                    modalTitle.textContent = 'Editar producto faltante';
                     productIdInput.value = product.id;
                     productSkuInput.value = product.sku;
                     productNameInput.value = product.name;
                     productSupplierInput.value = product.supplier || '';
                     missingQuantityInput.value = product.missingQuantity;
+                    reportedByInput.value = product.reportedBy || '';
                     missingStatusInput.value = product.status;
                     missingNotesInput.value = product.notes || '';
                 } else {
-                    modalTitle.textContent = 'Agregar producto';
+                    modalTitle.textContent = 'Agregar producto faltante';
                     missingForm.reset();
                     productIdInput.value = '';
                     missingStatusInput.value = 'unreported';
@@ -789,19 +801,18 @@
                     name: productNameInput.value,
                     supplier: productSupplierInput.value,
                     missingQuantity: parseInt(missingQuantityInput.value),
+                    reportedBy: reportedByInput.value,
                     status: missingStatusInput.value,
                     lastOrderDate: new Date().toISOString().split('T')[0],
                     notes: missingNotesInput.value
                 };
 
                 if (productIdInput.value) {
-                    // Editar producto existente
                     const index = missingProducts.findIndex(p => p.id === productIdInput.value);
                     if (index !== -1) {
                         missingProducts[index] = productData;
                     }
                 } else {
-                    // Agregar nuevo producto
                     missingProducts.push(productData);
                 }
 
