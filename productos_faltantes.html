@@ -609,11 +609,11 @@
                             <button class="btn ${product.status === 'unreported' ? 'btn-warning' : 'btn'}" 
                                     onclick="changeStatus('${product.id}')">
                                 <i class="fas ${product.status === 'unreported' ? 'fa-check-circle' : 'fa-undo'}"></i>
-                                <span class="btn-text">${product.status === 'unreported' ? 'Reportado al Proveedor' : 'Deshacer'}</span>
+                                <span class="btn-text">${product.status === 'unreported' ? 'Reportado' : 'Deshacer'}</span>
                             </button>
                             <button class="btn btn-success" onclick="markAsRestocked('${product.id}')">
                                 <i class="fas fa-check"></i>
-                                <span class="btn-text">Repuesto Por Proveedor</span>
+                                <span class="btn-text">Recibido</span>
                             </button>
                             <button class="btn" onclick="editProduct('${product.id}')">
                                 <i class="fas fa-edit"></i>
