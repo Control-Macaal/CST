@@ -429,7 +429,7 @@
         <header>
             <div class="header-title">
                 <i class="fas fa-exclamation-triangle"></i>
-                <h1>Productos Faltantes</h1>
+                <h1>Faltantes</h1>
             </div>
             <div class="header-actions">
                 <button class="btn" id="addMissingBtn">
@@ -509,7 +509,7 @@
                 </div>
                 <div class="form-group">
                     <label for="reportedBy">Reportado por</label>
-                    <input type="text" class="form-control" id="reportedBy" required placeholder="Tu nombre">
+                    <input type="text" class="form-control" id="reportedBy" required placeholder="usuario">
                 </div>
                 <div class="form-group">
                     <label for="missingStatus">Estado</label>
@@ -520,7 +520,7 @@
                 </div>
                 <div class="form-group">
                     <label for="missingNotes">Notas</label>
-                    <textarea class="form-control" id="missingNotes" rows="3" placeholder="Información adicional..."></textarea>
+                    <textarea class="form-control" id="missingNotes" rows="3" placeholder="agregar notas..."></textarea>
                 </div>
                 <button type="submit" class="btn" style="width: 100%; margin-top: 0.5rem;">
                     <i class="fas fa-save"></i>
@@ -609,11 +609,11 @@
                             <button class="btn ${product.status === 'unreported' ? 'btn-warning' : 'btn'}" 
                                     onclick="changeStatus('${product.id}')">
                                 <i class="fas ${product.status === 'unreported' ? 'fa-check-circle' : 'fa-undo'}"></i>
-                                <span class="btn-text">${product.status === 'unreported' ? 'Reportar' : 'Deshacer'}</span>
+                                <span class="btn-text">${product.status === 'unreported' ? 'Reportado al Proveedor' : 'Deshacer'}</span>
                             </button>
                             <button class="btn btn-success" onclick="markAsRestocked('${product.id}')">
                                 <i class="fas fa-check"></i>
-                                <span class="btn-text">Repuesto</span>
+                                <span class="btn-text">Repuesto Por Proveedor</span>
                             </button>
                             <button class="btn" onclick="editProduct('${product.id}')">
                                 <i class="fas fa-edit"></i>
