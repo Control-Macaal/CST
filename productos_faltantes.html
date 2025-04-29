@@ -378,6 +378,22 @@
             min-height: 80px;
         }
 
+        /* Estilo para la cantidad faltante */
+        .missing-quantity {
+            background-color: rgba(247, 37, 133, 0.15);
+            padding: 0.3rem 0.6rem;
+            border-radius: 12px;
+            font-weight: 700;
+            color: var(--danger);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .missing-quantity i {
+            color: var(--danger);
+        }
+
         /* Mejoras para tablets */
         @media (min-width: 480px) {
             .container {
@@ -537,14 +553,14 @@
     <script>
         // Configuración de Firebase (reemplaza con tus propios datos)
         const firebaseConfig = {
-  apiKey: "AIzaSyCefeYE1rHVxumOYyi311IMIg4vuqujC00",
-  authDomain: "inventario-productos-fal-dfb1d.firebaseapp.com",
-  projectId: "inventario-productos-fal-dfb1d",
-  storageBucket: "inventario-productos-fal-dfb1d.firebasestorage.app",
-  messagingSenderId: "164587710116",
-  appId: "1:164587710116:web:c1a1e3bb8327dbadf76831",
-  measurementId: "G-JGVLWTF44G"
-};
+            apiKey: "AIzaSyCefeYE1rHVxumOYyi311IMIg4vuqujC00",
+            authDomain: "inventario-productos-fal-dfb1d.firebaseapp.com",
+            projectId: "inventario-productos-fal-dfb1d",
+            storageBucket: "inventario-productos-fal-dfb1d.firebasestorage.app",
+            messagingSenderId: "164587710116",
+            appId: "1:164587710116:web:c1a1e3bb8327dbadf76831",
+            measurementId: "G-JGVLWTF44G"
+        };
 
         // Inicializa Firebase
         firebase.initializeApp(firebaseConfig);
@@ -595,8 +611,11 @@
                             <div class="product-name">${product.name}</div>
                             <div class="product-meta">
                                 <span><i class="fas fa-truck"></i> ${product.supplier || 'Sin proveedor'}</span>
-                                <span><i class="fas fa-cubes"></i> Faltan: ${product.missingQuantity}</span>
-                                <span><i class="fas fa-user"></i> Reportado por: ${product.reportedBy || 'No especificado'}</span>
+                                <span class="missing-quantity">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <strong>Faltan: ${product.missingQuantity}</strong>
+                                </span>
+                                <span><i class="fas fa-user"></i> ${product.reportedBy || 'No especificado'}</span>
                                 <span><i class="fas fa-calendar-alt"></i> ${product.lastOrderDate}</span>
                             </div>
                             ${product.notes ? `<div class="product-meta"><i class="fas fa-comment"></i> ${product.notes}</div>` : ''}
@@ -767,6 +786,13 @@
             window.changeStatus = function(id) {
                 const product = missingProducts.find(p => p.id === id);
                 if (product) {
+                    // Mostrar confirmación solo cuando se va a DESHACER (cambiar de reportado a sin reportar)
+                    if (product.status === 'reported') {
+                        if (!confirm('¿Estás seguro que quieres marcar este producto como NO reportado?')) {
+                            return; // Si el usuario cancela, no hacemos nada
+                        }
+                    }
+                    
                     // Cambiar el estado
                     product.status = product.status === 'unreported' ? 'reported' : 'unreported';
                     
