@@ -119,6 +119,10 @@
             background: var(--success);
         }
 
+        .btn-history {
+            background: var(--accent);
+        }
+
         /* Filtros y búsqueda */
         .filters-container {
             display: grid;
@@ -394,6 +398,41 @@
             color: var(--danger);
         }
 
+        /* Historial */
+        .history-item {
+            padding: 0.8rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-time {
+            font-size: 0.7rem;
+            color: var(--text-light);
+        }
+
+        .history-action {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .history-details {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-left: 1.2rem;
+        }
+
+        .history-icon {
+            color: var(--accent);
+        }
+
         /* Mejoras para tablets */
         @media (min-width: 480px) {
             .container {
@@ -448,6 +487,10 @@
                 <h1>Prod. Faltantes</h1>
             </div>
             <div class="header-actions">
+                <button class="btn btn-history" id="historyBtn">
+                    <i class="fas fa-clock"></i>
+                    <span class="btn-text">Historial</span>
+                </button>
                 <button class="btn" id="addMissingBtn">
                     <i class="fas fa-plus"></i>
                     <span class="btn-text">Agregar</span>
@@ -546,6 +589,22 @@
         </div>
     </div>
 
+    <!-- Modal de Historial -->
+    <div class="modal" id="historyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-clock history-icon"></i> Historial de Actividades</h2>
+                <button class="modal-close" id="historyModalClose">&times;</button>
+            </div>
+            <div id="historyContent">
+                <div class="no-results">
+                    <i class="fas fa-clock"></i>
+                    <h3>Cargando historial...</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
@@ -568,6 +627,7 @@
 
         // Datos de la aplicación
         let missingProducts = [];
+        let activityHistory = [];
 
         document.addEventListener('DOMContentLoaded', () => {
             // Elementos del DOM
@@ -578,8 +638,11 @@
             const warningCount = document.getElementById('warningCount');
             const totalCount = document.getElementById('totalCount');
             const addMissingBtn = document.getElementById('addMissingBtn');
+            const historyBtn = document.getElementById('historyBtn');
             const missingModal = document.getElementById('missingModal');
+            const historyModal = document.getElementById('historyModal');
             const modalClose = document.getElementById('modalClose');
+            const historyModalClose = document.getElementById('historyModalClose');
             const modalTitle = document.getElementById('modalTitle');
             const missingForm = document.getElementById('missingForm');
             const productIdInput = document.getElementById('productId');
@@ -590,6 +653,84 @@
             const reportedByInput = document.getElementById('reportedBy');
             const missingStatusInput = document.getElementById('missingStatus');
             const missingNotesInput = document.getElementById('missingNotes');
+            const historyContent = document.getElementById('historyContent');
+
+            // Registrar actividad en el historial
+            function logActivity(action, details, productId = null) {
+                const activity = {
+                    timestamp: new Date(),
+                    action: action,
+                    details: details,
+                    productId: productId,
+                    user: reportedByInput.value || 'Sistema'
+                };
+                
+                activityHistory.unshift(activity); // Agregar al inicio del array
+                
+                // Guardar en Firebase
+                db.collection("inventario").doc("historialActividades")
+                    .set({
+                        activities: firebase.firestore.FieldValue.arrayUnion(activity),
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                
+                return activity;
+            }
+
+            // Mostrar historial de actividades
+            function renderHistory(activities) {
+                if (activities.length === 0) {
+                    historyContent.innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-clock"></i>
+                            <h3>No hay actividades registradas</h3>
+                            <p>Las acciones que realices aparecerán aquí</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                historyContent.innerHTML = activities.map(activity => {
+                    let icon, actionText;
+                    
+                    switch(activity.action) {
+                        case 'add':
+                            icon = 'fa-plus-circle';
+                            actionText = 'Producto agregado';
+                            break;
+                        case 'edit':
+                            icon = 'fa-edit';
+                            actionText = 'Producto editado';
+                            break;
+                        case 'status':
+                            icon = 'fa-exchange-alt';
+                            actionText = 'Cambio de estado';
+                            break;
+                        case 'restock':
+                            icon = 'fa-check-circle';
+                            actionText = 'Producto repuesto';
+                            break;
+                        default:
+                            icon = 'fa-info-circle';
+                            actionText = 'Actividad';
+                    }
+                    
+                    return `
+                        <div class="history-item">
+                            <div class="history-time">
+                                ${activity.timestamp.toLocaleString()}
+                            </div>
+                            <div class="history-action">
+                                <i class="fas ${icon}"></i>
+                                ${actionText} - ${activity.user}
+                            </div>
+                            <div class="history-details">
+                                ${activity.details}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
 
             // Mostrar productos
             function renderProducts(products) {
@@ -722,8 +863,15 @@
                 document.body.style.overflow = 'hidden';
             }
 
+            function openHistoryModal() {
+                renderHistory(activityHistory);
+                historyModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+
             function closeModal() {
                 missingModal.style.display = 'none';
+                historyModal.style.display = 'none';
                 document.body.style.overflow = '';
             }
 
@@ -753,6 +901,29 @@
                     });
             }
 
+            // Cargar historial desde Firestore
+            function loadHistory() {
+                db.collection("inventario").doc("historialActividades")
+                    .get()
+                    .then((doc) => {
+                        if (doc.exists) {
+                            activityHistory = doc.data().activities || [];
+                            // Ordenar por timestamp (más reciente primero)
+                            activityHistory.sort((a, b) => {
+                                const dateA = a.timestamp.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
+                                const dateB = b.timestamp.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
+                                return dateB - dateA;
+                            });
+                        } else {
+                            db.collection("inventario").doc("historialActividades")
+                                .set({ activities: [] });
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error al cargar historial:", error);
+                    });
+            }
+
             // Guardar productos en Firestore
             function saveProducts() {
                 db.collection("inventario").doc("productosFaltantes")
@@ -772,6 +943,10 @@
             // Funciones globales para los botones
             window.markAsRestocked = function(id) {
                 if (confirm('¿Marcar este producto como repuesto?')) {
+                    const product = missingProducts.find(p => p.id === id);
+                    if (product) {
+                        logActivity('restock', `Producto ${product.name} (SKU: ${product.sku}) marcado como repuesto`, id);
+                    }
                     missingProducts = missingProducts.filter(p => p.id !== id);
                     saveProducts();
                     filterProducts();
@@ -793,8 +968,15 @@
                         }
                     }
                     
+                    // Registrar la actividad antes de cambiar el estado
+                    const oldStatus = product.status;
+                    const newStatus = oldStatus === 'unreported' ? 'reported' : 'unreported';
+                    logActivity('status', 
+                        `Cambio de estado de "${getStatusText(oldStatus)}" a "${getStatusText(newStatus)}" para producto ${product.name} (SKU: ${product.sku})`, 
+                        product.id);
+                    
                     // Cambiar el estado
-                    product.status = product.status === 'unreported' ? 'reported' : 'unreported';
+                    product.status = newStatus;
                     
                     // Actualizar en Firebase
                     db.collection("inventario").doc("productosFaltantes")
@@ -816,11 +998,14 @@
             searchInput.addEventListener('input', filterProducts);
             statusFilter.addEventListener('change', filterProducts);
             addMissingBtn.addEventListener('click', () => openModal());
+            historyBtn.addEventListener('click', openHistoryModal);
             modalClose.addEventListener('click', closeModal);
+            historyModalClose.addEventListener('click', closeModal);
 
             missingForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 
+                const isEdit = !!productIdInput.value;
                 const productData = {
                     id: productIdInput.value || Date.now().toString(),
                     sku: productSkuInput.value,
@@ -833,12 +1018,18 @@
                     notes: missingNotesInput.value
                 };
 
-                if (productIdInput.value) {
+                if (isEdit) {
                     const index = missingProducts.findIndex(p => p.id === productIdInput.value);
                     if (index !== -1) {
+                        logActivity('edit', 
+                            `Producto editado: ${productData.name} (SKU: ${productData.sku})`, 
+                            productData.id);
                         missingProducts[index] = productData;
                     }
                 } else {
+                    logActivity('add', 
+                        `Nuevo producto agregado: ${productData.name} (SKU: ${productData.sku})`, 
+                        productData.id);
                     missingProducts.push(productData);
                 }
 
@@ -854,6 +1045,12 @@
                 }
             });
 
+            historyModal.addEventListener('click', (e) => {
+                if (e.target === historyModal) {
+                    closeModal();
+                }
+            });
+
             // Escuchar cambios en tiempo real
             db.collection("inventario").doc("productosFaltantes")
                 .onSnapshot((doc) => {
@@ -864,8 +1061,22 @@
                     }
                 });
 
-            // Cargar productos inicialmente
+            db.collection("inventario").doc("historialActividades")
+                .onSnapshot((doc) => {
+                    if (doc.exists) {
+                        activityHistory = doc.data().activities || [];
+                        // Ordenar por timestamp (más reciente primero)
+                        activityHistory.sort((a, b) => {
+                            const dateA = a.timestamp.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
+                            const dateB = b.timestamp.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
+                            return dateB - dateA;
+                        });
+                    }
+                });
+
+            // Cargar datos inicialmente
             loadProducts();
+            loadHistory();
         });
     </script>
 </body>
