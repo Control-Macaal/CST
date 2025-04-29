@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Control de Productos Faltantes</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -20,9 +20,9 @@
             --danger: #f72585;
             --warning: #f8961e;
             --success: #4cc9f0;
-            --border-radius: 12px;
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --border-radius: 8px;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            --transition: all 0.2s ease;
         }
 
         * {
@@ -36,65 +36,71 @@
             font-family: 'Inter', sans-serif;
             background-color: var(--light);
             color: var(--text);
-            padding: 1rem;
+            padding: 0.5rem;
             min-height: 100vh;
             -webkit-text-size-adjust: 100%;
+            touch-action: manipulation;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 100%;
             margin: 0 auto;
             width: 100%;
+            padding: 0.5rem;
         }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: 0.75rem;
         }
 
         .header-title {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.5rem;
             flex: 1;
-            min-width: 200px;
+            min-width: 0;
         }
 
         .header-title h1 {
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             white-space: nowrap;
             color: var(--dark);
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .header-actions {
             display: flex;
-            gap: 0.75rem;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
         .btn {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 0.75rem 1rem;
+            padding: 0.6rem 0.8rem;
             border-radius: var(--border-radius);
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
             transition: var(--transition);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             text-decoration: none;
+            white-space: nowrap;
         }
 
         .btn:hover {
             background: var(--primary-hover);
-            transform: translateY(-2px);
+            transform: translateY(-1px);
         }
 
         .btn-danger {
@@ -112,11 +118,11 @@
         /* Filtros y búsqueda */
         .filters-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
             background: var(--card-bg);
-            padding: 1.25rem;
+            padding: 0.75rem;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
         }
@@ -128,10 +134,10 @@
 
         .search-input {
             width: 100%;
-            padding: 0.75rem 0.75rem 0.75rem 3rem;
+            padding: 0.6rem 0.6rem 0.6rem 2.5rem;
             border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: var(--border-radius);
-            font-size: 1rem;
+            font-size: 0.9rem;
             transition: var(--transition);
             box-shadow: var(--shadow);
             -webkit-appearance: none;
@@ -146,17 +152,17 @@
 
         .search-icon {
             position: absolute;
-            left: 1rem;
+            left: 0.8rem;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-light);
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
         /* Resultados */
         #results {
             display: grid;
-            gap: 0.75rem;
+            gap: 0.6rem;
             width: 100%;
         }
 
@@ -164,34 +170,32 @@
             background: var(--card-bg);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
-            padding: 1.25rem;
+            padding: 0.8rem;
             transition: var(--transition);
             border: 1px solid rgba(0, 0, 0, 0.05);
             display: grid;
-            grid-template-columns: auto 1fr auto;
-            align-items: center;
-            gap: 1.5rem;
+            grid-template-columns: 1fr;
+            gap: 0.8rem;
         }
 
         .result-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            border-color: rgba(67, 97, 238, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .product-info {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: 0.4rem;
         }
 
         .sku {
             font-weight: 700;
             color: var(--primary);
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             background: rgba(67, 97, 238, 0.1);
-            padding: 0.25rem 0.5rem;
-            border-radius: 6px;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
             display: inline-block;
             width: fit-content;
         }
@@ -199,34 +203,39 @@
         .product-name {
             font-weight: 500;
             color: var(--dark);
+            font-size: 0.95rem;
         }
 
         .product-meta {
             display: flex;
-            gap: 1rem;
-            font-size: 0.85rem;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            font-size: 0.8rem;
             color: var(--text-light);
         }
 
         .product-meta span {
             display: flex;
             align-items: center;
-            gap: 0.25rem;
+            gap: 0.2rem;
         }
 
         .product-actions {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.4rem;
+            justify-content: flex-end;
+            flex-wrap: wrap;
         }
 
         .status-badge {
-            padding: 0.35rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 16px;
+            font-size: 0.7rem;
             font-weight: 600;
             display: inline-flex;
             align-items: center;
-            gap: 0.25rem;
+            gap: 0.2rem;
+            margin-left: auto;
         }
 
         .status-unreported {
@@ -241,14 +250,14 @@
 
         .no-results {
             text-align: center;
-            padding: 2rem;
+            padding: 1.5rem;
             color: var(--text-light);
             grid-column: 1 / -1;
         }
 
         .no-results i {
-            font-size: 2rem;
-            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            margin-bottom: 0.8rem;
             color: var(--text-light);
             opacity: 0.5;
         }
@@ -256,29 +265,29 @@
         /* Stats */
         .stats-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
         }
 
         .stat-card {
             background: var(--card-bg);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
-            padding: 1.25rem;
+            padding: 0.8rem;
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: 0.4rem;
         }
 
         .stat-value {
-            font-size: 1.75rem;
+            font-size: 1.4rem;
             font-weight: 700;
             color: var(--dark);
         }
 
         .stat-label {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             color: var(--text-light);
         }
 
@@ -302,24 +311,35 @@
             z-index: 1000;
             justify-content: center;
             align-items: center;
+            padding: 0.5rem;
         }
 
         .modal-content {
             background: white;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
-            width: 90%;
-            max-width: 500px;
-            padding: 1.5rem;
+            width: 100%;
+            max-width: 100%;
+            padding: 1rem;
             max-height: 90vh;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 0.5rem 0;
+            z-index: 1;
+        }
+
+        .modal-header h2 {
+            font-size: 1.2rem;
         }
 
         .modal-close {
@@ -328,61 +348,74 @@
             font-size: 1.5rem;
             cursor: pointer;
             color: var(--text-light);
+            padding: 0.2rem;
         }
 
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 0.8rem;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
             font-weight: 500;
+            font-size: 0.9rem;
         }
 
         .form-control {
             width: 100%;
-            padding: 0.75rem;
+            padding: 0.6rem;
             border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: var(--border-radius);
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
 
-        /* Mejoras para móviles */
-        @media (max-width: 768px) {
-            body {
+        textarea.form-control {
+            min-height: 80px;
+        }
+
+        /* Mejoras para tablets */
+        @media (min-width: 480px) {
+            .container {
                 padding: 0.75rem;
             }
             
-            .header-title h1 {
-                font-size: 1.3rem;
-            }
-            
             .result-item {
-                grid-template-columns: 1fr;
-                gap: 1rem;
+                grid-template-columns: auto 1fr auto;
+                align-items: center;
             }
             
             .product-actions {
-                justify-content: flex-end;
+                flex-wrap: nowrap;
+            }
+            
+            .modal-content {
+                max-width: 450px;
             }
         }
 
-        @media (max-width: 480px) {
-            .header-title {
-                min-width: 100%;
+        /* Mejoras para pantallas grandes */
+        @media (min-width: 768px) {
+            .filters-container {
+                grid-template-columns: 1fr auto;
             }
             
-            .search-icon {
-                left: 0.85rem;
+            .header-title h1 {
+                font-size: 1.5rem;
             }
             
-            .stats-container {
-                grid-template-columns: 1fr;
+            .btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
             }
-            
-            .product-actions {
-                flex-direction: column;
+        }
+
+        /* Evitar zoom en inputs en iOS */
+        @media screen and (-webkit-min-device-pixel-ratio:0) {
+            select,
+            textarea,
+            input {
+                font-size: 16px !important;
             }
         }
     </style>
@@ -397,11 +430,11 @@
             <div class="header-actions">
                 <button class="btn" id="addMissingBtn">
                     <i class="fas fa-plus"></i>
-                    Agregar
+                    <span class="btn-text">Agregar</span>
                 </button>
                 <a href="index.html" class="btn">
                     <i class="fas fa-arrow-left"></i>
-                    Volver
+                    <span class="btn-text">Volver</span>
                 </a>
             </div>
         </header>
@@ -414,7 +447,7 @@
             </div>
             <div class="stat-card stat-warning">
                 <div class="stat-value" id="warningCount">0</div>
-                <div class="stat-label">Reportado a Proveedor</div>
+                <div class="stat-label">Reportado</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="totalCount">0</div>
@@ -429,9 +462,9 @@
                 <input type="text" class="search-input" id="search" placeholder="Buscar por SKU, nombre o proveedor..." autofocus>
             </div>
             <select class="form-control" id="statusFilter">
-                <option value="all">Todos los estados</option>
+                <option value="all">Todos</option>
                 <option value="unreported">Sin Reportar</option>
-                <option value="reported">Reportado a Proveedor</option>
+                <option value="reported">Reportado</option>
             </select>
         </div>
 
@@ -449,7 +482,7 @@
     <div class="modal" id="missingModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modalTitle">Agregar producto faltante</h2>
+                <h2 id="modalTitle">Agregar producto</h2>
                 <button class="modal-close" id="modalClose">&times;</button>
             </div>
             <form id="missingForm">
@@ -481,7 +514,7 @@
                     <label for="missingNotes">Notas</label>
                     <textarea class="form-control" id="missingNotes" rows="3"></textarea>
                 </div>
-                <button type="submit" class="btn" style="width: 100%; margin-top: 1rem;">
+                <button type="submit" class="btn" style="width: 100%; margin-top: 0.5rem;">
                     <i class="fas fa-save"></i>
                     Guardar
                 </button>
@@ -566,15 +599,15 @@
                             <button class="btn ${product.status === 'unreported' ? 'btn-warning' : 'btn'}" 
                                     onclick="changeStatus('${product.id}')">
                                 <i class="fas ${product.status === 'unreported' ? 'fa-check-circle' : 'fa-undo'}"></i>
-                                ${product.status === 'unreported' ? 'Reportado' : 'Deshacer'}
+                                <span class="btn-text">${product.status === 'unreported' ? 'Reportar' : 'Deshacer'}</span>
                             </button>
                             <button class="btn btn-success" onclick="markAsRestocked('${product.id}')">
                                 <i class="fas fa-check"></i>
-                                Repuesto
+                                <span class="btn-text">Repuesto</span>
                             </button>
                             <button class="btn" onclick="editProduct('${product.id}')">
                                 <i class="fas fa-edit"></i>
-                                Editar
+                                <span class="btn-text">Editar</span>
                             </button>
                         </div>
                     </div>
@@ -602,7 +635,7 @@
             function getStatusText(status) {
                 return {
                     unreported: 'Sin Reportar',
-                    reported: 'Reportado a Proveedor'
+                    reported: 'Reportado'
                 }[status] || 'Desconocido';
             }
 
@@ -640,7 +673,7 @@
             // Manejo del modal
             function openModal(product = null) {
                 if (product) {
-                    modalTitle.textContent = 'Editar producto faltante';
+                    modalTitle.textContent = 'Editar producto';
                     productIdInput.value = product.id;
                     productSkuInput.value = product.sku;
                     productNameInput.value = product.name;
@@ -649,16 +682,18 @@
                     missingStatusInput.value = product.status;
                     missingNotesInput.value = product.notes || '';
                 } else {
-                    modalTitle.textContent = 'Agregar producto faltante';
+                    modalTitle.textContent = 'Agregar producto';
                     missingForm.reset();
                     productIdInput.value = '';
                     missingStatusInput.value = 'unreported';
                 }
                 missingModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
             }
 
             function closeModal() {
                 missingModal.style.display = 'none';
+                document.body.style.overflow = '';
             }
 
             // Cargar productos desde Firestore
