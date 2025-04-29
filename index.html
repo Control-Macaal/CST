@@ -315,32 +315,33 @@
             transform: scale(0.98);
         }
 
-        /* Efecto Ripple (Onda) para botones */
-        .ripple {
-            position: absolute;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.4);
-            transform: scale(0);
-            animation: ripple 0.6s linear;
-            pointer-events: none;
-        }
+        /* Efecto Ripple (Onda) para botones - Solo desktop */
+        @media (hover: hover) {
+            .ripple {
+                position: absolute;
+                border-radius: 50%;
+                background-color: rgba(255, 255, 255, 0.4);
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                pointer-events: none;
+            }
 
-        @keyframes ripple {
-            to {
-                transform: scale(2.5);
-                opacity: 0;
+            @keyframes ripple {
+                to {
+                    transform: scale(2.5);
+                    opacity: 0;
+                }
             }
         }
 
-        /* Efecto hover para dispositivos con mouse */
-        @media (hover: hover) {
-            .btn:hover {
-                filter: brightness(1.05);
-                transform: translateY(-1px);
+        /* Desactivar efectos en móviles */
+        @media (hover: none) {
+            .ripple {
+                display: none !important;
             }
             
             .btn:active {
-                transform: translateY(1px);
+                transform: none !important;
             }
         }
 
@@ -665,7 +666,23 @@
             </button>
         </header>
 
-        <main class="app-grid">
+        <main id="appGrid" class="app-grid">
+            <!-- Card para Bodega (oculta inicialmente) -->
+            <div id="bodegaCard" class="card" style="display: none;">
+                <div class="card-header">
+                    <i class="fas fa-warehouse"></i>
+                    <h2>Bodega</h2>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group">
+                        <button onclick="window.open('productos_faltantes.html', '_self')" class="btn btn-secondary">
+                            <i class="fas fa-boxes"></i>
+                            Productos Faltantes
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Card para Crear Registros -->
             <div class="card">
                 <div class="card-header">
@@ -729,22 +746,6 @@
                         <button onclick="window.open('catalogos.html', '_self')" class="btn btn-secondary">
                             <i class="fas fa-book"></i>
                             Catálogos de Productos
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Nueva Card para Bodega (solo visible con contraseña bodega) -->
-            <div id="bodegaCard" class="card" style="display: none;">
-                <div class="card-header">
-                    <i class="fas fa-warehouse"></i>
-                    <h2>Bodega</h2>
-                </div>
-                <div class="card-body">
-                    <div class="btn-group">
-                        <button onclick="window.open('productos_faltantes.html', '_self')" class="btn btn-secondary">
-                            <i class="fas fa-boxes"></i>
-                            Productos Faltantes
                         </button>
                     </div>
                 </div>
@@ -856,8 +857,13 @@
             }, 3000);
         }
 
-        // Función para crear efecto ripple en los botones
+        // Función para crear efecto ripple en los botones (solo desktop)
         function createRipple(event) {
+            // Verificar si es dispositivo táctil
+            if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+                return; // No aplicar efecto en móviles
+            }
+            
             const button = event.currentTarget;
             
             // Crear elemento ripple
@@ -868,13 +874,9 @@
             const diameter = Math.max(button.clientWidth, button.clientHeight);
             const radius = diameter / 2;
             
-            // Para eventos táctiles
-            const clientX = event.clientX || event.touches[0].clientX;
-            const clientY = event.clientY || event.touches[0].clientY;
-            
             ripple.style.width = ripple.style.height = `${diameter}px`;
-            ripple.style.left = `${clientX - button.getBoundingClientRect().left - radius}px`;
-            ripple.style.top = `${clientY - button.getBoundingClientRect().top - radius}px`;
+            ripple.style.left = `${event.clientX - button.getBoundingClientRect().left - radius}px`;
+            ripple.style.top = `${event.clientY - button.getBoundingClientRect().top - radius}px`;
             
             // Añadir ripple al botón
             button.appendChild(ripple);
@@ -893,10 +895,13 @@
                 if (USER_PERMISSIONS[auth]) {
                     currentUserRole = role;
                     
-                    // Mostrar/ocultar card de bodega
+                    // Mostrar/ocultar y reordenar la card de bodega
+                    const appGrid = document.getElementById('appGrid');
                     const bodegaCard = document.getElementById('bodegaCard');
+                    
                     if (auth.toLowerCase() === 'bodega') {
                         bodegaCard.style.display = 'block';
+                        appGrid.insertBefore(bodegaCard, appGrid.firstChild);
                     } else {
                         bodegaCard.style.display = 'none';
                     }
@@ -909,12 +914,11 @@
             // Configurar evento para el botón de logout
             document.getElementById('logoutBtn').addEventListener('click', logout);
 
-            // Aplicar efecto ripple a todos los botones
+            // Aplicar efecto ripple a todos los botones (solo desktop)
             document.querySelectorAll('.btn').forEach(button => {
-    if (!('ontouchstart' in window || navigator.maxTouchPoints > 0)) {
-        button.addEventListener('click', createRipple);
-    }
-});
+                button.addEventListener('click', createRipple);
+            });
+        });
 
         // Función para verificar login inicial
         function checkLogin() {
@@ -940,10 +944,14 @@
                     role: currentUserRole
                 }));
                 
-                // Mostrar/ocultar card de bodega
+                // Obtener elementos del DOM
+                const appGrid = document.getElementById('appGrid');
                 const bodegaCard = document.getElementById('bodegaCard');
+                
+                // Mostrar/ocultar y reordenar la card de bodega
                 if (password.toLowerCase() === 'bodega') {
                     bodegaCard.style.display = 'block';
+                    appGrid.insertBefore(bodegaCard, appGrid.firstChild);
                 } else {
                     bodegaCard.style.display = 'none';
                 }
