@@ -404,7 +404,7 @@
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             display: flex;
             flex-direction: column;
-            gap: 0.3rem;
+            gap: 0.4rem;
         }
 
         .history-item:last-child {
@@ -412,8 +412,17 @@
         }
 
         .history-time {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .history-time i {
+            color: var(--text-light);
+            font-size: 0.7rem;
         }
 
         .history-action {
@@ -424,13 +433,32 @@
         }
 
         .history-details {
-            font-size: 0.8rem;
-            color: var(--text-light);
+            font-size: 0.85rem;
+            color: var(--text);
             margin-left: 1.2rem;
+            line-height: 1.4;
         }
 
         .history-icon {
             color: var(--accent);
+        }
+
+        .history-user {
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .status-change {
+            font-weight: 600;
+            color: var(--dark);
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .history-details strong {
+            color: var(--primary);
+            font-weight: 700;
         }
 
         /* Mejoras para tablets */
@@ -465,6 +493,14 @@
             
             .btn {
                 padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .history-item {
+                padding: 1rem;
+            }
+
+            .history-details {
                 font-size: 0.9rem;
             }
         }
@@ -610,12 +646,12 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // Configuración de Firebase (reemplaza con tus propios datos)
+        // Configuración de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCefeYE1rHVxumOYyi311IMIg4vuqujC00",
             authDomain: "inventario-productos-fal-dfb1d.firebaseapp.com",
             projectId: "inventario-productos-fal-dfb1d",
-            storageBucket: "inventario-productos-fal-dfb1d.firebasestorage.app",
+            storageBucket: "inventario-productos-fal-dfb1d.appspot.com",
             messagingSenderId: "164587710116",
             appId: "1:164587710116:web:c1a1e3bb8327dbadf76831",
             measurementId: "G-JGVLWTF44G"
@@ -665,7 +701,7 @@
                     user: reportedByInput.value || 'Sistema'
                 };
                 
-                activityHistory.unshift(activity); // Agregar al inicio del array
+                activityHistory.unshift(activity);
                 
                 // Guardar en Firebase
                 db.collection("inventario").doc("historialActividades")
@@ -692,23 +728,36 @@
 
                 historyContent.innerHTML = activities.map(activity => {
                     let icon, actionText;
+                    let details = activity.details;
+                    
+                    // Formatear fecha y hora
+                    const dateObj = activity.timestamp.toDate ? activity.timestamp.toDate() : new Date(activity.timestamp);
+                    const formattedDate = dateObj.toLocaleDateString('es-ES');
+                    const formattedTime = dateObj.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
                     
                     switch(activity.action) {
                         case 'add':
                             icon = 'fa-plus-circle';
                             actionText = 'Producto agregado';
+                            details = details.replace(/SKU: (\w+)/, 'SKU: <strong>$1</strong>');
                             break;
                         case 'edit':
                             icon = 'fa-edit';
                             actionText = 'Producto editado';
+                            details = details.replace(/SKU: (\w+)/, 'SKU: <strong>$1</strong>');
                             break;
                         case 'status':
                             icon = 'fa-exchange-alt';
                             actionText = 'Cambio de estado';
+                            details = details.replace(
+                                /Cambio de estado: (.*) \| De "(.*)" a "(.*)" \| SKU: (\w+)/,
+                                '$1<br>De <span class="status-change">$2</span> a <span class="status-change">$3</span><br>SKU: <strong>$4</strong>'
+                            );
                             break;
                         case 'restock':
                             icon = 'fa-check-circle';
                             actionText = 'Producto repuesto';
+                            details = details.replace(/SKU: (\w+)/, 'SKU: <strong>$1</strong>');
                             break;
                         default:
                             icon = 'fa-info-circle';
@@ -718,14 +767,15 @@
                     return `
                         <div class="history-item">
                             <div class="history-time">
-                                ${activity.timestamp.toLocaleString()}
+                                <i class="far fa-calendar-alt"></i> ${formattedDate}
+                                <i class="far fa-clock" style="margin-left: 10px;"></i> ${formattedTime}
                             </div>
                             <div class="history-action">
                                 <i class="fas ${icon}"></i>
-                                ${actionText} - ${activity.user}
+                                ${actionText} - <span class="history-user">${activity.user}</span>
                             </div>
                             <div class="history-details">
-                                ${activity.details}
+                                ${details}
                             </div>
                         </div>
                     `;
@@ -783,7 +833,6 @@
                     </div>
                 `).join('');
 
-                // Actualizar estadísticas
                 updateStats();
             }
 
@@ -908,7 +957,6 @@
                     .then((doc) => {
                         if (doc.exists) {
                             activityHistory = doc.data().activities || [];
-                            // Ordenar por timestamp (más reciente primero)
                             activityHistory.sort((a, b) => {
                                 const dateA = a.timestamp.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
                                 const dateB = b.timestamp.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
@@ -945,7 +993,7 @@
                 if (confirm('¿Marcar este producto como repuesto?')) {
                     const product = missingProducts.find(p => p.id === id);
                     if (product) {
-                        logActivity('restock', `Producto ${product.name} (SKU: ${product.sku}) marcado como repuesto`, id);
+                        logActivity('restock', `Producto repuesto: ${product.name} | SKU: ${product.sku}`, id);
                     }
                     missingProducts = missingProducts.filter(p => p.id !== id);
                     saveProducts();
@@ -961,35 +1009,28 @@
             window.changeStatus = function(id) {
                 const product = missingProducts.find(p => p.id === id);
                 if (product) {
-                    // Mostrar confirmación solo cuando se va a DESHACER (cambiar de reportado a sin reportar)
                     if (product.status === 'reported') {
                         if (!confirm('¿Estás seguro que quieres marcar este producto como NO reportado?')) {
-                            return; // Si el usuario cancela, no hacemos nada
+                            return;
                         }
                     }
                     
-                    // Registrar la actividad antes de cambiar el estado
                     const oldStatus = product.status;
                     const newStatus = oldStatus === 'unreported' ? 'reported' : 'unreported';
+                    
                     logActivity('status', 
-                        `Cambio de estado de "${getStatusText(oldStatus)}" a "${getStatusText(newStatus)}" para producto ${product.name} (SKU: ${product.sku})`, 
+                        `Cambio de estado: ${product.name} | De "${getStatusText(oldStatus)}" a "${getStatusText(newStatus)}" | SKU: ${product.sku}`, 
                         product.id);
                     
-                    // Cambiar el estado
                     product.status = newStatus;
                     
-                    // Actualizar en Firebase
                     db.collection("inventario").doc("productosFaltantes")
                         .set({
                             products: missingProducts,
                             lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
                         })
                         .then(() => {
-                            console.log("Estado actualizado correctamente");
                             filterProducts();
-                        })
-                        .catch((error) => {
-                            console.error("Error al actualizar estado:", error);
                         });
                 }
             };
@@ -1022,13 +1063,13 @@
                     const index = missingProducts.findIndex(p => p.id === productIdInput.value);
                     if (index !== -1) {
                         logActivity('edit', 
-                            `Producto editado: ${productData.name} (SKU: ${productData.sku})`, 
+                            `Producto editado: ${productData.name} | SKU: ${productData.sku}`, 
                             productData.id);
                         missingProducts[index] = productData;
                     }
                 } else {
                     logActivity('add', 
-                        `Nuevo producto agregado: ${productData.name} (SKU: ${productData.sku})`, 
+                        `Nuevo producto agregado: ${productData.name} | SKU: ${productData.sku}`, 
                         productData.id);
                     missingProducts.push(productData);
                 }
@@ -1065,7 +1106,6 @@
                 .onSnapshot((doc) => {
                     if (doc.exists) {
                         activityHistory = doc.data().activities || [];
-                        // Ordenar por timestamp (más reciente primero)
                         activityHistory.sort((a, b) => {
                             const dateA = a.timestamp.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
                             const dateB = b.timestamp.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
