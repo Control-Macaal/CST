@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Comparación SKUs Diferentes</title>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔄</text></svg>">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Firebase SDK (solo Firestore) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <style>
+        /* [Tus estilos CSS existentes permanecen igual] */
+        :root {
+            --primary: #4361ee;
+            --primary-hover: #3a56d4;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --dark: #1b263b;
+            --light: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #2b2d42;
+            --text-light: #8d99ae;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --success: #4cc9f0;
+            --border-radius: 8px;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light);
+            color: var(--text);
+            padding: 0.5rem;
+            min-height: 100vh;
+            -webkit-text-size-adjust: 100%;
+            touch-action: manipulation;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            width: 100%;
+            padding: 0.5rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .header-title h1 {
+            font-size: 1.25rem;
+            white-space: nowrap;
+            color: var(--dark);
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.6rem 0.8rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: var(--transition);
+            font-size: 0.85rem;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+        }
+
+        .btn-success {
+            background: var(--success);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+        }
+
+        /* Formularios */
+        .form-container {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 0.8rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+        }
+
+        /* Resultados */
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .comparison-container {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        .price-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1rem;
+        }
+
+        .price-card h3 {
+            margin-bottom: 1rem;
+            color: var(--dark);
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding-bottom: 0.5rem;
+        }
+
+        .price-info {
+            margin-bottom: 0.5rem;
+        }
+
+        .price-info span {
+            font-weight: 500;
+        }
+
+        .difference-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .difference-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 0.5rem 0;
+        }
+
+        .positive {
+            color: var(--success);
+        }
+
+        .negative {
+            color: var(--danger);
+        }
+
+        .neutral {
+            color: var(--text);
+        }
+
+        /* Lista de comparaciones */
+        .comparison-list {
+            margin-top: 2rem;
+        }
+
+        .comparison-item {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .comparison-item {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        .comparison-item-header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .comparison-item-date {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .sku-match {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            padding: 0.5rem;
+            background: rgba(67, 97, 238, 0.1);
+            border-radius: var(--border-radius);
+        }
+
+        .sku-match i {
+            color: var(--primary);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+        }
+
+        .no-results i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--text-light);
+        }
+
+        /* Modal para lista de comparaciones */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        /* Grupo de comparaciones */
+        .group-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .group-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--dark);
+        }
+
+        .group-date {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .group-comparisons {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        /* Modal para nuevo grupo */
+        .group-form-container {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Mejoras para tablets */
+        @media (min-width: 480px) {
+            .container {
+                padding: 0.75rem;
+            }
+            
+            .header-title h1 {
+                font-size: 1.5rem;
+            }
+            
+            .btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .comparison-item {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        .price-card, .difference-card {
+            transition: transform 0.2s ease;
+        }
+
+        .price-card:hover, .difference-card:hover {
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-title">
+                <i class="fas fa-exchange-alt"></i>
+                <h1>Comparación SKUs Diferentes</h1>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-success" id="groupComparisonBtn">
+                    <i class="fas fa-layer-group"></i>
+                    <span class="btn-text">Grupo Comparaciones</span>
+                </button>
+                <button class="btn" id="newComparisonBtn">
+                    <i class="fas fa-plus"></i>
+                    <span class="btn-text">Nueva Comparación</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Formulario para nueva comparación -->
+        <div class="form-container" id="comparisonForm">
+            <h2>Comparar SKUs Diferentes</h2>
+            
+            <!-- Producto que debería haberse vendido -->
+            <h3><i class="fas fa-box"></i> Producto Original</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="originalSku">SKU</label>
+                    <input type="text" class="form-control" id="originalSku" required placeholder="Ej: SKU-12345">
+                </div>
+                <div class="form-group">
+                    <label for="originalName">Nombre</label>
+                    <input type="text" class="form-control" id="originalName" required placeholder="Nombre del producto">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="originalQuantity">Cantidad</label>
+                    <input type="number" class="form-control" id="originalQuantity" min="1" value="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="originalPrice">Precio Unitario (Q)</label>
+                    <input type="number" class="form-control" id="originalPrice" step="0.01" min="0" required placeholder="0.00">
+                </div>
+            </div>
+            
+            <!-- Producto que se vendió realmente -->
+            <h3><i class="fas fa-cash-register"></i> Producto Vendido</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="soldSku">SKU</label>
+                    <input type="text" class="form-control" id="soldSku" required placeholder="Ej: SKU-67890">
+                </div>
+                <div class="form-group">
+                    <label for="soldName">Nombre</label>
+                    <input type="text" class="form-control" id="soldName" required placeholder="Nombre del producto">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="soldQuantity">Cantidad</label>
+                    <input type="number" class="form-control" id="soldQuantity" min="1" value="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="soldPrice">Precio Unitario (Q)</label>
+                    <input type="number" class="form-control" id="soldPrice" step="0.01" min="0" required placeholder="0.00">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <button type="button" class="btn" id="calculateBtn">
+                    <i class="fas fa-calculator"></i>
+                    Calcular Diferencia
+                </button>
+                <button type="button" class="btn btn-warning" id="clearFormBtn">
+                    <i class="fas fa-eraser"></i>
+                    Limpiar
+                </button>
+            </div>
+        </div>
+
+        <!-- Resultado de la comparación -->
+        <div class="comparison-container" id="currentComparison" style="display: none;">
+            <div class="price-card">
+                <h3><i class="fas fa-box"></i> Producto Original</h3>
+                <div class="price-info">
+                    <span>SKU:</span> <span id="compOriginalSku"></span>
+                </div>
+                <div class="price-info">
+                    <span>Nombre:</span> <span id="compOriginalName"></span>
+                </div>
+                <div class="price-info">
+                    <span>Cantidad:</span> <span id="compOriginalQuantity"></span>
+                </div>
+                <div class="price-info">
+                    <span>Precio Unitario:</span> Q<span id="compOriginalPrice"></span>
+                </div>
+                <div class="price-info">
+                    <span>Precio Total:</span> Q<span id="compOriginalTotal"></span>
+                </div>
+            </div>
+            
+            <div class="price-card">
+                <h3><i class="fas fa-cash-register"></i> Producto Vendido</h3>
+                <div class="price-info">
+                    <span>SKU:</span> <span id="compSoldSku"></span>
+                </div>
+                <div class="price-info">
+                    <span>Nombre:</span> <span id="compSoldName"></span>
+                </div>
+                <div class="price-info">
+                    <span>Cantidad:</span> <span id="compSoldQuantity"></span>
+                </div>
+                <div class="price-info">
+                    <span>Precio Unitario:</span> Q<span id="compSoldPrice"></span>
+                </div>
+                <div class="price-info">
+                    <span>Precio Total:</span> Q<span id="compSoldTotal"></span>
+                </div>
+            </div>
+            
+            <div class="difference-card">
+                <h3><i class="fas fa-balance-scale"></i> Diferencia de Precio</h3>
+                <div class="sku-match">
+                    <i class="fas fa-random"></i>
+                    <span>Se vendió <strong id="soldSkuDisplay"></strong> por <strong id="originalSkuDisplay"></strong></span>
+                </div>
+                <div class="price-info">
+                    <span>Diferencia Unitario:</span> Q<span id="unitDifference"></span>
+                </div>
+                <div class="price-info">
+                    <span>Diferencia Total:</span>
+                </div>
+                <div class="difference-value" id="totalDifference"></div>
+                <div class="price-info">
+                    <span>Porcentaje:</span> <span id="percentageDifference"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de comparaciones anteriores -->
+        <div class="comparison-list">
+            <h2><i class="fas fa-history"></i> Historial de Comparaciones</h2>
+            <div id="comparisonsList">
+                <div class="no-results">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>No hay comparaciones registradas</h3>
+                    <p>Realiza tu primera comparación de SKUs</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para nuevo grupo de comparaciones -->
+    <div class="modal" id="groupModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Nuevo Grupo de Comparaciones</h2>
+                <button class="close-modal" id="closeGroupModal">&times;</button>
+            </div>
+            <div class="group-form-container">
+                <div class="form-group">
+                    <label for="groupName">Nombre del Grupo</label>
+                    <input type="text" class="form-control" id="groupName" placeholder="Ej: Comparación Mayo 2023" required>
+                </div>
+                <div class="form-group">
+                    <label for="groupDescription">Descripción (Opcional)</label>
+                    <textarea class="form-control" id="groupDescription" rows="2" placeholder="Agrega una descripción para este grupo"></textarea>
+                </div>
+                
+                <h3 style="margin-top: 1.5rem;">Comparaciones en este grupo</h3>
+                <div id="groupComparisonsList" style="margin-top: 1rem;">
+                    <div class="no-results" style="padding: 1rem;">
+                        <i class="fas fa-info-circle"></i>
+                        <p>No hay comparaciones agregadas al grupo</p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
+                    <button type="button" class="btn" id="addCurrentToGroup">
+                        <i class="fas fa-plus"></i> Agregar Comparación Actual
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="addExistingToGroup">
+                        <i class="fas fa-list"></i> Seleccionar Existente
+                    </button>
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
+                <button type="button" class="btn btn-warning" id="cancelGroupBtn">
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-success" id="saveGroupBtn">
+                    <i class="fas fa-save"></i> Guardar Grupo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para seleccionar comparaciones existentes -->
+    <div class="modal" id="selectComparisonsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Seleccionar Comparaciones</h2>
+                <button class="close-modal" id="closeSelectModal">&times;</button>
+            </div>
+            <div id="availableComparisonsList" style="max-height: 50vh; overflow-y: auto;">
+                <!-- Comparaciones disponibles -->
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
+                <button type="button" class="btn btn-warning" id="cancelSelectBtn">
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-success" id="confirmSelectBtn">
+                    <i class="fas fa-check"></i> Agregar Seleccionadas
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBMBeAJqQysohkg4pR-AEKT4xtHQAY9JsM",
+            authDomain: "ajustes-macl.firebaseapp.com",
+            projectId: "ajustes-macl",
+            storageBucket: "ajustes-macl.appspot.com",
+            messagingSenderId: "317052511393",
+            appId: "1:317052511393:web:c3cf85b26cce480f4dfce0",
+            measurementId: "G-B4ER6Z3D5J"
+        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Inicializa Firebase sin autenticación
+            firebase.initializeApp(firebaseConfig);
+            const db = firebase.firestore();
+            
+            // Variables de estado
+            let comparisons = [];
+            let comparisonGroups = [];
+            let currentComparisons = [];
+            let selectedComparisons = [];
+            
+            // Elementos del DOM
+            const comparisonForm = document.getElementById('comparisonForm');
+            const newComparisonBtn = document.getElementById('newComparisonBtn');
+            const groupComparisonBtn = document.getElementById('groupComparisonBtn');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const clearFormBtn = document.getElementById('clearFormBtn');
+            const currentComparison = document.getElementById('currentComparison');
+            const comparisonsList = document.getElementById('comparisonsList');
+            const groupModal = document.getElementById('groupModal');
+            const closeGroupModal = document.getElementById('closeGroupModal');
+            const groupName = document.getElementById('groupName');
+            const groupDescription = document.getElementById('groupDescription');
+            const groupComparisonsList = document.getElementById('groupComparisonsList');
+            const addCurrentToGroup = document.getElementById('addCurrentToGroup');
+            const addExistingToGroup = document.getElementById('addExistingToGroup');
+            const cancelGroupBtn = document.getElementById('cancelGroupBtn');
+            const saveGroupBtn = document.getElementById('saveGroupBtn');
+            const selectComparisonsModal = document.getElementById('selectComparisonsModal');
+            const closeSelectModal = document.getElementById('closeSelectModal');
+            const availableComparisonsList = document.getElementById('availableComparisonsList');
+            const cancelSelectBtn = document.getElementById('cancelSelectBtn');
+            const confirmSelectBtn = document.getElementById('confirmSelectBtn');
+            const originalSku = document.getElementById('originalSku');
+            const originalName = document.getElementById('originalName');
+            const originalQuantity = document.getElementById('originalQuantity');
+            const originalPrice = document.getElementById('originalPrice');
+            const soldSku = document.getElementById('soldSku');
+            const soldName = document.getElementById('soldName');
+            const soldQuantity = document.getElementById('soldQuantity');
+            const soldPrice = document.getElementById('soldPrice');
+            const compOriginalSku = document.getElementById('compOriginalSku');
+            const compOriginalName = document.getElementById('compOriginalName');
+            const compOriginalQuantity = document.getElementById('compOriginalQuantity');
+            const compOriginalPrice = document.getElementById('compOriginalPrice');
+            const compOriginalTotal = document.getElementById('compOriginalTotal');
+            const compSoldSku = document.getElementById('compSoldSku');
+            const compSoldName = document.getElementById('compSoldName');
+            const compSoldQuantity = document.getElementById('compSoldQuantity');
+            const compSoldPrice = document.getElementById('compSoldPrice');
+            const compSoldTotal = document.getElementById('compSoldTotal');
+            const unitDifference = document.getElementById('unitDifference');
+            const totalDifference = document.getElementById('totalDifference');
+            const percentageDifference = document.getElementById('percentageDifference');
+            const soldSkuDisplay = document.getElementById('soldSkuDisplay');
+            const originalSkuDisplay = document.getElementById('originalSkuDisplay');
+
+            // Cargar comparaciones desde Firestore
+            async function loadComparisons() {
+                try {
+                    const snapshot = await db.collection('comparisons')
+                        .orderBy('date', 'desc')
+                        .get();
+                    
+                    comparisons = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderComparisonList();
+                } catch (error) {
+                    console.error("Error cargando comparaciones:", error);
+                    alert("Error al cargar comparaciones");
+                }
+            }
+            
+            // Cargar grupos desde Firestore
+            async function loadComparisonGroups() {
+                try {
+                    const snapshot = await db.collection('comparisonGroups')
+                        .orderBy('date', 'desc')
+                        .get();
+                    
+                    comparisonGroups = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderComparisonList();
+                } catch (error) {
+                    console.error("Error cargando grupos:", error);
+                    alert("Error al cargar grupos de comparaciones");
+                }
+            }
+            
+            // Guardar una comparación en Firestore
+            async function saveComparison(comparison) {
+                try {
+                    const docRef = await db.collection('comparisons')
+                        .add({
+                            ...comparison,
+                            date: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    
+                    console.log("Comparación guardada con ID:", docRef.id);
+                    return docRef.id;
+                } catch (error) {
+                    console.error("Error guardando comparación:", error);
+                    alert("Error al guardar la comparación");
+                    return null;
+                }
+            }
+            
+            // Guardar un grupo en Firestore
+            async function saveGroup(group) {
+                try {
+                    const docRef = await db.collection('comparisonGroups')
+                        .add({
+                            ...group,
+                            date: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    
+                    console.log("Grupo guardado con ID:", docRef.id);
+                    return docRef.id;
+                } catch (error) {
+                    console.error("Error guardando grupo:", error);
+                    alert("Error al guardar el grupo");
+                    return null;
+                }
+            }
+            
+            // Eliminar una comparación de Firestore
+            async function deleteComparisonFromFirestore(id) {
+                try {
+                    await db.collection('comparisons')
+                        .doc(id)
+                        .delete();
+                    
+                    console.log("Comparación eliminada:", id);
+                    return true;
+                } catch (error) {
+                    console.error("Error eliminando comparación:", error);
+                    alert("Error al eliminar la comparación");
+                    return false;
+                }
+            }
+            
+            // Eliminar un grupo de Firestore
+            async function deleteGroupFromFirestore(id) {
+                try {
+                    await db.collection('comparisonGroups')
+                        .doc(id)
+                        .delete();
+                    
+                    console.log("Grupo eliminado:", id);
+                    return true;
+                } catch (error) {
+                    console.error("Error eliminando grupo:", error);
+                    alert("Error al eliminar el grupo");
+                    return false;
+                }
+            }
+            
+            // Función para calcular la diferencia
+            async function calculateDifference() {
+                // Validación mejorada
+                const requiredFields = [
+                    originalSku, originalName, originalPrice,
+                    soldSku, soldName, soldPrice
+                ];
+                
+                let isValid = true;
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        field.style.borderColor = 'var(--danger)';
+                        isValid = false;
+                    } else {
+                        field.style.borderColor = '';
+                    }
+                });
+                
+                if (!isValid) {
+                    alert('Por favor complete todos los campos requeridos');
+                    return;
+                }
+                
+                // Obtener valores
+                const oQty = Number(originalQuantity.value);
+                const oPrice = Number(originalPrice.value);
+                const sQty = Number(soldQuantity.value);
+                const sPrice = Number(soldPrice.value);
+                
+                // Validar precios positivos
+                if (oPrice < 0 || sPrice < 0) {
+                    alert('Los precios no pueden ser negativos');
+                    return;
+                }
+                
+                // Calcular totales y diferencias
+                const oTotal = oQty * oPrice;
+                const sTotal = sQty * sPrice;
+                const uDiff = sPrice - oPrice;
+                const tDiff = sTotal - oTotal;
+                const pDiff = ((sPrice - oPrice) / oPrice * 100).toFixed(2);
+                
+                // Mostrar resultados
+                compOriginalSku.textContent = originalSku.value;
+                compOriginalName.textContent = originalName.value;
+                compOriginalQuantity.textContent = oQty;
+                compOriginalPrice.textContent = oPrice.toFixed(2);
+                compOriginalTotal.textContent = oTotal.toFixed(2);
+                compSoldSku.textContent = soldSku.value;
+                compSoldName.textContent = soldName.value;
+                compSoldQuantity.textContent = sQty;
+                compSoldPrice.textContent = sPrice.toFixed(2);
+                compSoldTotal.textContent = sTotal.toFixed(2);
+                unitDifference.textContent = uDiff.toFixed(2);
+                totalDifference.textContent = tDiff.toFixed(2);
+                percentageDifference.textContent = `${pDiff}%`;
+                soldSkuDisplay.textContent = soldSku.value;
+                originalSkuDisplay.textContent = originalSku.value;
+                
+                // Estilizar según la diferencia
+                totalDifference.className = tDiff > 0 ? 'difference-value positive' : 
+                                         tDiff < 0 ? 'difference-value negative' : 
+                                         'difference-value neutral';
+                
+                // Mostrar resultados
+                currentComparison.style.display = 'grid';
+                comparisonForm.style.display = 'none';
+                currentComparison.scrollIntoView({ behavior: 'smooth' });
+                
+                // Guardar la comparación en Firestore
+                const compId = await saveComparison({
+                    originalSku: originalSku.value,
+                    originalName: originalName.value,
+                    originalQuantity: oQty,
+                    originalPrice: oPrice,
+                    soldSku: soldSku.value,
+                    soldName: soldName.value,
+                    soldQuantity: sQty,
+                    soldPrice: sPrice,
+                    unitDifference: uDiff,
+                    totalDifference: tDiff,
+                    percentageDifference: pDiff
+                });
+                
+                if (compId) {
+                    await loadComparisons();
+                }
+            }
+            
+            // Renderizar lista de comparaciones
+            function renderComparisonList() {
+                if (comparisons.length === 0 && comparisonGroups.length === 0) {
+                    comparisonsList.innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-clipboard-list"></i>
+                            <h3>No hay comparaciones registradas</h3>
+                            <p>Realiza tu primera comparación de SKUs</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let html = '';
+                
+                // Mostrar grupos primero
+                if (comparisonGroups.length > 0) {
+                    html += '<h3 style="margin-bottom: 1rem;"><i class="fas fa-layer-group"></i> Grupos de Comparaciones</h3>';
+                    
+                    comparisonGroups.forEach(group => {
+                        const groupTotalDiff = group.comparisons.reduce((total, comp) => total + comp.totalDifference, 0);
+                        
+                        html += `
+                            <div class="group-card">
+                                <div class="group-header">
+                                    <div class="group-title">${escapeHTML(group.name)}</div>
+                                    <div class="group-date">${formatDate(group.date)}</div>
+                                </div>
+                                ${group.description ? `<p style="margin-bottom: 0.5rem; color: var(--text-light);">${escapeHTML(group.description)}</p>` : ''}
+                                <div class="price-info">
+                                    <span>Comparaciones:</span> ${group.comparisons.length}
+                                </div>
+                                <div class="price-info">
+                                    <span>Diferencia Total:</span> 
+                                    <span style="font-weight: bold;" class="${groupTotalDiff > 0 ? 'positive' : groupTotalDiff < 0 ? 'negative' : 'neutral'}">
+                                        Q${groupTotalDiff.toFixed(2)}
+                                    </span>
+                                </div>
+                                <button class="delete-btn" onclick="deleteGroup('${group.id}')" style="position: absolute; top: 1rem; right: 1rem;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `;
+                    });
+                }
+                
+                // Mostrar comparaciones individuales
+                if (comparisons.length > 0) {
+                    html += '<h3 style="margin-top: 1.5rem; margin-bottom: 1rem;"><i class="fas fa-exchange-alt"></i> Comparaciones Individuales</h3>';
+                    
+                    html += comparisons.slice(0, 3).map(comp => `
+                        <div class="comparison-item">
+                            <div class="comparison-item-header">
+                                <h4>${escapeHTML(comp.originalName)} (${escapeHTML(comp.originalSku)}) ➔ ${escapeHTML(comp.soldName)} (${escapeHTML(comp.soldSku)})</h4>
+                                <span class="comparison-item-date">${formatDate(comp.date)}</span>
+                            </div>
+                            
+                            <div class="price-card">
+                                <h3><i class="fas fa-box"></i> Producto Original</h3>
+                                <div class="price-info">
+                                    <span>SKU:</span> ${escapeHTML(comp.originalSku)}
+                                </div>
+                                <div class="price-info">
+                                    <span>Nombre:</span> ${escapeHTML(comp.originalName)}
+                                </div>
+                                <div class="price-info">
+                                    <span>Cantidad:</span> ${escapeHTML(comp.originalQuantity)}
+                                </div>
+                                <div class="price-info">
+                                    <span>Precio Unitario:</span> Q${escapeHTML(comp.originalPrice.toFixed(2))}
+                                </div>
+                                <div class="price-info">
+                                    <span>Total:</span> Q${escapeHTML((comp.originalQuantity * comp.originalPrice).toFixed(2))}
+                                </div>
+                            </div>
+                            
+                            <div class="price-card">
+                                <h3><i class="fas fa-cash-register"></i> Producto Vendido</h3>
+                                <div class="price-info">
+                                    <span>SKU:</span> ${escapeHTML(comp.soldSku)}
+                                </div>
+                                <div class="price-info">
+                                    <span>Nombre:</span> ${escapeHTML(comp.soldName)}
+                                </div>
+                                <div class="price-info">
+                                    <span>Cantidad:</span> ${escapeHTML(comp.soldQuantity)}
+                                </div>
+                                <div class="price-info">
+                                    <span>Precio Unitario:</span> Q${escapeHTML(comp.soldPrice.toFixed(2))}
+                                </div>
+                                <div class="price-info">
+                                    <span>Total:</span> Q${escapeHTML((comp.soldQuantity * comp.soldPrice).toFixed(2))}
+                                </div>
+                            </div>
+                            
+                            <div class="difference-card">
+                                <h3><i class="fas fa-balance-scale"></i> Diferencia</h3>
+                                <div class="sku-match">
+                                    <i class="fas fa-random"></i>
+                                    <span>Se vendió <strong>${escapeHTML(comp.soldSku)}</strong> por <strong>${escapeHTML(comp.originalSku)}</strong></span>
+                                </div>
+                                <div class="price-info">
+                                    <span>Unitario:</span> Q${escapeHTML(comp.unitDifference.toFixed(2))}
+                                </div>
+                                <div class="price-info">
+                                    <span>Total:</span>
+                                </div>
+                                <div class="difference-value ${comp.totalDifference > 0 ? 'positive' : comp.totalDifference < 0 ? 'negative' : 'neutral'}">
+                                    Q${escapeHTML(comp.totalDifference.toFixed(2))}
+                                </div>
+                                <div class="price-info">
+                                    <span>Porcentaje:</span> ${escapeHTML(comp.percentageDifference)}%
+                                </div>
+                                <button class="delete-btn" onclick="deleteComparison('${comp.id}')">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    // Mostrar enlace para ver más si hay más de 3 comparaciones
+                    if (comparisons.length > 3) {
+                        html += `
+                            <div style="text-align: center; margin-top: 1rem;">
+                                <button class="btn btn-secondary" onclick="document.getElementById('groupComparisonBtn').click()">
+                                    <i class="fas fa-eye"></i> Ver más comparaciones (${comparisons.length})
+                                </button>
+                            </div>
+                        `;
+                    }
+                }
+                
+                comparisonsList.innerHTML = html;
+            }
+            
+            // Renderizar comparaciones en el grupo actual
+            function renderGroupComparisonsList() {
+                if (currentComparisons.length === 0) {
+                    groupComparisonsList.innerHTML = `
+                        <div class="no-results" style="padding: 1rem;">
+                            <i class="fas fa-info-circle"></i>
+                            <p>No hay comparaciones agregadas al grupo</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                groupComparisonsList.innerHTML = currentComparisons.map((comp, index) => `
+                    <div class="comparison-item" style="margin-bottom: 1rem; padding: 0.75rem; background-color: rgba(0,0,0,0.03); border-radius: var(--border-radius);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>${escapeHTML(comp.originalName)}</strong> (${escapeHTML(comp.originalSku)}) ➔ 
+                                <strong>${escapeHTML(comp.soldName)}</strong> (${escapeHTML(comp.soldSku)})
+                            </div>
+                            <button class="delete-btn" onclick="removeFromGroup(${index})">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
+                            <div class="price-info">
+                                <span>Original:</span> Q${escapeHTML((comp.originalQuantity * comp.originalPrice).toFixed(2))}
+                            </div>
+                            <div class="price-info">
+                                <span>Vendido:</span> Q${escapeHTML((comp.soldQuantity * comp.soldPrice).toFixed(2))}
+                            </div>
+                        </div>
+                        <div class="price-info">
+                            <span>Diferencia:</span>
+                            <span class="${comp.totalDifference > 0 ? 'positive' : comp.totalDifference < 0 ? 'negative' : 'neutral'}" style="font-weight: bold;">
+                                Q${escapeHTML(comp.totalDifference.toFixed(2))}
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // Renderizar comparaciones disponibles para agregar al grupo
+            function renderAvailableComparisonsList() {
+                if (comparisons.length === 0) {
+                    availableComparisonsList.innerHTML = `
+                        <div class="no-results" style="padding: 1rem;">
+                            <i class="fas fa-info-circle"></i>
+                            <p>No hay comparaciones disponibles</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                availableComparisonsList.innerHTML = comparisons.map(comp => `
+                    <div style="padding: 0.75rem; border-bottom: 1px solid rgba(0,0,0,0.1);">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" value="${comp.id}" 
+                                   onchange="toggleComparisonSelection('${comp.id}', this.checked)"
+                                   ${selectedComparisons.includes(comp.id) ? 'checked' : ''}>
+                            <div>
+                                <div><strong>${escapeHTML(comp.originalName)}</strong> (${escapeHTML(comp.originalSku)}) ➔ 
+                                     <strong>${escapeHTML(comp.soldName)}</strong> (${escapeHTML(comp.soldSku)})</div>
+                                <div style="font-size: 0.8rem; color: var(--text-light);">
+                                    ${formatDate(comp.date)} | Diferencia: 
+                                    <span class="${comp.totalDifference > 0 ? 'positive' : comp.totalDifference < 0 ? 'negative' : 'neutral'}">
+                                        Q${escapeHTML(comp.totalDifference.toFixed(2))}
+                                    </span>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                `).join('');
+            }
+            
+            // Formatear fecha
+            function formatDate(timestamp) {
+                if (!timestamp) return '';
+                
+                let date;
+                if (timestamp.toDate) {
+                    date = timestamp.toDate();
+                } else if (timestamp.seconds) {
+                    date = new Date(timestamp.seconds * 1000);
+                } else {
+                    date = new Date(timestamp);
+                }
+                
+                return date.toLocaleString('es-ES', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+            
+            // Escapar HTML para seguridad
+            function escapeHTML(str) {
+                if (!str) return '';
+                return String(str).replace(/[&<>'"\/]/g, function (s) {
+                    return {
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#39;',
+                        '/': '&#x2F;'
+                    }[s];
+                });
+            }
+            
+            // Resetear formulario de grupo
+            function resetGroupForm() {
+                groupName.value = '';
+                groupDescription.value = '';
+                currentComparisons = [];
+                selectedComparisons = [];
+                renderGroupComparisonsList();
+            }
+            
+            // Configurar event listeners
+            newComparisonBtn.addEventListener('click', () => {
+                comparisonForm.style.display = 'block';
+                currentComparison.style.display = 'none';
+                comparisonForm.scrollIntoView({ behavior: 'smooth' });
+            });
+            
+            groupComparisonBtn.addEventListener('click', () => {
+                if (comparisons.length === 0 && currentComparison.style.display === 'none') {
+                    alert('No hay comparaciones para agrupar. Primero crea al menos una comparación.');
+                    return;
+                }
+                groupModal.style.display = 'flex';
+                renderGroupComparisonsList();
+            });
+            
+            closeGroupModal.addEventListener('click', () => {
+                groupModal.style.display = 'none';
+                resetGroupForm();
+            });
+            
+            closeSelectModal.addEventListener('click', () => {
+                selectComparisonsModal.style.display = 'none';
+            });
+            
+            // Cerrar modales al hacer clic fuera
+            groupModal.addEventListener('click', (e) => {
+                if (e.target === groupModal) {
+                    groupModal.style.display = 'none';
+                    resetGroupForm();
+                }
+            });
+            
+            selectComparisonsModal.addEventListener('click', (e) => {
+                if (e.target === selectComparisonsModal) {
+                    selectComparisonsModal.style.display = 'none';
+                }
+            });
+            
+            calculateBtn.addEventListener('click', calculateDifference);
+            
+            clearFormBtn.addEventListener('click', () => {
+                originalSku.value = '';
+                originalName.value = '';
+                originalQuantity.value = '1';
+                originalPrice.value = '';
+                soldSku.value = '';
+                soldName.value = '';
+                soldQuantity.value = '1';
+                soldPrice.value = '';
+            });
+            
+            addCurrentToGroup.addEventListener('click', () => {
+                if (currentComparison.style.display === 'none') {
+                    alert('No hay una comparación actual para agregar al grupo. Primero calcula una comparación.');
+                    return;
+                }
+                
+                const currentComp = {
+                    originalSku: compOriginalSku.textContent,
+                    originalName: compOriginalName.textContent,
+                    originalQuantity: Number(compOriginalQuantity.textContent),
+                    originalPrice: Number(compOriginalPrice.textContent),
+                    soldSku: compSoldSku.textContent,
+                    soldName: compSoldName.textContent,
+                    soldQuantity: Number(compSoldQuantity.textContent),
+                    soldPrice: Number(compSoldPrice.textContent),
+                    unitDifference: Number(unitDifference.textContent),
+                    totalDifference: Number(totalDifference.textContent),
+                    percentageDifference: percentageDifference.textContent,
+                    date: new Date().toISOString()
+                };
+                
+                currentComparisons.push(currentComp);
+                renderGroupComparisonsList();
+            });
+            
+            addExistingToGroup.addEventListener('click', () => {
+                if (comparisons.length === 0) {
+                    alert('No hay comparaciones existentes para agregar.');
+                    return;
+                }
+                
+                selectedComparisons = [];
+                renderAvailableComparisonsList();
+                selectComparisonsModal.style.display = 'flex';
+            });
+            
+            cancelGroupBtn.addEventListener('click', () => {
+                groupModal.style.display = 'none';
+                resetGroupForm();
+            });
+            
+            saveGroupBtn.addEventListener('click', async () => {
+                if (currentComparisons.length === 0) {
+                    alert('Debes agregar al menos una comparación al grupo.');
+                    return;
+                }
+                
+                if (!groupName.value.trim()) {
+                    alert('Debes ingresar un nombre para el grupo.');
+                    return;
+                }
+                
+                const newGroup = {
+                    name: groupName.value.trim(),
+                    description: groupDescription.value.trim(),
+                    comparisons: [...currentComparisons],
+                    date: new Date().toISOString()
+                };
+                
+                const groupId = await saveGroup(newGroup);
+                if (groupId) {
+                    alert(`Grupo "${newGroup.name}" guardado exitosamente con ${newGroup.comparisons.length} comparaciones.`);
+                    groupModal.style.display = 'none';
+                    resetGroupForm();
+                    await loadComparisonGroups();
+                }
+            });
+            
+            cancelSelectBtn.addEventListener('click', () => {
+                selectComparisonsModal.style.display = 'none';
+            });
+            
+            confirmSelectBtn.addEventListener('click', () => {
+                if (selectedComparisons.length === 0) {
+                    alert('No has seleccionado ninguna comparación para agregar.');
+                    return;
+                }
+                
+                selectedComparisons.forEach(compId => {
+                    const comp = comparisons.find(c => c.id === compId);
+                    if (comp) {
+                        currentComparisons.push(comp);
+                    }
+                });
+                
+                selectComparisonsModal.style.display = 'none';
+                renderGroupComparisonsList();
+            });
+            
+            // Inicializar la aplicación
+            async function initApp() {
+                await loadComparisons();
+                await loadComparisonGroups();
+            }
+            
+            initApp();
+        });
+        
+        // Funciones globales
+        async function deleteComparison(id) {
+            if (confirm('¿Eliminar esta comparación?')) {
+                const success = await firebase.firestore().collection('comparisons')
+                    .doc(id)
+                    .delete();
+                
+                if (success === undefined) { // Firestore delete no devuelve valor en éxito
+                    document.getElementById('comparisonsList').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    // Recargar datos
+                    document.dispatchEvent(new Event('DOMContentLoaded'));
+                }
+            }
+        }
+        
+        async function deleteGroup(id) {
+            if (confirm('¿Eliminar este grupo y todas sus comparaciones?')) {
+                const success = await firebase.firestore().collection('comparisonGroups')
+                    .doc(id)
+                    .delete();
+                
+                if (success === undefined) {
+                    document.getElementById('comparisonsList').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    // Recargar datos
+                    document.dispatchEvent(new Event('DOMContentLoaded'));
+                }
+            }
+        }
+        
+        function removeFromGroup(index) {
+            let currentComparisons = [];
+            try {
+                currentComparisons = JSON.parse(JSON.stringify(window.currentComparisons || []));
+                currentComparisons.splice(index, 1);
+                window.currentComparisons = currentComparisons;
+                document.querySelector('#groupComparisonsList').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                setTimeout(() => {
+                    document.dispatchEvent(new Event('DOMContentLoaded'));
+                }, 300);
+            } catch (e) {
+                console.error('Error removing from group:', e);
+            }
+        }
+        
+        function toggleComparisonSelection(id, isChecked) {
+            let selectedComparisons = [];
+            try {
+                selectedComparisons = JSON.parse(JSON.stringify(window.selectedComparisons || []));
+                if (isChecked) {
+                    if (!selectedComparisons.includes(id)) {
+                        selectedComparisons.push(id);
+                    }
+                } else {
+                    selectedComparisons = selectedComparisons.filter(item => item !== id);
+                }
+                window.selectedComparisons = selectedComparisons;
+            } catch (e) {
+                console.error('Error toggling comparison selection:', e);
+            }
+        }
+    </script>
+</body>
+</html>
