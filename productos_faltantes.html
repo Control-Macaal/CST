@@ -10,6 +10,9 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- PDF Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
         :root {
             --primary: #4361ee;
@@ -109,6 +112,10 @@
 
         .btn-danger {
             background: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: #e5177a;
         }
 
         .btn-warning {
@@ -505,6 +512,55 @@
             }
         }
 
+        /* Estilos para el menú de exportación */
+        .export-menu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 1001;
+            width: 90%;
+            max-width: 350px;
+        }
+
+        .export-menu h3 {
+            margin-bottom: 1rem;
+            color: var(--dark);
+            text-align: center;
+        }
+
+        .export-option {
+            display: block;
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            background-color: var(--primary);
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .export-option:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .export-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
         /* Evitar zoom en inputs en iOS */
         @media screen and (-webkit-min-device-pixel-ratio:0) {
             select,
@@ -526,6 +582,10 @@
                 <button class="btn btn-history" id="historyBtn">
                     <i class="fas fa-clock"></i>
                     <span class="btn-text">Historial</span>
+                </button>
+                <button class="btn btn-danger" id="exportPdfBtn">
+                    <i class="fas fa-file-pdf"></i>
+                    <span class="btn-text">Exportar PDF</span>
                 </button>
                 <button class="btn" id="addMissingBtn">
                     <i class="fas fa-plus"></i>
@@ -675,6 +735,7 @@
             const totalCount = document.getElementById('totalCount');
             const addMissingBtn = document.getElementById('addMissingBtn');
             const historyBtn = document.getElementById('historyBtn');
+            const exportPdfBtn = document.getElementById('exportPdfBtn');
             const missingModal = document.getElementById('missingModal');
             const historyModal = document.getElementById('historyModal');
             const modalClose = document.getElementById('modalClose');
@@ -690,6 +751,125 @@
             const missingStatusInput = document.getElementById('missingStatus');
             const missingNotesInput = document.getElementById('missingNotes');
             const historyContent = document.getElementById('historyContent');
+
+            // Ordenar productos por fecha (más reciente primero)
+            function sortProductsByRecent() {
+                missingProducts.sort((a, b) => {
+                    const dateA = new Date(a.lastOrderDate || a.timestamp || 0);
+                    const dateB = new Date(b.lastOrderDate || b.timestamp || 0);
+                    return dateB - dateA;
+                });
+                filterProducts();
+            }
+
+            // Función para exportar a PDF
+            function exportToPDF(type = 'all') {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Filtrar productos según el tipo
+                let productsToExport = [...missingProducts];
+                let title = "Todos los Productos Faltantes";
+                
+                if (type === 'unreported') {
+                    productsToExport = missingProducts.filter(p => p.status === 'unreported');
+                    title = "Productos No Reportados";
+                } else if (type === 'reported') {
+                    productsToExport = missingProducts.filter(p => p.status === 'reported');
+                    title = "Productos Reportados";
+                }
+                
+                // Ordenar por más reciente primero
+                productsToExport.sort((a, b) => {
+                    const dateA = new Date(a.lastOrderDate || a.timestamp || 0);
+                    const dateB = new Date(b.lastOrderDate || b.timestamp || 0);
+                    return dateB - dateA;
+                });
+                
+                // Configuración del PDF
+                doc.setFontSize(18);
+                doc.text(title, 14, 15);
+                doc.setFontSize(12);
+                doc.text(`Generado el: ${new Date().toLocaleDateString()}`, 14, 22);
+                
+                // Preparar datos para la tabla
+                const tableData = productsToExport.map(product => [
+                    product.sku,
+                    product.name,
+                    product.supplier || 'N/A',
+                    product.missingQuantity,
+                    product.reportedBy || 'N/A',
+                    product.lastOrderDate || 'N/A',
+                    getStatusText(product.status)
+                ]);
+                
+                // Crear tabla
+                doc.autoTable({
+                    head: [['SKU', 'Nombre', 'Proveedor', 'Cantidad', 'Reportado por', 'Fecha', 'Estado']],
+                    body: tableData,
+                    startY: 30,
+                    styles: {
+                        cellPadding: 3,
+                        fontSize: 9,
+                        valign: 'middle'
+                    },
+                    headStyles: {
+                        fillColor: [67, 97, 238],
+                        textColor: 255,
+                        fontStyle: 'bold'
+                    },
+                    alternateRowStyles: {
+                        fillColor: [240, 240, 240]
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 25 }, // SKU
+                        3: { cellWidth: 20 }, // Cantidad
+                        5: { cellWidth: 25 }, // Fecha
+                        6: { cellWidth: 25 }  // Estado
+                    }
+                });
+                
+                // Guardar PDF
+                doc.save(`Productos_Faltantes_${type}_${new Date().toISOString().slice(0,10)}.pdf`);
+            }
+
+            // Menú para seleccionar tipo de exportación
+            function showExportMenu() {
+                const menu = document.createElement('div');
+                menu.className = 'export-menu';
+                
+                const title = document.createElement('h3');
+                title.textContent = 'Exportar Reporte';
+                menu.appendChild(title);
+                
+                const options = [
+                    { text: 'Todos los productos', type: 'all' },
+                    { text: 'Solo no reportados', type: 'unreported' },
+                    { text: 'Solo reportados', type: 'reported' }
+                ];
+                
+                options.forEach(option => {
+                    const btn = document.createElement('button');
+                    btn.className = 'export-option';
+                    btn.textContent = option.text;
+                    btn.addEventListener('click', () => {
+                        exportToPDF(option.type);
+                        document.body.removeChild(menu);
+                        document.body.removeChild(overlay);
+                    });
+                    menu.appendChild(btn);
+                });
+                
+                const overlay = document.createElement('div');
+                overlay.className = 'export-overlay';
+                overlay.addEventListener('click', () => {
+                    document.body.removeChild(menu);
+                    document.body.removeChild(overlay);
+                });
+                
+                document.body.appendChild(overlay);
+                document.body.appendChild(menu);
+            }
 
             // Registrar actividad en el historial
             function logActivity(action, details, productId = null) {
@@ -872,7 +1052,7 @@
                 const term = searchInput.value.trim().toLowerCase();
                 const status = statusFilter.value;
 
-                let filtered = missingProducts;
+                let filtered = [...missingProducts]; // Copia para no modificar el original
 
                 if (term) {
                     filtered = filtered.filter(p => 
@@ -886,6 +1066,13 @@
                 if (status !== 'all') {
                     filtered = filtered.filter(p => p.status === status);
                 }
+
+                // Ordenar por fecha más reciente primero
+                filtered.sort((a, b) => {
+                    const dateA = new Date(a.lastOrderDate || a.timestamp || 0);
+                    const dateB = new Date(b.lastOrderDate || b.timestamp || 0);
+                    return dateB - dateA;
+                });
 
                 renderProducts(filtered);
             }
@@ -931,6 +1118,8 @@
                     .then((doc) => {
                         if (doc.exists) {
                             missingProducts = doc.data().products || [];
+                            // Ordenar por más reciente primero
+                            sortProductsByRecent();
                             renderProducts(missingProducts);
                             filterProducts();
                         } else {
@@ -1040,6 +1229,7 @@
             statusFilter.addEventListener('change', filterProducts);
             addMissingBtn.addEventListener('click', () => openModal());
             historyBtn.addEventListener('click', openHistoryModal);
+            exportPdfBtn.addEventListener('click', showExportMenu);
             modalClose.addEventListener('click', closeModal);
             historyModalClose.addEventListener('click', closeModal);
 
@@ -1097,6 +1287,7 @@
                 .onSnapshot((doc) => {
                     if (doc.exists) {
                         missingProducts = doc.data().products || [];
+                        sortProductsByRecent();
                         renderProducts(missingProducts);
                         filterProducts();
                     }
