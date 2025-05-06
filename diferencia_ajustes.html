@@ -83,7 +83,7 @@
             display: flex;
             gap: 0.5rem;
             flex-wrap: wrap;
-            margin-left: auto; /* Mueve los botones a la derecha */
+            margin-left: auto;
         }
 
         .btn {
@@ -365,7 +365,6 @@
                 border: 1px solid #ddd !important;
             }
 
-            /* Eliminar número de página y ruta en PDF */
             @page {
                 size: auto;
                 margin: 5mm;
@@ -377,12 +376,10 @@
                 }
             }
             
-            /* Ocultar URL en impresión */
             a[href]:after {
                 content: none !important;
             }
 
-            /* Mostrar título en PDF */
             .pdf-title {
                 display: block;
                 text-align: center;
@@ -391,7 +388,6 @@
                 margin-bottom: 10px;
             }
 
-            /* Mostrar fecha en PDF */
             .pdf-date {
                 display: block;
                 text-align: center;
@@ -406,25 +402,27 @@
         <header>
             <div class="header-title">
                 <i class="fas fa-exchange-alt"></i>
-                <h1>Diferencia de Precio</h1>
+                <h1 class="no-print">Diferencia de Precio</h1>
             </div>
             <div class="header-actions no-print">
                 <a href="index.html" class="btn btn-back">
                     <i class="fas fa-arrow-left"></i>
                     <span>Volver</span>
                 </a>
-                </button>
                 <button class="btn btn-secondary" id="printBtn">
                     <i class="fas fa-print"></i>
                     <span>Imprimir</span>
+                </button>
                 <button class="btn btn-success" id="exportExcelBtn">
                     <i class="fas fa-file-excel"></i>
                     <span>Exportar</span>
-                
+                </button>
+                <button class="btn btn-warning" id="clearAllBtn">
+                    <i class="fas fa-trash-alt"></i>
+                    <span>Limpiar Todo</span>
                 </button>
             </div>
         </header>
-        </div>
 
         <!-- Elementos ocultos solo para PDF -->
         <div class="pdf-title">Diferencia de Precios por Ajuste Macaal</div>
@@ -530,6 +528,41 @@
         let totalDiff = 0;
         let currentEditIndex = -1;
         
+        // Clave para localStorage
+        const STORAGE_KEY = 'priceComparisons';
+        
+        // Función para cargar datos desde localStorage
+        function loadFromLocalStorage() {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            if (savedData) {
+                comparisons = JSON.parse(savedData);
+                // Calcular el totalDiff sumando todas las diferencias
+                totalDiff = comparisons.reduce((sum, comp) => sum + comp.totalDiffItem, 0);
+                updateTable();
+                updateTotals();
+            }
+        }
+        
+        // Función para guardar datos en localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(comparisons));
+        }
+        
+        // Función para limpiar todos los datos
+        function clearAllData() {
+            if (comparisons.length === 0) return;
+            
+            if (confirm('¿Está seguro que desea eliminar TODAS las comparaciones? Esta acción no se puede deshacer.')) {
+                comparisons = [];
+                totalDiff = 0;
+                currentEditIndex = -1;
+                updateTable();
+                updateTotals();
+                clearForm();
+                saveToLocalStorage();
+            }
+        }
+        
         // Función para formatear fecha
         function formatDate(date) {
             const day = date.getDate().toString().padStart(2, '0');
@@ -555,6 +588,17 @@
             if (!originalSku || !originalName || isNaN(originalPrice) || isNaN(originalQuantity) ||
                 !soldSku || !soldName || isNaN(soldPrice) || isNaN(soldQuantity)) {
                 alert('Por favor complete todos los campos correctamente');
+                return;
+            }
+            
+            // Validar valores positivos
+            if (originalPrice <= 0 || soldPrice <= 0) {
+                alert('Los precios deben ser mayores a cero');
+                return;
+            }
+
+            if (originalQuantity <= 0 || soldQuantity <= 0) {
+                alert('Las cantidades deben ser mayores a cero');
                 return;
             }
             
@@ -617,6 +661,9 @@
             
             // Limpiar formulario
             clearForm();
+            
+            // Guardar en localStorage
+            saveToLocalStorage();
         }
         
         // Función para editar una comparación
@@ -671,6 +718,9 @@
                 // Actualizar totales y tabla
                 updateTotals();
                 updateTable();
+                
+                // Guardar en localStorage
+                saveToLocalStorage();
             }
         }
         
@@ -759,47 +809,47 @@
             let html = `
                 <table>
                     <tr>
-                        <th>SKU Orig</th>
-                        <th>Producto Orig</th>
-                        <th>P. Unit</th>
-                        <th>Cant</th>
-                        <th>Total</th>
-                        <th>SKU Vend</th>
-                        <th>Producto Vend</th>
-                        <th>P. Unit</th>
-                        <th>Cant</th>
-                        <th>Total</th>
-                        <th>Dif. Unit</th>
-                        <th>Dif. Total</th>
-                        <th>%</th>
+                        <th style="border: 1px solid #ddd; padding: 5px; background-color: #4361ee; color: white;">SKU Orig</th>
+                        <th style="border: 1px solid #ddd; padding: 5px; background-color: #4361ee; color: white;">Producto Orig</th>
+                        <th style="border: 1px solid #ddd; padding: 5px; background-color: #4361ee; color: white;">P. Unit</th>
+                        <th style="border: 1px solid #ddd; padding: 5px; background-color: #4361ee; color: white;">Cant</th>
+                        <th style="border: 1px solid #ddd; padding: 5px; background-color: #4361ee; color: white;">Total</th>
+                        <th style="border: 1px solid #ddd; padding: 5px; background-color: #4361ee; color: white;">SKU Vend</th>
+                        <th style="border: 1px solid #ddd; padding: 5px; background-color: #4361ee; color: white;">Producto Vend</th>
+                        <th style="border: 1px solid #ddd; padding: 5px; background-color: #4361ee; color: white;">P. Unit</th>
+                        <th style="border: 1px solid #ddd; padding: 5px; background-color: #4361ee; color: white;">Cant</th>
+                        <th style="border: 1px solid #ddd; padding: 5px; background-color: #4361ee; color: white;">Total</th>
+                        <th style="border: 1px solid #ddd; padding: 5px; background-color: #4361ee; color: white;">Dif. Unit</th>
+                        <th style="border: 1px solid #ddd; padding: 5px; background-color: #4361ee; color: white;">Dif. Total</th>
+                        <th style="border: 1px solid #ddd; padding: 5px; background-color: #4361ee; color: white;">%</th>
                     </tr>
             `;
             
             comparisons.forEach(comp => {
                 html += `
                     <tr>
-                        <td>${comp.originalSku}</td>
-                        <td>${comp.originalName}</td>
-                        <td>Q${comp.originalPrice.toFixed(2)}</td>
-                        <td>${comp.originalQuantity}</td>
-                        <td>Q${comp.originalTotal.toFixed(2)}</td>
-                        <td>${comp.soldSku}</td>
-                        <td>${comp.soldName}</td>
-                        <td>Q${comp.soldPrice.toFixed(2)}</td>
-                        <td>${comp.soldQuantity}</td>
-                        <td>Q${comp.soldTotal.toFixed(2)}</td>
-                        <td>${comp.unitDiff >= 0 ? '+' : '-'}Q${Math.abs(comp.unitDiff).toFixed(2)}</td>
-                        <td>${comp.totalDiffItem >= 0 ? '+' : '-'}Q${Math.abs(comp.totalDiffItem).toFixed(2)}</td>
-                        <td>${comp.percentageDiff >= 0 ? '+' : ''}${comp.percentageDiff}%</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">${comp.originalSku}</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">${comp.originalName}</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">Q${comp.originalPrice.toFixed(2)}</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">${comp.originalQuantity}</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">Q${comp.originalTotal.toFixed(2)}</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">${comp.soldSku}</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">${comp.soldName}</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">Q${comp.soldPrice.toFixed(2)}</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">${comp.soldQuantity}</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">Q${comp.soldTotal.toFixed(2)}</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">${comp.unitDiff >= 0 ? '+' : '-'}Q${Math.abs(comp.unitDiff).toFixed(2)}</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">${comp.totalDiffItem >= 0 ? '+' : '-'}Q${Math.abs(comp.totalDiffItem).toFixed(2)}</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">${comp.percentageDiff >= 0 ? '+' : ''}${comp.percentageDiff}%</td>
                     </tr>
                 `;
             });
             
             html += `
                     <tr>
-                        <td colspan="11" style="text-align: right; font-weight: bold;">Total General:</td>
-                        <td>${totalDiff >= 0 ? '+' : '-'}Q${Math.abs(totalDiff).toFixed(2)}</td>
-                        <td></td>
+                        <td colspan="10" style="border: 1px solid #ddd; padding: 5px; text-align: right; font-weight: bold;">Total General:</td>
+                        <td style="border: 1px solid #ddd; padding: 5px; font-weight: bold;">${totalDiff >= 0 ? '+' : '-'}Q${Math.abs(totalDiff).toFixed(2)}</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;"></td>
                     </tr>
                 </table>
             `;
@@ -824,11 +874,16 @@
         
         // Asignar event listeners cuando el DOM esté cargado
         document.addEventListener('DOMContentLoaded', function() {
+            // Cargar datos guardados
+            loadFromLocalStorage();
+            
+            // Asignar eventos
             document.getElementById('addComparisonBtn').addEventListener('click', saveComparison);
             document.getElementById('clearFormBtn').addEventListener('click', clearForm);
             document.getElementById('cancelEditBtn').addEventListener('click', cancelEdit);
             document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
             document.getElementById('printBtn').addEventListener('click', printWithHeader);
+            document.getElementById('clearAllBtn').addEventListener('click', clearAllData);
 
             // Agregar con Enter
             const inputs = document.querySelectorAll('.form-control');
