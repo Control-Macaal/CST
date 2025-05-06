@@ -301,9 +301,27 @@
             font-size: 0.75rem;
         }
 
-        /* Estilo para el título del PDF */
-        .pdf-title {
+        /* Estilo para el encabezado del PDF */
+        .pdf-header {
             display: none;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .pdf-logo {
+            height: 60px;
+            margin-bottom: 10px;
+        }
+
+        .pdf-title {
+            font-size: 16pt;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .pdf-date {
+            font-size: 10pt;
+            margin-bottom: 10px;
         }
 
         /* Responsive */
@@ -365,34 +383,18 @@
                 border: 1px solid #ddd !important;
             }
 
+            .pdf-header {
+                display: block !important;
+                page-break-after: avoid;
+            }
+
             @page {
                 size: auto;
-                margin: 5mm;
-                @top-center {
-                    content: " ";
-                    font-size: 14pt;
-                    font-weight: bold;
-                ;
-                }
+                margin: 10mm;
             }
             
             a[href]:after {
                 content: none !important;
-            }
-
-            .pdf-title {
-                display: block;
-                text-align: center;
-                font-size: 16pt;
-                font-weight: bold;
-                margin-bottom: 10px;
-            }
-
-            .pdf-date {
-                display: block;
-                text-align: center;
-                font-size: 10pt;
-                margin-bottom: 15px;
             }
         }
     </style>
@@ -424,9 +426,12 @@
             </div>
         </header>
 
-        <!-- Elementos ocultos solo para PDF -->
-        <div class="pdf-title">Diferencia de Precios por Ajuste Macaal</div>
-        <div class="pdf-date"></div>
+        <!-- Encabezado para PDF -->
+        <div class="pdf-header no-print">
+            <img src="images/logo/logo.png" class="pdf-logo" alt="Logo">
+            <div class="pdf-title">Diferencia de Precios por Ajuste Macaal</div>
+            <div class="pdf-date"></div>
+        </div>
 
         <div class="form-container no-print">
             <div class="form-row">
@@ -862,7 +867,7 @@
             link.click();
         }
 
-        // Función para imprimir con título y fecha
+        // Función para imprimir con título, logo y fecha
         function printWithHeader() {
             // Actualizar la fecha en el elemento oculto
             const now = new Date();
