@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Comparación de Productos</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔄</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-hover: #3a56d4;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --dark: #1b263b;
+            --light: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #2b2d42;
+            --text-light: #8d99ae;
+            --danger: #e53935;
+            --warning: #f8961e;
+            --success: #43a047;
+            --border-radius: 8px;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            --transition: all 0.2s ease;
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            color: var(--text);
+            padding: 0.5rem;
+            min-height: 100vh;
+            -webkit-text-size-adjust: 100%;
+            touch-action: manipulation;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            width: 100%;
+            padding: 0.5rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .header-title h1 {
+            font-size: 1.25rem;
+            white-space: nowrap;
+            color: var(--dark);
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-left: auto; /* Mueve los botones a la derecha */
+        }
+
+        .btn {
+            background-color: rgba(67, 97, 238, 0.8);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.6rem 0.8rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: var(--transition);
+            font-size: 0.85rem;
+            text-decoration: none;
+            white-space: nowrap;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .btn:hover {
+            background-color: rgba(58, 86, 212, 0.9);
+            transform: translateY(-1px);
+        }
+
+        .btn-back {
+            background-color: rgba(108, 117, 125, 0.8) !important;
+        }
+
+        .btn-back:hover {
+            background-color: rgba(84, 91, 98, 0.9) !important;
+        }
+
+        .btn-danger {
+            background-color: rgba(229, 57, 53, 0.8) !important;
+        }
+
+        .btn-danger:hover {
+            background-color: rgba(198, 40, 40, 0.9) !important;
+        }
+
+        .btn-warning {
+            background-color: rgba(248, 150, 30, 0.8) !important;
+        }
+
+        .btn-warning:hover {
+            background-color: rgba(214, 126, 19, 0.9) !important;
+        }
+
+        .btn-success {
+            background-color: rgba(67, 160, 71, 0.8) !important;
+        }
+
+        .btn-success:hover {
+            background-color: rgba(56, 142, 60, 0.9) !important;
+        }
+
+        .btn-secondary {
+            background-color: rgba(63, 55, 201, 0.8) !important;
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(54, 47, 173, 0.9) !important;
+        }
+
+        /* Formularios */
+        .form-container {
+            background: var(--glass-bg) !important;
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid var(--glass-border) !important;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .form-group {
+            margin-bottom: 0.75rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            font-size: 0.85rem;
+            transition: var(--transition);
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+            background-color: white;
+        }
+
+        /* Resultados */
+        .results-container {
+            background: var(--glass-bg) !important;
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid var(--glass-border) !important;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .results-header {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(67, 97, 238, 0.15) !important;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            min-width: 1000px;
+        }
+
+        .results-table th {
+            background-color: rgba(67, 97, 238, 0.9);
+            color: white;
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+            backdrop-filter: blur(5px);
+        }
+
+        .results-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .results-table tr:nth-child(even) td {
+            background-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .results-table tr:hover td {
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .positive {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .negative {
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        .table-footer {
+            padding: 0.75rem 1rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(67, 97, 238, 0.1) !important;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .total-difference {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.4rem;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.6rem;
+            font-size: 0.75rem;
+        }
+
+        /* Estilo para el título del PDF */
+        .pdf-title {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-title h1 {
+                font-size: 1.1rem;
+            }
+            
+            .btn {
+                padding: 0.5rem 0.7rem;
+                font-size: 0.8rem;
+            }
+
+            .form-container, 
+            .results-container {
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+            }
+
+            .header-actions {
+                order: 3;
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+
+        @media print {
+            body, .container {
+                padding: 0 !important;
+                margin: 0 !important;
+                background: white !important;
+            }
+            
+            .no-print, .header-actions {
+                display: none !important;
+            }
+            
+            .results-table {
+                font-size: 8pt !important;
+                min-width: 100% !important;
+            }
+            
+            .results-table th {
+                position: static !important;
+                background-color: var(--primary) !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .form-container,
+            .results-container {
+                box-shadow: none !important;
+                background: transparent !important;
+                backdrop-filter: none !important;
+                border: 1px solid #ddd !important;
+            }
+
+            /* Eliminar número de página y ruta en PDF */
+            @page {
+                size: auto;
+                margin: 5mm;
+                @top-center {
+                    content: " ";
+                    font-size: 14pt;
+                    font-weight: bold;
+                ;
+                }
+            }
+            
+            /* Ocultar URL en impresión */
+            a[href]:after {
+                content: none !important;
+            }
+
+            /* Mostrar título en PDF */
+            .pdf-title {
+                display: block;
+                text-align: center;
+                font-size: 16pt;
+                font-weight: bold;
+                margin-bottom: 10px;
+            }
+
+            /* Mostrar fecha en PDF */
+            .pdf-date {
+                display: block;
+                text-align: center;
+                font-size: 10pt;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-title">
+                <i class="fas fa-exchange-alt"></i>
+                <h1>Comparación de Productos</h1>
+            </div>
+            <div class="header-actions no-print">
+                <a href="index.html" class="btn btn-back">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Volver</span>
+                </a>
+                </button>
+                <button class="btn btn-secondary" id="printBtn">
+                    <i class="fas fa-print"></i>
+                    <span>Imprimir</span>
+                <button class="btn btn-success" id="exportExcelBtn">
+                    <i class="fas fa-file-excel"></i>
+                    <span>Exportar</span>
+                
+                </button>
+            </div>
+        </header>
+
+        <!-- Elementos ocultos solo para PDF -->
+        <div class="pdf-title">Diferencia de Precios por Ajuste Macaal1</div>
+        <div class="pdf-date"></div>
+
+        <div class="form-container no-print">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="originalSku">SKU Original</label>
+                    <input type="text" class="form-control" id="originalSku" required>
+                </div>
+                <div class="form-group">
+                    <label for="originalName">Nombre Original</label>
+                    <input type="text" class="form-control" id="originalName" required>
+                </div>
+                <div class="form-group">
+                    <label for="originalPrice">Precio (Q)</label>
+                    <input type="number" class="form-control" id="originalPrice" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="originalQuantity">Cantidad</label>
+                    <input type="number" class="form-control" id="originalQuantity" min="1" value="1" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="soldSku">SKU Vendido</label>
+                    <input type="text" class="form-control" id="soldSku" required>
+                </div>
+                <div class="form-group">
+                    <label for="soldName">Nombre Vendido</label>
+                    <input type="text" class="form-control" id="soldName" required>
+                </div>
+                <div class="form-group">
+                    <label for="soldPrice">Precio (Q)</label>
+                    <input type="number" class="form-control" id="soldPrice" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="soldQuantity">Cantidad</label>
+                    <input type="number" class="form-control" id="soldQuantity" min="1" value="1" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <button class="btn" id="addComparisonBtn">
+                    <i class="fas fa-plus"></i>
+                    <span id="submitButtonText">Agregar</span>
+                </button>
+                <button class="btn btn-danger" id="clearFormBtn">
+                    <i class="fas fa-broom"></i>
+                    Limpiar
+                </button>
+                <button class="btn btn-warning" id="cancelEditBtn" style="display: none;">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                </button>
+            </div>
+        </div>
+
+        <div class="results-container">
+            <div class="results-header">
+                <i class="fas fa-table"></i>
+                <span>Resultados de Comparación</span>
+            </div>
+            
+            <div class="table-container">
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th class="no-print">Acciones</th>
+                            <th>SKU Orig</th>
+                            <th>Producto Orig</th>
+                            <th>P. Unit</th>
+                            <th>Cant</th>
+                            <th>Total</th>
+                            <th>SKU Vend</th>
+                            <th>Producto Vend</th>
+                            <th>P. Unit</th>
+                            <th>Cant</th>
+                            <th>Total</th>
+                            <th>Dif. Unit</th>
+                            <th>Dif. Total</th>
+                            <th>%</th>
+                        </tr>
+                    </thead>
+                    <tbody id="comparisonResults">
+                        <!-- Las comparaciones se agregarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="table-footer">
+                <span>Total de comparaciones: <span id="totalComparisons">0</span></span>
+                <span class="total-difference">Diferencia total: <span id="totalDifference">Q0.00</span></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let comparisons = [];
+        let totalDiff = 0;
+        let currentEditIndex = -1;
+        
+        // Función para formatear fecha
+        function formatDate(date) {
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+        
+        // Función para agregar o actualizar una comparación
+        function saveComparison() {
+            // Obtener valores del formulario
+            const originalSku = document.getElementById('originalSku').value;
+            const originalName = document.getElementById('originalName').value;
+            const originalPrice = parseFloat(document.getElementById('originalPrice').value);
+            const originalQuantity = parseInt(document.getElementById('originalQuantity').value);
+            
+            const soldSku = document.getElementById('soldSku').value;
+            const soldName = document.getElementById('soldName').value;
+            const soldPrice = parseFloat(document.getElementById('soldPrice').value);
+            const soldQuantity = parseInt(document.getElementById('soldQuantity').value);
+            
+            // Validar campos
+            if (!originalSku || !originalName || isNaN(originalPrice) || isNaN(originalQuantity) ||
+                !soldSku || !soldName || isNaN(soldPrice) || isNaN(soldQuantity)) {
+                alert('Por favor complete todos los campos correctamente');
+                return;
+            }
+            
+            // Calcular totales y diferencias
+            const originalTotal = originalPrice * originalQuantity;
+            const soldTotal = soldPrice * soldQuantity;
+            const unitDiff = soldPrice - originalPrice;
+            const totalDiffItem = soldTotal - originalTotal;
+            const percentageDiff = ((soldPrice - originalPrice) / originalPrice * 100).toFixed(2);
+            
+            if (currentEditIndex === -1) {
+                // Agregar nueva comparación
+                comparisons.push({
+                    originalSku, 
+                    originalName, 
+                    originalPrice, 
+                    originalQuantity, 
+                    originalTotal,
+                    soldSku, 
+                    soldName, 
+                    soldPrice, 
+                    soldQuantity, 
+                    soldTotal,
+                    unitDiff, 
+                    totalDiffItem, 
+                    percentageDiff
+                });
+            } else {
+                // Actualizar comparación existente
+                // Restar la diferencia anterior del total
+                totalDiff -= comparisons[currentEditIndex].totalDiffItem;
+                
+                // Actualizar la comparación
+                comparisons[currentEditIndex] = {
+                    originalSku, 
+                    originalName, 
+                    originalPrice, 
+                    originalQuantity, 
+                    originalTotal,
+                    soldSku, 
+                    soldName, 
+                    soldPrice, 
+                    soldQuantity, 
+                    soldTotal,
+                    unitDiff, 
+                    totalDiffItem, 
+                    percentageDiff
+                };
+                
+                // Salir del modo edición
+                cancelEdit();
+            }
+            
+            // Actualizar totales
+            totalDiff += totalDiffItem;
+            updateTotals();
+            
+            // Actualizar tabla
+            updateTable();
+            
+            // Limpiar formulario
+            clearForm();
+        }
+        
+        // Función para editar una comparación
+        function editComparison(index) {
+            const comp = comparisons[index];
+            
+            // Llenar el formulario con los datos a editar
+            document.getElementById('originalSku').value = comp.originalSku;
+            document.getElementById('originalName').value = comp.originalName;
+            document.getElementById('originalPrice').value = comp.originalPrice;
+            document.getElementById('originalQuantity').value = comp.originalQuantity;
+            document.getElementById('soldSku').value = comp.soldSku;
+            document.getElementById('soldName').value = comp.soldName;
+            document.getElementById('soldPrice').value = comp.soldPrice;
+            document.getElementById('soldQuantity').value = comp.soldQuantity;
+            
+            // Cambiar a modo edición
+            currentEditIndex = index;
+            document.getElementById('submitButtonText').textContent = 'Actualizar';
+            document.getElementById('cancelEditBtn').style.display = 'block';
+            document.getElementById('addComparisonBtn').classList.add('btn-warning');
+            document.getElementById('addComparisonBtn').classList.remove('btn');
+        }
+        
+        // Función para cancelar la edición
+        function cancelEdit() {
+            currentEditIndex = -1;
+            document.getElementById('submitButtonText').textContent = 'Agregar';
+            document.getElementById('cancelEditBtn').style.display = 'none';
+            document.getElementById('addComparisonBtn').classList.remove('btn-warning');
+            document.getElementById('addComparisonBtn').classList.add('btn');
+            clearForm();
+        }
+        
+        // Función para eliminar una comparación
+        function deleteComparison(index) {
+            if (confirm('¿Está seguro que desea eliminar esta comparación?')) {
+                // Restar la diferencia del total
+                totalDiff -= comparisons[index].totalDiffItem;
+                
+                // Eliminar la comparación
+                comparisons.splice(index, 1);
+                
+                // Si estaba editando esta comparación, cancelar edición
+                if (currentEditIndex === index) {
+                    cancelEdit();
+                } else if (currentEditIndex > index) {
+                    // Ajustar el índice de edición si es necesario
+                    currentEditIndex--;
+                }
+                
+                // Actualizar totales y tabla
+                updateTotals();
+                updateTable();
+            }
+        }
+        
+        // Función para actualizar la tabla de resultados
+        function updateTable() {
+            const tbody = document.getElementById('comparisonResults');
+            tbody.innerHTML = '';
+            
+            if (comparisons.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="14" style="text-align: center; padding: 1rem; color: var(--text-light);">
+                            <i class="fas fa-info-circle"></i> No hay comparaciones agregadas
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            comparisons.forEach((comp, index) => {
+                const row = document.createElement('tr');
+                
+                // Determinar clases para diferencias
+                const unitClass = comp.unitDiff > 0 ? 'positive' : comp.unitDiff < 0 ? 'negative' : '';
+                const totalClass = comp.totalDiffItem > 0 ? 'positive' : comp.totalDiffItem < 0 ? 'negative' : '';
+                
+                row.innerHTML = `
+                    <td class="action-buttons no-print">
+                        <button class="btn btn-sm" onclick="editComparison(${index})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteComparison(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                    <td>${comp.originalSku}</td>
+                    <td>${comp.originalName}</td>
+                    <td>Q${comp.originalPrice.toFixed(2)}</td>
+                    <td>${comp.originalQuantity}</td>
+                    <td>Q${comp.originalTotal.toFixed(2)}</td>
+                    <td>${comp.soldSku}</td>
+                    <td>${comp.soldName}</td>
+                    <td>Q${comp.soldPrice.toFixed(2)}</td>
+                    <td>${comp.soldQuantity}</td>
+                    <td>Q${comp.soldTotal.toFixed(2)}</td>
+                    <td class="${unitClass}">${comp.unitDiff >= 0 ? '+' : '-'}Q${Math.abs(comp.unitDiff).toFixed(2)}</td>
+                    <td class="${totalClass}">${comp.totalDiffItem >= 0 ? '+' : '-'}Q${Math.abs(comp.totalDiffItem).toFixed(2)}</td>
+                    <td>${comp.percentageDiff >= 0 ? '+' : ''}${comp.percentageDiff}%</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        // Función para actualizar los totales
+        function updateTotals() {
+            document.getElementById('totalComparisons').textContent = comparisons.length;
+            
+            const totalElement = document.getElementById('totalDifference');
+            totalElement.textContent = `${totalDiff >= 0 ? '+' : '-'}Q${Math.abs(totalDiff).toFixed(2)}`;
+            
+            // Actualizar clase según si es positivo o negativo
+            totalElement.className = 'total-difference';
+            if (totalDiff > 0) {
+                totalElement.classList.add('positive');
+            } else if (totalDiff < 0) {
+                totalElement.classList.add('negative');
+            }
+        }
+        
+        // Función para limpiar el formulario
+        function clearForm() {
+            document.getElementById('originalSku').value = '';
+            document.getElementById('originalName').value = '';
+            document.getElementById('originalPrice').value = '';
+            document.getElementById('originalQuantity').value = '1';
+            document.getElementById('soldSku').value = '';
+            document.getElementById('soldName').value = '';
+            document.getElementById('soldPrice').value = '';
+            document.getElementById('soldQuantity').value = '1';
+        }
+        
+        // Función para exportar a Excel
+        function exportToExcel() {
+            // Crear contenido HTML para la tabla
+            let html = `
+                <table>
+                    <tr>
+                        <th>SKU Orig</th>
+                        <th>Producto Orig</th>
+                        <th>P. Unit</th>
+                        <th>Cant</th>
+                        <th>Total</th>
+                        <th>SKU Vend</th>
+                        <th>Producto Vend</th>
+                        <th>P. Unit</th>
+                        <th>Cant</th>
+                        <th>Total</th>
+                        <th>Dif. Unit</th>
+                        <th>Dif. Total</th>
+                        <th>%</th>
+                    </tr>
+            `;
+            
+            comparisons.forEach(comp => {
+                html += `
+                    <tr>
+                        <td>${comp.originalSku}</td>
+                        <td>${comp.originalName}</td>
+                        <td>Q${comp.originalPrice.toFixed(2)}</td>
+                        <td>${comp.originalQuantity}</td>
+                        <td>Q${comp.originalTotal.toFixed(2)}</td>
+                        <td>${comp.soldSku}</td>
+                        <td>${comp.soldName}</td>
+                        <td>Q${comp.soldPrice.toFixed(2)}</td>
+                        <td>${comp.soldQuantity}</td>
+                        <td>Q${comp.soldTotal.toFixed(2)}</td>
+                        <td>${comp.unitDiff >= 0 ? '+' : '-'}Q${Math.abs(comp.unitDiff).toFixed(2)}</td>
+                        <td>${comp.totalDiffItem >= 0 ? '+' : '-'}Q${Math.abs(comp.totalDiffItem).toFixed(2)}</td>
+                        <td>${comp.percentageDiff >= 0 ? '+' : ''}${comp.percentageDiff}%</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                    <tr>
+                        <td colspan="11" style="text-align: right; font-weight: bold;">Total General:</td>
+                        <td>${totalDiff >= 0 ? '+' : '-'}Q${Math.abs(totalDiff).toFixed(2)}</td>
+                        <td></td>
+                    </tr>
+                </table>
+            `;
+            
+            // Crear archivo Excel
+            const blob = new Blob([html], {type: 'application/vnd.ms-excel'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'comparacion_productos.xls';
+            link.click();
+        }
+
+        // Función para imprimir con título y fecha
+        function printWithHeader() {
+            // Actualizar la fecha en el elemento oculto
+            const now = new Date();
+            document.querySelector('.pdf-date').textContent = `Fecha: ${formatDate(now)}`;
+            
+            // Llamar a la función de impresión nativa
+            window.print();
+        }
+        
+        // Asignar event listeners cuando el DOM esté cargado
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('addComparisonBtn').addEventListener('click', saveComparison);
+            document.getElementById('clearFormBtn').addEventListener('click', clearForm);
+            document.getElementById('cancelEditBtn').addEventListener('click', cancelEdit);
+            document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
+            document.getElementById('printBtn').addEventListener('click', printWithHeader);
+
+            // Agregar con Enter
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        saveComparison();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
