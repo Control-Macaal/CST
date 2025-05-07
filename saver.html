@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Carga Inteligente de Tarimas</title>
+    <title>Carga de Tarimas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -35,48 +35,32 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        html {
-            height: 100%;
-            font-size: 16px;
-        }
-
-        @media (max-width: 360px) {
-            html { font-size: 14px; }
-        }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: var(--light);
             color: var(--dark);
             line-height: 1.5;
             touch-action: manipulation;
-            height: 100%;
+            height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
-        /* Layout principal optimizado para móviles */
         .app-container {
             flex: 1;
             display: flex;
             flex-direction: column;
-            max-width: 100vw;
+            max-width: 100%;
             overflow-x: hidden;
-            position: relative;
         }
 
-        /* Header ajustado a dispositivos móviles */
         .app-header {
             padding: 0.75rem 1rem;
             background-color: var(--lighter);
             box-shadow: var(--shadow);
-            z-index: 10;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
-            top: 0;
-            min-height: 60px;
         }
 
         .logo {
@@ -94,54 +78,26 @@
             align-items: center;
             justify-content: center;
             color: white;
-            flex-shrink: 0;
         }
 
         .logo-text {
             font-weight: 600;
             font-size: 1.1rem;
             color: var(--dark);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 70vw;
         }
 
-        .btn-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: none;
-            background: transparent;
-            color: var(--dark);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            flex-shrink: 0;
-        }
-
-        /* Contenedores de pantalla adaptables */
         .screen {
             display: none;
             flex: 1;
             padding: 1rem;
             flex-direction: column;
-            animation: fadeIn 0.3s ease-out;
             width: 100%;
-            box-sizing: border-box;
         }
 
         .screen.active {
             display: flex;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Cámara adaptativa */
         .camera-container {
             position: relative;
             flex: 1;
@@ -149,17 +105,12 @@
             border-radius: var(--border-radius);
             overflow: hidden;
             margin-bottom: 1rem;
-            box-shadow: var(--shadow-md);
-            min-height: 50vh;
-            max-height: 70vh;
-            width: 100%;
         }
 
         #cameraView {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            display: block;
         }
 
         .camera-overlay {
@@ -181,7 +132,6 @@
             align-items: center;
             gap: 1rem;
             pointer-events: auto;
-            padding-bottom: env(safe-area-inset-bottom);
         }
 
         .btn-camera {
@@ -194,14 +144,6 @@
             align-items: center;
             justify-content: center;
             box-shadow: var(--shadow);
-            transition: var(--transition);
-        }
-
-        @media (min-height: 700px) {
-            .btn-camera {
-                width: 56px;
-                height: 56px;
-            }
         }
 
         .btn-capture {
@@ -209,21 +151,6 @@
             height: 56px;
             background-color: var(--primary);
             color: white;
-        }
-
-        @media (min-height: 700px) {
-            .btn-capture {
-                width: 64px;
-                height: 64px;
-            }
-        }
-
-        .btn-camera:active {
-            transform: scale(0.95);
-        }
-
-        .btn-capture:active {
-            transform: scale(0.9);
         }
 
         .photo-counter {
@@ -239,14 +166,12 @@
             align-self: flex-end;
         }
 
-        /* Formulario optimizado para móviles */
         .form-section {
             background-color: var(--lighter);
             border-radius: var(--border-radius);
             padding: 1rem;
             margin-bottom: 1rem;
             box-shadow: var(--shadow);
-            width: 100%;
         }
 
         .form-title {
@@ -263,10 +188,6 @@
             margin-bottom: 1rem;
         }
 
-        .form-group:last-child {
-            margin-bottom: 0;
-        }
-
         .form-label {
             display: block;
             margin-bottom: 0.4rem;
@@ -281,37 +202,14 @@
             border: 1px solid var(--gray-light);
             border-radius: var(--border-radius-sm);
             font-size: 1rem;
-            transition: var(--transition);
             background-color: var(--lighter);
-            -webkit-appearance: none;
         }
 
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
-        }
-
-        .form-value {
-            font-size: 1rem;
-            color: var(--dark);
-            padding: 0.7rem 0;
-            font-weight: 500;
-        }
-
-        /* Preview de fotos adaptable */
         .photos-preview {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
             gap: 0.6rem;
             margin-top: 0.8rem;
-        }
-
-        @media (max-width: 350px) {
-            .photos-preview {
-                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-                gap: 0.5rem;
-            }
         }
 
         .photo-thumbnail {
@@ -343,10 +241,8 @@
             justify-content: center;
             font-size: 0.7rem;
             opacity: 0.9;
-            transition: var(--transition);
         }
 
-        /* Botones optimizados para touch */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -356,11 +252,9 @@
             font-weight: 500;
             font-size: 0.95rem;
             border: none;
-            cursor: pointer;
-            transition: var(--transition);
-            text-decoration: none;
-            gap: 0.5rem;
             min-height: 48px;
+            width: 100%;
+            margin-top: 1rem;
         }
 
         .btn-primary {
@@ -368,60 +262,18 @@
             color: white;
         }
 
-        .btn-primary:hover, .btn-primary:focus {
-            background-color: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-
         .btn-secondary {
             background-color: var(--gray-light);
             color: var(--dark);
         }
 
-        .btn-secondary:hover, .btn-secondary:focus {
-            background-color: var(--gray);
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background-color: var(--danger);
-            color: white;
-        }
-
-        .btn-block {
-            display: flex;
-            width: 100%;
-        }
-
-        /* Flash effect */
-        .flash-effect {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: white;
-            opacity: 0;
-            pointer-events: none;
-            z-index: 100;
-            transition: opacity 0.3s;
-        }
-
-        .flash-active {
-            opacity: 0.9;
-        }
-
-        /* Progress indicator */
         .progress-container {
             height: 4px;
             background-color: var(--gray-light);
             border-radius: 2px;
             overflow: hidden;
             margin: 1rem 0;
+            display: none;
         }
 
         .progress-bar {
@@ -431,7 +283,6 @@
             transition: width 0.4s ease;
         }
 
-        /* Confirmation */
         .confirmation {
             text-align: center;
             padding: 1.5rem;
@@ -448,79 +299,25 @@
             margin-bottom: 0.8rem;
         }
 
-        .confirmation h3 {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-            color: var(--dark);
-        }
-
-        .confirmation p {
-            color: var(--gray);
-            margin-bottom: 1.2rem;
-            font-size: 0.9rem;
-        }
-
-        /* Action buttons */
         .action-buttons {
             display: flex;
             gap: 0.6rem;
-            margin-top: 1.2rem;
-            width: 100%;
+            margin-top: 1rem;
         }
 
         .action-buttons .btn {
-            flex: 1;
-            min-width: 0;
+            margin-top: 0;
         }
 
-        /* Animations */
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-
-        /* Safe area para dispositivos con notch */
-        @supports (padding: max(0px)) {
-            .app-header, .camera-controls {
-                padding-left: max(1rem, env(safe-area-inset-left));
-                padding-right: max(1rem, env(safe-area-inset-right));
-            }
-            
-            .screen {
-                padding-left: max(1rem, env(safe-area-inset-left));
-                padding-right: max(1rem, env(safe-area-inset-right));
-            }
-            
-            .camera-container {
-                margin-left: env(safe-area-inset-left);
-                margin-right: env(safe-area-inset-right);
-                width: calc(100% - env(safe-area-inset-left) - env(safe-area-inset-right));
-            }
-        }
-
-        /* iOS specific adjustments */
-        @supports (-webkit-touch-callout: none) {
-            .btn {
-                padding: 0.9rem 1rem;
-            }
-            
-            .form-control {
-                padding: 0.8rem;
+        @media (max-width: 360px) {
+            .photos-preview {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
             }
         }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- Flash effect -->
-        <div class="flash-effect" id="flashEffect"></div>
-
-        <!-- Header -->
         <header class="app-header">
             <div class="logo">
                 <div class="logo-icon">
@@ -528,39 +325,28 @@
                 </div>
                 <span class="logo-text">Carga de Tarimas</span>
             </div>
-            <button class="btn-icon" id="btnHelp">
-                <i class="fas fa-question-circle"></i>
-            </button>
         </header>
 
         <!-- Pantalla de Cámara -->
         <div class="screen active" id="cameraScreen">
             <div class="camera-container">
                 <video id="cameraView" autoplay playsinline></video>
-                
                 <div class="camera-overlay">
                     <div class="photo-counter" id="photoCounter">
                         <i class="fas fa-camera"></i>
                         <span>0/5 fotos</span>
                     </div>
-                    
                     <div class="camera-controls">
                         <button class="btn-camera" id="btnFlipCamera">
                             <i class="fas fa-camera-retro"></i>
                         </button>
-                        
                         <button class="btn-camera btn-capture" id="btnCapture">
                             <i class="fas fa-camera"></i>
-                        </button>
-                        
-                        <button class="btn-camera" id="btnFlash">
-                            <i class="fas fa-bolt"></i>
                         </button>
                     </div>
                 </div>
             </div>
-            
-            <button class="btn btn-primary btn-block" id="btnContinue" disabled>
+            <button class="btn btn-primary" id="btnContinue" disabled>
                 <i class="fas fa-arrow-right"></i>
                 <span>Continuar al formulario</span>
             </button>
@@ -568,13 +354,8 @@
 
         <!-- Pantalla de Formulario -->
         <div class="screen" id="formScreen">
-            <button class="btn-icon" id="btnBack" style="align-self: flex-start; margin-bottom: 0.8rem;">
-                <i class="fas fa-arrow-left"></i>
-            </button>
-            
             <div class="form-section">
                 <h3 class="form-title"><i class="fas fa-clipboard-list"></i> Datos de la tarima</h3>
-                
                 <div class="form-group">
                     <label for="tienda" class="form-label">Tienda</label>
                     <select id="tienda" class="form-control" required>
@@ -584,22 +365,13 @@
                         <option value="eplastik">Eplastik</option>
                     </select>
                 </div>
-                
                 <div class="form-group">
                     <label for="numeroTarima" class="form-label">Número de tarima</label>
                     <input type="number" id="numeroTarima" class="form-control" required placeholder="Ej: 101">
                 </div>
-                
                 <div class="form-group">
                     <label class="form-label">Fecha de envío</label>
-                    <div class="form-value" id="fechaEnvio">Cargando...</div>
-                </div>
-            </div>
-            
-            <div class="form-section">
-                <h3 class="form-title"><i class="fas fa-edit"></i> Observaciones</h3>
-                <div class="form-group">
-                    <input type="text" id="observaciones" class="form-control" placeholder="Opcional">
+                    <div class="form-value" id="fechaEnvio"></div>
                 </div>
             </div>
             
@@ -608,7 +380,7 @@
                 <div class="photos-preview" id="photosPreview"></div>
             </div>
             
-            <div class="progress-container" id="progressContainer" style="display: none;">
+            <div class="progress-container" id="progressContainer">
                 <div class="progress-bar" id="progressBar"></div>
             </div>
             
@@ -618,18 +390,17 @@
                 </div>
                 <h3>¡Tarima registrada!</h3>
                 <p>Los datos se han guardado correctamente.</p>
-                <button class="btn btn-primary btn-block" id="btnNewRegister">
+                <button class="btn btn-primary" id="btnNewRegister">
                     <i class="fas fa-plus"></i>
                     <span>Nuevo registro</span>
                 </button>
             </div>
             
             <div class="action-buttons">
-                <button class="btn btn-secondary" id="btnRetakePhotos">
-                    <i class="fas fa-camera-retro"></i>
-                    <span>Volver a tomar fotos</span>
+                <button class="btn btn-secondary" id="btnBack">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Volver</span>
                 </button>
-                
                 <button class="btn btn-primary" id="btnSubmit">
                     <i class="fas fa-paper-plane"></i>
                     <span>Enviar</span>
@@ -638,13 +409,36 @@
         </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
+
     <script>
+        // Configuración de Firebase con tus datos
+        const firebaseConfig = {
+            apiKey: "AIzaSyC0Y8jROxVu6a6TS0-n-GjpD-FP-dwzjuw",
+            authDomain: "images-cargatarima.firebaseapp.com",
+            projectId: "images-cargatarima",
+            storageBucket: "images-cargatarima.appspot.com",
+            messagingSenderId: "871809179845",
+            appId: "1:871809179845:web:005744f3c159edbaba10ac"
+        };
+
+        // Inicializa Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        // Referencias a los servicios
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
         // Estado de la aplicación
         const state = {
             photos: [],
             maxPhotos: 5,
             usingFrontCamera: false,
-            flashOn: false,
             stream: null
         };
 
@@ -655,54 +449,31 @@
             cameraView: document.getElementById('cameraView'),
             btnCapture: document.getElementById('btnCapture'),
             btnFlipCamera: document.getElementById('btnFlipCamera'),
-            btnFlash: document.getElementById('btnFlash'),
             btnContinue: document.getElementById('btnContinue'),
             btnBack: document.getElementById('btnBack'),
-            btnRetakePhotos: document.getElementById('btnRetakePhotos'),
+            btnSubmit: document.getElementById('btnSubmit'),
+            btnNewRegister: document.getElementById('btnNewRegister'),
             photoCounter: document.getElementById('photoCounter'),
             photosPreview: document.getElementById('photosPreview'),
-            flashEffect: document.getElementById('flashEffect'),
             fechaEnvio: document.getElementById('fechaEnvio'),
-            btnSubmit: document.getElementById('btnSubmit'),
             progressContainer: document.getElementById('progressContainer'),
             progressBar: document.getElementById('progressBar'),
-            confirmation: document.getElementById('confirmation'),
-            btnNewRegister: document.getElementById('btnNewRegister'),
-            btnHelp: document.getElementById('btnHelp')
+            confirmation: document.getElementById('confirmation')
         };
 
         // Inicialización
-        document.addEventListener('DOMContentLoaded', initApp);
-
-        function initApp() {
+        document.addEventListener('DOMContentLoaded', function() {
             setCurrentDate();
             setupCamera();
             setupEventListeners();
-            
-            // Detectar cambios de orientación
-            window.addEventListener('orientationchange', handleOrientationChange);
-            handleOrientationChange(); // Ejecutar al inicio
-        }
-
-        function handleOrientationChange() {
-            // Ajustar altura de la cámara según la orientación
-            const cameraContainer = document.querySelector('.camera-container');
-            if (window.orientation === 0 || window.orientation === 180) {
-                // Portrait
-                cameraContainer.style.maxHeight = '60vh';
-            } else {
-                // Landscape
-                cameraContainer.style.maxHeight = '50vh';
-            }
-        }
+        });
 
         function setCurrentDate() {
             const now = new Date();
             const options = { 
-                weekday: 'long', 
                 year: 'numeric', 
-                month: 'long', 
-                day: 'numeric',
+                month: '2-digit', 
+                day: '2-digit',
                 hour: '2-digit',
                 minute: '2-digit'
             };
@@ -728,24 +499,15 @@
         }
 
         function setupEventListeners() {
-            // Cámara
             elements.btnCapture.addEventListener('click', capturePhoto);
             elements.btnFlipCamera.addEventListener('click', flipCamera);
-            elements.btnFlash.addEventListener('click', toggleFlash);
             elements.btnContinue.addEventListener('click', showFormScreen);
-            
-            // Formulario
             elements.btnBack.addEventListener('click', returnToCamera);
-            elements.btnRetakePhotos.addEventListener('click', returnToCamera);
             elements.btnSubmit.addEventListener('click', submitForm);
             elements.btnNewRegister.addEventListener('click', resetApp);
-            elements.btnHelp.addEventListener('click', showHelp);
         }
 
         function capturePhoto() {
-            // Efecto flash visual
-            triggerFlashEffect();
-            
             // Crear canvas para captura
             const canvas = document.createElement('canvas');
             canvas.width = elements.cameraView.videoWidth;
@@ -772,11 +534,6 @@
                 elements.btnContinue.disabled = false;
             }
             
-            // Vibrar al capturar
-            if ('vibrate' in navigator) {
-                navigator.vibrate(50);
-            }
-            
             // Si alcanzó el máximo, mostrar mensaje
             if (state.photos.length >= state.maxPhotos) {
                 setTimeout(() => {
@@ -785,25 +542,11 @@
             }
         }
 
-        function triggerFlashEffect() {
-            elements.flashEffect.classList.add('flash-active');
-            setTimeout(() => {
-                elements.flashEffect.classList.remove('flash-active');
-            }, 300);
-        }
-
         function updatePhotoCounter() {
             elements.photoCounter.innerHTML = `
                 <i class="fas fa-camera"></i>
                 <span>${state.photos.length}/${state.maxPhotos} fotos</span>
             `;
-            
-            // Animación cuando se acerca al máximo
-            if (state.photos.length >= state.maxPhotos - 1) {
-                elements.photoCounter.classList.add('pulse');
-            } else {
-                elements.photoCounter.classList.remove('pulse');
-            }
         }
 
         async function flipCamera() {
@@ -816,21 +559,6 @@
             
             // Iniciar nueva cámara
             await setupCamera();
-            
-            // Actualizar icono
-            elements.btnFlipCamera.innerHTML = state.usingFrontCamera ? 
-                '<i class="fas fa-camera"></i>' : 
-                '<i class="fas fa-camera-retro"></i>';
-        }
-
-        function toggleFlash() {
-            state.flashOn = !state.flashOn;
-            elements.btnFlash.innerHTML = state.flashOn ? 
-                '<i class="fas fa-bolt"></i>' : 
-                '<i class="fas fa-bolt" style="opacity: 0.5;"></i>';
-            
-            // Nota: Para flash real necesitarías la API de MediaStreamTrack.applyConstraints()
-            // Esto es solo un indicador visual
         }
 
         function showFormScreen() {
@@ -857,12 +585,6 @@
                 state.stream.getTracks().forEach(track => track.stop());
             }
             setupCamera();
-            
-            // Actualizamos el contador
-            updatePhotoCounter();
-            
-            // Habilitamos continuar si ya hay fotos
-            elements.btnContinue.disabled = state.photos.length === 0;
         }
 
         function renderPhotos() {
@@ -884,65 +606,85 @@
         function removePhoto(index) {
             state.photos.splice(index, 1);
             renderPhotos();
-            
-            // Si no quedan fotos, deshabilitar submit
-            if (state.photos.length === 0) {
-                elements.btnSubmit.disabled = true;
-            }
         }
 
-        function submitForm(e) {
+        async function uploadPhotos(photos) {
+            const uploadPromises = photos.map(async (photoData, index) => {
+                try {
+                    // Convertir Data URL a Blob
+                    const response = await fetch(photoData);
+                    const blob = await response.blob();
+                    
+                    // Crear referencia única para cada imagen
+                    const storageRef = storage.ref().child(`tarimas/${Date.now()}_${index}.jpg`);
+                    
+                    // Subir el archivo
+                    await storageRef.put(blob);
+                    
+                    // Obtener URL de descarga
+                    return await storageRef.getDownloadURL();
+                } catch (error) {
+                    console.error("Error al subir foto:", error);
+                    return null;
+                }
+            });
+            
+            return Promise.all(uploadPromises);
+        }
+
+        async function submitForm(e) {
             e.preventDefault();
             
-            // Validación básica
+            // Validaciones básicas
             const tienda = document.getElementById('tienda').value;
             const numeroTarima = document.getElementById('numeroTarima').value;
             
-            if (!tienda) {
-                alert('Por favor selecciona una tienda');
-                return;
-            }
-            
-            if (!numeroTarima) {
-                alert('Por favor ingresa el número de tarima');
-                return;
-            }
-            
-            if (state.photos.length === 0) {
-                alert('Debes tomar al menos una foto de la tarima');
+            if (!tienda || !numeroTarima || state.photos.length === 0) {
+                alert('Por favor completa todos los campos requeridos y toma al menos una foto');
                 return;
             }
             
             // Mostrar progreso
             elements.progressContainer.style.display = 'block';
+            elements.progressBar.style.width = '10%';
             elements.btnSubmit.disabled = true;
-            document.querySelector('.action-buttons').style.display = 'none';
             
-            // Simular envío (reemplazar con tu lógica real)
-            simulateUpload();
-        }
-
-        function simulateUpload() {
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += Math.random() * 10 + 5;
-                if (progress > 100) progress = 100;
-                elements.progressBar.style.width = `${progress}%`;
+            try {
+                // Subir fotos (30% progreso)
+                elements.progressBar.style.width = '30%';
+                const photoUrls = await uploadPhotos(state.photos);
+                const validPhotoUrls = photoUrls.filter(url => url !== null);
                 
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    showConfirmation();
+                if (validPhotoUrls.length === 0) {
+                    throw new Error("No se pudieron subir las fotos");
                 }
-            }, 300);
-        }
-
-        function showConfirmation() {
-            elements.btnSubmit.style.display = 'none';
-            elements.progressContainer.style.display = 'none';
-            elements.confirmation.style.display = 'block';
-            
-            // Scroll to top
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Preparar datos (50% progreso)
+                elements.progressBar.style.width = '50%';
+                const tarimaData = {
+                    tienda: tienda,
+                    numeroTarima: numeroTarima,
+                    observaciones: document.getElementById('observaciones').value || '',
+                    fotos: validPhotoUrls,
+                    fechaEnvio: new Date().toISOString(),
+                    fechaRegistro: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                // Guardar en Firestore (80% progreso)
+                elements.progressBar.style.width = '80%';
+                await db.collection('tarimas').add(tarimaData);
+                
+                // Completado (100% progreso)
+                elements.progressBar.style.width = '100%';
+                elements.confirmation.style.display = 'block';
+                elements.btnSubmit.style.display = 'none';
+                
+            } catch (error) {
+                console.error("Error al guardar:", error);
+                alert("Error al guardar los datos: " + error.message);
+                elements.progressContainer.style.display = 'none';
+                elements.btnSubmit.disabled = false;
+            }
         }
 
         function resetApp() {
@@ -952,12 +694,12 @@
             // Resetear formulario
             document.getElementById('tienda').value = '';
             document.getElementById('numeroTarima').value = '';
-            document.getElementById('observaciones').value = '';
             
             // Ocultar confirmación
             elements.confirmation.style.display = 'none';
+            elements.progressContainer.style.display = 'none';
             elements.btnSubmit.style.display = 'flex';
-            document.querySelector('.action-buttons').style.display = 'flex';
+            elements.btnSubmit.disabled = false;
             
             // Volver a cámara
             elements.formScreen.classList.remove('active');
@@ -974,12 +716,11 @@
             elements.btnContinue.disabled = true;
         }
 
-        function showHelp() {
-            alert("Ayuda:\n1. Toma fotos de la tarima con el botón central\n2. Completa los datos requeridos\n3. Envía el registro cuando esté listo\n\nPuedes volver a tomar fotos en cualquier momento.");
-        }
-
         // Hacer funciones accesibles globalmente
-        window.removePhoto = removePhoto;
+        window.removePhoto = function(index) {
+            state.photos.splice(index, 1);
+            renderPhotos();
+        };
     </script>
 </body>
 </html>
