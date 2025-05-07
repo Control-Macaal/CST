@@ -2,281 +2,310 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cámara Móvil</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Carga de Tarimas con Cámara</title>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #4361ee;
+            --primary-hover: #3a56d4;
+            --dark: #1b263b;
+            --light: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #2b2d42;
+            --danger: #f72585;
+            --border-radius: 8px;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         }
-        
+
         body {
-            background-color: #000;
-            color: white;
-            height: 100vh;
-            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--light);
+            color: var(--text);
+            touch-action: manipulation;
         }
-        
+
+        .container {
+            display: none; /* Oculto inicialmente */
+            padding: 1rem;
+            max-width: 100%;
+        }
+
+        /* Estilos de cámara (igual que antes) */
         .camera-container {
-            position: relative;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .camera-preview {
-            flex-grow: 1;
-            background-color: #222;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        #videoElement {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .camera-controls {
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: rgba(0, 0, 0, 0.7);
-        }
-        
-        .top-controls {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            z-index: 10;
-        }
-        
-        .btn {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .btn:active {
-            transform: scale(0.9);
-        }
-        
-        .btn-primary {
-            width: 70px;
-            height: 70px;
-            border: 4px solid white;
-            background-color: transparent;
-        }
-        
-        .btn-primary:active {
-            transform: scale(0.95);
-        }
-        
-        .btn-circle {
-            border-radius: 50%;
-        }
-        
-        .flash-btn {
-            position: relative;
-        }
-        
-        .flash-active {
-            color: #FFD700;
-        }
-        
-        .gallery-preview {
-            width: 50px;
-            height: 50px;
-            border-radius: 5px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            overflow: hidden;
-        }
-        
-        .gallery-preview img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-        }
-        
-        .mode-selector {
-            position: absolute;
-            bottom: 100px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-        
-        .mode-btn {
-            color: white;
-            background-color: transparent;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            opacity: 0.7;
-        }
-        
-        .mode-active {
-            opacity: 1;
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-        
-        .zoom-controls {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
+            background: black;
+            z-index: 1000;
             display: flex;
             flex-direction: column;
-            gap: 10px;
         }
-        
-        .zoom-btn {
-            width: 40px;
-            height: 40px;
+
+        /* ... (Mantén todos los estilos de cámara del ejemplo anterior) ... */
+
+        /* Nuevos estilos para el flujo integrado */
+        .photo-counter {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            z-index: 10;
+        }
+
+        .btn-next {
+            position: absolute;
+            bottom: 5rem;
+            right: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
         }
     </style>
 </head>
 <body>
-    <div class="camera-container">
-        <!-- Controles superiores -->
-        <div class="top-controls">
-            <button class="btn flash-btn" id="flashBtn">⚡</button>
-            <button class="btn" id="settingsBtn">⚙️</button>
-        </div>
+    <!-- Contenedor de Cámara (visible primero) -->
+    <div class="camera-container" id="cameraContainer">
+        <button class="btn-close" id="btnClose">
+            <i class="fas fa-times"></i>
+        </button>
+        <button class="btn-flip" id="btnFlip">
+            <i class="fas fa-camera-retro"></i>
+        </button>
+        <video id="cameraView" autoplay playsinline></video>
+        <div class="flash" id="flashEffect"></div>
+        <div class="photo-counter" id="photoCounter">0/5 fotos</div>
         
-        <!-- Vista previa de la cámara -->
-        <div class="camera-preview">
-            <video id="videoElement" autoplay playsinline></video>
-            
-            <!-- Controles de zoom -->
-            <div class="zoom-controls">
-                <button class="btn zoom-btn" id="zoomIn">+</button>
-                <button class="btn zoom-btn" id="zoomOut">-</button>
-            </div>
-        </div>
-        
-        <!-- Selector de modo -->
-        <div class="mode-selector">
-            <button class="mode-btn mode-active">Foto</button>
-            <button class="mode-btn">Video</button>
-            <button class="mode-btn">Retrato</button>
-        </div>
-        
-        <!-- Controles inferiores -->
-        <div class="camera-controls">
-            <button class="btn" id="galleryBtn">
-                <div class="gallery-preview">
-                    <img src="https://via.placeholder.com/50" alt="Última foto">
-                </div>
+        <div class="controls">
+            <button class="btn-camera btn-capture" id="btnCapture">
+                <i class="fas fa-camera"></i>
             </button>
-            
-            <button class="btn btn-primary" id="captureBtn"></button>
-            
-            <button class="btn" id="flipBtn">🔄</button>
         </div>
+        
+        <button class="btn-next" id="btnNext" style="display: none;">
+            <i class="fas fa-check"></i>
+        </button>
+    </div>
+
+    <!-- Contenedor del Formulario (oculto inicialmente) -->
+    <div class="container" id="formContainer">
+        <header>
+            <div class="header-title">
+                <i class="fas fa-pallet"></i>
+                <h1>Carga de Tarimas</h1>
+            </div>
+        </header>
+
+        <form id="tarimaForm">
+            <div class="form-section">
+                <div class="form-group">
+                    <label for="tienda">Tienda</label>
+                    <select id="tienda" name="tienda" required>
+                        <option value="">Seleccionar</option>
+                        <option value="hogar1">Hogar 1</option>
+                        <option value="hogar2">Hogar 2</option>
+                        <option value="eplastik">Eplastik</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="numeroTarima">Número</label>
+                    <input type="number" id="numeroTarima" name="numeroTarima" required placeholder="Ej: 101">
+                </div>
+                
+                <div class="form-group">
+                    <label>Fecha de envío</label>
+                    <div class="form-value" id="fechaEnvioDisplay"></div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <div class="form-group">
+                    <label for="observaciones">Observaciones</label>
+                    <input type="text" id="observaciones" name="observaciones" placeholder="Opcional">
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <div class="preview-container" id="previewContainer"></div>
+            </div>
+            
+            <button type="submit" class="btn" style="width: 100%;">
+                <i class="fas fa-check icon"></i>
+                <span>Enviar tarima</span>
+            </button>
+        </form>
     </div>
 
     <script>
-        // Aquí iría la lógica JavaScript para controlar la cámara
+        // Variables globales
+        let capturedPhotos = [];
+        const MAX_PHOTOS = 5;
+
+        // Iniciar cámara al cargar
         document.addEventListener('DOMContentLoaded', function() {
-            // Elementos del DOM
-            const videoElement = document.getElementById('videoElement');
-            const flashBtn = document.getElementById('flashBtn');
-            const captureBtn = document.getElementById('captureBtn');
-            const flipBtn = document.getElementById('flipBtn');
-            const zoomInBtn = document.getElementById('zoomIn');
-            const zoomOutBtn = document.getElementById('zoomOut');
-            const modeButtons = document.querySelectorAll('.mode-btn');
+            startCameraFlow();
+        });
+
+        // ===== FUNCIONES DE CÁMARA =====
+        async function startCameraFlow() {
+            document.getElementById('cameraContainer').style.display = 'flex';
+            document.getElementById('formContainer').style.display = 'none';
             
-            // Variables de estado
-            let flashOn = false;
-            let currentCamera = 'user'; // 'user' o 'environment'
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment" },
+                    audio: false
+                });
+                document.getElementById('cameraView').srcObject = stream;
+                
+                // Event Listeners
+                document.getElementById('btnCapture').addEventListener('click', capturePhoto);
+                document.getElementById('btnFlip').addEventListener('click', flipCamera);
+                document.getElementById('btnNext').addEventListener('click', showForm);
+                document.getElementById('btnClose').addEventListener('click', () => {
+                    window.location.href = "index.html"; // Ajusta según tu flujo
+                });
+                
+            } catch (error) {
+                console.error("Error al acceder a la cámara:", error);
+                alert("No se pudo acceder a la cámara. Se usará el método tradicional.");
+                showForm(); // Fallback a formulario sin fotos
+            }
+        }
+
+        function capturePhoto() {
+            const cameraView = document.getElementById('cameraView');
+            const flashEffect = document.getElementById('flashEffect');
             
-            // Iniciar cámara
-            async function startCamera() {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({
-                        video: {
-                            facingMode: currentCamera,
-                            width: { ideal: 1920 },
-                            height: { ideal: 1080 }
-                        }
-                    });
-                    videoElement.srcObject = stream;
-                } catch (err) {
-                    console.error("Error al acceder a la cámara:", err);
-                    alert("No se pudo acceder a la cámara");
-                }
+            // Efecto flash
+            flashEffect.classList.add('flash-active');
+            setTimeout(() => flashEffect.classList.remove('flash-active'), 300);
+            
+            // Crear canvas para captura
+            const canvas = document.createElement('canvas');
+            canvas.width = cameraView.videoWidth;
+            canvas.height = cameraView.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(cameraView, 0, 0, canvas.width, canvas.height);
+            
+            // Guardar foto
+            capturedPhotos.push(canvas.toDataURL('image/jpeg'));
+            updatePhotoCounter();
+            
+            // Mostrar botón "Siguiente" si hay fotos
+            if (capturedPhotos.length > 0) {
+                document.getElementById('btnNext').style.display = 'flex';
             }
             
-            // Control del flash
-            flashBtn.addEventListener('click', function() {
-                flashOn = !flashOn;
-                flashBtn.classList.toggle('flash-active', flashOn);
-                // Aquí iría la lógica para activar el flash del dispositivo
+            // Si alcanzó el máximo, pasar al formulario
+            if (capturedPhotos.length >= MAX_PHOTOS) {
+                showForm();
+            }
+        }
+
+        function updatePhotoCounter() {
+            document.getElementById('photoCounter').textContent = 
+                `${capturedPhotos.length}/${MAX_PHOTOS} fotos`;
+        }
+
+        function flipCamera() {
+            // Implementa el cambio de cámara frontal/trasera
+            console.log("Cambiar cámara");
+        }
+
+        // ===== FUNCIONES DE FORMULARIO =====
+        function showForm() {
+            // Detener cámara
+            const stream = document.getElementById('cameraView').srcObject;
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            
+            // Ocultar cámara, mostrar formulario
+            document.getElementById('cameraContainer').style.display = 'none';
+            document.getElementById('formContainer').style.display = 'block';
+            
+            // Mostrar fotos capturadas
+            displayCapturedPhotos();
+            
+            // Configurar fecha actual
+            const now = new Date();
+            document.getElementById('fechaEnvioDisplay').textContent = 
+                now.toLocaleDateString('es-ES') + ' ' + now.toLocaleTimeString().slice(0, 5);
+            
+            // Configurar envío del formulario
+            document.getElementById('tarimaForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitFormData();
+            });
+        }
+
+        function displayCapturedPhotos() {
+            const previewContainer = document.getElementById('previewContainer');
+            previewContainer.innerHTML = '';
+            
+            capturedPhotos.forEach((photoData, index) => {
+                const previewItem = document.createElement('div');
+                previewItem.className = 'preview-item';
+                previewItem.innerHTML = `
+                    <img src="${photoData}">
+                    <button class="remove-btn" onclick="removePhoto(${index})">×</button>
+                `;
+                previewContainer.appendChild(previewItem);
+            });
+        }
+
+        function removePhoto(index) {
+            capturedPhotos.splice(index, 1);
+            displayCapturedPhotos();
+        }
+
+        function submitFormData() {
+            // Aquí implementarías el envío al servidor
+            const formData = {
+                tienda: document.getElementById('tienda').value,
+                numeroTarima: document.getElementById('numeroTarima').value,
+                observaciones: document.getElementById('observaciones').value,
+                fotos: capturedPhotos // Array de Data URLs
+            };
+            
+            console.log("Datos a enviar:", {
+                ...formData,
+                fotos: `${formData.fotos.length} imágenes`
             });
             
-            // Capturar foto
-            captureBtn.addEventListener('click', function() {
-                // Simulación de captura
-                this.style.transform = 'scale(0.8)';
-                setTimeout(() => {
-                    this.style.transform = 'scale(1)';
-                }, 200);
-                
-                // Aquí iría la lógica para capturar la foto
-                console.log("Foto capturada!");
-            });
+            // Simular envío
+            alert(`Tarima ${formData.numeroTarima} enviada con ${formData.fotos.length} fotos`);
             
-            // Cambiar cámara frontal/trasera
-            flipBtn.addEventListener('click', function() {
-                currentCamera = currentCamera === 'user' ? 'environment' : 'user';
-                startCamera();
-            });
-            
-            // Cambiar modo (Foto, Video, Retrato)
-            modeButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    modeButtons.forEach(b => b.classList.remove('mode-active'));
-                    this.classList.add('mode-active');
-                });
-            });
-            
-            // Zoom
-            zoomInBtn.addEventListener('click', function() {
-                console.log("Zoom in");
-            });
-            
-            zoomOutBtn.addEventListener('click', function() {
-                console.log("Zoom out");
-            });
-            
-            // Iniciar la cámara al cargar
-            startCamera();
-        });
+            // Resetear flujo
+            capturedPhotos = [];
+            startCameraFlow();
+        }
+
+        // Hacer accesible desde HTML
+        window.removePhoto = removePhoto;
     </script>
 </body>
 </html>
