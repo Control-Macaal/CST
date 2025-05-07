@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cámara Móvil</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        body {
+            background-color: #000;
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .camera-container {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .camera-preview {
+            flex-grow: 1;
+            background-color: #222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #videoElement {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .camera-controls {
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        
+        .top-controls {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 10;
+        }
+        
+        .btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn:active {
+            transform: scale(0.9);
+        }
+        
+        .btn-primary {
+            width: 70px;
+            height: 70px;
+            border: 4px solid white;
+            background-color: transparent;
+        }
+        
+        .btn-primary:active {
+            transform: scale(0.95);
+        }
+        
+        .btn-circle {
+            border-radius: 50%;
+        }
+        
+        .flash-btn {
+            position: relative;
+        }
+        
+        .flash-active {
+            color: #FFD700;
+        }
+        
+        .gallery-preview {
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+        }
+        
+        .gallery-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .mode-selector {
+            position: absolute;
+            bottom: 100px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .mode-btn {
+            color: white;
+            background-color: transparent;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            opacity: 0.7;
+        }
+        
+        .mode-active {
+            opacity: 1;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .zoom-controls {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="camera-container">
+        <!-- Controles superiores -->
+        <div class="top-controls">
+            <button class="btn flash-btn" id="flashBtn">⚡</button>
+            <button class="btn" id="settingsBtn">⚙️</button>
+        </div>
+        
+        <!-- Vista previa de la cámara -->
+        <div class="camera-preview">
+            <video id="videoElement" autoplay playsinline></video>
+            
+            <!-- Controles de zoom -->
+            <div class="zoom-controls">
+                <button class="btn zoom-btn" id="zoomIn">+</button>
+                <button class="btn zoom-btn" id="zoomOut">-</button>
+            </div>
+        </div>
+        
+        <!-- Selector de modo -->
+        <div class="mode-selector">
+            <button class="mode-btn mode-active">Foto</button>
+            <button class="mode-btn">Video</button>
+            <button class="mode-btn">Retrato</button>
+        </div>
+        
+        <!-- Controles inferiores -->
+        <div class="camera-controls">
+            <button class="btn" id="galleryBtn">
+                <div class="gallery-preview">
+                    <img src="https://via.placeholder.com/50" alt="Última foto">
+                </div>
+            </button>
+            
+            <button class="btn btn-primary" id="captureBtn"></button>
+            
+            <button class="btn" id="flipBtn">🔄</button>
+        </div>
+    </div>
+
+    <script>
+        // Aquí iría la lógica JavaScript para controlar la cámara
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos del DOM
+            const videoElement = document.getElementById('videoElement');
+            const flashBtn = document.getElementById('flashBtn');
+            const captureBtn = document.getElementById('captureBtn');
+            const flipBtn = document.getElementById('flipBtn');
+            const zoomInBtn = document.getElementById('zoomIn');
+            const zoomOutBtn = document.getElementById('zoomOut');
+            const modeButtons = document.querySelectorAll('.mode-btn');
+            
+            // Variables de estado
+            let flashOn = false;
+            let currentCamera = 'user'; // 'user' o 'environment'
+            
+            // Iniciar cámara
+            async function startCamera() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            facingMode: currentCamera,
+                            width: { ideal: 1920 },
+                            height: { ideal: 1080 }
+                        }
+                    });
+                    videoElement.srcObject = stream;
+                } catch (err) {
+                    console.error("Error al acceder a la cámara:", err);
+                    alert("No se pudo acceder a la cámara");
+                }
+            }
+            
+            // Control del flash
+            flashBtn.addEventListener('click', function() {
+                flashOn = !flashOn;
+                flashBtn.classList.toggle('flash-active', flashOn);
+                // Aquí iría la lógica para activar el flash del dispositivo
+            });
+            
+            // Capturar foto
+            captureBtn.addEventListener('click', function() {
+                // Simulación de captura
+                this.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 200);
+                
+                // Aquí iría la lógica para capturar la foto
+                console.log("Foto capturada!");
+            });
+            
+            // Cambiar cámara frontal/trasera
+            flipBtn.addEventListener('click', function() {
+                currentCamera = currentCamera === 'user' ? 'environment' : 'user';
+                startCamera();
+            });
+            
+            // Cambiar modo (Foto, Video, Retrato)
+            modeButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    modeButtons.forEach(b => b.classList.remove('mode-active'));
+                    this.classList.add('mode-active');
+                });
+            });
+            
+            // Zoom
+            zoomInBtn.addEventListener('click', function() {
+                console.log("Zoom in");
+            });
+            
+            zoomOutBtn.addEventListener('click', function() {
+                console.log("Zoom out");
+            });
+            
+            // Iniciar la cámara al cargar
+            startCamera();
+        });
+    </script>
+</body>
+</html>
