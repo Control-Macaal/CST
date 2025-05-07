@@ -65,6 +65,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
         }
 
         .logo {
@@ -88,6 +90,19 @@
             font-weight: 600;
             font-size: 1.1rem;
             color: var(--dark);
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
         }
 
         /* Contenedores de pantalla */
@@ -318,6 +333,21 @@
             transform: translateY(0);
         }
 
+        .btn-secondary {
+            background-color: var(--gray-light);
+            color: var(--dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--gray);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
         .btn-block {
             display: flex;
             width: 100%;
@@ -385,6 +415,13 @@
             margin-bottom: 1.5rem;
         }
 
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
         /* Animations */
         @keyframes pulse {
             0% { transform: scale(1); }
@@ -421,6 +458,9 @@
                 </div>
                 <span class="logo-text">Carga de Tarimas</span>
             </div>
+            <button class="btn-icon" id="btnHelp">
+                <i class="fas fa-question-circle"></i>
+            </button>
         </header>
 
         <!-- Pantalla de Cámara -->
@@ -458,6 +498,10 @@
 
         <!-- Pantalla de Formulario -->
         <div class="screen" id="formScreen">
+            <button class="btn-icon" id="btnBack" style="align-self: flex-start; margin-bottom: 1rem;">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            
             <div class="form-section">
                 <h3 class="form-title"><i class="fas fa-clipboard-list"></i> Datos de la tarima</h3>
                 
@@ -510,10 +554,17 @@
                 </button>
             </div>
             
-            <button class="btn btn-primary btn-block" id="btnSubmit">
-                <i class="fas fa-paper-plane"></i>
-                <span>Enviar registro</span>
-            </button>
+            <div class="action-buttons">
+                <button class="btn btn-secondary" id="btnRetakePhotos">
+                    <i class="fas fa-camera-retro"></i>
+                    <span>Volver a tomar fotos</span>
+                </button>
+                
+                <button class="btn btn-primary" id="btnSubmit">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Enviar</span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -536,6 +587,8 @@
             btnFlipCamera: document.getElementById('btnFlipCamera'),
             btnFlash: document.getElementById('btnFlash'),
             btnContinue: document.getElementById('btnContinue'),
+            btnBack: document.getElementById('btnBack'),
+            btnRetakePhotos: document.getElementById('btnRetakePhotos'),
             photoCounter: document.getElementById('photoCounter'),
             photosPreview: document.getElementById('photosPreview'),
             flashEffect: document.getElementById('flashEffect'),
@@ -544,7 +597,8 @@
             progressContainer: document.getElementById('progressContainer'),
             progressBar: document.getElementById('progressBar'),
             confirmation: document.getElementById('confirmation'),
-            btnNewRegister: document.getElementById('btnNewRegister')
+            btnNewRegister: document.getElementById('btnNewRegister'),
+            btnHelp: document.getElementById('btnHelp')
         };
 
         // Inicialización
@@ -595,8 +649,11 @@
             elements.btnContinue.addEventListener('click', showFormScreen);
             
             // Formulario
+            elements.btnBack.addEventListener('click', returnToCamera);
+            elements.btnRetakePhotos.addEventListener('click', returnToCamera);
             elements.btnSubmit.addEventListener('click', submitForm);
             elements.btnNewRegister.addEventListener('click', resetApp);
+            elements.btnHelp.addEventListener('click', showHelp);
         }
 
         function capturePhoto() {
@@ -704,6 +761,24 @@
             renderPhotos();
         }
 
+        function returnToCamera() {
+            // Mantenemos las fotos actuales pero permitimos tomar más
+            elements.formScreen.classList.remove('active');
+            elements.cameraScreen.classList.add('active');
+            
+            // Reiniciamos la cámara
+            if (state.stream) {
+                state.stream.getTracks().forEach(track => track.stop());
+            }
+            setupCamera();
+            
+            // Actualizamos el contador
+            updatePhotoCounter();
+            
+            // Habilitamos continuar si ya hay fotos
+            elements.btnContinue.disabled = state.photos.length === 0;
+        }
+
         function renderPhotos() {
             elements.photosPreview.innerHTML = '';
             
@@ -755,6 +830,7 @@
             // Mostrar progreso
             elements.progressContainer.style.display = 'block';
             elements.btnSubmit.disabled = true;
+            document.querySelector('.action-buttons').style.display = 'none';
             
             // Simular envío (reemplazar con tu lógica real)
             simulateUpload();
@@ -795,6 +871,7 @@
             // Ocultar confirmación
             elements.confirmation.style.display = 'none';
             elements.btnSubmit.style.display = 'flex';
+            document.querySelector('.action-buttons').style.display = 'flex';
             
             // Volver a cámara
             elements.formScreen.classList.remove('active');
@@ -809,6 +886,10 @@
             // Resetear contador
             updatePhotoCounter();
             elements.btnContinue.disabled = true;
+        }
+
+        function showHelp() {
+            alert("Ayuda:\n1. Toma fotos de la tarima con el botón central\n2. Completa los datos requeridos\n3. Envía el registro cuando esté listo\n\nPuedes volver a tomar fotos en cualquier momento.");
         }
 
         // Hacer funciones accesibles globalmente
