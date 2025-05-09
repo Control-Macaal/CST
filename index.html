@@ -17,39 +17,40 @@
         
         .loading-container {
             text-align: center;
-            max-width: 300px;
-            padding: 30px;
+            max-width: 400px;
+            padding: 40px;
         }
         
         .logo {
-            width: 120px;
+            width: 200px;  /* Tamaño aumentado del logo */
             height: auto;
-            margin-bottom: 25px;
+            margin-bottom: 35px;
             animation: fadeIn 0.5s ease-out;
         }
         
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #e0e7ff;
+            width: 80px;   /* Spinner más grande */
+            height: 80px;  /* Spinner más grande */
+            border: 8px solid #e0e7ff;  /* Borde más grueso */
             border-radius: 50%;
             border-top-color: #4361ee;
             animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            margin: 0 auto 30px;  /* Más margen */
         }
         
         .loading-text {
             color: #2b2d42;
-            font-size: 1.1rem;
-            margin-top: 20px;
-            font-weight: 500;
+            font-size: 1.5rem;  /* Texto más grande */
+            margin-top: 30px;
+            font-weight: 600;    /* Más negrita */
             opacity: 0.9;
         }
         
         .progress-text {
             color: #64748b;
-            font-size: 0.9rem;
-            margin-top: 10px;
+            font-size: 1.2rem;   /* Texto más grande */
+            margin-top: 15px;
+            font-weight: 500;
         }
         
         @keyframes spin {
@@ -57,7 +58,7 @@
         }
         
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(20px); }  /* Mayor desplazamiento */
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
@@ -101,13 +102,13 @@
 </head>
 <body>
     <div class="loading-container">
-        <!-- Logo de la aplicación -->
+        <!-- Logo de la aplicación - Ahora más grande -->
         <img src="images/logo/logo.png" alt="Logo Control de Traslados" class="logo">
         
-        <!-- Spinner de carga -->
+        <!-- Spinner de carga - Ahora más grande -->
         <div class="spinner"></div>
         
-        <!-- Textos -->
+        <!-- Textos - Ahora más grandes -->
         <div class="loading-text">Inicializando sistema...</div>
         <div class="progress-text" id="progressText">Iniciando en 2 segundos...</div>
     </div>
