@@ -321,6 +321,15 @@
             margin-top: 0.5rem;
         }
 
+        /* Content Sections */
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
         /* Responsive */
         @media (min-width: 768px) {
             .mobile-container {
@@ -371,139 +380,165 @@
             </div>
         </header>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Sección de Acciones Rápidas -->
-            <div class="quick-actions">
-                <button class="quick-btn" onclick="openFormModal('th1')">
+        <!-- Main Content Sections -->
+        <div class="main-content">
+            <!-- Sección Registrar (Inicio) -->
+            <div id="registrarSection" class="content-section active">
+                <h2 class="section-title">
                     <i class="fas fa-file-import"></i>
-                    <span>TH1</span>
-                </button>
-                <button class="quick-btn" onclick="openFormModal('th2')">
-                    <i class="fas fa-file-import"></i>
-                    <span>TH2</span>
-                </button>
-                <button class="quick-btn" onclick="openFormModal('eplastik')">
-                    <i class="fas fa-file-import"></i>
-                    <span>Eplastik</span>
-                </button>
-            </div>
-
-            <!-- Sección Principal -->
-            <h2 class="section-title">
-                <i class="fas fa-tasks"></i>
-                Módulos
-            </h2>
-            
-            <div class="cards-grid">
-                <!-- Card Registrar -->
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">
-                            <i class="fas fa-plus"></i>
-                        </div>
-                        <h3 class="card-title">Registrar</h3>
-                    </div>
-                    <div class="card-body">
-                        <button class="action-btn" onclick="openFormModal('th1')">
-                            <i class="fas fa-file-import"></i>
-                            Todo Hogar 1
-                        </button>
-                        <button class="action-btn" onclick="openFormModal('th2')">
-                            <i class="fas fa-file-import"></i>
-                            Todo Hogar 2
-                        </button>
-                        <button class="action-btn" onclick="openFormModal('eplastik')">
-                            <i class="fas fa-file-import"></i>
-                            Eplastik
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Card Consultar -->
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">
-                            <i class="fas fa-search"></i>
-                        </div>
-                        <h3 class="card-title">Consultar</h3>
-                    </div>
-                    <div class="card-body">
-                        <button class="action-btn" onclick="requestPin('view_th1')">
-                            <i class="fas fa-file-alt"></i>
-                            Ver TH1
-                        </button>
-                        <button class="action-btn" onclick="requestPin('view_th2')">
-                            <i class="fas fa-file-alt"></i>
-                            Ver TH2
-                        </button>
-                        <button class="action-btn" onclick="requestPin('view_eplastik')">
-                            <i class="fas fa-file-alt"></i>
-                            Ver Eplastik
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Card Bodega (condicional) -->
-                <div id="bodegaCard" class="card" style="display: none;">
-                    <div class="card-header">
-                        <div class="card-icon">
-                            <i class="fas fa-warehouse"></i>
-                        </div>
-                        <h3 class="card-title">Bodega</h3>
-                    </div>
-                    <div class="card-body">
-                        <button class="action-btn" onclick="window.open('productos_faltantes.html', '_self')">
-                            <i class="fas fa-boxes"></i>
-                            Productos Faltantes
-                        </button>
-                        <button class="action-btn" onclick="window.open('diferencia_ajustes.html', '_self')">
-                            <i class="fas fa-boxes"></i>
-                            Dif. Precio Ajuste
-                        </button>
-                    </div>
-                </div>
-            </div>
-<!-- Otras Funciones -->
-            <h2 class="section-title">
-                <i class="fas fa-cogs"></i>
-                Herramientas
-            </h2>
-            
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon">
-                        <i class="fas fa-tools"></i>
-                    </div>
-                    <h3 class="card-title">Utilidades</h3>
-                </div>
-                <div class="btn-grid">
-                    <button class="btn btn-secondary" onclick="window.open('catalogos.html', '_self')">
-                        <i class="fas fa-book"></i>
-                        Catálogos
+                    Registrar Traslados
+                </h2>
+                
+                <div class="quick-actions">
+                    <button class="quick-btn" onclick="openFormModal('th1')">
+                        <i class="fas fa-file-import"></i>
+                        <span>TH1</span>
                     </button>
-                    <button class="btn btn-danger" onclick="showVersionModal()">
-                        <i class="fas fa-info-circle"></i>
-                        Versión
+                    <button class="quick-btn" onclick="openFormModal('th2')">
+                        <i class="fas fa-file-import"></i>
+                        <span>TH2</span>
+                    </button>
+                    <button class="quick-btn" onclick="openFormModal('eplastik')">
+                        <i class="fas fa-file-import"></i>
+                        <span>Eplastik</span>
                     </button>
                 </div>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-file-import"></i>
+                            </div>
+                            <h3 class="card-title">Registros Rápidos</h3>
+                        </div>
+                        <div class="card-body">
+                            <button class="action-btn" onclick="openFormModal('th1')">
+                                <i class="fas fa-file-import"></i>
+                                Registrar TH1
+                            </button>
+                            <button class="action-btn" onclick="openFormModal('th2')">
+                                <i class="fas fa-file-import"></i>
+                                Registrar TH2
+                            </button>
+                            <button class="action-btn" onclick="openFormModal('eplastik')">
+                                <i class="fas fa-file-import"></i>
+                                Registrar Eplastik
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-        </main>
+            <!-- Sección Consultar -->
+            <div id="consultarSection" class="content-section">
+                <h2 class="section-title">
+                    <i class="fas fa-search"></i>
+                    Consultar Registros
+                </h2>
+                
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <h3 class="card-title">Registros Existentes</h3>
+                        </div>
+                        <div class="card-body">
+                            <button class="action-btn" onclick="requestPin('view_th1')">
+                                <i class="fas fa-search"></i>
+                                Consultar TH1
+                            </button>
+                            <button class="action-btn" onclick="requestPin('view_th2')">
+                                <i class="fas fa-search"></i>
+                                Consultar TH2
+                            </button>
+                            <button class="action-btn" onclick="requestPin('view_eplastik')">
+                                <i class="fas fa-search"></i>
+                                Consultar Eplastik
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Bodega (solo visible para usuarios de bodega) -->
+            <div id="bodegaSection" class="content-section" style="display: none;">
+                <h2 class="section-title">
+                    <i class="fas fa-warehouse"></i>
+                    Módulo de Bodega
+                </h2>
+                
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-boxes"></i>
+                            </div>
+                            <h3 class="card-title">Operaciones de Bodega</h3>
+                        </div>
+                        <div class="card-body">
+                            <button class="action-btn" onclick="window.open('productos_faltantes.html', '_self')">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Productos Faltantes
+                            </button>
+                            <button class="action-btn" onclick="window.open('diferencia_ajustes.html', '_self')">
+                                <i class="fas fa-calculator"></i>
+                                Dif. Precio Ajuste
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Herramientas -->
+            <div id="herramientasSection" class="content-section">
+                <h2 class="section-title">
+                    <i class="fas fa-tools"></i>
+                    Herramientas
+                </h2>
+                
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <h3 class="card-title">Utilidades</h3>
+                        </div>
+                        <div class="card-body">
+                            <button class="action-btn" onclick="window.open('catalogos.html', '_self')">
+                                <i class="fas fa-book"></i>
+                                Catálogos
+                            </button>
+                            <button class="action-btn" onclick="showVersionModal()">
+                                <i class="fas fa-info-circle"></i>
+                                Versión
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Bottom Navigation -->
         <nav class="bottom-nav">
-            <a href="#" class="nav-item active">
-                <i class="fas fa-home"></i>
-                <span>Inicio</span>
+            <a href="#" class="nav-item active" onclick="showSection('registrarSection', this)">
+                <i class="fas fa-file-import"></i>
+                <span>Registrar</span>
             </a>
-            <a href="#" class="nav-item" onclick="requestPin('view_th1')">
+            <a href="#" class="nav-item" onclick="showSection('consultarSection', this)">
                 <i class="fas fa-search"></i>
                 <span>Consultar</span>
             </a>
-            <a href="#" class="nav-item" onclick="showMoreOptions()">
-                <i class="fas fa-ellipsis-h"></i>
-                <span>Más</span>
+            <a href="#" id="bodegaNavItem" class="nav-item" onclick="showSection('bodegaSection', this)" style="display: none;">
+                <i class="fas fa-warehouse"></i>
+                <span>Bodega</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showSection('herramientasSection', this)">
+                <i class="fas fa-tools"></i>
+                <span>Herramientas</span>
             </a>
         </nav>
     </div>
@@ -547,9 +582,13 @@
                     role: currentUserRole
                 }));
                 
-                // Mostrar/ocultar card de bodega
+                // Mostrar/ocultar sección de bodega según el usuario
                 if (password.toLowerCase() === 'bodega') {
-                    document.getElementById('bodegaCard').style.display = 'block';
+                    document.getElementById('bodegaSection').style.display = 'block';
+                    document.getElementById('bodegaNavItem').style.display = 'flex';
+                } else {
+                    document.getElementById('bodegaSection').style.display = 'none';
+                    document.getElementById('bodegaNavItem').style.display = 'none';
                 }
                 
                 document.getElementById('loginScreen').style.display = 'none';
@@ -587,8 +626,25 @@
             alert('No hay notificaciones nuevas');
         }
 
-        function showMoreOptions() {
-            alert('Opciones adicionales:\n1. Catálogos\n2. Configuración');
+        function showVersionModal() {
+            alert("Versión 1.0.0\nÚltima actualización: 10/05/2024");
+        }
+
+        // Mostrar sección seleccionada
+        function showSection(sectionId, clickedElement) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Mostrar la sección seleccionada
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Actualizar navegación activa
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            clickedElement.classList.add('active');
         }
 
         // Toggle para mostrar/ocultar contraseña
@@ -612,9 +668,16 @@
                 const { auth, role } = JSON.parse(savedAuth);
                 if (USER_PERMISSIONS[auth]) {
                     currentUserRole = role;
+                    
+                    // Mostrar/ocultar sección de bodega según el usuario
                     if (auth.toLowerCase() === 'bodega') {
-                        document.getElementById('bodegaCard').style.display = 'block';
+                        document.getElementById('bodegaSection').style.display = 'block';
+                        document.getElementById('bodegaNavItem').style.display = 'flex';
+                    } else {
+                        document.getElementById('bodegaSection').style.display = 'none';
+                        document.getElementById('bodegaNavItem').style.display = 'none';
                     }
+                    
                     document.getElementById('loginScreen').style.display = 'none';
                     document.getElementById('mobileDashboard').style.display = 'block';
                 }
