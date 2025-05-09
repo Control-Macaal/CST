@@ -2,6 +2,43 @@
 <html>
 <head>
     <title>Redirección Control de Traslados</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f8f9fa;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            flex-direction: column;
+        }
+        
+        .spinner-container {
+            text-align: center;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #e0e7ff;
+            border-radius: 50%;
+            border-top-color: #4361ee;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            color: #2b2d42;
+            font-size: 1.2rem;
+            margin-top: 20px;
+        }
+    </style>
     <script>
         // Función para detectar si es dispositivo móvil
         function isMobileDevice() {
@@ -10,11 +47,14 @@
         
         // Redirigir según el dispositivo
         function redirectToProperVersion() {
-            if (isMobileDevice()) {
-                window.location.href = "mobile.html";
-            } else {
-                window.location.href = "pc.html";
-            }
+            // Pequeño retraso para que se vea el spinner
+            setTimeout(function() {
+                if (isMobileDevice()) {
+                    window.location.href = "mobile.html";
+                } else {
+                    window.location.href = "pc.html";
+                }
+            }, 800); // 0.8 segundos de delay
         }
         
         // Ejecutar al cargar
@@ -22,6 +62,9 @@
     </script>
 </head>
 <body>
-    <p>Redirigiendo a la versión adecuada para tu dispositivo...</p>
+    <div class="spinner-container">
+        <div class="spinner"></div>
+        <div class="loading-text">Cargando la aplicación...</div>
+    </div>
 </body>
 </html>
