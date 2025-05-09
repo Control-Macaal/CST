@@ -1,1 +1,813 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Control de Traslados Móvil</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #e0e7ff;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --dark: #1b263b;
+            --light: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #2b2d42;
+            --text-light: #64748b;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --border-radius: 12px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --transition: all 0.2s ease;
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f7fa;
+            color: var(--text);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        /* App Container */
+        .mobile-container {
+            max-width: 100%;
+            min-height: 100vh;
+            padding-bottom: 60px;
+            position: relative;
+        }
+
+        /* Header */
+        .mobile-header {
+            background: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .logo i {
+            color: var(--primary);
+        }
+
+        .user-menu {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary-light);
+            color: var(--primary);
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-light);
+            font-size: 0.75rem;
+            gap: 0.25rem;
+            padding: 0.5rem;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item i {
+            font-size: 1.25rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--dark);
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.25rem;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--primary-light);
+            border-radius: var(--border-radius);
+            color: var(--primary);
+            font-weight: 500;
+            border: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .action-btn i {
+            font-size: 1rem;
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+            background: #dbe4ff;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .quick-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .quick-btn:active {
+            transform: scale(0.98);
+        }
+
+        .quick-btn i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .quick-btn span {
+            font-size: 0.85rem;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        /* Login Screen */
+        .login-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1.5rem;
+            background: white;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+        }
+
+        .login-title {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .login-title i {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 1rem;
+            padding-right: 40px;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* Modal de Registro Pantalla Completa */
+        .fullscreen-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            z-index: 100;
+            padding: 1rem;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+
+        /* Spinner de carga */
+        .spinner-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--primary-light);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .mobile-container {
+                max-width: 480px;
+                margin: 0 auto;
+                border-left: 1px solid #e2e8f0;
+                border-right: 1px solid #e2e8f0;
+            }
+            
+            .fullscreen-modal {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Pantalla de Login -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-card">
+            <h1 class="login-title">
+                <i class="fas fa-truck-loading"></i>
+                Control de Traslados
+            </h1>
+            <div class="input-group">
+                <input type="password" id="loginInput" class="login-input" placeholder="Ingrese la contraseña">
+                <button class="toggle-password" id="togglePassword">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+            <div id="loginError" style="color: var(--danger); margin-bottom: 1rem; text-align: center;"></div>
+            <button class="login-btn" onclick="checkLogin()">
+                Ingresar
+            </button>
+        </div>
+    </div>
+
+    <!-- Dashboard Móvil -->
+    <div id="mobileDashboard" class="mobile-container" style="display: none;">
+        <!-- Header -->
+        <header class="mobile-header">
+            <div class="logo">
+                <i class="fas fa-truck-loading"></i>
+                <span>Control de Traslados</span>
+            </div>
+            <div class="user-menu">
+                <button class="icon-btn" onclick="showNotifications()">
+                    <i class="fas fa-bell"></i>
+                </button>
+                <button class="icon-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Sections -->
+        <div class="main-content">
+            <!-- Sección Registrar (Inicio) -->
+            <div id="registrarSection" class="content-section active">
+                <h2 class="section-title">
+                    <i class="fas fa-file-import"></i>
+                    Registrar Traslados
+                </h2>
+                
+                <div class="quick-actions">
+                    <button class="quick-btn" onclick="openFullscreenModal('th1')">
+                        <i class="fas fa-file-import"></i>
+                        <span>TH1</span>
+                    </button>
+                    <button class="quick-btn" onclick="openFullscreenModal('th2')">
+                        <i class="fas fa-file-import"></i>
+                        <span>TH2</span>
+                    </button>
+                    <button class="quick-btn" onclick="openFullscreenModal('eplastik')">
+                        <i class="fas fa-file-import"></i>
+                        <span>Eplastik</span>
+                    </button>
+                </div>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-file-import"></i>
+                            </div>
+                            <h3 class="card-title">Registros Rápidos</h3>
+                        </div>
+                        <div class="card-body">
+                            <button class="action-btn" onclick="openFullscreenModal('th1')">
+                                <i class="fas fa-file-import"></i>
+                                Registrar TH1
+                            </button>
+                            <button class="action-btn" onclick="openFullscreenModal('th2')">
+                                <i class="fas fa-file-import"></i>
+                                Registrar TH2
+                            </button>
+                            <button class="action-btn" onclick="openFullscreenModal('eplastik')">
+                                <i class="fas fa-file-import"></i>
+                                Registrar Eplastik
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Consultar -->
+            <div id="consultarSection" class="content-section">
+                <h2 class="section-title">
+                    <i class="fas fa-search"></i>
+                    Consultar Registros
+                </h2>
+                
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <h3 class="card-title">Registros Existentes</h3>
+                        </div>
+                        <div class="card-body">
+                            <button class="action-btn" onclick="requestPin('view_th1')">
+                                <i class="fas fa-search"></i>
+                                Consultar TH1
+                            </button>
+                            <button class="action-btn" onclick="requestPin('view_th2')">
+                                <i class="fas fa-search"></i>
+                                Consultar TH2
+                            </button>
+                            <button class="action-btn" onclick="requestPin('view_eplastik')">
+                                <i class="fas fa-search"></i>
+                                Consultar Eplastik
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Bodega -->
+            <div id="bodegaSection" class="content-section">
+                <h2 class="section-title">
+                    <i class="fas fa-warehouse"></i>
+                    Módulo de Bodega
+                </h2>
+                
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-boxes"></i>
+                            </div>
+                            <h3 class="card-title">Operaciones de Bodega</h3>
+                        </div>
+                        <div class="card-body">
+                            <button class="action-btn" onclick="window.open('productos_faltantes.html', '_self')">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Productos Faltantes
+                            </button>
+                            <button class="action-btn" onclick="window.open('diferencia_ajustes.html', '_self')">
+                                <i class="fas fa-calculator"></i>
+                                Dif. Precio Ajuste
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Herramientas -->
+            <div id="herramientasSection" class="content-section">
+                <h2 class="section-title">
+                    <i class="fas fa-tools"></i>
+                    Herramientas
+                </h2>
+                
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <h3 class="card-title">Utilidades</h3>
+                        </div>
+                        <div class="card-body">
+                            <button class="action-btn" onclick="window.open('catalogos.html', '_self')">
+                                <i class="fas fa-book"></i>
+                                Catálogos
+                            </button>
+                            <button class="action-btn" onclick="showVersionModal()">
+                                <i class="fas fa-info-circle"></i>
+                                Versión
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item active" onclick="showSection('registrarSection', this)">
+                <i class="fas fa-file-import"></i>
+                <span>Registrar</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showSection('consultarSection', this)">
+                <i class="fas fa-search"></i>
+                <span>Consultar</span>
+            </a>
+            <a href="#" id="bodegaNavItem" class="nav-item" onclick="showSection('bodegaSection', this)" style="display: none;">
+                <i class="fas fa-warehouse"></i>
+                <span>Bodega</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showSection('herramientasSection', this)">
+                <i class="fas fa-tools"></i>
+                <span>Herramientas</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Modal de Registro Pantalla Completa -->
+    <div id="registroModal" class="fullscreen-modal">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modalFormTitle">Registro</h3>
+            <button class="close-modal" onclick="closeFullscreenModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div id="modalFormContainer">
+            <!-- Spinner de carga -->
+            <div id="loadingSpinner" class="spinner-container">
+                <div class="spinner"></div>
+            </div>
+            
+            <!-- Contenedor del iframe (oculto inicialmente) -->
+            <iframe id="formIframe" style="width: 100%; height: calc(100vh - 100px); border: none; display: none;"></iframe>
+        </div>
+    </div>
+
+    <script>
+        // Configuración
+        const USER_PERMISSIONS = {
+            'hogar': 'admin',
+            'Hogar': 'admin',
+            'bodega': 'viewer',
+            'Bodega': 'viewer'
+        };
+        
+        const VIEW_PIN = '1901';
+        const STORAGE_KEY = 'traslados_auth';
+        let currentUserRole = '';
+        
+        // URLs de formularios
+        const FORM_URLS = {
+            th1: 'https://tally.so/r/nPkaye',
+            th2: 'https://tally.so/r/wbv0ML',
+            eplastik: 'https://tally.so/r/3161Yp'
+        };
+        
+        // URLs de visualización
+        const VIEW_URLS = {
+            view_th1: 'https://drive.google.com/drive/folders/1CzeWbDpsRtVorL5vLq3K6CRnkqAe8O0F?usp=sharing',
+            view_th2: 'https://drive.google.com/drive/folders/1uZew6baLcXot5RxytNAjilkzDeoySVJK?usp=sharing',
+            view_eplastik: 'https://drive.google.com/drive/folders/15t0p44lnSNqXb0jKIkenNkKFPqFe9i_g?usp=sharing'
+        };
+
+        // Funciones principales
+        function checkLogin() {
+            const password = document.getElementById('loginInput').value.trim();
+            const errorElement = document.getElementById('loginError');
+            
+            if (USER_PERMISSIONS[password]) {
+                currentUserRole = USER_PERMISSIONS[password];
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    auth: password,
+                    role: currentUserRole
+                }));
+                
+                // Control de visibilidad del módulo Bodega
+                const isBodegaUser = password.toLowerCase() === 'bodega';
+                document.getElementById('bodegaNavItem').style.display = isBodegaUser ? 'flex' : 'none';
+                
+                // Si es usuario bodega, mostrar directamente esa sección
+                if (isBodegaUser) {
+                    showSection('bodegaSection', document.getElementById('bodegaNavItem'));
+                }
+                
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mobileDashboard').style.display = 'block';
+            } else {
+                errorElement.textContent = 'Contraseña incorrecta';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem(STORAGE_KEY);
+            document.getElementById('mobileDashboard').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('loginInput').value = '';
+        }
+
+        function openFullscreenModal(formType) {
+            if (currentUserRole === 'viewer') {
+                alert('No tiene permisos para esta función');
+                return;
+            }
+            
+            // Configurar el título del modal según el formulario
+            let formTitle = '';
+            switch(formType) {
+                case 'th1':
+                    formTitle = 'Registro Todo Hogar 1';
+                    break;
+                case 'th2':
+                    formTitle = 'Registro Todo Hogar 2';
+                    break;
+                case 'eplastik':
+                    formTitle = 'Registro Eplastik';
+                    break;
+            }
+            
+            // Mostrar el modal y el spinner
+            document.getElementById('modalFormTitle').textContent = formTitle;
+            document.getElementById('registroModal').style.display = 'block';
+            document.getElementById('loadingSpinner').style.display = 'flex';
+            document.getElementById('formIframe').style.display = 'none';
+            document.body.style.overflow = 'hidden';
+            
+            // Cargar el iframe
+            const iframe = document.getElementById('formIframe');
+            iframe.src = FORM_URLS[formType];
+            
+            // Cuando el iframe termine de cargar
+            iframe.onload = function() {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                iframe.style.display = 'block';
+            };
+        }
+
+        function closeFullscreenModal() {
+            document.getElementById('registroModal').style.display = 'none';
+            document.getElementById('formIframe').src = '';
+            document.body.style.overflow = 'auto';
+        }
+
+        function requestPin(action) {
+            const pin = prompt('Ingrese el PIN de visualización:');
+            if (pin === VIEW_PIN) {
+                window.open(VIEW_URLS[action], '_blank');
+            } else if (pin) {
+                alert('PIN incorrecto');
+            }
+        }
+
+        function showNotifications() {
+            alert('No hay notificaciones nuevas');
+        }
+
+        function showVersionModal() {
+            alert("Versión 1.0.0\nÚltima actualización: " + new Date().toLocaleDateString());
+        }
+
+        // Mostrar sección seleccionada
+        function showSection(sectionId, clickedElement) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Mostrar la sección seleccionada
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Actualizar navegación activa
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            clickedElement.classList.add('active');
+        }
+
+        // Toggle para mostrar/ocultar contraseña
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('loginInput');
+            const icon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        });
+
+        // Verificar autenticación al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedAuth = localStorage.getItem(STORAGE_KEY);
+            if (savedAuth) {
+                const { auth, role } = JSON.parse(savedAuth);
+                if (USER_PERMISSIONS[auth]) {
+                    currentUserRole = role;
+                    
+                    // Control de visibilidad del módulo Bodega
+                    const isBodegaUser = auth.toLowerCase() === 'bodega';
+                    document.getElementById('bodegaNavItem').style.display = isBodegaUser ? 'flex' : 'none';
+                    
+                    // Si es usuario bodega, mostrar directamente esa sección
+                    if (isBodegaUser) {
+                        showSection('bodegaSection', document.getElementById('bodegaNavItem'));
+                    }
+                    
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('mobileDashboard').style.display = 'block';
+                }
+            }
+            
+            // Enter para login
+            document.getElementById('loginInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') checkLogin();
+            });
+        });
+    </script>
+</body>
+</html>
