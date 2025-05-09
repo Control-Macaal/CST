@@ -1,23 +1,19 @@
 <!DOCTYPE html>
-<html>
+<html style="background: #f5f5f5;">
 <head>
-    <title>Redirección Instantánea</title>
-    <!-- Redirección por META (más rápida, funciona incluso si JS falla) -->
-    <meta http-equiv="refresh" content="0;url=pc.html" id="metaRedirect">
+    <title>Redirección</title>
     <script>
-        // Sobrescribe el meta refresh con la detección JS (más precisa)
-        var isMobile = /Android|iPhone|iPad|iPod|BlackBerry|Windows Phone/i.test(navigator.userAgent);
-        if (isMobile) {
-            document.getElementById("metaRedirect").content = "0;url=mobile.html";
-        }
-        // Redirige INMEDIATAMENTE con JS (más rápido que esperar al meta)
-        window.location.replace(isMobile ? "mobile.html" : "pc.html");
+        // Fuerza la redirección ANTES de renderizar
+        var url = /Android|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) 
+               ? "mobile.html" : "pc.html";
+        window.location.replace(url);
     </script>
 </head>
 <body>
-    <!-- Mensaje ultra-rápido (visible solo si tarda unos milisegundos) -->
-    <p style="font-family: Arial; text-align: center; margin-top: 50px;">
-        Cargando la mejor versión para tu dispositivo...
-    </p>
+    <!-- Solo se ve si JS tarda (poco probable) -->
+    <div style="text-align: center; margin-top: 50px; font-family: Arial;">
+        <p>Preparando tu experiencia...</p>
+        <p><a href="pc.html">Versión Escritorio</a> | <a href="mobile.html">Versión Móvil</a></p>
+    </div>
 </body>
 </html>
