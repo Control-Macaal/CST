@@ -463,8 +463,8 @@
                 </div>
             </div>
 
-            <!-- Sección Bodega (solo visible para usuarios de bodega) -->
-            <div id="bodegaSection" class="content-section" style="display: none;">
+            <!-- Sección Bodega -->
+            <div id="bodegaSection" class="content-section">
                 <h2 class="section-title">
                     <i class="fas fa-warehouse"></i>
                     Módulo de Bodega
@@ -582,13 +582,15 @@
                     role: currentUserRole
                 }));
                 
-                // Mostrar/ocultar sección de bodega según el usuario
-                if (password.toLowerCase() === 'bodega') {
-                    document.getElementById('bodegaSection').style.display = 'block';
-                    document.getElementById('bodegaNavItem').style.display = 'flex';
+                // Control de visibilidad del módulo Bodega
+                const isBodegaUser = password.toLowerCase() === 'bodega';
+                document.getElementById('bodegaNavItem').style.display = isBodegaUser ? 'flex' : 'none';
+                
+                // Si es usuario bodega, mostrar directamente esa sección
+                if (isBodegaUser) {
+                    showSection('bodegaSection', document.getElementById('bodegaNavItem'));
                 } else {
-                    document.getElementById('bodegaSection').style.display = 'none';
-                    document.getElementById('bodegaNavItem').style.display = 'none';
+                    showSection('registrarSection', document.querySelector('.bottom-nav .nav-item'));
                 }
                 
                 document.getElementById('loginScreen').style.display = 'none';
@@ -627,7 +629,7 @@
         }
 
         function showVersionModal() {
-            alert("Versión 1.0.0\nÚltima actualización: 10/05/2024");
+            alert("Versión 1.0.0\nÚltima actualización: " + new Date().toLocaleDateString());
         }
 
         // Mostrar sección seleccionada
@@ -669,13 +671,15 @@
                 if (USER_PERMISSIONS[auth]) {
                     currentUserRole = role;
                     
-                    // Mostrar/ocultar sección de bodega según el usuario
-                    if (auth.toLowerCase() === 'bodega') {
-                        document.getElementById('bodegaSection').style.display = 'block';
-                        document.getElementById('bodegaNavItem').style.display = 'flex';
+                    // Control de visibilidad del módulo Bodega
+                    const isBodegaUser = auth.toLowerCase() === 'bodega';
+                    document.getElementById('bodegaNavItem').style.display = isBodegaUser ? 'flex' : 'none';
+                    
+                    // Si es usuario bodega, mostrar directamente esa sección
+                    if (isBodegaUser) {
+                        showSection('bodegaSection', document.getElementById('bodegaNavItem'));
                     } else {
-                        document.getElementById('bodegaSection').style.display = 'none';
-                        document.getElementById('bodegaNavItem').style.display = 'none';
+                        showSection('registrarSection', document.querySelector('.bottom-nav .nav-item'));
                     }
                     
                     document.getElementById('loginScreen').style.display = 'none';
