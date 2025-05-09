@@ -36,6 +36,7 @@
             background-color: #f5f7fa;
             color: var(--text);
             line-height: 1.5;
+            overflow-x: hidden;
         }
 
         /* App Container */
@@ -43,6 +44,7 @@
             max-width: 100%;
             min-height: 100vh;
             padding-bottom: 60px;
+            position: relative;
         }
 
         /* Header */
@@ -330,6 +332,43 @@
             display: block;
         }
 
+        /* Modal de Registro Pantalla Completa */
+        .fullscreen-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            z-index: 100;
+            padding: 1rem;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+
         /* Responsive */
         @media (min-width: 768px) {
             .mobile-container {
@@ -337,6 +376,10 @@
                 margin: 0 auto;
                 border-left: 1px solid #e2e8f0;
                 border-right: 1px solid #e2e8f0;
+            }
+            
+            .fullscreen-modal {
+                padding: 2rem;
             }
         }
     </style>
@@ -390,15 +433,15 @@
                 </h2>
                 
                 <div class="quick-actions">
-                    <button class="quick-btn" onclick="openFormModal('th1')">
+                    <button class="quick-btn" onclick="openFullscreenModal('th1')">
                         <i class="fas fa-file-import"></i>
                         <span>TH1</span>
                     </button>
-                    <button class="quick-btn" onclick="openFormModal('th2')">
+                    <button class="quick-btn" onclick="openFullscreenModal('th2')">
                         <i class="fas fa-file-import"></i>
                         <span>TH2</span>
                     </button>
-                    <button class="quick-btn" onclick="openFormModal('eplastik')">
+                    <button class="quick-btn" onclick="openFullscreenModal('eplastik')">
                         <i class="fas fa-file-import"></i>
                         <span>Eplastik</span>
                     </button>
@@ -413,15 +456,15 @@
                             <h3 class="card-title">Registros Rápidos</h3>
                         </div>
                         <div class="card-body">
-                            <button class="action-btn" onclick="openFormModal('th1')">
+                            <button class="action-btn" onclick="openFullscreenModal('th1')">
                                 <i class="fas fa-file-import"></i>
                                 Registrar TH1
                             </button>
-                            <button class="action-btn" onclick="openFormModal('th2')">
+                            <button class="action-btn" onclick="openFullscreenModal('th2')">
                                 <i class="fas fa-file-import"></i>
                                 Registrar TH2
                             </button>
-                            <button class="action-btn" onclick="openFormModal('eplastik')">
+                            <button class="action-btn" onclick="openFullscreenModal('eplastik')">
                                 <i class="fas fa-file-import"></i>
                                 Registrar Eplastik
                             </button>
@@ -543,6 +586,21 @@
         </nav>
     </div>
 
+    <!-- Modal de Registro Pantalla Completa -->
+    <div id="registroModal" class="fullscreen-modal">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modalFormTitle">Registro</h3>
+            <button class="close-modal" onclick="closeFullscreenModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div id="modalFormContainer">
+            <!-- El contenido del formulario se cargará aquí dinámicamente -->
+            <iframe id="formIframe" style="width: 100%; height: calc(100vh - 100px); border: none;"></iframe>
+        </div>
+    </div>
+
     <script>
         // Configuración
         const USER_PERMISSIONS = {
@@ -589,8 +647,6 @@
                 // Si es usuario bodega, mostrar directamente esa sección
                 if (isBodegaUser) {
                     showSection('bodegaSection', document.getElementById('bodegaNavItem'));
-                } else {
-                    showSection('registrarSection', document.querySelector('.bottom-nav .nav-item'));
                 }
                 
                 document.getElementById('loginScreen').style.display = 'none';
@@ -607,12 +663,36 @@
             document.getElementById('loginInput').value = '';
         }
 
-        function openFormModal(formType) {
+        function openFullscreenModal(formType) {
             if (currentUserRole === 'viewer') {
                 alert('No tiene permisos para esta función');
                 return;
             }
-            window.open(FORM_URLS[formType], '_blank');
+            
+            // Configurar el título del modal según el formulario
+            let formTitle = '';
+            switch(formType) {
+                case 'th1':
+                    formTitle = 'Registro Todo Hogar 1';
+                    break;
+                case 'th2':
+                    formTitle = 'Registro Todo Hogar 2';
+                    break;
+                case 'eplastik':
+                    formTitle = 'Registro Eplastik';
+                    break;
+            }
+            
+            document.getElementById('modalFormTitle').textContent = formTitle;
+            document.getElementById('formIframe').src = FORM_URLS[formType];
+            document.getElementById('registroModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeFullscreenModal() {
+            document.getElementById('registroModal').style.display = 'none';
+            document.getElementById('formIframe').src = '';
+            document.body.style.overflow = 'auto';
         }
 
         function requestPin(action) {
@@ -678,8 +758,6 @@
                     // Si es usuario bodega, mostrar directamente esa sección
                     if (isBodegaUser) {
                         showSection('bodegaSection', document.getElementById('bodegaNavItem'));
-                    } else {
-                        showSection('registrarSection', document.querySelector('.bottom-nav .nav-item'));
                     }
                     
                     document.getElementById('loginScreen').style.display = 'none';
