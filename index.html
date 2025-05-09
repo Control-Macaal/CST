@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Redirección Control de Traslados</title>
+    <script>
+        // Función para detectar si es dispositivo móvil
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+        
+        // Redirigir según el dispositivo
+        function redirectToProperVersion() {
+            if (isMobileDevice()) {
+                window.location.href = "mobile.html";
+            } else {
+                window.location.href = "pc.html";
+            }
+        }
+        
+        // Ejecutar al cargar
+        window.onload = redirectToProperVersion;
+    </script>
+</head>
+<body>
+    <p>Redirigiendo a la versión adecuada para tu dispositivo...</p>
+</body>
+</html>
