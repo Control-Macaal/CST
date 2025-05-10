@@ -3,37 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="Dashboard centralizado de catálogos de productos para empresas de plásticos">
-    <title>Catálogos de Productos</title>
-    <!-- Preconexión para mejorar performance -->
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <!-- Preload de fuentes críticas -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"></noscript>
-    <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
-    <!-- Hojas de estilo -->
+    <title>Catálogos Digitales</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- PDF.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js" defer></script>
     <style>
         :root {
             --primary: #4361ee;
-            --primary-hover: #3a56d4;
+            --primary-light: #e0e7ff;
             --secondary: #3f37c9;
             --accent: #4895ef;
             --dark: #1b263b;
             --light: #f8f9fa;
             --card-bg: #ffffff;
             --text: #2b2d42;
-            --text-light: #8d99ae;
+            --text-light: #64748b;
+            --success: #4cc9f0;
             --danger: #f72585;
-            --border-radius: 16px;
-            --shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
-            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            --plastic-color: #3a86ff;
-            --disposable-color: #4cc9f0;
+            --border-radius: 12px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --transition: all 0.2s ease;
         }
 
         * {
@@ -44,1025 +32,692 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--light);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f7fa;
             color: var(--text);
-            padding: 1rem;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        /* App Container */
+        .mobile-container {
+            max-width: 100%;
             min-height: 100vh;
-            -webkit-text-size-adjust: 100%;
+            padding-bottom: 60px;
+            position: relative;
         }
 
-        .dashboard-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        header {
+        /* Header */
+        .mobile-header {
+            background: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: var(--shadow-sm);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-            flex-wrap: wrap;
-            gap: 1rem;
         }
 
-        .header-title {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .header-title h1 {
-            font-size: 1.5rem;
-            white-space: nowrap;
-        }
-
-        .back-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.75rem 1rem;
-            border-radius: var(--border-radius);
-            cursor: pointer;
+        .logo {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            transition: var(--transition);
-            font-size: 0.9rem;
-            flex-shrink: 0;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .logo i {
+            color: var(--primary);
+        }
+
+        .user-menu {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary-light);
+            color: var(--primary);
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             text-decoration: none;
+            color: var(--text-light);
+            font-size: 0.75rem;
+            gap: 0.25rem;
+            padding: 0.5rem;
         }
 
-        .back-btn:hover {
-            background: var(--primary-hover);
-            transform: translateY(-2px);
+        .nav-item.active {
+            color: var(--primary);
         }
 
-        /* Barra de búsqueda */
+        .nav-item i {
+            font-size: 1.25rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--dark);
+        }
+
+        /* Search Bar */
         .search-container {
             position: relative;
-            width: 100%;
             margin-bottom: 1.5rem;
         }
 
         .search-input {
             width: 100%;
-            padding: 0.75rem 0.75rem 0.75rem 2.5rem;
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            padding-left: 3rem;
+            border: 1px solid #e2e8f0;
             border-radius: var(--border-radius);
-            font-size: 0.95rem;
-            transition: var(--transition);
-            box-shadow: var(--shadow);
-            -webkit-appearance: none;
+            font-size: 1rem;
+            background-color: white;
+            box-shadow: var(--shadow-sm);
         }
 
         .search-input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
         }
 
         .search-icon {
             position: absolute;
-            left: 0.75rem;
+            left: 1rem;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-light);
-            font-size: 1rem;
         }
 
+        /* Filter Chips */
+        .filter-chips {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            scrollbar-width: none; /* Firefox */
+        }
+
+        .filter-chips::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+
+        .filter-chip {
+            padding: 0.5rem 1rem;
+            background: var(--primary-light);
+            border-radius: 20px;
+            color: var(--primary);
+            font-size: 0.85rem;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .filter-chip.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Catalog Grid */
         .catalog-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 1rem;
-            width: 100%;
+            margin-bottom: 1.5rem;
         }
 
         .catalog-card {
-            background: var(--card-bg);
+            background: white;
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            padding: 1.25rem;
-            transition: var(--transition);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            min-height: 140px;
-            position: relative;
             overflow: hidden;
-        }
-
-        .catalog-card::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--primary);
-            transform: scaleX(0);
+            box-shadow: var(--shadow-sm);
             transition: var(--transition);
         }
 
-        .catalog-card:hover::after {
-            transform: scaleX(1);
-        }
-
-        .catalog-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 0.5rem;
-        }
-
-        .catalog-card h3 {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin: 0;
-            font-size: 1.1rem;
-            flex: 1;
-        }
-
-        .catalog-card h3 i {
-            font-size: 1rem;
-        }
-
-        .card-category {
-            background-color: rgba(58, 134, 255, 0.1);
-            color: var(--plastic-color);
-            padding: 0.25rem 0.5rem;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            white-space: nowrap;
-        }
-
-        .card-category.disposable {
-            background-color: rgba(76, 201, 240, 0.1);
-            color: var(--disposable-color);
-        }
-
-        .card-category i {
-            font-size: 0.6rem;
-        }
-
-        .catalog-btn {
-            width: 100%;
-            padding: 0.75rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-top: auto;
-            font-size: 0.9rem;
-            min-height: 44px;
-        }
-
-        .catalog-btn:hover {
-            background: var(--primary-hover);
-        }
-
-        .catalog-btn:active {
+        .catalog-card:active {
             transform: scale(0.98);
         }
 
-        .catalog-btn.disabled {
-            background: var(--text-light);
-            cursor: not-allowed;
-            opacity: 0.7;
+        .catalog-thumbnail {
+            height: 120px;
+            background-color: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             position: relative;
         }
 
-        .catalog-btn.disabled::after {
-            content: "Próximamente";
-            position: absolute;
-            bottom: -20px;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            font-size: 0.65rem;
-            color: var(--text-light);
+        .catalog-thumbnail img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
 
-        /* Modal Pantalla Completa */
-        .fullscreen-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--light);
-            z-index: 1000;
-            display: none;
-            overflow: hidden;
-            touch-action: none;
+        .catalog-info {
+            padding: 0.75rem;
         }
 
-        .fullscreen-modal.active {
-            display: block;
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            font-size: 1.25rem;
-            cursor: pointer;
-            z-index: 1002;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            transition: var(--transition);
-            border: 2px solid white;
-        }
-
-        .modal-close:hover {
-            background: var(--primary-hover);
-            transform: scale(1.1);
-        }
-
-        .modal-content {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        /* Overlay para cuando el PDF esté cargando */
-        .pdf-loading {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.8);
-            z-index: 1001;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--primary);
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* PDF Fallback */
-        .pdf-fallback {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-        }
-
-        .pdf-fallback-content {
-            background: white;
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            max-width: 90%;
-            width: 400px;
-            text-align: center;
-        }
-
-        .pdf-fallback-content button {
-            margin: 0.5rem;
-            width: calc(100% - 1rem);
-        }
-
-        /* PDF Viewer iOS */
-        .pdf-viewer-ios {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10000;
-            background: white;
-            border: none;
-        }
-
-        /* Mejoras de focus para accesibilidad */
-        button:focus-visible, .catalog-card:focus-visible, .search-input:focus-visible {
-            outline: 2px solid var(--primary);
-            outline-offset: 2px;
-        }
-
-        /* Efecto para elementos no encontrados */
-        .no-results {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-light);
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        /* Clase para solo lectores de pantalla */
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
+        .catalog-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
             white-space: nowrap;
-            border: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        /* Resultados de búsqueda en PDF */
-        .pdf-search-results {
-            margin-top: 20px;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-        }
-        
-        .pdf-result-item {
-            background: white;
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            border-left: 3px solid var(--primary);
-        }
-        
-        .pdf-result-title {
+        .catalog-meta {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 5px;
-        }
-        
-        .pdf-result-catalog {
-            font-weight: bold;
-            color: var(--primary);
-        }
-        
-        .pdf-result-page {
-            background: var(--primary);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 0.8em;
-        }
-        
-        .pdf-result-text {
-            font-size: 0.9em;
-            color: var(--text);
-        }
-        
-        .pdf-search-loading {
-            display: flex;
-            align-items: center;
-            gap: 10px;
             color: var(--text-light);
-            padding: 10px;
-        }
-        
-        .pdf-search-empty {
-            text-align: center;
-            color: var(--text-light);
-            padding: 15px;
+            font-size: 0.75rem;
         }
 
-        /* Mejoras específicas para móviles */
-        @media (max-width: 768px) {
-            body {
-                padding: 0.75rem;
+        .catalog-type {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            margin-top: 0.5rem;
+        }
+
+        .type-pdf {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        .type-web {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+
+        /* PDF Viewer Modal */
+        .pdf-viewer-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .pdf-viewer-modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .pdf-viewer-container {
+            width: 95%;
+            height: 90%;
+            background-color: white;
+            border-radius: var(--border-radius);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pdf-viewer-header {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .pdf-viewer-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .pdf-viewer-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .pdf-viewer-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .pdf-viewer-fallback {
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .fallback-options {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .fallback-btn {
+            padding: 0.75rem 1.25rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.9rem;
+        }
+
+        /* No Results */
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            grid-column: 1 / -1;
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .mobile-container {
+                max-width: 480px;
+                margin: 0 auto;
+                border-left: 1px solid #e2e8f0;
+                border-right: 1px solid #e2e8f0;
             }
             
             .catalog-grid {
-                grid-template-columns: 1fr;
-                gap: 0.75rem;
-            }
-            
-            header {
-                margin-bottom: 1rem;
-            }
-            
-            .header-title h1 {
-                font-size: 1.3rem;
-            }
-            
-            .search-container {
-                margin-bottom: 1rem;
-            }
-            
-            .catalog-card {
-                padding: 1rem;
-                gap: 0.75rem;
-                min-height: 130px;
-            }
-            
-            .catalog-card h3 {
-                font-size: 1rem;
-            }
-            
-            .card-category {
-                font-size: 0.65rem;
-                padding: 0.2rem 0.4rem;
-            }
-            
-            .catalog-btn {
-                padding: 0.8rem;
-                font-size: 1rem;
-            }
-
-            .pdf-result-item {
-                padding: 10px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .back-btn {
-                width: 100%;
-            }
-            
-            .header-title {
-                min-width: 100%;
-                justify-content: center;
-            }
-            
-            .modal-close {
-                top: 10px;
-                right: 10px;
-                width: 35px;
-                height: 35px;
-                font-size: 1.1rem;
-            }
-            
-            .search-input {
-                padding-left: 2.25rem;
-            }
-            
-            .search-icon {
-                left: 0.65rem;
-            }
-            
-            .card-header {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            
-            .card-category {
-                align-self: flex-start;
-            }
-
-            .pdf-result-title {
-                flex-direction: column;
-                gap: 5px;
-            }
-        }
-
-        /* Soporte para Safari iOS */
-        @supports (-webkit-touch-callout: none) {
-            body {
-                padding-bottom: constant(safe-area-inset-bottom);
-                padding-bottom: env(safe-area-inset-bottom);
-            }
-            
-            .catalog-card {
-                touch-action: manipulation;
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             }
         }
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <header>
-            <div class="header-title">
-                <i class="fas fa-boxes"></i>
-                <h1>Catálogos de Productos</h1>
+    <!-- Dashboard Móvil -->
+    <div class="mobile-container">
+        <!-- Header -->
+        <header class="mobile-header">
+            <div class="logo">
+                <i class="fas fa-book-open"></i>
+                <span>Catálogos Digitales</span>
             </div>
-            <a href="index.html" class="back-btn">
-                <i class="fas fa-arrow-left"></i>
-                Volver
-            </a>
+            <div class="user-menu">
+                <button class="icon-btn" id="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+                <button class="icon-btn" id="filter-btn">
+                    <i class="fas fa-filter"></i>
+                </button>
+            </div>
         </header>
 
-        <!-- Barra de búsqueda con accesibilidad mejorada -->
-        <div class="search-container" role="search">
-            <label for="searchInput" class="sr-only">Buscar catálogo</label>
-            <i class="fas fa-search search-icon"></i>
-            <input type="text" class="search-input" id="searchInput" placeholder="Buscar catálogo..." 
-                   aria-label="Buscar catálogo" autocorrect="off" autocapitalize="off">
-        </div>
-
-        <!-- Resultados de búsqueda en PDF -->
-        <div id="pdfSearchResultsContainer" class="pdf-search-results hidden">
-            <h3><i class="fas fa-file-pdf"></i> Resultados en contenido de PDFs</h3>
-            <div id="pdfSearchResults"></div>
-        </div>
-
-        <div class="catalog-grid" id="catalogGrid">
-            <!-- Catálogo 1 - Stampo Internacional (Local) -->
-            <div class="catalog-card" data-search="stampo internacional plastico productos">
-                <div class="card-header">
-                    <h3><i class="fas fa-file-pdf"></i> Stampo Internacional</h3>
-                    <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
-                </div>
-                <button class="catalog-btn" 
-                        onclick="handleCatalogOpen('catmedia/stampo.pdf')"
-                        aria-label="Abrir catálogo de Stampo Internacional">
-                    <i class="fas fa-external-link-alt"></i>
-                    Abrir Catálogo
-                </button>
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="search-input" class="search-input" placeholder="Buscar catálogos...">
             </div>
 
-            <!-- Catálogo 2 - Sparta Plast (Local) -->
-            <div class="catalog-card" data-search="sparta plast productos catalogo plastico">
-                <div class="card-header">
-                    <h3><i class="fas fa-file-pdf"></i> Sparta Plast</h3>
-                    <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
-                </div>
-                <button class="catalog-btn" 
-                        onclick="handleCatalogOpen('catmedia/sparta.pdf')"
-                        aria-label="Abrir catálogo de Sparta Plast">
-                    <i class="fas fa-external-link-alt"></i>
-                    Abrir Catálogo
-                </button>
+            <div class="filter-chips" id="filter-chips">
+                <button class="filter-chip active" data-filter="all">Todos</button>
+                <button class="filter-chip" data-filter="pdf">PDF</button>
+                <button class="filter-chip" data-filter="web">Web</button>
+                <!-- Las categorías dinámicas se agregarán aquí con JavaScript -->
             </div>
 
-            <!-- Catálogo 3 - Prini -->
-            <div class="catalog-card" data-search="prini productos plastico guatemala">
-                <div class="card-header">
-                    <h3><i class="fas fa-box-open"></i> Prini</h3>
-                    <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
-                </div>
-                <button class="catalog-btn" 
-                        onclick="handleCatalogOpen('https://www.prini.com.gt/index.php/nuestros-productos')"
-                        aria-label="Ver catálogo de Prini">
-                    <i class="fas fa-external-link-alt"></i>
-                    Ver Catálogo
-                </button>
+            <div class="catalog-grid" id="catalog-container">
+                <!-- Los catálogos se cargarán aquí dinámicamente -->
+                <div class="no-results">Cargando catálogos...</div>
             </div>
+        </main>
 
-            <!-- Catálogo 4 - Plastikito (Alteplast) -->
-            <div class="catalog-card" data-search="plastikito alteplast productos plastico">
-                <div class="card-header">
-                    <h3><i class="fas fa-boxes"></i> Plastikito (Alteplast)</h3>
-                    <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
-                </div>
-                <button class="catalog-btn" 
-                        onclick="handleCatalogOpen('https://www.plastikito.com/php/categorias/menu_categorias.php')"
-                        aria-label="Ver catálogo de Plastikito">
-                    <i class="fas fa-external-link-alt"></i>
-                    Ver Catálogo
-                </button>
-            </div>
-
-            <!-- Catálogo 5 - Plasticentro -->
-            <div class="catalog-card" data-search="plasticentro suplicentro desechable productos">
-                <div class="card-header">
-                    <h3><i class="fas fa-utensils"></i> Plasticentro</h3>
-                    <span class="card-category disposable"><i class="fas fa-tag"></i> Desechable</span>
-                </div>
-                <button class="catalog-btn" 
-                        onclick="handleCatalogOpen('catmedia/plasticentro.pdf')"
-                        aria-label="Abrir catálogo de Plasticentro">
-                    <i class="fas fa-external-link-alt"></i>
-                    Abrir Catálogo
-                </button>
-            </div>
-
-            <!-- Catálogo 6 - Neoplast (Local) -->
-            <div class="catalog-card" data-search="neoplast plastico productos catalogo">
-                <div class="card-header">
-                    <h3><i class="fas fa-file-pdf"></i> Neoplast</h3>
-                    <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
-                </div>
-                <button class="catalog-btn" 
-                        onclick="handleCatalogOpen('catmedia/neoplast.pdf')"
-                        aria-label="Abrir catálogo de Neoplast">
-                    <i class="fas fa-external-link-alt"></i>
-                    Abrir Catálogo
-                </button>
-            </div>
-
-            <!-- Catálogo 7 - Doriplast S.A -->
-            <div class="catalog-card" data-search="doriplast plastico productos hogar">
-                <div class="card-header">
-                    <h3><i class="fas fa-home"></i> Doriplast S.A</h3>
-                    <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
-                </div>
-                <button class="catalog-btn" 
-                        onclick="handleCatalogOpen('https://www.doriplast.com/hogar')"
-                        aria-label="Ver catálogo de Doriplast">
-                    <i class="fas fa-external-link-alt"></i>
-                    Ver Catálogo
-                </button>
-            </div>
-
-            <!-- Catálogo 8 - Diprossa -->
-            <div class="catalog-card" data-search="diprossa plastico productos hogar">
-                <div class="card-header">
-                    <h3><i class="fas fa-home"></i> Diprossa</h3>
-                    <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
-                </div>
-                <button class="catalog-btn" 
-                        onclick="handleCatalogOpen('https://diprossa.company.site/Hogar-c56298343')"
-                        aria-label="Ver catálogo de Diprossa">
-                    <i class="fas fa-external-link-alt"></i>
-                    Ver Catálogo
-                </button>
-            </div>
-
-            <!-- Catálogo 9 - Induplastik S.A (Local) -->
-            <div class="catalog-card" data-search="induplastik plastico productos catalogo">
-                <div class="card-header">
-                    <h3><i class="fas fa-file-pdf"></i> Induplastik S.A</h3>
-                    <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
-                </div>
-                <button class="catalog-btn" 
-                        onclick="handleCatalogOpen('catmedia/induplastik.pdf')"
-                        aria-label="Abrir catálogo de Induplastik">
-                    <i class="fas fa-external-link-alt"></i>
-                    Abrir Catálogo
-                </button>
-            </div>
-
-            <!-- Catálogo 10 - House & Green -->
-            <div class="catalog-card" data-search="house green cocina productos catalogo">
-                <div class="card-header">
-                    <h3><i class="fas fa-utensils"></i> House & Green</h3>
-                    <span class="card-category disposable"><i class="fas fa-tag"></i> Cocina</span>
-                </div>
-                <button class="catalog-btn" 
-                        onclick="handleCatalogOpen('https://www.houseandgreen.com.gt/catalogo.php')"
-                        aria-label="Ver catálogo de House & Green">
-                    <i class="fas fa-external-link-alt"></i>
-                    Ver Catálogo
-                </button>
-            </div>
-
-            <!-- Catálogo 11 - Guateplast -->
-            <div class="catalog-card" data-search="guateplast plastico productos catalogo">
-                <div class="card-header">
-                    <h3><i class="fas fa-file-pdf"></i> Guateplast</h3>
-                    <span class="card-category"><i class="fas fa-tag"></i> Plástico</span>
-                </div>
-                <button class="catalog-btn" 
-                        onclick="handleCatalogOpen('catmedia/guateplast.pdf')"
-                        aria-label="Abrir catálogo de Guateplast">
-                    <i class="fas fa-external-link-alt"></i>
-                    Abrir Catálogo
-                </button>
-            </div>
-
-            <!-- Catálogo 12 - Inix S.A -->
-            <div class="catalog-card" data-search="inix desechable productos catalogo">
-                <div class="card-header">
-                    <h3><i class="fas fa-file-pdf"></i> Inix S.A</h3>
-                    <span class="card-category disposable"><i class="fas fa-tag"></i> Desechable</span>
-                </div>
-                <button class="catalog-btn" 
-                        onclick="handleCatalogOpen('catmedia/inix.pdf')"
-                        aria-label="Abrir catálogo de Inix S.A">
-                    <i class="fas fa-external-link-alt"></i>
-                    Abrir Catálogo
-                </button>
-            </div>
-
-            <!-- Catálogo 13 - Plastifar S.A -->
-            <div class="catalog-card" data-search="plastifar desechable productos catalogo">
-                <div class="card-header">
-                    <h3><i class="fas fa-file-pdf"></i> Plastifar S.A</h3>
-                    <span class="card-category disposable"><i class="fas fa-tag"></i> Desechable</span>
-                </div>
-                <button class="catalog-btn" 
-                        onclick="handleCatalogOpen('catmedia/plastifar.pdf')"
-                        aria-label="Abrir catálogo de Plastifar S.A">
-                    <i class="fas fa-external-link-alt"></i>
-                    Abrir Catálogo
-                </button>
-            </div>
-            
-            <!-- Mensaje cuando no hay resultados -->
-            <div class="no-results hidden" id="noResults">
-                <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-                <h3>No se encontraron resultados</h3>
-                <p>Intenta con otros términos de búsqueda</p>
-            </div>
-        </div>
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item active">
+                <i class="fas fa-home"></i>
+                <span>Inicio</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-heart"></i>
+                <span>Favoritos</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-history"></i>
+                <span>Recientes</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Ajustes</span>
+            </a>
+        </nav>
     </div>
 
-    <!-- Modal Pantalla Completa -->
-    <div class="fullscreen-modal" id="pdfModal">
-        <button class="modal-close" id="modalClose" aria-label="Cerrar visor de PDF">&times;</button>
-        <div class="pdf-loading" id="pdfLoading">
-            <div class="spinner"></div>
-        </div>
-        <iframe class="modal-content" id="pdfViewer" frameborder="0" loading="lazy" title="Visor de PDF"></iframe>
-    </div>
-
-    <!-- PDF Fallback Container -->
-    <div id="pdfFallbackContainer" class="pdf-fallback hidden">
-        <div class="pdf-fallback-content">
-            <h3>No se puede visualizar el PDF directamente</h3>
-            <p>Por favor, selecciona una opción:</p>
-            <button class="catalog-btn" id="openInNewTab">
-                <i class="fas fa-external-link-alt"></i> Abrir en nueva pestaña
-            </button>
-            <button class="catalog-btn" id="downloadPDF">
-                <i class="fas fa-download"></i> Descargar PDF
-            </button>
+    <!-- PDF Viewer Modal -->
+    <div class="pdf-viewer-modal" id="pdf-viewer">
+        <div class="pdf-viewer-container">
+            <div class="pdf-viewer-header">
+                <h3 id="pdf-viewer-title">Visualizador de PDF</h3>
+                <button class="pdf-viewer-close" id="pdf-viewer-close">&times;</button>
+            </div>
+            <div class="pdf-viewer-content">
+                <iframe class="pdf-viewer-iframe" id="pdf-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
+                <div class="pdf-viewer-fallback" id="pdf-fallback" style="display: none;">
+                    <p>No se puede visualizar el PDF directamente. Por favor seleccione una opción:</p>
+                    <div class="fallback-options">
+                        <a href="#" class="fallback-btn" id="fallback-open">Abrir en nueva pestaña</a>
+                        <a href="#" class="fallback-btn" id="fallback-download">Descargar PDF</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Configura PDF.js
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+        // Datos de ejemplo - en una aplicación real estos vendrían de una API
+        const catalogs = [
+            {
+                id: 1,
+                title: "Catálogo Stampo 2023",
+                type: "pdf",
+                url: "catalogs/stampo-2023.pdf",
+                thumbnail: "https://via.placeholder.com/300x400.png?text=Stampo+2023",
+                categories: ["herramientas", "manuales"],
+                keywords: ["estampado", "metales", "industrial"],
+                pages: 18
+            },
+            {
+                id: 2,
+                title: "Línea profesional de pinturas",
+                type: "web",
+                url: "https://ejemplo.com/catalogo-pinturas",
+                thumbnail: "https://via.placeholder.com/300x400.png?text=Pinturas",
+                categories: ["pinturas", "decoración"],
+                keywords: ["latex", "acrílico", "esmalte"],
+                description: "Catálogo completo de pinturas profesionales para interiores y exteriores"
+            },
+            {
+                id: 3,
+                title: "Herramientas eléctricas 2024",
+                type: "pdf",
+                url: "catalogs/herramientas-electricas.pdf",
+                thumbnail: "https://via.placeholder.com/300x400.png?text=Herramientas",
+                categories: ["herramientas", "eléctricas"],
+                keywords: ["taladros", "amoladoras", "sierras"],
+                pages: 24
+            },
+            {
+                id: 4,
+                title: "Catálogo de seguridad industrial",
+                type: "pdf",
+                url: "catalogs/seguridad-industrial.pdf",
+                thumbnail: "https://via.placeholder.com/300x400.png?text=Seguridad",
+                categories: ["seguridad", "EPP"],
+                keywords: ["guantes", "cascos", "protección"],
+                pages: 15
+            },
+            {
+                id: 5,
+                title: "Novedades en ferretería",
+                type: "web",
+                url: "https://ejemplo.com/novedades-ferreteria",
+                thumbnail: "https://via.placeholder.com/300x400.png?text=Ferretería",
+                categories: ["ferretería", "novedades"],
+                keywords: ["herrajes", "cerraduras", "accesorios"]
+            },
+            {
+                id: 6,
+                title: "Guía de instalación eléctrica",
+                type: "pdf",
+                url: "catalogs/guia-electrica.pdf",
+                thumbnail: "https://via.placeholder.com/300x400.png?text=Eléctrica",
+                categories: ["manuales", "eléctrica"],
+                keywords: ["instalación", "cableado", "seguridad"],
+                pages: 32
+            }
+        ];
         
         // Variables globales
-        let currentPdfUrl = '';
-        const pdfSearchCache = {};
+        let filteredCatalogs = [...catalogs];
+        let currentFilter = "all";
+        let currentSearch = "";
         
-        // Función para detectar el dispositivo y navegador
-        function getPlatform() {
-            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            
-            // iOS detection
-            if (/iPad|iPhone|iPod/.test(userAgent) || 
-                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
-                return 'ios';
-            }
-            
-            // Android detection
-            if (/android/i.test(userAgent)) {
-                return 'android';
-            }
-            
-            return 'other';
-        }
+        // Elementos del DOM
+        const catalogContainer = document.getElementById('catalog-container');
+        const searchInput = document.getElementById('search-input');
+        const filterChips = document.getElementById('filter-chips');
+        const pdfViewer = document.getElementById('pdf-viewer');
+        const pdfIframe = document.getElementById('pdf-iframe');
+        const pdfFallback = document.getElementById('pdf-fallback');
+        const pdfViewerClose = document.getElementById('pdf-viewer-close');
+        const fallbackOpen = document.getElementById('fallback-open');
+        const fallbackDownload = document.getElementById('fallback-download');
         
-        // Función para abrir PDFs según la plataforma
-        function openPDF(url, pageNumber = 1) {
-            const platform = getPlatform();
-            const isChrome = /Chrome/.test(navigator.userAgent);
-            const isSafari = /Safari/.test(navigator.userAgent) && !isChrome;
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            renderCatalogs(filteredCatalogs);
+            setupCategoryFilters();
             
-            // Construir URL absoluta para archivos locales
-            const absoluteUrl = url.startsWith('http') ? url : 
-                              `${window.location.origin}/${url.replace(/^\/?/, '')}?t=${Date.now()}`;
-            
-            // Estrategias diferentes por plataforma
-            switch(platform) {
-                case 'ios':
-                    // iOS - Safari tiene mejor soporte para PDFs en ventana emergente
-                    if (isSafari) {
-                        const win = window.open('', '_blank');
-                        win.document.write(`
-                            <iframe 
-                                src="${absoluteUrl}" 
-                                class="pdf-viewer-ios"
-                                frameborder="0"
-                            ></iframe>
-                        `);
-                    } else {
-                        // Otros navegadores en iOS
-                        window.open(absoluteUrl, '_blank');
-                    }
-                    break;
-                    
-                case 'android':
-                    // Android - Chrome puede mostrar PDFs directamente
-                    if (isChrome) {
-                        // Usar el visor de PDF de Google
-                        window.open(`https://docs.google.com/viewer?url=${encodeURIComponent(absoluteUrl)}&embedded=true`, '_blank');
-                    } else {
-                        // Otros navegadores en Android
-                        window.open(absoluteUrl, '_blank');
-                    }
-                    break;
-                    
-                default:
-                    // Para escritorio u otros dispositivos, usar nuestra implementación actual
-                    openFullscreenModal(url, pageNumber);
-            }
-        }
+            // Event listeners
+            searchInput.addEventListener('input', handleSearch);
+            document.querySelectorAll('.filter-chip').forEach(chip => chip.addEventListener('click', handleFilter));
+            pdfViewerClose.addEventListener('click', closePdfViewer);
+        });
         
-        // Función para abrir el modal de pantalla completa
-        function openFullscreenModal(url, pageNumber = 1) {
-            const pdfModal = document.getElementById('pdfModal');
-            const pdfViewer = document.getElementById('pdfViewer');
-            const pdfLoading = document.getElementById('pdfLoading');
-            
-            pdfModal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            pdfLoading.style.display = 'flex';
-            pdfViewer.style.display = 'none';
-
-            const finalUrl = url.startsWith('http') ? url : 
-                           `${window.location.pathname.replace(/\/[^/]*$/, '')}/${url}`;
-
-            // Agregar #page= al URL si se especificó página
-            const viewerUrl = finalUrl + (finalUrl.includes('#') ? '' : `#page=${pageNumber}`);
-            pdfViewer.src = viewerUrl;
-            
-            pdfViewer.onload = function() {
-                pdfLoading.style.display = 'none';
-                pdfViewer.style.display = 'block';
-            };
-
-            pdfViewer.onerror = function() {
-                pdfLoading.style.display = 'none';
-                showPDFFallback(finalUrl);
-            };
-        }
-        
-        // Función para cerrar el modal
-        function closeModal() {
-            const pdfModal = document.getElementById('pdfModal');
-            const pdfViewer = document.getElementById('pdfViewer');
-            
-            pdfModal.classList.remove('active');
-            document.body.style.overflow = '';
-            pdfViewer.src = '';
-        }
-        
-        // Función de fallback si el PDF no se puede visualizar
-        function showPDFFallback(url) {
-            currentPdfUrl = url;
-            const pdfFallback = document.getElementById('pdfFallbackContainer');
-            pdfFallback.classList.remove('hidden');
-            
-            document.getElementById('openInNewTab').onclick = function() {
-                window.open(url, '_blank');
-                pdfFallback.classList.add('hidden');
-            };
-            
-            document.getElementById('downloadPDF').onclick = function() {
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = url.split('/').pop() || 'catalogo.pdf';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                pdfFallback.classList.add('hidden');
-            };
-        }
-        
-        // Manejador universal para abrir catálogos
-        window.handleCatalogOpen = function(url) {
-            // Verificar conexión a internet primero
-            if (!navigator.onLine) {
-                alert('Se requiere conexión a internet para ver este catálogo');
+        // Renderizar catálogos
+        function renderCatalogs(catalogsToRender) {
+            if (catalogsToRender.length === 0) {
+                catalogContainer.innerHTML = '<div class="no-results">No se encontraron catálogos que coincidan con tu búsqueda.</div>';
                 return;
             }
             
-            // Intentar abrir según la plataforma
-            try {
-                if (url.includes('.pdf') || url.endsWith('.pdf')) {
-                    openPDF(url);
-                } else {
-                    // Para URLs web, siempre abrir en nueva pestaña
-                    window.open(url, '_blank');
-                }
-            } catch (error) {
-                console.error('Error al abrir catálogo:', error);
-                showPDFFallback(url);
-            }
-        };
+            catalogContainer.innerHTML = '';
+            
+            catalogsToRender.forEach(catalog => {
+                const card = document.createElement('div');
+                card.className = 'catalog-card';
+                card.dataset.id = catalog.id;
+                card.dataset.type = catalog.type;
+                card.dataset.categories = catalog.categories.join(' ');
+                
+                const thumbnail = catalog.thumbnail ? 
+                    `<img src="${catalog.thumbnail}" alt="${catalog.title}" loading="lazy">` : 
+                    `<i class="fas ${catalog.type === 'pdf' ? 'fa-file-pdf' : 'fa-globe'}" style="font-size: 40px; color: #999;"></i>`;
+                
+                const typeBadge = catalog.type === 'pdf' ? 
+                    `<span class="catalog-type type-pdf"><i class="fas fa-file-pdf"></i> PDF (${catalog.pages || 'N/A'} páginas)</span>` :
+                    `<span class="catalog-type type-web"><i class="fas fa-external-link-alt"></i> Página web</span>`;
+                
+                card.innerHTML = `
+                    <div class="catalog-thumbnail">
+                        ${thumbnail}
+                    </div>
+                    <div class="catalog-info">
+                        <div class="catalog-title">${catalog.title}</div>
+                        ${typeBadge}
+                        <div class="catalog-meta">
+                            <span>${catalog.categories.join(', ')}</span>
+                        </div>
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => openCatalog(catalog));
+                catalogContainer.appendChild(card);
+            });
+        }
         
-        document.addEventListener('DOMContentLoaded', function() {
-            const modalClose = document.getElementById('modalClose');
-            const searchInput = document.getElementById('searchInput');
-            const catalogGrid = document.getElementById('catalogGrid');
-            const noResults = document.getElementById('noResults');
-            const catalogCards = document.querySelectorAll('.catalog-card:not(.no-results)');
-            const pdfSearchResultsContainer = document.getElementById('pdfSearchResultsContainer');
-            const pdfSearchResults = document.getElementById('pdfSearchResults');
-            
-            // Configurar botón de cerrar
-            modalClose.addEventListener('click', closeModal);
-            
-            // Cerrar modal con ESC
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    const pdfModal = document.getElementById('pdfModal');
-                    const pdfFallback = document.getElementById('pdfFallbackContainer');
-                    
-                    if (pdfModal.classList.contains('active')) {
-                        closeModal();
-                    }
-                    
-                    if (!pdfFallback.classList.contains('hidden')) {
-                        pdfFallback.classList.add('hidden');
-                    }
-                }
+        // Configurar filtros de categoría dinámicos
+        function setupCategoryFilters() {
+            const categories = new Set();
+            catalogs.forEach(catalog => {
+                catalog.categories.forEach(cat => categories.add(cat));
             });
             
-            // Cerrar fallback al hacer clic fuera
-            document.getElementById('pdfFallbackContainer').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.classList.add('hidden');
-                }
+            categories.forEach(category => {
+                const chip = document.createElement('button');
+                chip.className = 'filter-chip';
+                chip.dataset.filter = category;
+                chip.textContent = category;
+                chip.addEventListener('click', handleFilter);
+                filterChips.appendChild(chip);
+            });
+        }
+        
+        // Manejar búsqueda
+        function handleSearch() {
+            currentSearch = searchInput.value.toLowerCase();
+            applyFilters();
+        }
+        
+        // Manejar filtros
+        function handleFilter(e) {
+            const filter = e.currentTarget.dataset.filter;
+            
+            // Actualizar chips activos
+            document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            
+            currentFilter = filter;
+            applyFilters();
+        }
+        
+        // Aplicar filtros y búsqueda
+        function applyFilters() {
+            filteredCatalogs = catalogs.filter(catalog => {
+                // Aplicar filtro de tipo/categoría
+                const typeMatch = currentFilter === 'all' || 
+                                catalog.type === currentFilter || 
+                                catalog.categories.includes(currentFilter);
+                
+                if (!typeMatch) return false;
+                
+                // Aplicar búsqueda
+                if (!currentSearch) return true;
+                
+                const searchInTitle = catalog.title.toLowerCase().includes(currentSearch);
+                const searchInCategories = catalog.categories.some(cat => cat.toLowerCase().includes(currentSearch));
+                const searchInKeywords = catalog.keywords.some(kw => kw.toLowerCase().includes(currentSearch));
+                const searchInDescription = catalog.description?.toLowerCase().includes(currentSearch) || false;
+                
+                return searchInTitle || searchInCategories || searchInKeywords || searchInDescription;
             });
             
-            // Función para buscar catálogos con coincidencias parciales
-            async function searchCatalogs() {
-                const searchTerm = searchInput.value.trim().toLowerCase();
+            renderCatalogs(filteredCatalogs);
+        }
+        
+        // Abrir catálogo
+        function openCatalog(catalog) {
+            if (catalog.type === 'pdf') {
+                openPdf(catalog);
+            } else {
+                window.open(catalog.url, '_blank');
+            }
+        }
+        
+        // Abrir PDF con detección de dispositivo
+        function openPdf(catalog) {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            
+            document.getElementById('pdf-viewer-title').textContent = catalog.title;
+            
+            if (isMobile) {
+                // Para móviles, intentamos abrir el PDF directamente
+                pdfIframe.style.display = 'none';
+                pdfFallback.style.display = 'block';
                 
-                // Limpiar búsquedas anteriores
-                pdfSearchResultsContainer.classList.add('hidden');
-                pdfSearchResults.innerHTML = '';
+                // Configurar opciones de fallback
+                fallbackOpen.href = catalog.url;
+                fallbackOpen.onclick = (e) => {
+                    e.preventDefault();
+                    window.open(catalog.url, '_blank');
+                    closePdfViewer();
+                };
                 
-                // Búsqueda normal en metadatos
-                const normalResults = [...catalogCards].filter(card => {
-                    const searchData = card.getAttribute('data-search').toLowerCase();
-                    const cardTitle = card.querySelector('h3').textContent.toLowerCase();
-                    const cardCategory = card.querySelector('.card-category').textContent.toLowerCase();
-                    const allText = `${searchData} ${cardTitle} ${cardCategory}`;
-                    
-                    // Verifica si TODOS los términos están presentes
-                    const terms = searchTerm.split(' ');
-                    return terms.every(term => allText.includes(term));
-                });
+                fallbackDownload.href = catalog.url;
+                fallbackDownload.download = catalog.title + '.pdf';
+                fallbackDownload.onclick = closePdfViewer;
                 
-                // Mostrar u ocultar mensaje de no resultados
-                if (normalResults.length > 0 || searchTerm === '') {
-                    noResults.classList.add('hidden');
+                // Intentar abrir en el visor nativo
+                if (isIOS) {
+                    // iOS maneja PDFs de manera diferente
+                    window.open(catalog.url, '_blank');
+                    return;
                 } else {
-                    noResults.classList.remove('hidden');
+                    // Android puede manejar PDFs directamente
+                    pdfIframe.src = catalog.url;
+                    pdfIframe.onload = () => {
+                        pdfIframe.style.display = 'block';
+                        pdfFallback.style.display = 'none';
+                    };
+                    pdfIframe.onerror = () => {
+                        pdfIframe.style.display = 'none';
+                        pdfFallback.style.display = 'block';
+                    };
                 }
-                
-                // Mostrar resultados normales
-                catalogCards.forEach(card => {
-                    card.style.display = 'none';
-                });
-                
-                normalResults.forEach(card => {
-                    card.style.display = 'flex';
-                });
+            } else {
+                // Para escritorio, usar el visor embebido
+                pdfIframe.src = catalog.url;
+                pdfIframe.style.display = 'block';
+                pdfFallback.style.display = 'none';
             }
             
-            // Evento de búsqueda al escribir
-            let searchTimeout;
-            searchInput.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(searchCatalogs, 300);
-            });
-            
-            // Hacer las tarjetas clickeables
-            catalogCards.forEach(card => {
-                const btn = card.querySelector('.catalog-btn:not(.disabled)');
-                
-                if (btn) {
-                    card.style.cursor = 'pointer';
-                    card.setAttribute('tabindex', '0');
-                    card.setAttribute('role', 'button');
-                    
-                    card.addEventListener('keydown', (e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            btn.click();
-                        }
-                    });
-                }
-            });
-        });
+            pdfViewer.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // Cerrar visor de PDF
+        function closePdfViewer() {
+            pdfViewer.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            pdfIframe.src = '';
+        }
     </script>
 </body>
 </html>
