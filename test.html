@@ -60,6 +60,22 @@
             align-items: center;
         }
 
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            margin-right: 0.5rem;
+        }
+
         .logo {
             display: flex;
             align-items: center;
@@ -272,6 +288,21 @@
             color: #1565c0;
         }
 
+        .catalog-btn {
+            width: 100%;
+            padding: 0.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
         /* PDF Viewer Modal */
         .pdf-viewer-modal {
             position: fixed;
@@ -382,11 +413,16 @@
 <body>
     <!-- Dashboard Móvil -->
     <div class="mobile-container">
-        <!-- Header -->
+        <!-- Header con botón Volver -->
         <header class="mobile-header">
-            <div class="logo">
-                <i class="fas fa-book-open"></i>
-                <span>Catálogos Digitales</span>
+            <div class="header-left">
+                <button class="back-btn" id="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div class="logo">
+                    <i class="fas fa-book-open"></i>
+                    <span>Catálogos Digitales</span>
+                </div>
             </div>
             <div class="user-menu">
                 <button class="icon-btn" id="search-btn">
@@ -409,12 +445,245 @@
                 <button class="filter-chip active" data-filter="all">Todos</button>
                 <button class="filter-chip" data-filter="pdf">PDF</button>
                 <button class="filter-chip" data-filter="web">Web</button>
-                <!-- Las categorías dinámicas se agregarán aquí con JavaScript -->
+                <button class="filter-chip" data-filter="plastico">Plástico</button>
+                <button class="filter-chip" data-filter="desechable">Desechable</button>
+                <button class="filter-chip" data-filter="cocina">Cocina</button>
             </div>
 
             <div class="catalog-grid" id="catalog-container">
-                <!-- Los catálogos se cargarán aquí dinámicamente -->
-                <div class="no-results">Cargando catálogos...</div>
+                <!-- Catálogo 1 - Stampo Internacional -->
+                <div class="catalog-card" data-search="stampo internacional plastico productos">
+                    <div class="catalog-thumbnail">
+                        <i class="fas fa-file-pdf" style="font-size: 40px; color: #999;"></i>
+                    </div>
+                    <div class="catalog-info">
+                        <div class="catalog-title">Stampo Internacional</div>
+                        <span class="catalog-type type-pdf"><i class="fas fa-file-pdf"></i> PDF</span>
+                        <div class="catalog-meta">
+                            <span>Plástico</span>
+                        </div>
+                    </div>
+                    <button class="catalog-btn" data-pdf-url="catmedia/stampo.pdf">
+                        <i class="fas fa-external-link-alt"></i>
+                        Abrir Catálogo
+                    </button>
+                </div>
+
+                <!-- Catálogo 2 - Sparta Plast -->
+                <div class="catalog-card" data-search="sparta plast productos catalogo plastico">
+                    <div class="catalog-thumbnail">
+                        <i class="fas fa-file-pdf" style="font-size: 40px; color: #999;"></i>
+                    </div>
+                    <div class="catalog-info">
+                        <div class="catalog-title">Sparta Plast</div>
+                        <span class="catalog-type type-pdf"><i class="fas fa-file-pdf"></i> PDF</span>
+                        <div class="catalog-meta">
+                            <span>Plástico</span>
+                        </div>
+                    </div>
+                    <button class="catalog-btn" data-pdf-url="catmedia/sparta.pdf">
+                        <i class="fas fa-external-link-alt"></i>
+                        Abrir Catálogo
+                    </button>
+                </div>
+
+                <!-- Catálogo 3 - Prini -->
+                <div class="catalog-card" data-search="prini productos plastico guatemala">
+                    <div class="catalog-thumbnail">
+                        <i class="fas fa-box-open" style="font-size: 40px; color: #999;"></i>
+                    </div>
+                    <div class="catalog-info">
+                        <div class="catalog-title">Prini</div>
+                        <span class="catalog-type type-web"><i class="fas fa-external-link-alt"></i> Web</span>
+                        <div class="catalog-meta">
+                            <span>Plástico</span>
+                        </div>
+                    </div>
+                    <button class="catalog-btn" data-web-url="https://www.prini.com.gt/index.php/nuestros-productos">
+                        <i class="fas fa-external-link-alt"></i>
+                        Ver Catálogo
+                    </button>
+                </div>
+
+                <!-- Catálogo 4 - Plastikito (Alteplast) -->
+                <div class="catalog-card" data-search="plastikito alteplast productos plastico">
+                    <div class="catalog-thumbnail">
+                        <i class="fas fa-boxes" style="font-size: 40px; color: #999;"></i>
+                    </div>
+                    <div class="catalog-info">
+                        <div class="catalog-title">Plastikito (Alteplast)</div>
+                        <span class="catalog-type type-web"><i class="fas fa-external-link-alt"></i> Web</span>
+                        <div class="catalog-meta">
+                            <span>Plástico</span>
+                        </div>
+                    </div>
+                    <button class="catalog-btn" data-web-url="https://www.plastikito.com/php/categorias/menu_categorias.php">
+                        <i class="fas fa-external-link-alt"></i>
+                        Ver Catálogo
+                    </button>
+                </div>
+
+                <!-- Catálogo 6 - Neoplast -->
+                <div class="catalog-card" data-search="neoplast plastico productos catalogo">
+                    <div class="catalog-thumbnail">
+                        <i class="fas fa-file-pdf" style="font-size: 40px; color: #999;"></i>
+                    </div>
+                    <div class="catalog-info">
+                        <div class="catalog-title">Neoplast</div>
+                        <span class="catalog-type type-pdf"><i class="fas fa-file-pdf"></i> PDF</span>
+                        <div class="catalog-meta">
+                            <span>Plástico</span>
+                        </div>
+                    </div>
+                    <button class="catalog-btn" data-pdf-url="catmedia/neoplast.pdf">
+                        <i class="fas fa-external-link-alt"></i>
+                        Abrir Catálogo
+                    </button>
+                </div>
+
+                <!-- Catálogo 7 - Doriplast S.A -->
+                <div class="catalog-card" data-search="doriplast plastico productos hogar">
+                    <div class="catalog-thumbnail">
+                        <i class="fas fa-home" style="font-size: 40px; color: #999;"></i>
+                    </div>
+                    <div class="catalog-info">
+                        <div class="catalog-title">Doriplast S.A</div>
+                        <span class="catalog-type type-web"><i class="fas fa-external-link-alt"></i> Web</span>
+                        <div class="catalog-meta">
+                            <span>Plástico</span>
+                        </div>
+                    </div>
+                    <button class="catalog-btn" data-web-url="https://www.doriplast.com/hogar">
+                        <i class="fas fa-external-link-alt"></i>
+                        Ver Catálogo
+                    </button>
+                </div>
+
+                <!-- Catálogo 8 - Diprossa -->
+                <div class="catalog-card" data-search="diprossa plastico productos hogar">
+                    <div class="catalog-thumbnail">
+                        <i class="fas fa-home" style="font-size: 40px; color: #999;"></i>
+                    </div>
+                    <div class="catalog-info">
+                        <div class="catalog-title">Diprossa</div>
+                        <span class="catalog-type type-web"><i class="fas fa-external-link-alt"></i> Web</span>
+                        <div class="catalog-meta">
+                            <span>Plástico</span>
+                        </div>
+                    </div>
+                    <button class="catalog-btn" data-web-url="https://diprossa.company.site/Hogar-c56298343">
+                        <i class="fas fa-external-link-alt"></i>
+                        Ver Catálogo
+                    </button>
+                </div>
+
+                <!-- Catálogo 9 - Induplastik S.A -->
+                <div class="catalog-card" data-search="induplastik plastico productos catalogo">
+                    <div class="catalog-thumbnail">
+                        <i class="fas fa-file-pdf" style="font-size: 40px; color: #999;"></i>
+                    </div>
+                    <div class="catalog-info">
+                        <div class="catalog-title">Induplastik S.A</div>
+                        <span class="catalog-type type-pdf"><i class="fas fa-file-pdf"></i> PDF</span>
+                        <div class="catalog-meta">
+                            <span>Plástico</span>
+                        </div>
+                    </div>
+                    <button class="catalog-btn" data-pdf-url="catmedia/induplastik.pdf">
+                        <i class="fas fa-external-link-alt"></i>
+                        Abrir Catálogo
+                    </button>
+                </div>
+
+                <!-- Catálogo 10 - House & Green -->
+                <div class="catalog-card" data-search="house green cocina productos catalogo">
+                    <div class="catalog-thumbnail">
+                        <i class="fas fa-utensils" style="font-size: 40px; color: #999;"></i>
+                    </div>
+                    <div class="catalog-info">
+                        <div class="catalog-title">House & Green</div>
+                        <span class="catalog-type type-web"><i class="fas fa-external-link-alt"></i> Web</span>
+                        <div class="catalog-meta">
+                            <span>Cocina</span>
+                        </div>
+                    </div>
+                    <button class="catalog-btn" data-web-url="https://www.houseandgreen.com.gt/catalogo.php">
+                        <i class="fas fa-external-link-alt"></i>
+                        Ver Catálogo
+                    </button>
+                </div>
+
+                <!-- Catálogo - Guateplast -->
+                <div class="catalog-card" data-search="guateplast plastico productos catalogo">
+                    <div class="catalog-thumbnail">
+                        <i class="fas fa-file-pdf" style="font-size: 40px; color: #999;"></i>
+                    </div>
+                    <div class="catalog-info">
+                        <div class="catalog-title">Guateplast</div>
+                        <span class="catalog-type type-pdf"><i class="fas fa-file-pdf"></i> PDF</span>
+                        <div class="catalog-meta">
+                            <span>Plástico</span>
+                        </div>
+                    </div>
+                    <button class="catalog-btn" data-pdf-url="catmedia/guateplast.pdf">
+                        <i class="fas fa-external-link-alt"></i>
+                        Abrir Catálogo
+                    </button>
+                </div>
+
+                <!-- Catálogo - Inix S.A -->
+                <div class="catalog-card" data-search="inix desechable productos catalogo">
+                    <div class="catalog-thumbnail">
+                        <i class="fas fa-file-pdf" style="font-size: 40px; color: #999;"></i>
+                    </div>
+                    <div class="catalog-info">
+                        <div class="catalog-title">Inix S.A</div>
+                        <span class="catalog-type type-pdf"><i class="fas fa-file-pdf"></i> PDF</span>
+                        <div class="catalog-meta">
+                            <span>Desechable</span>
+                        </div>
+                    </div>
+                    <button class="catalog-btn" data-pdf-url="catmedia/inix.pdf">
+                        <i class="fas fa-external-link-alt"></i>
+                        Abrir Catálogo
+                    </button>
+                </div>
+
+                <!-- Catálogo - Plastifar S.A -->
+                <div class="catalog-card" data-search="plastifar desechable productos catalogo">
+                    <div class="catalog-thumbnail">
+                        <i class="fas fa-file-pdf" style="font-size: 40px; color: #999;"></i>
+                    </div>
+                    <div class="catalog-info">
+                        <div class="catalog-title">Plastifar S.A</div>
+                        <span class="catalog-type type-pdf"><i class="fas fa-file-pdf"></i> PDF</span>
+                        <div class="catalog-meta">
+                            <span>Desechable</span>
+                        </div>
+                    </div>
+                    <button class="catalog-btn" data-pdf-url="catmedia/plastifar.pdf">
+                        <i class="fas fa-external-link-alt"></i>
+                        Abrir Catálogo
+                    </button>
+                </div>
+
+                <!-- Catálogo Plasticentro -->
+                <div class="catalog-card" data-search="plasticentro suplicentro desechable productos">
+                    <div class="catalog-thumbnail">
+                        <i class="fas fa-utensils" style="font-size: 40px; color: #999;"></i>
+                    </div>
+                    <div class="catalog-info">
+                        <div class="catalog-title">Plasticentro (Suplicentro)</div>
+                        <span class="catalog-type type-pdf"><i class="fas fa-file-pdf"></i> PDF</span>
+                        <div class="catalog-meta">
+                            <span>Desechable</span>
+                        </div>
+                    </div>
+                    <button class="catalog-btn" data-pdf-url="catmedia/plasticentro.pdf">
+                        <i class="fas fa-external-link-alt"></i>
+                        Abrir Catálogo
+                    </button>
+                </div>
             </div>
         </main>
 
@@ -460,74 +729,6 @@
     </div>
 
     <script>
-        // Datos de ejemplo - en una aplicación real estos vendrían de una API
-        const catalogs = [
-            {
-                id: 1,
-                title: "Catálogo Stampo 2023",
-                type: "pdf",
-                url: "catalogs/stampo-2023.pdf",
-                thumbnail: "https://via.placeholder.com/300x400.png?text=Stampo+2023",
-                categories: ["herramientas", "manuales"],
-                keywords: ["estampado", "metales", "industrial"],
-                pages: 18
-            },
-            {
-                id: 2,
-                title: "Línea profesional de pinturas",
-                type: "web",
-                url: "https://ejemplo.com/catalogo-pinturas",
-                thumbnail: "https://via.placeholder.com/300x400.png?text=Pinturas",
-                categories: ["pinturas", "decoración"],
-                keywords: ["latex", "acrílico", "esmalte"],
-                description: "Catálogo completo de pinturas profesionales para interiores y exteriores"
-            },
-            {
-                id: 3,
-                title: "Herramientas eléctricas 2024",
-                type: "pdf",
-                url: "catalogs/herramientas-electricas.pdf",
-                thumbnail: "https://via.placeholder.com/300x400.png?text=Herramientas",
-                categories: ["herramientas", "eléctricas"],
-                keywords: ["taladros", "amoladoras", "sierras"],
-                pages: 24
-            },
-            {
-                id: 4,
-                title: "Catálogo de seguridad industrial",
-                type: "pdf",
-                url: "catalogs/seguridad-industrial.pdf",
-                thumbnail: "https://via.placeholder.com/300x400.png?text=Seguridad",
-                categories: ["seguridad", "EPP"],
-                keywords: ["guantes", "cascos", "protección"],
-                pages: 15
-            },
-            {
-                id: 5,
-                title: "Novedades en ferretería",
-                type: "web",
-                url: "https://ejemplo.com/novedades-ferreteria",
-                thumbnail: "https://via.placeholder.com/300x400.png?text=Ferretería",
-                categories: ["ferretería", "novedades"],
-                keywords: ["herrajes", "cerraduras", "accesorios"]
-            },
-            {
-                id: 6,
-                title: "Guía de instalación eléctrica",
-                type: "pdf",
-                url: "catalogs/guia-electrica.pdf",
-                thumbnail: "https://via.placeholder.com/300x400.png?text=Eléctrica",
-                categories: ["manuales", "eléctrica"],
-                keywords: ["instalación", "cableado", "seguridad"],
-                pages: 32
-            }
-        ];
-        
-        // Variables globales
-        let filteredCatalogs = [...catalogs];
-        let currentFilter = "all";
-        let currentSearch = "";
-        
         // Elementos del DOM
         const catalogContainer = document.getElementById('catalog-container');
         const searchInput = document.getElementById('search-input');
@@ -538,81 +739,51 @@
         const pdfViewerClose = document.getElementById('pdf-viewer-close');
         const fallbackOpen = document.getElementById('fallback-open');
         const fallbackDownload = document.getElementById('fallback-download');
+        const backBtn = document.getElementById('back-btn');
         
         // Inicialización
         document.addEventListener('DOMContentLoaded', function() {
-            renderCatalogs(filteredCatalogs);
-            setupCategoryFilters();
-            
             // Event listeners
             searchInput.addEventListener('input', handleSearch);
             document.querySelectorAll('.filter-chip').forEach(chip => chip.addEventListener('click', handleFilter));
             pdfViewerClose.addEventListener('click', closePdfViewer);
+            
+            // Event listener para el botón Volver
+            backBtn.addEventListener('click', () => {
+                window.location.href = 'index.html';
+            });
+            
+            // Configurar eventos para los botones de catálogo
+            document.querySelectorAll('.catalog-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const pdfUrl = this.getAttribute('data-pdf-url');
+                    const webUrl = this.getAttribute('data-web-url');
+                    
+                    if (pdfUrl) {
+                        openPdf({
+                            title: this.closest('.catalog-card').querySelector('.catalog-title').textContent,
+                            url: pdfUrl
+                        });
+                    } else if (webUrl) {
+                        window.open(webUrl, '_blank');
+                    }
+                });
+            });
         });
-        
-        // Renderizar catálogos
-        function renderCatalogs(catalogsToRender) {
-            if (catalogsToRender.length === 0) {
-                catalogContainer.innerHTML = '<div class="no-results">No se encontraron catálogos que coincidan con tu búsqueda.</div>';
-                return;
-            }
-            
-            catalogContainer.innerHTML = '';
-            
-            catalogsToRender.forEach(catalog => {
-                const card = document.createElement('div');
-                card.className = 'catalog-card';
-                card.dataset.id = catalog.id;
-                card.dataset.type = catalog.type;
-                card.dataset.categories = catalog.categories.join(' ');
-                
-                const thumbnail = catalog.thumbnail ? 
-                    `<img src="${catalog.thumbnail}" alt="${catalog.title}" loading="lazy">` : 
-                    `<i class="fas ${catalog.type === 'pdf' ? 'fa-file-pdf' : 'fa-globe'}" style="font-size: 40px; color: #999;"></i>`;
-                
-                const typeBadge = catalog.type === 'pdf' ? 
-                    `<span class="catalog-type type-pdf"><i class="fas fa-file-pdf"></i> PDF (${catalog.pages || 'N/A'} páginas)</span>` :
-                    `<span class="catalog-type type-web"><i class="fas fa-external-link-alt"></i> Página web</span>`;
-                
-                card.innerHTML = `
-                    <div class="catalog-thumbnail">
-                        ${thumbnail}
-                    </div>
-                    <div class="catalog-info">
-                        <div class="catalog-title">${catalog.title}</div>
-                        ${typeBadge}
-                        <div class="catalog-meta">
-                            <span>${catalog.categories.join(', ')}</span>
-                        </div>
-                    </div>
-                `;
-                
-                card.addEventListener('click', () => openCatalog(catalog));
-                catalogContainer.appendChild(card);
-            });
-        }
-        
-        // Configurar filtros de categoría dinámicos
-        function setupCategoryFilters() {
-            const categories = new Set();
-            catalogs.forEach(catalog => {
-                catalog.categories.forEach(cat => categories.add(cat));
-            });
-            
-            categories.forEach(category => {
-                const chip = document.createElement('button');
-                chip.className = 'filter-chip';
-                chip.dataset.filter = category;
-                chip.textContent = category;
-                chip.addEventListener('click', handleFilter);
-                filterChips.appendChild(chip);
-            });
-        }
         
         // Manejar búsqueda
         function handleSearch() {
-            currentSearch = searchInput.value.toLowerCase();
-            applyFilters();
+            const searchTerm = searchInput.value.toLowerCase();
+            const cards = document.querySelectorAll('.catalog-card');
+            
+            cards.forEach(card => {
+                const searchData = card.getAttribute('data-search').toLowerCase();
+                if (searchData.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
         }
         
         // Manejar filtros
@@ -623,41 +794,21 @@
             document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
             e.currentTarget.classList.add('active');
             
-            currentFilter = filter;
-            applyFilters();
-        }
-        
-        // Aplicar filtros y búsqueda
-        function applyFilters() {
-            filteredCatalogs = catalogs.filter(catalog => {
-                // Aplicar filtro de tipo/categoría
-                const typeMatch = currentFilter === 'all' || 
-                                catalog.type === currentFilter || 
-                                catalog.categories.includes(currentFilter);
-                
-                if (!typeMatch) return false;
-                
-                // Aplicar búsqueda
-                if (!currentSearch) return true;
-                
-                const searchInTitle = catalog.title.toLowerCase().includes(currentSearch);
-                const searchInCategories = catalog.categories.some(cat => cat.toLowerCase().includes(currentSearch));
-                const searchInKeywords = catalog.keywords.some(kw => kw.toLowerCase().includes(currentSearch));
-                const searchInDescription = catalog.description?.toLowerCase().includes(currentSearch) || false;
-                
-                return searchInTitle || searchInCategories || searchInKeywords || searchInDescription;
-            });
+            const cards = document.querySelectorAll('.catalog-card');
             
-            renderCatalogs(filteredCatalogs);
-        }
-        
-        // Abrir catálogo
-        function openCatalog(catalog) {
-            if (catalog.type === 'pdf') {
-                openPdf(catalog);
-            } else {
-                window.open(catalog.url, '_blank');
-            }
+            cards.forEach(card => {
+                const searchData = card.getAttribute('data-search').toLowerCase();
+                const type = card.querySelector('.catalog-type').textContent.toLowerCase();
+                
+                if (filter === 'all' || 
+                    searchData.includes(filter) || 
+                    (filter === 'pdf' && type.includes('pdf')) ||
+                    (filter === 'web' && type.includes('web'))) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
         }
         
         // Abrir PDF con detección de dispositivo
