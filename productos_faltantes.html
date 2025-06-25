@@ -468,6 +468,41 @@
             font-weight: 700;
         }
 
+        /* Report Modal */
+        .report-modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 400px;
+            padding: 1.5rem;
+            max-height: 90vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .report-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .report-modal-header h2 {
+            font-size: 1.3rem;
+            color: var(--dark);
+        }
+
+        .report-modal-body {
+            margin-bottom: 1.5rem;
+        }
+
+        .report-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
         /* Mejoras para tablets */
         @media (min-width: 480px) {
             .container {
@@ -559,6 +594,39 @@
             height: 100%;
             background-color: rgba(0,0,0,0.5);
             z-index: 1000;
+        }
+
+        /* Estilos para el buscador de proveedores en exportación */
+        .export-menu input[type="text"] {
+            width: 100%;
+            padding: 0.6rem 0.6rem 0.6rem 2rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            background-color: var(--card-bg);
+        }
+
+        .export-menu input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+        }
+
+        .suppliers-container {
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 5px;
+            margin-top: 10px;
+        }
+
+        .suppliers-container::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .suppliers-container::-webkit-scrollbar-thumb {
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 10px;
         }
 
         /* Evitar zoom en inputs en iOS */
@@ -663,7 +731,7 @@
                     <input type="number" class="form-control" id="missingQuantity" min="1" required>
                 </div>
                 <div class="form-group">
-                    <label for="reportedBy">Reportado por</label>
+                    <label for="reportedBy">Revisado por</label>
                     <input type="text" class="form-control" id="reportedBy" required placeholder="usuario">
                 </div>
                 <div class="form-group">
@@ -701,6 +769,30 @@
         </div>
     </div>
 
+    <!-- Modal para Reportar -->
+    <div class="modal" id="reportModal">
+        <div class="report-modal-content">
+            <div class="report-modal-header">
+                <h2><i class="fas fa-flag"></i> Reportar Producto</h2>
+                <button class="modal-close" id="reportModalClose">&times;</button>
+            </div>
+            <div class="report-modal-body">
+                <div class="form-group">
+                    <label for="reporterName">Nombre de quien reporta</label>
+                    <input type="text" class="form-control" id="reporterName" required placeholder="Ingresa tu nombre">
+                </div>
+                <div class="form-group">
+                    <label>Fecha y hora del reporte</label>
+                    <input type="text" class="form-control" id="reportDateTime" readonly>
+                </div>
+            </div>
+            <div class="report-modal-footer">
+                <button class="btn" id="cancelReportBtn">Cancelar</button>
+                <button class="btn btn-warning" id="confirmReportBtn">Confirmar Reporte</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
@@ -724,6 +816,7 @@
         // Datos de la aplicación
         let missingProducts = [];
         let activityHistory = [];
+        let currentProductIdForReport = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             // Elementos del DOM
@@ -738,8 +831,14 @@
             const exportPdfBtn = document.getElementById('exportPdfBtn');
             const missingModal = document.getElementById('missingModal');
             const historyModal = document.getElementById('historyModal');
+            const reportModal = document.getElementById('reportModal');
             const modalClose = document.getElementById('modalClose');
             const historyModalClose = document.getElementById('historyModalClose');
+            const reportModalClose = document.getElementById('reportModalClose');
+            const cancelReportBtn = document.getElementById('cancelReportBtn');
+            const confirmReportBtn = document.getElementById('confirmReportBtn');
+            const reporterNameInput = document.getElementById('reporterName');
+            const reportDateTimeInput = document.getElementById('reportDateTime');
             const modalTitle = document.getElementById('modalTitle');
             const missingForm = document.getElementById('missingForm');
             const productIdInput = document.getElementById('productId');
@@ -763,11 +862,11 @@
             }
 
             // Función para exportar a PDF
-            function exportToPDF(type = 'all') {
+            function exportToPDF(type = 'all', supplier = null) {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
                 
-                // Filtrar productos según el tipo
+                // Filtrar productos según el tipo y proveedor
                 let productsToExport = [...missingProducts];
                 let title = "Todos los Productos Faltantes";
                 
@@ -777,6 +876,12 @@
                 } else if (type === 'reported') {
                     productsToExport = missingProducts.filter(p => p.status === 'reported');
                     title = "Productos Reportados";
+                }
+                
+                // Filtrar por proveedor si se especifica
+                if (supplier) {
+                    productsToExport = productsToExport.filter(p => p.supplier && p.supplier.toLowerCase() === supplier.toLowerCase());
+                    title = `Productos Faltantes - ${supplier}`;
                 }
                 
                 // Ordenar por más reciente primero
@@ -830,7 +935,24 @@
                 });
                 
                 // Guardar PDF
-                doc.save(`Productos_Faltantes_${type}_${new Date().toISOString().slice(0,10)}.pdf`);
+                let fileName = `Productos_Faltantes_${type}`;
+                if (supplier) {
+                    fileName += `_${supplier.replace(/\s+/g, '_')}`;
+                }
+                fileName += `_${new Date().toISOString().slice(0,10)}.pdf`;
+                
+                doc.save(fileName);
+            }
+
+            // Obtener lista de proveedores únicos
+            function getUniqueSuppliers() {
+                const suppliers = new Set();
+                missingProducts.forEach(product => {
+                    if (product.supplier) {
+                        suppliers.add(product.supplier);
+                    }
+                });
+                return Array.from(suppliers).sort();
             }
 
             // Menú para seleccionar tipo de exportación
@@ -842,6 +964,7 @@
                 title.textContent = 'Exportar Reporte';
                 menu.appendChild(title);
                 
+                // Opciones generales
                 const options = [
                     { text: 'Todos los productos', type: 'all' },
                     { text: 'Solo no reportados', type: 'unreported' },
@@ -859,6 +982,88 @@
                     });
                     menu.appendChild(btn);
                 });
+                
+                // Separador
+                const separator = document.createElement('div');
+                separator.style.textAlign = 'center';
+                separator.style.margin = '10px 0';
+                separator.style.color = 'var(--text-light)';
+                separator.textContent = '─ O por proveedor ─';
+                menu.appendChild(separator);
+                
+                // Campo de búsqueda para proveedores
+                const searchContainer = document.createElement('div');
+                searchContainer.style.position = 'relative';
+                searchContainer.style.marginBottom = '10px';
+                
+                const searchIcon = document.createElement('i');
+                searchIcon.className = 'fas fa-search';
+                searchIcon.style.position = 'absolute';
+                searchIcon.style.left = '10px';
+                searchIcon.style.top = '50%';
+                searchIcon.style.transform = 'translateY(-50%)';
+                searchIcon.style.color = 'var(--text-light)';
+                
+                const searchInput = document.createElement('input');
+                searchInput.type = 'text';
+                searchInput.placeholder = 'Buscar proveedor...';
+                searchInput.style.width = '100%';
+                searchInput.style.padding = '8px 8px 8px 30px';
+                searchInput.style.border = '1px solid rgba(0,0,0,0.1)';
+                searchInput.style.borderRadius = 'var(--border-radius)';
+                searchInput.style.marginBottom = '10px';
+                
+                searchContainer.appendChild(searchIcon);
+                searchContainer.appendChild(searchInput);
+                menu.appendChild(searchContainer);
+                
+                // Contenedor para proveedores
+                const suppliersContainer = document.createElement('div');
+                suppliersContainer.className = 'suppliers-container';
+                
+                // Función para renderizar proveedores
+                function renderSuppliers(searchTerm = '') {
+                    suppliersContainer.innerHTML = '';
+                    
+                    const suppliers = getUniqueSuppliers();
+                    const filteredSuppliers = searchTerm 
+                        ? suppliers.filter(s => s.toLowerCase().includes(searchTerm.toLowerCase()))
+                        : suppliers;
+                    
+                    if (filteredSuppliers.length > 0) {
+                        filteredSuppliers.forEach(supplier => {
+                            const btn = document.createElement('button');
+                            btn.className = 'export-option';
+                            btn.style.backgroundColor = 'var(--accent)';
+                            btn.style.marginBottom = '5px';
+                            btn.textContent = `Proveedor: ${supplier}`;
+                            btn.addEventListener('click', () => {
+                                exportToPDF('all', supplier);
+                                document.body.removeChild(menu);
+                                document.body.removeChild(overlay);
+                            });
+                            suppliersContainer.appendChild(btn);
+                        });
+                    } else {
+                        const noResults = document.createElement('div');
+                        noResults.style.textAlign = 'center';
+                        noResults.style.padding = '10px';
+                        noResults.style.color = 'var(--text-light)';
+                        noResults.textContent = suppliers.length 
+                            ? 'No hay proveedores que coincidan' 
+                            : 'No hay proveedores registrados';
+                        suppliersContainer.appendChild(noResults);
+                    }
+                }
+                
+                // Evento de búsqueda
+                searchInput.addEventListener('input', (e) => {
+                    renderSuppliers(e.target.value);
+                });
+                
+                // Renderizar proveedores inicialmente
+                renderSuppliers();
+                menu.appendChild(suppliersContainer);
                 
                 const overlay = document.createElement('div');
                 overlay.className = 'export-overlay';
@@ -997,9 +1202,9 @@
                         </span>
                         <div class="product-actions">
                             <button class="btn ${product.status === 'unreported' ? 'btn-warning' : 'btn'}" 
-                                    onclick="changeStatus('${product.id}')">
+                                    onclick="openReportModal('${product.id}')">
                                 <i class="fas ${product.status === 'unreported' ? 'fa-check-circle' : 'fa-undo'}"></i>
-                                <span class="btn-text">${product.status === 'unreported' ? 'Reportado' : 'Deshacer'}</span>
+                                <span class="btn-text">${product.status === 'unreported' ? 'Reportar' : 'Deshacer'}</span>
                             </button>
                             <button class="btn btn-success" onclick="markAsRestocked('${product.id}')">
                                 <i class="fas fa-check"></i>
@@ -1105,9 +1310,33 @@
                 document.body.style.overflow = 'hidden';
             }
 
+            // Abrir modal de reporte
+            window.openReportModal = function(id) {
+                currentProductIdForReport = id;
+                const product = missingProducts.find(p => p.id === id);
+                
+                if (product) {
+                    // Actualizar la fecha y hora actual
+                    const now = new Date();
+                    const formattedDateTime = now.toLocaleString('es-ES', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    reportDateTimeInput.value = formattedDateTime;
+                    reporterNameInput.value = '';
+                    reportModal.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                }
+            };
+
             function closeModal() {
                 missingModal.style.display = 'none';
                 historyModal.style.display = 'none';
+                reportModal.style.display = 'none';
                 document.body.style.overflow = '';
             }
 
@@ -1195,34 +1424,43 @@
                 if (product) openModal(product);
             }
 
-            window.changeStatus = function(id) {
-                const product = missingProducts.find(p => p.id === id);
+            // Confirmar reporte del producto
+            confirmReportBtn.addEventListener('click', () => {
+                if (!reporterNameInput.value.trim()) {
+                    alert('Por favor ingresa tu nombre');
+                    return;
+                }
+                
+                const product = missingProducts.find(p => p.id === currentProductIdForReport);
                 if (product) {
-                    if (product.status === 'reported') {
-                        if (!confirm('¿Estás seguro que quieres marcar este producto como NO reportado?')) {
-                            return;
-                        }
-                    }
-                    
                     const oldStatus = product.status;
                     const newStatus = oldStatus === 'unreported' ? 'reported' : 'unreported';
                     
+                    // Actualizar el producto
+                    product.status = newStatus;
+                    product.reportedBy = reporterNameInput.value.trim();
+                    product.lastOrderDate = new Date().toISOString().split('T')[0];
+                    
+                    // Registrar la actividad
                     logActivity('status', 
-                        `Cambio de estado: ${product.name} | De "${getStatusText(oldStatus)}" a "${getStatusText(newStatus)}" | SKU: ${product.sku}`, 
+                        `Cambio de estado: ${product.name} | De "${getStatusText(oldStatus)}" a "${getStatusText(newStatus)}" | Reportado por: ${product.reportedBy} | SKU: ${product.sku}`, 
                         product.id);
                     
-                    product.status = newStatus;
-                    
+                    // Guardar cambios
                     db.collection("inventario").doc("productosFaltantes")
                         .set({
                             products: missingProducts,
                             lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
                         })
                         .then(() => {
+                            closeModal();
                             filterProducts();
                         });
                 }
-            };
+            });
+
+            // Cancelar reporte
+            cancelReportBtn.addEventListener('click', closeModal);
 
             // Eventos
             searchInput.addEventListener('input', filterProducts);
@@ -1232,6 +1470,7 @@
             exportPdfBtn.addEventListener('click', showExportMenu);
             modalClose.addEventListener('click', closeModal);
             historyModalClose.addEventListener('click', closeModal);
+            reportModalClose.addEventListener('click', closeModal);
 
             missingForm.addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -1269,17 +1508,17 @@
                 filterProducts();
             });
 
-            // Cerrar modal al hacer clic fuera del contenido
+            // Prevenir que el modal se cierre al hacer clic fuera
             missingModal.addEventListener('click', (e) => {
-                if (e.target === missingModal) {
-                    closeModal();
-                }
+                e.stopPropagation();
             });
 
             historyModal.addEventListener('click', (e) => {
-                if (e.target === historyModal) {
-                    closeModal();
-                }
+                e.stopPropagation();
+            });
+
+            reportModal.addEventListener('click', (e) => {
+                e.stopPropagation();
             });
 
             // Escuchar cambios en tiempo real
