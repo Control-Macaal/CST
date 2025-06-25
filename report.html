@@ -792,11 +792,6 @@
                 
                 const doc = new jsPDF();
                 const currentDate = new Date();
-                const printDate = currentDate.toLocaleDateString('es-ES', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric'
-                });
                 
                 // Configuración de márgenes
                 const marginLeft = 15;
@@ -824,7 +819,6 @@
                 let yPosition = 45;
                 
                 doc.text(`Número de Reporte: ${report.id}`, marginLeft, yPosition);
-                doc.text(`Fecha de Impresión: ${printDate}`, pageWidth - marginRight, yPosition, { align: 'right' });
                 yPosition += 7;
                 
                 doc.text(`Proveedor: ${report.supplier}`, marginLeft, yPosition);
@@ -869,20 +863,17 @@
                 });
                 
                 // Firmas en la parte inferior
-                const lastY = doc.lastAutoTable.finalY + 15;
+                const lastY = doc.lastAutoTable.finalY + 20;
                 const signatureWidth = 80;
-                const signatureSpacing = 30;
                 
-                // Firma de quien entrega (izquierda)
+                // Fecha de entrega (izquierda)
                 doc.setFontSize(10);
-                doc.text('Firma de quien entrega:', marginLeft, lastY);
-                doc.line(marginLeft, lastY + 5, marginLeft + signatureWidth, lastY + 5);
-                doc.text('Nombre y Cargo', marginLeft, lastY + 10);
+                doc.text('Fecha de Entrega: ________________', marginLeft, lastY);
                 
-                // Firma de quien recibe (derecha) - ABAJO como solicitaste
-                doc.text('Firma de quien recibe:', pageWidth - marginRight - signatureWidth, lastY);
-                doc.line(pageWidth - marginRight - signatureWidth, lastY + 5, pageWidth - marginRight, lastY + 5);
-                doc.text('Nombre y Cargo', pageWidth - marginRight - signatureWidth, lastY + 10);
+                // Firma de quien recibe (izquierda, debajo de la fecha)
+                doc.text('Firma de quien recibe:', marginLeft, lastY + 15);
+                doc.line(marginLeft, lastY + 20, marginLeft + signatureWidth, lastY + 20);
+                doc.text('Nombre y Cargo', marginLeft, lastY + 25);
                 
                 // Guardar PDF
                 doc.save(`Reporte_${report.id}.pdf`);
