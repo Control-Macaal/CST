@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes de Producto Mal Estado</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-hover: #3a56d4;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --dark: #1b263b;
+            --light: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #2b2d42;
+            --text-light: #8d99ae;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --success: #4cc9f0;
+            --border-radius: 8px;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light);
+            color: var(--text);
+            padding: 1rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-success {
+            background: var(--success);
+        }
+
+        .btn-pdf {
+            background: #e74c3c;
+        }
+
+        /* Formulario de devolución */
+        .return-form {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-header h2 {
+            font-size: 1.2rem;
+            color: var(--dark);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            font-size: 0.95rem;
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* Tabla de productos */
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .products-table th {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+        }
+
+        .products-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .products-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .products-table input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+        }
+
+        .add-row-btn {
+            margin-top: 1rem;
+            background: var(--accent);
+        }
+
+        /* Lista de reportes */
+        .reports-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .report-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .report-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .report-id {
+            font-weight: 700;
+            color: var(--primary);
+            background: rgba(67, 97, 238, 0.1);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+        }
+
+        .report-date {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .report-supplier {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .report-notes {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .report-products {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .report-products th {
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .report-products td {
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 0.9rem;
+        }
+
+        .report-products tr:last-child td {
+            border-bottom: none;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.3rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .products-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .report-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .report-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-title">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h1>Reportes de Producto Mal Estado</h1>
+            </div>
+            <button class="btn" id="newReportBtn">
+                <i class="fas fa-plus"></i>
+                Nueva Devolución
+            </button>
+        </header>
+
+        <!-- Formulario de nueva devolución -->
+        <div class="return-form" id="returnForm">
+            <div class="form-header">
+                <h2><i class="fas fa-file-alt"></i> Nueva Devolución</h2>
+                <div class="report-id">Registro #<span id="reportNumber">--</span></div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="supplier">Proveedor</label>
+                    <input type="text" class="form-control" id="supplier" required>
+                </div>
+                <div class="form-group">
+                    <label for="reportDate">Fecha</label>
+                    <input type="date" class="form-control" id="reportDate" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="notes">Observaciones (Opcional)</label>
+                <textarea class="form-control" id="notes"></textarea>
+            </div>
+            
+            <h3 style="margin: 1.5rem 0 1rem;">Productos en mal estado</h3>
+            
+            <table class="products-table" id="productsTable">
+                <thead>
+                    <tr>
+                        <th>Descripción</th>
+                        <th style="width: 100px;">Cantidad</th>
+                        <th style="width: 150px;">Motivo</th>
+                        <th style="width: 50px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" placeholder="Código y descripción del producto"></td>
+                        <td><input type="number" placeholder="0" min="1"></td>
+                        <td><input type="text" placeholder="Ej: Quebrado, Dañado"></td>
+                        <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <button class="btn add-row-btn" id="addRowBtn">
+                <i class="fas fa-plus"></i>
+                Agregar Producto
+            </button>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button class="btn btn-danger" id="cancelReportBtn">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                </button>
+                <button class="btn btn-success" id="saveReportBtn">
+                    <i class="fas fa-save"></i>
+                    Guardar Reporte
+                </button>
+            </div>
+        </div>
+
+        <!-- Lista de reportes -->
+        <div class="reports-list" id="reportsList">
+            <div class="no-reports" style="text-align: center; padding: 2rem; color: var(--text-light);">
+                <i class="fas fa-box-open" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                <h3>No hay reportes registrados</h3>
+                <p>Haz clic en "Nueva Devolución" para crear tu primer reporte</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para ver reporte completo -->
+    <div class="modal" id="reportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-alt"></i> Reporte de Devolución</h2>
+                <button class="modal-close" id="modalCloseBtn">&times;</button>
+            </div>
+            <div id="modalReportContent">
+                <!-- Contenido del reporte se cargará aquí -->
+            </div>
+            <div class="report-actions" id="modalReportActions">
+                <!-- Acciones del reporte se cargarán aquí -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCefeYE1rHVxumOYyi311IMIg4vuqujC00",
+            authDomain: "inventario-productos-fal-dfb1d.firebaseapp.com",
+            projectId: "inventario-productos-fal-dfb1d",
+            storageBucket: "inventario-productos-fal-dfb1d.appspot.com",
+            messagingSenderId: "164587710116",
+            appId: "1:164587710116:web:c1a1e3bb8327dbadf76831",
+            measurementId: "G-JGVLWTF44G"
+        };
+
+        // Inicializa Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const { jsPDF } = window.jspdf;
+
+        // Datos de la aplicación
+        let reports = [];
+        let currentReportId = null;
+        const companyName = "MACAAL S.A";
+        const companyLogo = new Image();
+        companyLogo.src = 'images/logo/logo.png';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Elementos del DOM
+            const newReportBtn = document.getElementById('newReportBtn');
+            const returnForm = document.getElementById('returnForm');
+            const cancelReportBtn = document.getElementById('cancelReportBtn');
+            const saveReportBtn = document.getElementById('saveReportBtn');
+            const addRowBtn = document.getElementById('addRowBtn');
+            const productsTable = document.getElementById('productsTable');
+            const reportsList = document.getElementById('reportsList');
+            const reportModal = document.getElementById('reportModal');
+            const modalCloseBtn = document.getElementById('modalCloseBtn');
+            const modalReportContent = document.getElementById('modalReportContent');
+            const modalReportActions = document.getElementById('modalReportActions');
+            const reportNumberSpan = document.getElementById('reportNumber');
+            const supplierInput = document.getElementById('supplier');
+            const reportDateInput = document.getElementById('reportDate');
+            const notesInput = document.getElementById('notes');
+
+            // Generar número de reporte
+            function generateReportNumber() {
+                const now = new Date();
+                const year = now.getFullYear().toString().slice(-2);
+                const month = (now.getMonth() + 1).toString().padStart(2, '0');
+                const day = now.getDate().toString().padStart(2, '0');
+                const randomNum = Math.floor(1000 + Math.random() * 9000);
+                return `DEV-${year}${month}${day}-${randomNum}`;
+            }
+
+            // Mostrar formulario de nueva devolución
+            function showNewReportForm() {
+                currentReportId = generateReportNumber();
+                reportNumberSpan.textContent = currentReportId;
+                
+                // Establecer fecha actual
+                const today = new Date().toISOString().split('T')[0];
+                reportDateInput.value = today;
+                
+                // Limpiar campos
+                supplierInput.value = '';
+                notesInput.value = '';
+                
+                // Limpiar tabla de productos (dejar solo una fila vacía)
+                const tbody = productsTable.querySelector('tbody');
+                tbody.innerHTML = `
+                    <tr>
+                        <td><input type="text" placeholder="Código y descripción del producto"></td>
+                        <td><input type="number" placeholder="0" min="1"></td>
+                        <td><input type="text" placeholder="Ej: Quebrado, Dañado"></td>
+                        <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
+                    </tr>
+                `;
+                
+                // Agregar event listeners a los botones de eliminar
+                addDeleteRowListeners();
+                
+                returnForm.style.display = 'block';
+            }
+
+            // Ocultar formulario de devolución
+            function hideReturnForm() {
+                returnForm.style.display = 'none';
+            }
+
+            // Agregar nueva fila a la tabla de productos
+            function addProductRow() {
+                const tbody = productsTable.querySelector('tbody');
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td><input type="text" placeholder="Código y descripción del producto"></td>
+                    <td><input type="number" placeholder="0" min="1"></td>
+                    <td><input type="text" placeholder="Ej: Quebrado, Dañado"></td>
+                    <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
+                `;
+                tbody.appendChild(newRow);
+                
+                // Agregar event listener al botón de eliminar
+                const deleteBtn = newRow.querySelector('.fa-trash-alt');
+                deleteBtn.addEventListener('click', () => {
+                    if (tbody.childElementCount > 1) {
+                        tbody.removeChild(newRow);
+                    } else {
+                        // Si es la última fila, limpiar los campos
+                        const inputs = newRow.querySelectorAll('input');
+                        inputs.forEach(input => input.value = '');
+                    }
+                });
+            }
+
+            // Agregar event listeners a los botones de eliminar fila
+            function addDeleteRowListeners() {
+                const deleteBtns = productsTable.querySelectorAll('.fa-trash-alt');
+                const tbody = productsTable.querySelector('tbody');
+                
+                deleteBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const row = e.target.closest('tr');
+                        if (tbody.childElementCount > 1) {
+                            tbody.removeChild(row);
+                        } else {
+                            // Si es la última fila, limpiar los campos
+                            const inputs = row.querySelectorAll('input');
+                            inputs.forEach(input => input.value = '');
+                        }
+                    });
+                });
+            }
+
+            // Obtener productos de la tabla
+            function getProductsFromTable() {
+                const products = [];
+                const rows = productsTable.querySelectorAll('tbody tr');
+                
+                rows.forEach(row => {
+                    const inputs = row.querySelectorAll('input');
+                    const description = inputs[0].value.trim();
+                    const quantity = inputs[1].value.trim();
+                    const reason = inputs[2].value.trim();
+                    
+                    if (description && quantity && reason) {
+                        products.push({
+                            description: description,
+                            quantity: parseInt(quantity),
+                            reason: reason
+                        });
+                    }
+                });
+                
+                return products;
+            }
+
+            // Validar formulario
+            function validateForm() {
+                if (!supplierInput.value.trim()) {
+                    alert('Por favor ingresa el nombre del proveedor');
+                    return false;
+                }
+                
+                const products = getProductsFromTable();
+                if (products.length === 0) {
+                    alert('Debes agregar al menos un producto');
+                    return false;
+                }
+                
+                return true;
+            }
+
+            // Guardar reporte en Firebase
+            function saveReport() {
+                if (!validateForm()) return;
+                
+                const reportData = {
+                    id: currentReportId,
+                    supplier: supplierInput.value.trim(),
+                    date: reportDateInput.value,
+                    notes: notesInput.value.trim(),
+                    products: getProductsFromTable(),
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                db.collection("reportesMalEstado").doc(currentReportId)
+                    .set(reportData)
+                    .then(() => {
+                        alert('Reporte guardado correctamente');
+                        hideReturnForm();
+                        loadReports();
+                    })
+                    .catch(error => {
+                        console.error("Error al guardar el reporte:", error);
+                        alert('Ocurrió un error al guardar el reporte');
+                    });
+            }
+
+            // Cargar reportes desde Firebase
+            function loadReports() {
+                db.collection("reportesMalEstado")
+                    .orderBy("createdAt", "desc")
+                    .get()
+                    .then(querySnapshot => {
+                        reports = [];
+                        querySnapshot.forEach(doc => {
+                            reports.push(doc.data());
+                        });
+                        
+                        renderReportsList();
+                    })
+                    .catch(error => {
+                        console.error("Error al cargar reportes:", error);
+                    });
+            }
+
+            // Mostrar lista de reportes
+            function renderReportsList() {
+                if (reports.length === 0) {
+                    reportsList.innerHTML = `
+                        <div class="no-reports" style="text-align: center; padding: 2rem; color: var(--text-light);">
+                            <i class="fas fa-box-open" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                            <h3>No hay reportes registrados</h3>
+                            <p>Haz clic en "Nueva Devolución" para crear tu primer reporte</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                reportsList.innerHTML = '';
+                
+                reports.forEach(report => {
+                    const reportCard = document.createElement('div');
+                    reportCard.className = 'report-card';
+                    reportCard.innerHTML = `
+                        <div class="report-header">
+                            <div>
+                                <span class="report-id">${report.id}</span>
+                                <span class="report-date">${formatDate(report.date)}</span>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn" onclick="viewReport('${report.id}')">
+                                    <i class="fas fa-eye"></i> Ver
+                                </button>
+                                <button class="btn btn-pdf" onclick="generatePDF('${report.id}')">
+                                    <i class="fas fa-file-pdf"></i> PDF
+                                </button>
+                            </div>
+                        </div>
+                        <div class="report-supplier">Proveedor: ${report.supplier}</div>
+                        ${report.notes ? `<div class="report-notes">Observaciones: ${report.notes}</div>` : ''}
+                        <table class="report-products">
+                            <thead>
+                                <tr>
+                                    <th>Descripción</th>
+                                    <th style="width: 80px;">Cantidad</th>
+                                    <th style="width: 120px;">Motivo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${report.products.map(product => `
+                                    <tr>
+                                        <td>${product.description}</td>
+                                        <td>${product.quantity}</td>
+                                        <td>${product.reason}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                    
+                    reportsList.appendChild(reportCard);
+                });
+            }
+
+            // Formatear fecha
+            function formatDate(dateString) {
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                return new Date(dateString).toLocaleDateString('es-ES', options);
+            }
+
+            // Ver reporte completo en modal
+            window.viewReport = function(reportId) {
+                const report = reports.find(r => r.id === reportId);
+                if (!report) return;
+                
+                modalReportContent.innerHTML = `
+                    <div class="report-header">
+                        <div>
+                            <span class="report-id">${report.id}</span>
+                            <span class="report-date">${formatDate(report.date)}</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Proveedor</label>
+                        <div class="form-control" style="background: #f8f9fa;">${report.supplier}</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha de Reporte</label>
+                        <div class="form-control" style="background: #f8f9fa;">${formatDate(report.date)}</div>
+                    </div>
+                    ${report.notes ? `
+                    <div class="form-group">
+                        <label>Observaciones</label>
+                        <div class="form-control" style="background: #f8f9fa; min-height: auto;">${report.notes}</div>
+                    </div>
+                    ` : ''}
+                    <div class="form-group">
+                        <label>Productos en mal estado</label>
+                        <table class="report-products" style="width: 100%; margin-top: 0;">
+                            <thead>
+                                <tr>
+                                    <th>Descripción</th>
+                                    <th style="width: 80px;">Cantidad</th>
+                                    <th style="width: 120px;">Motivo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${report.products.map(product => `
+                                    <tr>
+                                        <td>${product.description}</td>
+                                        <td>${product.quantity}</td>
+                                        <td>${product.reason}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                
+                modalReportActions.innerHTML = `
+                    <button class="btn btn-pdf" onclick="generatePDF('${report.id}')">
+                        <i class="fas fa-file-pdf"></i>
+                        Generar PDF
+                    </button>
+                    <button class="btn" onclick="closeModal()">
+                        <i class="fas fa-times"></i>
+                        Cerrar
+                    </button>
+                `;
+                
+                reportModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            };
+
+            // Generar PDF del reporte
+            window.generatePDF = function(reportId) {
+                const report = reports.find(r => r.id === reportId);
+                if (!report) return;
+                
+                const doc = new jsPDF();
+                const currentDate = new Date();
+                const printDate = currentDate.toLocaleDateString('es-ES', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+                
+                // Configuración de márgenes
+                const marginLeft = 15;
+                const marginRight = 15;
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const contentWidth = pageWidth - marginLeft - marginRight;
+                
+                // Logo de la empresa y nombre
+                doc.addImage(companyLogo, 'PNG', marginLeft, 10, 40, 15);
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.text(companyName, pageWidth / 2, 20, { align: 'center' });
+                
+                // Título del documento
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Reporte de Productos en Mal Estado', pageWidth / 2, 30, { align: 'center' });
+                
+                // Línea separadora
+                doc.setDrawColor(200, 200, 200);
+                doc.line(marginLeft, 35, pageWidth - marginRight, 35);
+                
+                // Información del reporte
+                doc.setFontSize(10);
+                let yPosition = 45;
+                
+                doc.text(`Número de Reporte: ${report.id}`, marginLeft, yPosition);
+                doc.text(`Fecha de Impresión: ${printDate}`, pageWidth - marginRight, yPosition, { align: 'right' });
+                yPosition += 7;
+                
+                doc.text(`Proveedor: ${report.supplier}`, marginLeft, yPosition);
+                doc.text(`Fecha de Reporte: ${formatDate(report.date)}`, pageWidth - marginRight, yPosition, { align: 'right' });
+                yPosition += 7;
+                
+                if (report.notes) {
+                    const splitNotes = doc.splitTextToSize(`Observaciones: ${report.notes}`, contentWidth);
+                    doc.text(splitNotes, marginLeft, yPosition);
+                    yPosition += splitNotes.length * 5 + 5;
+                } else {
+                    yPosition += 5;
+                }
+                
+                // Tabla de productos
+                const tableData = report.products.map(product => [
+                    product.description,
+                    product.quantity.toString(),
+                    product.reason
+                ]);
+                
+                doc.autoTable({
+                    startY: yPosition,
+                    head: [['Descripción', 'Cantidad', 'Motivo']],
+                    body: tableData,
+                    margin: { left: marginLeft, right: marginRight },
+                    styles: {
+                        fontSize: 9,
+                        cellPadding: 3,
+                        valign: 'middle'
+                    },
+                    headStyles: {
+                        fillColor: [67, 97, 238],
+                        textColor: 255,
+                        fontStyle: 'bold'
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 'auto' },
+                        1: { cellWidth: 25 },
+                        2: { cellWidth: 40 }
+                    }
+                });
+                
+                // Firmas en la parte inferior
+                const lastY = doc.lastAutoTable.finalY + 15;
+                const signatureWidth = 80;
+                const signatureSpacing = 30;
+                
+                // Firma de quien entrega (izquierda)
+                doc.setFontSize(10);
+                doc.text('Firma de quien entrega:', marginLeft, lastY);
+                doc.line(marginLeft, lastY + 5, marginLeft + signatureWidth, lastY + 5);
+                doc.text('Nombre y Cargo', marginLeft, lastY + 10);
+                
+                // Firma de quien recibe (derecha) - ABAJO como solicitaste
+                doc.text('Firma de quien recibe:', pageWidth - marginRight - signatureWidth, lastY);
+                doc.line(pageWidth - marginRight - signatureWidth, lastY + 5, pageWidth - marginRight, lastY + 5);
+                doc.text('Nombre y Cargo', pageWidth - marginRight - signatureWidth, lastY + 10);
+                
+                // Guardar PDF
+                doc.save(`Reporte_${report.id}.pdf`);
+            };
+
+            // Cerrar modal
+            function closeModal() {
+                reportModal.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+
+            // Event listeners
+            newReportBtn.addEventListener('click', showNewReportForm);
+            cancelReportBtn.addEventListener('click', hideReturnForm);
+            saveReportBtn.addEventListener('click', saveReport);
+            addRowBtn.addEventListener('click', addProductRow);
+            modalCloseBtn.addEventListener('click', closeModal);
+            reportModal.addEventListener('click', (e) => {
+                if (e.target === reportModal) closeModal();
+            });
+
+            // Cargar reportes al iniciar
+            loadReports();
+        });
+    </script>
+</body>
+</html>
