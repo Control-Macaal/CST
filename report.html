@@ -70,18 +70,46 @@
             color: var(--dark);
         }
 
+        .search-container {
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            font-size: 0.95rem;
+        }
+
+        .search-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .search-btn:hover {
+            background: var(--primary-hover);
+        }
+
         .btn {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 0.75rem 1rem;
+            padding: 0.5rem 0.75rem;
             border-radius: var(--border-radius);
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 0.5rem;
             transition: var(--transition);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .btn:hover {
@@ -101,6 +129,14 @@
             background: #e74c3c;
         }
 
+        .btn-warning {
+            background: var(--warning);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+        }
+
         /* Formulario de devolución */
         .return-form {
             background: var(--card-bg);
@@ -115,12 +151,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
 
         .form-header h2 {
             font-size: 1.2rem;
             color: var(--dark);
+        }
+
+        .form-header-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
         }
 
         .form-row {
@@ -138,26 +180,28 @@
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 500;
+            font-size: 0.9rem;
         }
 
         .form-control {
             width: 100%;
-            padding: 0.75rem;
+            padding: 0.5rem;
             border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: var(--border-radius);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
 
         textarea.form-control {
-            min-height: 100px;
+            min-height: 60px;
             resize: vertical;
+            font-size: 0.9rem;
         }
 
         /* Tabla de productos */
         .products-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 1.5rem 0;
+            margin: 1rem 0;
             background: var(--card-bg);
             box-shadow: var(--shadow);
             border-radius: var(--border-radius);
@@ -167,13 +211,15 @@
         .products-table th {
             background-color: var(--primary);
             color: white;
-            padding: 1rem;
+            padding: 0.75rem;
             text-align: left;
+            font-size: 0.9rem;
         }
 
         .products-table td {
-            padding: 0.75rem 1rem;
+            padding: 0.5rem;
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 0.9rem;
         }
 
         .products-table tr:last-child td {
@@ -185,11 +231,38 @@
             padding: 0.5rem;
             border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .product-status {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+
+        .status-pending {
+            background-color: var(--success);
+        }
+
+        .status-received {
+            background-color: var(--danger);
+        }
+
+        .status-date {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            display: block;
+            margin-top: 2px;
         }
 
         .add-row-btn {
-            margin-top: 1rem;
+            margin-top: 0.5rem;
             background: var(--accent);
+            font-size: 0.85rem;
+            padding: 0.5rem 0.75rem;
         }
 
         /* Lista de reportes */
@@ -202,7 +275,7 @@
             background: var(--card-bg);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
-            padding: 1.5rem;
+            padding: 1.25rem;
             transition: var(--transition);
         }
 
@@ -226,42 +299,45 @@
             background: rgba(67, 97, 238, 0.1);
             padding: 0.3rem 0.6rem;
             border-radius: 4px;
+            font-size: 0.9rem;
         }
 
         .report-date {
             color: var(--text-light);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .report-supplier {
             font-weight: 600;
             margin-bottom: 0.5rem;
+            font-size: 0.95rem;
         }
 
         .report-notes {
             color: var(--text-light);
             margin-bottom: 1rem;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
 
         .report-products {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 1rem;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
         }
 
         .report-products th {
             background-color: rgba(0, 0, 0, 0.05);
-            padding: 0.75rem;
+            padding: 0.5rem;
             text-align: left;
             font-weight: 500;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .report-products td {
-            padding: 0.75rem;
+            padding: 0.5rem;
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .report-products tr:last-child td {
@@ -297,18 +373,18 @@
             max-width: 800px;
             max-height: 90vh;
             overflow-y: auto;
-            padding: 1.5rem;
+            padding: 1.25rem;
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
 
         .modal-header h2 {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
         }
 
         .modal-close {
@@ -339,6 +415,25 @@
             .report-actions {
                 flex-direction: column;
             }
+
+            .form-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .form-header-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .search-container {
+                flex-direction: column;
+            }
+
+            .search-btn {
+                padding: 0.75rem;
+            }
         }
     </style>
 </head>
@@ -355,11 +450,29 @@
             </button>
         </header>
 
+        <!-- Buscador -->
+        <div class="search-container">
+            <input type="text" class="search-input" id="searchInput" placeholder="Buscar por número de reporte o fecha...">
+            <button class="search-btn" id="searchBtn">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+
         <!-- Formulario de nueva devolución -->
         <div class="return-form" id="returnForm">
             <div class="form-header">
                 <h2><i class="fas fa-file-alt"></i> Nueva Devolución</h2>
-                <div class="report-id">Registro #<span id="reportNumber">--</span></div>
+                <div class="form-header-actions">
+                    <button class="btn btn-danger" id="cancelReportBtn">
+                        <i class="fas fa-times"></i>
+                        Cancelar
+                    </button>
+                    <button class="btn btn-success" id="saveReportBtn">
+                        <i class="fas fa-save"></i>
+                        Guardar
+                    </button>
+                    <div class="report-id">Registro #<span id="reportNumber">--</span></div>
+                </div>
             </div>
             
             <div class="form-row">
@@ -378,22 +491,22 @@
                 <textarea class="form-control" id="notes"></textarea>
             </div>
             
-            <h3 style="margin: 1.5rem 0 1rem;">Productos en mal estado</h3>
+            <h3 style="margin: 1rem 0 0.5rem; font-size: 1.1rem;">Productos en mal estado</h3>
             
             <table class="products-table" id="productsTable">
                 <thead>
                     <tr>
                         <th>Descripción</th>
-                        <th style="width: 100px;">Cantidad</th>
-                        <th style="width: 150px;">Motivo</th>
+                        <th style="width: 80px;">Cantidad</th>
+                        <th style="width: 120px;">Motivo</th>
                         <th style="width: 50px;"></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td><input type="text" placeholder="Código y descripción del producto"></td>
+                        <td><input type="text" placeholder="Código y descripción"></td>
                         <td><input type="number" placeholder="0" min="1"></td>
-                        <td><input type="text" placeholder="Ej: Quebrado, Dañado"></td>
+                        <td><input type="text" placeholder="Ej: Quebrado"></td>
                         <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                     </tr>
                 </tbody>
@@ -403,17 +516,6 @@
                 <i class="fas fa-plus"></i>
                 Agregar Producto
             </button>
-            
-            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                <button class="btn btn-danger" id="cancelReportBtn">
-                    <i class="fas fa-times"></i>
-                    Cancelar
-                </button>
-                <button class="btn btn-success" id="saveReportBtn">
-                    <i class="fas fa-save"></i>
-                    Guardar Reporte
-                </button>
-            </div>
         </div>
 
         <!-- Lista de reportes -->
@@ -430,7 +532,7 @@
     <div class="modal" id="reportModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-file-alt"></i> Reporte de Devolución</h2>
+                <h2><i class="fas fa-file-alt"></i> Detalle de Reporte</h2>
                 <button class="modal-close" id="modalCloseBtn">&times;</button>
             </div>
             <div id="modalReportContent">
@@ -462,7 +564,7 @@
         // Datos de la aplicación
         let reports = [];
         let currentReportId = null;
-        let reportCounter = 0; // Contador para números consecutivos
+        let reportCounter = 0;
         const companyName = "MACAAL S.A";
         const companyLogo = new Image();
         companyLogo.src = 'images/logo/logo.png';
@@ -484,6 +586,8 @@
             const supplierInput = document.getElementById('supplier');
             const reportDateInput = document.getElementById('reportDate');
             const notesInput = document.getElementById('notes');
+            const searchInput = document.getElementById('searchInput');
+            const searchBtn = document.getElementById('searchBtn');
 
             // Generar número de reporte consecutivo
             function generateReportNumber() {
@@ -508,9 +612,9 @@
                 const tbody = productsTable.querySelector('tbody');
                 tbody.innerHTML = `
                     <tr>
-                        <td><input type="text" placeholder="Código y descripción del producto"></td>
+                        <td><input type="text" placeholder="Código y descripción"></td>
                         <td><input type="number" placeholder="0" min="1"></td>
-                        <td><input type="text" placeholder="Ej: Quebrado, Dañado"></td>
+                        <td><input type="text" placeholder="Ej: Quebrado"></td>
                         <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                     </tr>
                 `;
@@ -531,9 +635,9 @@
                 const tbody = productsTable.querySelector('tbody');
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = `
-                    <td><input type="text" placeholder="Código y descripción del producto"></td>
+                    <td><input type="text" placeholder="Código y descripción"></td>
                     <td><input type="number" placeholder="0" min="1"></td>
-                    <td><input type="text" placeholder="Ej: Quebrado, Dañado"></td>
+                    <td><input type="text" placeholder="Ej: Quebrado"></td>
                     <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                 `;
                 tbody.appendChild(newRow);
@@ -585,7 +689,9 @@
                         products.push({
                             description: description,
                             quantity: parseInt(quantity),
-                            reason: reason
+                            reason: reason,
+                            status: 'pending', // Estado inicial
+                            receivedDate: null // Fecha de recepción inicialmente nula
                         });
                     }
                 });
@@ -620,7 +726,8 @@
                     notes: notesInput.value.trim(),
                     products: getProductsFromTable(),
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    reportNumber: reportCounter // Guardamos el número consecutivo
+                    reportNumber: reportCounter,
+                    status: 'active'
                 };
                 
                 db.collection("reportesMalEstado").doc(currentReportId)
@@ -636,6 +743,24 @@
                     });
             }
 
+            // Buscar reportes
+            function searchReports() {
+                const searchTerm = searchInput.value.trim().toLowerCase();
+                
+                if (searchTerm === '') {
+                    loadReports();
+                    return;
+                }
+                
+                // Buscar por número de reporte o fecha
+                const filteredReports = reports.filter(report => {
+                    return report.id.toLowerCase().includes(searchTerm) || 
+                           formatDate(report.date).toLowerCase().includes(searchTerm);
+                });
+                
+                renderReportsList(filteredReports);
+            }
+
             // Cargar reportes desde Firebase
             function loadReports() {
                 db.collection("reportesMalEstado")
@@ -644,7 +769,19 @@
                     .then(querySnapshot => {
                         reports = [];
                         querySnapshot.forEach(doc => {
-                            reports.push(doc.data());
+                            const data = doc.data();
+                            // Asegurarse de que todos los productos tengan status
+                            if (data.products) {
+                                data.products.forEach(product => {
+                                    if (!product.status) {
+                                        product.status = 'pending';
+                                    }
+                                    if (!product.receivedDate && product.status === 'received') {
+                                        product.receivedDate = new Date().toISOString();
+                                    }
+                                });
+                            }
+                            reports.push(data);
                         });
                         
                         // Establecer el contador al máximo número de reporte + 1
@@ -653,7 +790,7 @@
                             reportCounter = maxNumber;
                         }
                         
-                        renderReportsList();
+                        renderReportsList(reports);
                     })
                     .catch(error => {
                         console.error("Error al cargar reportes:", error);
@@ -661,13 +798,13 @@
             }
 
             // Mostrar lista de reportes
-            function renderReportsList() {
-                if (reports.length === 0) {
+            function renderReportsList(reportsToRender = reports) {
+                if (reportsToRender.length === 0) {
                     reportsList.innerHTML = `
                         <div class="no-reports" style="text-align: center; padding: 2rem; color: var(--text-light);">
                             <i class="fas fa-box-open" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
-                            <h3>No hay reportes registrados</h3>
-                            <p>Haz clic en "Nueva Devolución" para crear tu primer reporte</p>
+                            <h3>No se encontraron reportes</h3>
+                            <p>No hay reportes que coincidan con tu búsqueda</p>
                         </div>
                     `;
                     return;
@@ -675,14 +812,22 @@
                 
                 reportsList.innerHTML = '';
                 
-                reports.forEach(report => {
+                reportsToRender.forEach(report => {
                     const reportCard = document.createElement('div');
                     reportCard.className = 'report-card';
+                    
+                    // Contar productos recibidos
+                    const receivedCount = report.products ? report.products.filter(p => p.status === 'received').length : 0;
+                    const totalCount = report.products ? report.products.length : 0;
+                    
                     reportCard.innerHTML = `
                         <div class="report-header">
                             <div>
                                 <span class="report-id">${report.id}</span>
                                 <span class="report-date">${formatDate(report.date)}</span>
+                                <div style="margin-top: 0.25rem; font-size: 0.85rem; color: ${receivedCount === totalCount ? 'var(--danger)' : 'var(--success)'}">
+                                    ${receivedCount}/${totalCount} productos recibidos
+                                </div>
                             </div>
                             <div style="display: flex; gap: 0.5rem;">
                                 <button class="btn" onclick="viewReport('${report.id}')">
@@ -691,6 +836,16 @@
                                 <button class="btn btn-pdf" onclick="generatePDF('${report.id}')">
                                     <i class="fas fa-file-pdf"></i> PDF
                                 </button>
+                                ${report.status === 'active' ? `
+                                <button class="btn btn-danger" onclick="cancelReport('${report.id}')">
+                                    <i class="fas fa-ban"></i> Anular
+                                </button>
+                                ` : ''}
+                                ${report.status === 'active' ? `
+                                <button class="btn btn-secondary" onclick="editReport('${report.id}')">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                ` : ''}
                             </div>
                         </div>
                         <div class="report-supplier">Proveedor: ${report.supplier}</div>
@@ -699,18 +854,23 @@
                             <thead>
                                 <tr>
                                     <th>Descripción</th>
-                                    <th style="width: 80px;">Cantidad</th>
-                                    <th style="width: 120px;">Motivo</th>
+                                    <th style="width: 60px;">Cantidad</th>
+                                    <th style="width: 100px;">Motivo</th>
+                                    <th style="width: 100px;">Estado</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                ${report.products.map(product => `
+                                ${report.products ? report.products.map(product => `
                                     <tr>
                                         <td>${product.description}</td>
                                         <td>${product.quantity}</td>
                                         <td>${product.reason}</td>
+                                        <td>
+                                            <span class="product-status status-${product.status}"></span>
+                                            ${product.status === 'pending' ? 'Pendiente' : 'Recibido'}
+                                        </td>
                                     </tr>
-                                `).join('')}
+                                `).join('') : ''}
                             </tbody>
                         </table>
                     `;
@@ -725,6 +885,83 @@
                 return new Date(dateString).toLocaleDateString('es-ES', options);
             }
 
+            // Formatear fecha y hora
+            function formatDateTime(dateString) {
+                if (!dateString) return 'No especificada';
+                const options = { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                };
+                return new Date(dateString).toLocaleDateString('es-ES', options);
+            }
+
+            // Anular reporte
+            window.cancelReport = function(reportId) {
+                if (confirm('¿Estás seguro que deseas anular este reporte?')) {
+                    db.collection("reportesMalEstado").doc(reportId)
+                        .update({
+                            status: 'cancelled',
+                            cancelledAt: firebase.firestore.FieldValue.serverTimestamp()
+                        })
+                        .then(() => {
+                            alert('Reporte anulado correctamente');
+                            loadReports();
+                        })
+                        .catch(error => {
+                            console.error("Error al anular el reporte:", error);
+                            alert('Ocurrió un error al anular el reporte');
+                        });
+                }
+            };
+
+            // Editar reporte
+            window.editReport = function(reportId) {
+                const report = reports.find(r => r.id === reportId);
+                if (!report) return;
+                
+                if (report.status !== 'active') {
+                    alert('Solo se pueden editar reportes activos');
+                    return;
+                }
+
+                currentReportId = report.id;
+                reportNumberSpan.textContent = report.id;
+                
+                // Llenar campos del formulario
+                supplierInput.value = report.supplier;
+                reportDateInput.value = report.date.split('T')[0];
+                notesInput.value = report.notes || '';
+                
+                // Llenar tabla de productos
+                const tbody = productsTable.querySelector('tbody');
+                tbody.innerHTML = '';
+                
+                report.products.forEach(product => {
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td><input type="text" value="${product.description}" placeholder="Código y descripción"></td>
+                        <td><input type="number" value="${product.quantity}" placeholder="0" min="1"></td>
+                        <td><input type="text" value="${product.reason}" placeholder="Ej: Quebrado"></td>
+                        <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
+                    `;
+                    tbody.appendChild(newRow);
+                });
+                
+                // Agregar event listeners a los botones de eliminar
+                addDeleteRowListeners();
+                
+                returnForm.style.display = 'block';
+                
+                // Cambiar texto del botón de guardar
+                saveReportBtn.innerHTML = '<i class="fas fa-save"></i> Actualizar';
+                
+                // Desplazar hasta el formulario
+                returnForm.scrollIntoView({ behavior: 'smooth' });
+            };
+
             // Ver reporte completo en modal
             window.viewReport = function(reportId) {
                 const report = reports.find(r => r.id === reportId);
@@ -735,6 +972,10 @@
                         <div>
                             <span class="report-id">${report.id}</span>
                             <span class="report-date">${formatDate(report.date)}</span>
+                            <div style="margin-top: 0.25rem; font-size: 0.9rem; color: ${report.status === 'cancelled' ? 'var(--danger)' : report.status === 'completed' ? 'var(--success)' : 'var(--warning)'}">
+                                Estado: ${report.status === 'active' ? 'Activo' : report.status === 'cancelled' ? 'Anulado' : 'Completado'}
+                                ${report.cancelledAt ? `<span class="status-date">Anulado el: ${formatDateTime(report.cancelledAt.toDate ? report.cancelledAt.toDate().toISOString() : report.cancelledAt)}</span>` : ''}
+                            </div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -757,18 +998,35 @@
                             <thead>
                                 <tr>
                                     <th>Descripción</th>
-                                    <th style="width: 80px;">Cantidad</th>
-                                    <th style="width: 120px;">Motivo</th>
+                                    <th style="width: 60px;">Cantidad</th>
+                                    <th style="width: 100px;">Motivo</th>
+                                    <th style="width: 120px;">Estado</th>
+                                    ${report.status === 'active' ? '<th style="width: 80px;">Acción</th>' : ''}
                                 </tr>
                             </thead>
                             <tbody>
-                                ${report.products.map(product => `
+                                ${report.products ? report.products.map((product, index) => `
                                     <tr>
                                         <td>${product.description}</td>
                                         <td>${product.quantity}</td>
                                         <td>${product.reason}</td>
+                                        <td onclick="toggleProductStatus('${report.id}', ${index})" style="cursor: pointer;">
+                                            <span class="product-status status-${product.status}"></span>
+                                            ${product.status === 'pending' ? 'Pendiente' : 'Recibido'}
+                                            ${product.receivedDate ? `<span class="status-date">Recibido el: ${formatDateTime(product.receivedDate)}</span>` : ''}
+                                        </td>
+                                        ${report.status === 'active' ? `
+                                        <td>
+                                            ${product.status === 'pending' ? `
+                                            <button class="btn btn-success" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" 
+                                                onclick="markAsReceived('${report.id}', ${index})">
+                                                <i class="fas fa-check"></i> Recibido
+                                            </button>
+                                            ` : ''}
+                                        </td>
+                                        ` : ''}
                                     </tr>
-                                `).join('')}
+                                `).join('') : ''}
                             </tbody>
                         </table>
                     </div>
@@ -779,6 +1037,11 @@
                         <i class="fas fa-file-pdf"></i>
                         Generar PDF
                     </button>
+                    ${report.status === 'active' ? `
+                    <button class="btn btn-secondary" onclick="editReport('${report.id}')">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                    ` : ''}
                     <button class="btn" onclick="closeModal()">
                         <i class="fas fa-times"></i>
                         Cerrar
@@ -787,6 +1050,64 @@
                 
                 reportModal.style.display = 'flex';
                 document.body.style.overflow = 'hidden';
+            };
+
+            // Cambiar estado del producto al hacer clic en el status
+            window.toggleProductStatus = function(reportId, productIndex) {
+                const report = reports.find(r => r.id === reportId);
+                if (!report || !report.products || !report.products[productIndex] || report.status !== 'active') return;
+                
+                markAsReceived(reportId, productIndex);
+            };
+
+            // Marcar producto como recibido
+            window.markAsReceived = function(reportId, productIndex) {
+                const report = reports.find(r => r.id === reportId);
+                if (!report || !report.products || !report.products[productIndex]) return;
+                
+                const product = report.products[productIndex];
+                const newStatus = product.status === 'pending' ? 'received' : 'pending';
+                
+                // Actualizar estado del producto
+                product.status = newStatus;
+                if (newStatus === 'received') {
+                    product.receivedDate = new Date().toISOString();
+                } else {
+                    product.receivedDate = null;
+                }
+                
+                // Actualizar en Firebase
+                db.collection("reportesMalEstado").doc(reportId)
+                    .update({
+                        products: report.products
+                    })
+                    .then(() => {
+                        // Verificar si todos los productos están recibidos
+                        const allReceived = report.products.every(p => p.status === 'received');
+                        if (allReceived) {
+                            return db.collection("reportesMalEstado").doc(reportId)
+                                .update({
+                                    status: 'completed',
+                                    completedAt: firebase.firestore.FieldValue.serverTimestamp()
+                                });
+                        } else if (report.status === 'completed') {
+                            // Si ya estaba completado pero ahora no todos están recibidos
+                            return db.collection("reportesMalEstado").doc(reportId)
+                                .update({
+                                    status: 'active',
+                                    completedAt: firebase.firestore.FieldValue.delete()
+                                });
+                        }
+                        return Promise.resolve();
+                    })
+                    .then(() => {
+                        loadReports();
+                        viewReport(reportId); // Recargar el modal
+                    })
+                    .catch(error => {
+                        console.error("Error al actualizar el producto:", error);
+                        alert('Ocurrió un error al actualizar el producto');
+                    });
             };
 
             // Generar PDF del reporte
@@ -837,15 +1158,16 @@
                 }
                 
                 // Tabla de productos
-                const tableData = report.products.map(product => [
+                const tableData = report.products ? report.products.map(product => [
                     product.description,
                     product.quantity.toString(),
-                    product.reason
-                ]);
+                    product.reason,
+                    product.status === 'pending' ? 'Pendiente' : `Recibido\n${formatDateTime(product.receivedDate)}`
+                ]) : [];
                 
                 doc.autoTable({
                     startY: yPosition,
-                    head: [['Descripción', 'Cantidad', 'Motivo']],
+                    head: [['Descripción', 'Cantidad', 'Motivo', 'Estado']],
                     body: tableData,
                     margin: { left: marginLeft, right: marginRight },
                     styles: {
@@ -860,8 +1182,9 @@
                     },
                     columnStyles: {
                         0: { cellWidth: 'auto' },
-                        1: { cellWidth: 25 },
-                        2: { cellWidth: 40 }
+                        1: { cellWidth: 20 },
+                        2: { cellWidth: 40 },
+                        3: { cellWidth: 40 }
                     }
                 });
                 
@@ -892,6 +1215,10 @@
             modalCloseBtn.addEventListener('click', closeModal);
             reportModal.addEventListener('click', (e) => {
                 if (e.target === reportModal) closeModal();
+            });
+            searchBtn.addEventListener('click', searchReports);
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') searchReports();
             });
 
             // Cargar reportes al iniciar
