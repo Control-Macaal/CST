@@ -462,6 +462,7 @@
         // Datos de la aplicación
         let reports = [];
         let currentReportId = null;
+        let reportCounter = 0; // Contador para números consecutivos
         const companyName = "MACAAL S.A";
         const companyLogo = new Image();
         companyLogo.src = 'images/logo/logo.png';
@@ -484,14 +485,10 @@
             const reportDateInput = document.getElementById('reportDate');
             const notesInput = document.getElementById('notes');
 
-            // Generar número de reporte
+            // Generar número de reporte consecutivo
             function generateReportNumber() {
-                const now = new Date();
-                const year = now.getFullYear().toString().slice(-2);
-                const month = (now.getMonth() + 1).toString().padStart(2, '0');
-                const day = now.getDate().toString().padStart(2, '0');
-                const randomNum = Math.floor(1000 + Math.random() * 9000);
-                return `DEV-${year}${month}${day}-${randomNum}`;
+                reportCounter++;
+                return `DEV-#${reportCounter}`;
             }
 
             // Mostrar formulario de nueva devolución
@@ -622,7 +619,8 @@
                     date: reportDateInput.value,
                     notes: notesInput.value.trim(),
                     products: getProductsFromTable(),
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    reportNumber: reportCounter // Guardamos el número consecutivo
                 };
                 
                 db.collection("reportesMalEstado").doc(currentReportId)
@@ -648,6 +646,12 @@
                         querySnapshot.forEach(doc => {
                             reports.push(doc.data());
                         });
+                        
+                        // Establecer el contador al máximo número de reporte + 1
+                        if (reports.length > 0) {
+                            const maxNumber = Math.max(...reports.map(r => r.reportNumber || 0));
+                            reportCounter = maxNumber;
+                        }
                         
                         renderReportsList();
                     })
@@ -791,7 +795,6 @@
                 if (!report) return;
                 
                 const doc = new jsPDF();
-                const currentDate = new Date();
                 
                 // Configuración de márgenes
                 const marginLeft = 15;
@@ -864,16 +867,12 @@
                 
                 // Firmas en la parte inferior
                 const lastY = doc.lastAutoTable.finalY + 20;
-                const signatureWidth = 80;
                 
-                // Fecha de entrega (izquierda)
+                // Fecha de entrega y firmas
                 doc.setFontSize(10);
                 doc.text('Fecha de Entrega: ________________', marginLeft, lastY);
-                
-                // Firma de quien recibe (izquierda, debajo de la fecha)
-                doc.text('Firma de quien recibe:', marginLeft, lastY + 15);
-                doc.line(marginLeft, lastY + 20, marginLeft + signatureWidth, lastY + 20);
-                doc.text('Nombre y Cargo', marginLeft, lastY + 25);
+                doc.text('Recibe: ___________', marginLeft, lastY + 10);
+                doc.text('Entrega: ___________', marginLeft, lastY + 20);
                 
                 // Guardar PDF
                 doc.save(`Reporte_${report.id}.pdf`);
