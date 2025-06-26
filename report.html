@@ -149,7 +149,11 @@
             box-shadow: var(--shadow);
             padding: 1.5rem;
             margin-bottom: 2rem;
-            display: none;
+            transition: var(--transition);
+        }
+
+        .return-form.minimized {
+            padding: 0.5rem 1rem;
         }
 
         .form-header {
@@ -157,6 +161,14 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .return-form.minimized .form-header {
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: none;
         }
 
         .form-header h2 {
@@ -175,6 +187,12 @@
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1.2rem;
             margin-bottom: 1.2rem;
+        }
+
+        .return-form.minimized .form-row,
+        .return-form.minimized .invoice-fields,
+        .return-form.minimized .form-group:not(.summary-group) {
+            display: none;
         }
 
         .form-group {
@@ -202,6 +220,63 @@
             resize: vertical;
             font-size: 0.95rem;
             text-transform: none;
+        }
+
+        .invoice-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .invoice-fields .form-group label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .invoice-fields .form-control {
+            font-size: 0.95rem;
+            padding: 0.7rem;
+        }
+
+        .summary-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-item {
+            background: rgba(0,0,0,0.05);
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .summary-item strong {
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        .toggle-form-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            margin-bottom: 0.5rem;
+            padding: 0.3rem;
+        }
+
+        .toggle-form-btn i {
+            transition: transform 0.2s ease;
+        }
+
+        .return-form.minimized .toggle-form-btn i {
+            transform: rotate(180deg);
         }
 
         .products-table {
@@ -436,6 +511,10 @@
                 grid-template-columns: 1fr;
             }
             
+            .invoice-fields {
+                grid-template-columns: 1fr;
+            }
+            
             .products-table {
                 display: block;
                 overflow-x: auto;
@@ -507,7 +586,12 @@
         </div>
 
         <!-- Formulario de nueva devolución -->
-        <div class="return-form" id="returnForm">
+        <div class="return-form minimized" id="returnForm">
+            <button class="toggle-form-btn" id="toggleFormBtn">
+                <i class="fas fa-chevron-up"></i>
+                <span>Mostrar detalles</span>
+            </button>
+            
             <div class="form-header">
                 <h2><i class="fas fa-file-alt"></i> Nueva Devolución</h2>
                 <div class="form-header-actions">
@@ -519,35 +603,49 @@
                         <i class="fas fa-save"></i>
                         Guardar
                     </button>
-                    <div class="report-id">Registro #<span id="reportNumber">--</span></div>
+                    <div class="report-id">Registro <span id="reportNumber">--</span></div>
                 </div>
             </div>
             
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="supplier">Proveedor</label>
-                    <input type="text" class="form-control" id="supplier" required>
+            <div class="summary-group">
+                <div class="summary-item">
+                    <strong>Proveedor:</strong> <span id="supplierSummary">-</span>
                 </div>
-                <div class="form-group">
-                    <label for="reportDate">Fecha</label>
-                    <input type="date" class="form-control" id="reportDate" required>
+                <div class="summary-item">
+                    <strong>Fecha:</strong> <span id="dateSummary">-</span>
                 </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="invoiceNumber">Número de Factura (Opcional)</label>
-                    <input type="text" class="form-control" id="invoiceNumber" placeholder="XXXXX">
-                </div>
-                <div class="form-group">
-                    <label for="invoiceSeries">Serie de Factura (Opcional)</label>
-                    <input type="text" class="form-control" id="invoiceSeries" placeholder="XXXXX">
+                <div class="summary-item">
+                    <strong>Factura:</strong> <span id="invoiceSummary">XXXXX / XXXXX</span>
                 </div>
             </div>
             
-            <div class="form-group">
-                <label for="notes">Observaciones (Opcional)</label>
-                <textarea class="form-control" id="notes" style="min-height: 50px;"></textarea>
+            <div class="form-content">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="supplier">Proveedor</label>
+                        <input type="text" class="form-control" id="supplier" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reportDate">Fecha</label>
+                        <input type="date" class="form-control" id="reportDate" required>
+                    </div>
+                </div>
+                
+                <div class="invoice-fields">
+                    <div class="form-group">
+                        <label for="invoiceNumber">Número de Factura (Opcional)</label>
+                        <input type="text" class="form-control" id="invoiceNumber" placeholder="Ingrese número">
+                    </div>
+                    <div class="form-group">
+                        <label for="invoiceSeries">Serie de Factura (Opcional)</label>
+                        <input type="text" class="form-control" id="invoiceSeries" placeholder="Ingrese serie">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="notes">Observaciones (Opcional)</label>
+                    <textarea class="form-control" id="notes" style="min-height: 50px;"></textarea>
+                </div>
             </div>
             
             <h3 style="margin: 1.2rem 0 0.8rem; font-size: 1.15rem;">Productos en mal estado</h3>
@@ -652,6 +750,10 @@
             const searchBtn = document.getElementById('searchBtn');
             const searchContainer = document.getElementById('searchContainer');
             const headerActions = document.querySelector('.header-actions');
+            const toggleFormBtn = document.getElementById('toggleFormBtn');
+            const supplierSummary = document.getElementById('supplierSummary');
+            const dateSummary = document.getElementById('dateSummary');
+            const invoiceSummary = document.getElementById('invoiceSummary');
 
             // Mostrar alerta de confirmación con SweetAlert
             function showConfirmAlert(title, text, confirmButtonText) {
@@ -702,20 +804,52 @@
                 return text ? text.toUpperCase() : '';
             }
 
-            // Generar número de reporte consecutivo
-            function generateReportNumber() {
-                reportCounter++;
-                return `#${reportCounter}`;
+            // Generar número de reporte consecutivo basado en el último existente
+            async function generateReportNumber() {
+                try {
+                    const snapshot = await db.collection("reportesMalEstado")
+                        .orderBy("reportNumber", "desc")
+                        .limit(1)
+                        .get();
+                    
+                    if (!snapshot.empty) {
+                        const lastReport = snapshot.docs[0].data();
+                        reportCounter = lastReport.reportNumber;
+                    }
+                    
+                    reportCounter++;
+                    return reportCounter.toString(); // Solo el número, sin #
+                } catch (error) {
+                    console.error("Error al obtener último reporte:", error);
+                    reportCounter++;
+                    return reportCounter.toString(); // Solo el número, sin #
+                }
+            }
+
+            // Actualizar el resumen de información
+            function updateSummary() {
+                supplierSummary.textContent = supplierInput.value || '-';
+                
+                if (reportDateInput.value) {
+                    const date = new Date(reportDateInput.value);
+                    dateSummary.textContent = date.toLocaleDateString('es-ES');
+                } else {
+                    dateSummary.textContent = '-';
+                }
+                
+                const invNumber = invoiceNumberInput.value || 'XXXXX';
+                const invSeries = invoiceSeriesInput.value || 'XXXXX';
+                invoiceSummary.textContent = `${invNumber} / ${invSeries}`;
             }
 
             // Mostrar formulario de nueva devolución
-            function showNewReportForm() {
+            async function showNewReportForm() {
                 if (isCreatingNewReport) {
                     showErrorAlert('Operación en curso', 'Ya tienes una devolución en proceso. Termina o cancela la actual antes de crear una nueva.');
                     return;
                 }
 
-                currentReportId = generateReportNumber();
+                currentReportId = await generateReportNumber();
                 reportNumberSpan.textContent = currentReportId;
                 
                 // Establecer fecha actual
@@ -740,6 +874,9 @@
                     </tr>
                 `;
                 
+                // Actualizar resumen
+                updateSummary();
+                
                 // Restaurar texto del botón de guardar
                 saveReportBtn.innerHTML = '<i class="fas fa-save"></i> Guardar';
                 
@@ -751,8 +888,10 @@
                 searchContainer.style.display = 'none';
                 headerActions.style.display = 'none';
                 
-                // Mostrar el formulario
+                // Mostrar el formulario minimizado
                 returnForm.style.display = 'block';
+                returnForm.classList.add('minimized');
+                toggleFormBtn.querySelector('span').textContent = 'Mostrar detalles';
                 
                 // Marcar que estamos creando un nuevo reporte
                 isCreatingNewReport = true;
@@ -856,7 +995,7 @@
             }
 
             // Guardar reporte en Firebase
-            function saveReport() {
+            async function saveReport() {
                 if (!validateForm()) return;
                 
                 const reportData = {
@@ -865,9 +1004,10 @@
                     date: reportDateInput.value,
                     invoiceNumber: invoiceNumberInput.value.trim() || 'XXXXX',
                     invoiceSeries: invoiceSeriesInput.value.trim() || 'XXXXX',
-                    notes: notesInput.value.trim(), // Notas se mantienen como se escriben
+                    notes: notesInput.value.trim(),
                     products: getProductsFromTable(),
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    reportNumber: parseInt(currentReportId)
                 };
                 
                 // Verificar si estamos editando o creando nuevo
@@ -879,7 +1019,6 @@
                     if (originalReport) {
                         reportData.status = originalReport.status;
                         reportData.createdAt = originalReport.createdAt;
-                        reportData.reportNumber = originalReport.reportNumber;
                         
                         // Mantener el estado de los productos
                         reportData.products.forEach((product, index) => {
@@ -910,7 +1049,6 @@
                     // Es un nuevo reporte
                     reportData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
                     reportData.status = 'active';
-                    reportData.reportNumber = reportCounter;
                     
                     // Establecer estado inicial de los productos
                     reportData.products.forEach(product => {
@@ -985,12 +1123,6 @@
                             }
                             reports.push(data);
                         });
-                        
-                        // Establecer el contador al máximo número de reporte + 1
-                        if (reports.length > 0) {
-                            const maxNumber = Math.max(...reports.map(r => r.reportNumber || 0));
-                            reportCounter = maxNumber;
-                        }
                         
                         renderReportsList(reports);
                     })
@@ -1165,6 +1297,9 @@
                 invoiceSeriesInput.value = report.invoiceSeries === 'XXXXX' ? '' : report.invoiceSeries;
                 notesInput.value = report.notes || '';
                 
+                // Actualizar resumen
+                updateSummary();
+                
                 // Llenar tabla de productos
                 const tbody = productsTable.querySelector('tbody');
                 tbody.innerHTML = '';
@@ -1189,8 +1324,10 @@
                 searchContainer.style.display = 'none';
                 headerActions.style.display = 'none';
                 
-                // Mostrar el formulario
+                // Mostrar el formulario expandido
                 returnForm.style.display = 'block';
+                returnForm.classList.remove('minimized');
+                toggleFormBtn.querySelector('span').textContent = 'Ocultar detalles';
                 
                 // Marcar que estamos editando un reporte
                 isCreatingNewReport = true;
@@ -1388,38 +1525,40 @@
                 doc.setDrawColor(200, 200, 200);
                 doc.line(marginLeft, 35, pageWidth - marginRight, 35);
                 
-                // Información del reporte - alineado a la derecha el número de reporte y fecha
+                // Información del reporte
                 doc.setFontSize(10);
                 let yPosition = 45;
                 
-                // Número de reporte alineado a la derecha
-                const reportNumberText = `Número de Reporte: ${report.id}`;
-                const reportNumberWidth = doc.getStringUnitWidth(reportNumberText) * doc.internal.getFontSize() / doc.internal.scaleFactor;
-                doc.text(reportNumberText, pageWidth - marginRight - reportNumberWidth, yPosition);
+                // Textos alineados a la izquierda
+                const leftTexts = [
+                    `Proveedor: ${report.supplier}`,
+                    `Número de Factura: ${report.invoiceNumber}`,
+                    `Serie de Factura: ${report.invoiceSeries}`
+                ];
                 
-                // Fecha de Reporte alineada a la derecha
-                const reportDateText = `Fecha de Reporte: ${formatDate(report.date)}`;
-                const reportDateWidth = doc.getStringUnitWidth(reportDateText) * doc.internal.getFontSize() / doc.internal.scaleFactor;
-                doc.text(reportDateText, pageWidth - marginRight - reportDateWidth, yPosition + 7);
+                // Textos alineados a la derecha
+                const rightTexts = [
+                    `Número de Reporte: ${report.id}`,
+                    `Fecha de Reporte: ${formatDate(report.date)}`
+                ];
                 
-                yPosition += 14;
+                // Calcular posición vertical para alinear ambos lados
+                const lineHeight = 7;
+                const maxLines = Math.max(leftTexts.length, rightTexts.length);
                 
-                doc.text(`Proveedor: ${report.supplier}`, marginLeft, yPosition);
-                yPosition += 7;
-                
-                doc.text(`Número de Factura: ${report.invoiceNumber}`, marginLeft, yPosition);
-                yPosition += 7;
-                
-                doc.text(`Serie de Factura: ${report.invoiceSeries}`, marginLeft, yPosition);
-                yPosition += 7;
-                
-                if (report.notes) {
-                    const splitNotes = doc.splitTextToSize(`Observaciones: ${report.notes}`, contentWidth);
-                    doc.text(splitNotes, marginLeft, yPosition);
-                    yPosition += splitNotes.length * 5 + 10;
-                } else {
-                    yPosition += 10;
+                for (let i = 0; i < maxLines; i++) {
+                    if (i < leftTexts.length) {
+                        doc.text(leftTexts[i], marginLeft, yPosition + (i * lineHeight));
+                    }
+                    
+                    if (i < rightTexts.length) {
+                        const text = rightTexts[i];
+                        const textWidth = doc.getStringUnitWidth(text) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+                        doc.text(text, pageWidth - marginRight - textWidth, yPosition + (i * lineHeight));
+                    }
                 }
+                
+                yPosition += (maxLines * lineHeight) + 10;
                 
                 // Tabla de productos con bordes
                 const tableData = report.products ? report.products.map(product => [
@@ -1490,6 +1629,19 @@
             searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') searchReports();
             });
+
+            // Toggle para minimizar/expandir formulario
+            toggleFormBtn.addEventListener('click', () => {
+                returnForm.classList.toggle('minimized');
+                const isMinimized = returnForm.classList.contains('minimized');
+                toggleFormBtn.querySelector('span').textContent = isMinimized ? 'Mostrar detalles' : 'Ocultar detalles';
+            });
+
+            // Actualizar resumen cuando cambian los campos
+            supplierInput.addEventListener('input', updateSummary);
+            reportDateInput.addEventListener('change', updateSummary);
+            invoiceNumberInput.addEventListener('input', updateSummary);
+            invoiceSeriesInput.addEventListener('input', updateSummary);
 
             // Convertir automáticamente a mayúsculas mientras se escribe
             document.addEventListener('input', function(e) {
