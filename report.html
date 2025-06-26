@@ -72,6 +72,11 @@
             color: var(--dark);
         }
 
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
         .search-container {
             margin-bottom: 1.5rem;
             display: flex;
@@ -189,12 +194,14 @@
             border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: var(--border-radius);
             font-size: 0.9rem;
+            text-transform: uppercase;
         }
 
         textarea.form-control {
             min-height: 40px;
             resize: vertical;
             font-size: 0.9rem;
+            text-transform: none;
         }
 
         .products-table {
@@ -216,7 +223,7 @@
         }
 
         .products-table td {
-            padding: 0.5rem;
+            padding: 0.5rem 0.3rem;
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             font-size: 0.9rem;
         }
@@ -227,25 +234,26 @@
 
         .products-table input[type="text"] {
             width: 100%;
-            padding: 0.5rem;
+            padding: 0.3rem;
             border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: 4px;
             font-size: 0.9rem;
+            text-transform: uppercase;
         }
 
         .products-table input[type="number"] {
             width: 100%;
-            padding: 0.5rem;
+            padding: 0.3rem;
             border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: 4px;
             font-size: 0.9rem;
         }
 
-        /* Código más pequeño (9 caracteres) */
         .products-table input.code-input {
-            width: 80px; /* Ancho reducido */
+            width: 80px;
             font-family: monospace;
             letter-spacing: 1px;
+            padding: 0.3rem;
         }
 
         .product-status {
@@ -453,13 +461,15 @@
                 <i class="fas fa-exclamation-triangle"></i>
                 <h1>Reportes de Producto Mal Estado</h1>
             </div>
-            <button class="btn" id="newReportBtn">
-                <i class="fas fa-plus"></i>
-                Nueva Devolución
-            </button>
+            <div class="header-actions">
+                <button class="btn" id="newReportBtn">
+                    <i class="fas fa-plus"></i>
+                    Nueva Devolución
+                </button>
+            </div>
         </header>
 
-        <!-- Buscador (se ocultará al crear nueva devolución) -->
+        <!-- Buscador -->
         <div class="search-container" id="searchContainer">
             <input type="text" class="search-input" id="searchInput" placeholder="Buscar por número de reporte o fecha...">
             <button class="search-btn" id="searchBtn">
@@ -599,6 +609,7 @@
             const searchInput = document.getElementById('searchInput');
             const searchBtn = document.getElementById('searchBtn');
             const searchContainer = document.getElementById('searchContainer');
+            const headerActions = document.querySelector('.header-actions');
 
             // Mostrar alerta de confirmación con SweetAlert
             function showConfirmAlert(title, text, confirmButtonText) {
@@ -644,6 +655,11 @@
                 });
             }
 
+            // Convertir texto a mayúsculas
+            function toUpperCase(text) {
+                return text ? text.toUpperCase() : '';
+            }
+
             // Generar número de reporte consecutivo
             function generateReportNumber() {
                 reportCounter++;
@@ -686,9 +702,10 @@
                 // Agregar event listeners a los botones de eliminar
                 addDeleteRowListeners();
                 
-                // Ocultar la lista de reportes y barra de búsqueda
+                // Ocultar elementos
                 reportsList.style.display = 'none';
                 searchContainer.style.display = 'none';
+                headerActions.style.display = 'none';
                 
                 // Mostrar el formulario
                 returnForm.style.display = 'block';
@@ -702,6 +719,7 @@
                 returnForm.style.display = 'none';
                 reportsList.style.display = 'grid';
                 searchContainer.style.display = 'flex';
+                headerActions.style.display = 'flex';
                 isCreatingNewReport = false;
             }
 
@@ -757,10 +775,10 @@
                 
                 rows.forEach(row => {
                     const inputs = row.querySelectorAll('input');
-                    const code = inputs[0].value.trim();
-                    const description = inputs[1].value.trim();
+                    const code = toUpperCase(inputs[0].value.trim());
+                    const description = toUpperCase(inputs[1].value.trim());
                     const quantity = inputs[2].value.trim();
-                    const reason = inputs[3].value.trim();
+                    const reason = toUpperCase(inputs[3].value.trim());
                     
                     if (code && description && quantity && reason) {
                         products.push({
@@ -799,22 +817,25 @@
                 
                 const reportData = {
                     id: currentReportId,
-                    supplier: supplierInput.value.trim(),
+                    supplier: toUpperCase(supplierInput.value.trim()),
                     date: reportDateInput.value,
-                    notes: notesInput.value.trim(),
+                    notes: notesInput.value.trim(), // Notas se mantienen como se escriben
                     products: getProductsFromTable(),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
                 
+                // Verificar si estamos editando o creando nuevo
                 const isEditing = saveReportBtn.innerHTML.includes('Actualizar');
                 
                 if (isEditing) {
+                    // Mantener los datos existentes que no se editan
                     const originalReport = reports.find(r => r.id === currentReportId);
                     if (originalReport) {
                         reportData.status = originalReport.status;
                         reportData.createdAt = originalReport.createdAt;
                         reportData.reportNumber = originalReport.reportNumber;
                         
+                        // Mantener el estado de los productos
                         reportData.products.forEach((product, index) => {
                             if (originalReport.products && originalReport.products[index]) {
                                 product.status = originalReport.products[index].status;
@@ -840,10 +861,12 @@
                             showErrorAlert('Error', 'Ocurrió un error al actualizar el reporte');
                         });
                 } else {
+                    // Es un nuevo reporte
                     reportData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
                     reportData.status = 'active';
                     reportData.reportNumber = reportCounter;
                     
+                    // Establecer estado inicial de los productos
                     reportData.products.forEach(product => {
                         product.status = 'pending';
                         product.receivedDate = null;
@@ -874,6 +897,7 @@
                     return;
                 }
                 
+                // Buscar por número de reporte o fecha
                 const filteredReports = reports.filter(report => {
                     return report.id.toLowerCase().includes(searchTerm) || 
                            formatDate(report.date).toLowerCase().includes(searchTerm);
@@ -891,6 +915,7 @@
                         reports = [];
                         querySnapshot.forEach(doc => {
                             const data = doc.data();
+                            // Asegurarse de que todos los productos tengan status
                             if (data.products) {
                                 data.products.forEach(product => {
                                     if (!product.status) {
@@ -899,6 +924,7 @@
                                     if (!product.receivedDate && product.status === 'received') {
                                         product.receivedDate = new Date().toISOString();
                                     }
+                                    // Asegurar que todos los productos tengan código
                                     if (!product.code) {
                                         product.code = '';
                                     }
@@ -907,6 +933,7 @@
                             reports.push(data);
                         });
                         
+                        // Establecer el contador al máximo número de reporte + 1
                         if (reports.length > 0) {
                             const maxNumber = Math.max(...reports.map(r => r.reportNumber || 0));
                             reportCounter = maxNumber;
@@ -939,6 +966,7 @@
                     const reportCard = document.createElement('div');
                     reportCard.className = 'report-card';
                     
+                    // Contar productos recibidos
                     const receivedCount = report.products ? report.products.filter(p => p.status === 'received').length : 0;
                     const totalCount = report.products ? report.products.length : 0;
                     
@@ -1033,6 +1061,7 @@
                                     cancelledAt: firebase.firestore.FieldValue.serverTimestamp()
                                 })
                                 .then(() => {
+                                    // Actualizar el estado de todos los productos a 'cancelled'
                                     const report = reports.find(r => r.id === reportId);
                                     if (report && report.products) {
                                         report.products.forEach(product => {
@@ -1073,12 +1102,15 @@
                 currentReportId = report.id;
                 reportNumberSpan.textContent = report.id;
                 
+                // Cambiar el texto del botón de guardar
                 saveReportBtn.innerHTML = '<i class="fas fa-save"></i> Actualizar';
                 
+                // Llenar campos del formulario
                 supplierInput.value = report.supplier;
                 reportDateInput.value = report.date.split('T')[0];
                 notesInput.value = report.notes || '';
                 
+                // Llenar tabla de productos
                 const tbody = productsTable.querySelector('tbody');
                 tbody.innerHTML = '';
                 
@@ -1094,22 +1126,30 @@
                     tbody.appendChild(newRow);
                 });
                 
+                // Agregar event listeners a los botones de eliminar
                 addDeleteRowListeners();
                 
+                // Ocultar elementos
                 reportsList.style.display = 'none';
                 searchContainer.style.display = 'none';
+                headerActions.style.display = 'none';
+                
+                // Mostrar el formulario
                 returnForm.style.display = 'block';
                 
+                // Marcar que estamos editando un reporte
                 isCreatingNewReport = true;
                 
+                // Cerrar el modal si está abierto
                 closeModal();
                 
+                // Desplazar hasta el formulario
                 returnForm.scrollIntoView({ behavior: 'smooth' });
             };
 
             // Cambiar estado del producto
             window.toggleProductStatus = function(reportId, productIndex, event) {
-                if (event) event.stopPropagation();
+                if (event) event.stopPropagation(); // Evitar que se propague el evento
                 
                 const report = reports.find(r => r.id === reportId);
                 if (!report || !report.products || !report.products[productIndex] || report.status !== 'active') return;
@@ -1117,6 +1157,7 @@
                 const product = report.products[productIndex];
                 const newStatus = product.status === 'pending' ? 'received' : 'pending';
                 
+                // Actualizar estado del producto
                 product.status = newStatus;
                 if (newStatus === 'received') {
                     product.receivedDate = new Date().toISOString();
@@ -1124,11 +1165,13 @@
                     product.receivedDate = null;
                 }
                 
+                // Actualizar en Firebase
                 db.collection("reportesMalEstado").doc(reportId)
                     .update({
                         products: report.products
                     })
                     .then(() => {
+                        // Verificar si todos los productos están recibidos
                         const allReceived = report.products.every(p => p.status === 'received');
                         if (allReceived) {
                             return db.collection("reportesMalEstado").doc(reportId)
@@ -1137,6 +1180,7 @@
                                     completedAt: firebase.firestore.FieldValue.serverTimestamp()
                                 });
                         } else if (report.status === 'completed') {
+                            // Si ya estaba completado pero ahora no todos están recibidos
                             return db.collection("reportesMalEstado").doc(reportId)
                                 .update({
                                     status: 'active',
@@ -1147,6 +1191,7 @@
                     })
                     .then(() => {
                         loadReports();
+                        // Volver a abrir el modal para ver los cambios
                         const currentModalReport = reports.find(r => r.id === reportId);
                         if (currentModalReport) {
                             viewReport(reportId);
@@ -1259,23 +1304,28 @@
                 
                 const doc = new jsPDF();
                 
+                // Configuración de márgenes
                 const marginLeft = 15;
                 const marginRight = 15;
                 const pageWidth = doc.internal.pageSize.getWidth();
                 const contentWidth = pageWidth - marginLeft - marginRight;
                 
+                // Logo de la empresa y nombre
                 doc.addImage(companyLogo, 'PNG', marginLeft, 10, 40, 15);
                 doc.setFontSize(14);
                 doc.setFont('helvetica', 'bold');
                 doc.text(companyName, pageWidth / 2, 20, { align: 'center' });
                 
+                // Título del documento
                 doc.setFontSize(12);
                 doc.setFont('helvetica', 'normal');
                 doc.text('Reporte de Productos en Mal Estado', pageWidth / 2, 30, { align: 'center' });
                 
+                // Línea separadora
                 doc.setDrawColor(200, 200, 200);
                 doc.line(marginLeft, 35, pageWidth - marginRight, 35);
                 
+                // Información del reporte
                 doc.setFontSize(10);
                 let yPosition = 45;
                 
@@ -1294,6 +1344,7 @@
                     yPosition += 5;
                 }
                 
+                // Tabla de productos con bordes
                 const tableData = report.products ? report.products.map(product => [
                     product.code || '',
                     product.description,
@@ -1310,12 +1361,18 @@
                     styles: {
                         fontSize: 9,
                         cellPadding: 3,
-                        valign: 'middle'
+                        valign: 'middle',
+                        lineWidth: 0.2,
+                        lineColor: 50
                     },
                     headStyles: {
                         fillColor: [67, 97, 238],
                         textColor: 255,
-                        fontStyle: 'bold'
+                        fontStyle: 'bold',
+                        lineWidth: 0.2
+                    },
+                    bodyStyles: {
+                        lineWidth: 0.2
                     },
                     columnStyles: {
                         0: { cellWidth: 25 },
@@ -1326,13 +1383,15 @@
                     }
                 });
                 
-                const lastY = doc.lastAutoTable.finalY + 20;
+                // Firmas en la parte inferior con letra más grande y más separación
+                const lastY = doc.lastAutoTable.finalY + 25;
                 
-                doc.setFontSize(10);
+                doc.setFontSize(14);
                 doc.text('Fecha de Entrega: ________________', marginLeft, lastY);
-                doc.text('Recibe: ___________', marginLeft, lastY + 10);
-                doc.text('Entrega: ___________', marginLeft, lastY + 20);
+                doc.text('Recibe: __________________________', marginLeft, lastY + 15);
+                doc.text('Entrega: _________________________', marginLeft, lastY + 30);
                 
+                // Guardar PDF
                 doc.save(`Reporte_${report.id}.pdf`);
             };
 
@@ -1353,6 +1412,13 @@
             searchBtn.addEventListener('click', searchReports);
             searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') searchReports();
+            });
+
+            // Convertir automáticamente a mayúsculas mientras se escribe
+            document.addEventListener('input', function(e) {
+                if (e.target.matches('#supplier, #productsTable input[type="text"]:not(.code-input)')) {
+                    e.target.value = e.target.value.toUpperCase();
+                }
             });
 
             // Cargar reportes al iniciar
