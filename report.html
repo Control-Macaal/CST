@@ -149,11 +149,7 @@
             box-shadow: var(--shadow);
             padding: 1.5rem;
             margin-bottom: 2rem;
-            transition: var(--transition);
-        }
-
-        .return-form.minimized {
-            padding: 0.5rem 1rem;
+            display: none;
         }
 
         .form-header {
@@ -161,14 +157,6 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1.5rem;
-            padding-bottom: 0.8rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
-        .return-form.minimized .form-header {
-            margin-bottom: 0.5rem;
-            padding-bottom: 0.5rem;
-            border-bottom: none;
         }
 
         .form-header h2 {
@@ -189,10 +177,21 @@
             margin-bottom: 1.2rem;
         }
 
-        .return-form.minimized .form-row,
-        .return-form.minimized .invoice-fields,
-        .return-form.minimized .form-group:not(.summary-group) {
-            display: none;
+        .invoice-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+        
+        .invoice-fields .form-group label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+        
+        .invoice-fields .form-control {
+            font-size: 0.95rem;
+            padding: 0.7rem;
         }
 
         .form-group {
@@ -220,63 +219,6 @@
             resize: vertical;
             font-size: 0.95rem;
             text-transform: none;
-        }
-
-        .invoice-fields {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.2rem;
-            margin-bottom: 1.2rem;
-        }
-
-        .invoice-fields .form-group label {
-            font-size: 0.9rem;
-            color: var(--text-light);
-        }
-
-        .invoice-fields .form-control {
-            font-size: 0.95rem;
-            padding: 0.7rem;
-        }
-
-        .summary-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .summary-item {
-            background: rgba(0,0,0,0.05);
-            padding: 0.5rem 0.8rem;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-
-        .summary-item strong {
-            font-weight: 500;
-            color: var(--primary);
-        }
-
-        .toggle-form-btn {
-            background: none;
-            border: none;
-            color: var(--primary);
-            cursor: pointer;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-            margin-bottom: 0.5rem;
-            padding: 0.3rem;
-        }
-
-        .toggle-form-btn i {
-            transition: transform 0.2s ease;
-        }
-
-        .return-form.minimized .toggle-form-btn i {
-            transform: rotate(180deg);
         }
 
         .products-table {
@@ -507,11 +449,7 @@
         }
 
         @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
-            .invoice-fields {
+            .form-row, .invoice-fields {
                 grid-template-columns: 1fr;
             }
             
@@ -586,12 +524,7 @@
         </div>
 
         <!-- Formulario de nueva devolución -->
-        <div class="return-form minimized" id="returnForm">
-            <button class="toggle-form-btn" id="toggleFormBtn">
-                <i class="fas fa-chevron-up"></i>
-                <span>Mostrar detalles</span>
-            </button>
-            
+        <div class="return-form" id="returnForm">
             <div class="form-header">
                 <h2><i class="fas fa-file-alt"></i> Nueva Devolución</h2>
                 <div class="form-header-actions">
@@ -607,45 +540,31 @@
                 </div>
             </div>
             
-            <div class="summary-group">
-                <div class="summary-item">
-                    <strong>Proveedor:</strong> <span id="supplierSummary">-</span>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="supplier">Proveedor</label>
+                    <input type="text" class="form-control" id="supplier" required>
                 </div>
-                <div class="summary-item">
-                    <strong>Fecha:</strong> <span id="dateSummary">-</span>
-                </div>
-                <div class="summary-item">
-                    <strong>Factura:</strong> <span id="invoiceSummary">XXXXX / XXXXX</span>
+                <div class="form-group">
+                    <label for="reportDate">Fecha</label>
+                    <input type="date" class="form-control" id="reportDate" required>
                 </div>
             </div>
             
-            <div class="form-content">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="supplier">Proveedor</label>
-                        <input type="text" class="form-control" id="supplier" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="reportDate">Fecha</label>
-                        <input type="date" class="form-control" id="reportDate" required>
-                    </div>
-                </div>
-                
-                <div class="invoice-fields">
-                    <div class="form-group">
-                        <label for="invoiceNumber">Número de Factura (Opcional)</label>
-                        <input type="text" class="form-control" id="invoiceNumber" placeholder="Ingrese número">
-                    </div>
-                    <div class="form-group">
-                        <label for="invoiceSeries">Serie de Factura (Opcional)</label>
-                        <input type="text" class="form-control" id="invoiceSeries" placeholder="Ingrese serie">
-                    </div>
-                </div>
-                
+            <div class="invoice-fields">
                 <div class="form-group">
-                    <label for="notes">Observaciones (Opcional)</label>
-                    <textarea class="form-control" id="notes" style="min-height: 50px;"></textarea>
+                    <label for="invoiceNumber">Número de Factura (Opcional)</label>
+                    <input type="text" class="form-control" id="invoiceNumber" placeholder="Ingrese número">
                 </div>
+                <div class="form-group">
+                    <label for="invoiceSeries">Serie de Factura (Opcional)</label>
+                    <input type="text" class="form-control" id="invoiceSeries" placeholder="Ingrese serie">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="notes">Observaciones (Opcional)</label>
+                <textarea class="form-control" id="notes" style="min-height: 50px;"></textarea>
             </div>
             
             <h3 style="margin: 1.2rem 0 0.8rem; font-size: 1.15rem;">Productos en mal estado</h3>
@@ -750,10 +669,6 @@
             const searchBtn = document.getElementById('searchBtn');
             const searchContainer = document.getElementById('searchContainer');
             const headerActions = document.querySelector('.header-actions');
-            const toggleFormBtn = document.getElementById('toggleFormBtn');
-            const supplierSummary = document.getElementById('supplierSummary');
-            const dateSummary = document.getElementById('dateSummary');
-            const invoiceSummary = document.getElementById('invoiceSummary');
 
             // Mostrar alerta de confirmación con SweetAlert
             function showConfirmAlert(title, text, confirmButtonText) {
@@ -826,22 +741,6 @@
                 }
             }
 
-            // Actualizar el resumen de información
-            function updateSummary() {
-                supplierSummary.textContent = supplierInput.value || '-';
-                
-                if (reportDateInput.value) {
-                    const date = new Date(reportDateInput.value);
-                    dateSummary.textContent = date.toLocaleDateString('es-ES');
-                } else {
-                    dateSummary.textContent = '-';
-                }
-                
-                const invNumber = invoiceNumberInput.value || 'XXXXX';
-                const invSeries = invoiceSeriesInput.value || 'XXXXX';
-                invoiceSummary.textContent = `${invNumber} / ${invSeries}`;
-            }
-
             // Mostrar formulario de nueva devolución
             async function showNewReportForm() {
                 if (isCreatingNewReport) {
@@ -874,9 +773,6 @@
                     </tr>
                 `;
                 
-                // Actualizar resumen
-                updateSummary();
-                
                 // Restaurar texto del botón de guardar
                 saveReportBtn.innerHTML = '<i class="fas fa-save"></i> Guardar';
                 
@@ -888,10 +784,8 @@
                 searchContainer.style.display = 'none';
                 headerActions.style.display = 'none';
                 
-                // Mostrar el formulario minimizado
+                // Mostrar el formulario
                 returnForm.style.display = 'block';
-                returnForm.classList.add('minimized');
-                toggleFormBtn.querySelector('span').textContent = 'Mostrar detalles';
                 
                 // Marcar que estamos creando un nuevo reporte
                 isCreatingNewReport = true;
@@ -1004,10 +898,10 @@
                     date: reportDateInput.value,
                     invoiceNumber: invoiceNumberInput.value.trim() || 'XXXXX',
                     invoiceSeries: invoiceSeriesInput.value.trim() || 'XXXXX',
-                    notes: notesInput.value.trim(),
+                    notes: notesInput.value.trim(), // Notas se mantienen como se escriben
                     products: getProductsFromTable(),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    reportNumber: parseInt(currentReportId)
+                    reportNumber: parseInt(currentReportId) // Guardamos como número
                 };
                 
                 // Verificar si estamos editando o creando nuevo
@@ -1019,6 +913,7 @@
                     if (originalReport) {
                         reportData.status = originalReport.status;
                         reportData.createdAt = originalReport.createdAt;
+                        reportData.reportNumber = originalReport.reportNumber;
                         
                         // Mantener el estado de los productos
                         reportData.products.forEach((product, index) => {
@@ -1297,9 +1192,6 @@
                 invoiceSeriesInput.value = report.invoiceSeries === 'XXXXX' ? '' : report.invoiceSeries;
                 notesInput.value = report.notes || '';
                 
-                // Actualizar resumen
-                updateSummary();
-                
                 // Llenar tabla de productos
                 const tbody = productsTable.querySelector('tbody');
                 tbody.innerHTML = '';
@@ -1324,10 +1216,8 @@
                 searchContainer.style.display = 'none';
                 headerActions.style.display = 'none';
                 
-                // Mostrar el formulario expandido
+                // Mostrar el formulario
                 returnForm.style.display = 'block';
-                returnForm.classList.remove('minimized');
-                toggleFormBtn.querySelector('span').textContent = 'Ocultar detalles';
                 
                 // Marcar que estamos editando un reporte
                 isCreatingNewReport = true;
@@ -1560,6 +1450,14 @@
                 
                 yPosition += (maxLines * lineHeight) + 10;
                 
+                if (report.notes) {
+                    const splitNotes = doc.splitTextToSize(`Observaciones: ${report.notes}`, contentWidth);
+                    doc.text(splitNotes, marginLeft, yPosition);
+                    yPosition += splitNotes.length * 5 + 10;
+                } else {
+                    yPosition += 10;
+                }
+                
                 // Tabla de productos con bordes
                 const tableData = report.products ? report.products.map(product => [
                     product.code || '',
@@ -1629,19 +1527,6 @@
             searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') searchReports();
             });
-
-            // Toggle para minimizar/expandir formulario
-            toggleFormBtn.addEventListener('click', () => {
-                returnForm.classList.toggle('minimized');
-                const isMinimized = returnForm.classList.contains('minimized');
-                toggleFormBtn.querySelector('span').textContent = isMinimized ? 'Mostrar detalles' : 'Ocultar detalles';
-            });
-
-            // Actualizar resumen cuando cambian los campos
-            supplierInput.addEventListener('input', updateSummary);
-            reportDateInput.addEventListener('change', updateSummary);
-            invoiceNumberInput.addEventListener('input', updateSummary);
-            invoiceSeriesInput.addEventListener('input', updateSummary);
 
             // Convertir automáticamente a mayúsculas mientras se escribe
             document.addEventListener('input', function(e) {
