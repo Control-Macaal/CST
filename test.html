@@ -80,15 +80,33 @@
         .search-container {
             margin-bottom: 1.5rem;
             display: flex;
-            gap: 1rem;
+            gap: 0.5rem;
+            position: relative;
+        }
+
+        .search-input-container {
+            flex: 1;
+            position: relative;
         }
 
         .search-input {
-            flex: 1;
-            padding: 0.75rem;
+            width: 100%;
+            padding: 0.75rem 2.5rem 0.75rem 0.75rem;
             border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: var(--border-radius);
             font-size: 0.95rem;
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            display: none;
         }
 
         .search-btn {
@@ -276,6 +294,13 @@
             padding: 0.6rem;
         }
 
+        .factory-code-input {
+            min-width: 60px;
+            width: auto;
+            max-width: 150px;
+            transition: width 0.2s ease;
+        }
+
         .product-status {
             width: 15px;
             height: 15px;
@@ -451,6 +476,33 @@
             font-size: 0.9rem;
         }
 
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         @media (max-width: 768px) {
             .form-row, .invoice-fields {
                 grid-template-columns: 1fr;
@@ -504,6 +556,10 @@
     </style>
 </head>
 <body>
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner"></div>
+    </div>
+
     <div class="container">
         <header>
             <div class="header-title">
@@ -520,7 +576,12 @@
 
         <!-- Buscador -->
         <div class="search-container" id="searchContainer">
-            <input type="text" class="search-input" id="searchInput" placeholder="Buscar por número, fecha o proveedor...">
+            <div class="search-input-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Buscar por número, fecha o proveedor...">
+                <button class="search-clear" id="searchClear">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
             <button class="search-btn" id="searchBtn">
                 <i class="fas fa-search"></i>
             </button>
@@ -586,7 +647,7 @@
                 <tbody>
                     <tr>
                         <td><input type="text" class="code-input" placeholder="Sku" maxlength="9"></td>
-                        <td><input type="text" placeholder="Cód. Fab" style="width: 100%;"></td>
+                        <td><input type="text" class="factory-code-input" placeholder="Cód. Fab"></td>
                         <td><input type="text" placeholder="Descripción"></td>
                         <td><input type="number" placeholder="0" min="1"></td>
                         <td><input type="text" placeholder="Ej: Quebrado"></td>
@@ -659,6 +720,16 @@
             document.body.style.overflow = '';
         };
 
+        // Función para mostrar spinner de carga
+        function showLoading() {
+            document.getElementById('loadingSpinner').style.display = 'flex';
+        }
+
+        // Función para ocultar spinner de carga
+        function hideLoading() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             // Elementos del DOM
             const newReportBtn = document.getElementById('newReportBtn');
@@ -679,6 +750,7 @@
             const notesInput = document.getElementById('notes');
             const searchInput = document.getElementById('searchInput');
             const searchBtn = document.getElementById('searchBtn');
+            const searchClear = document.getElementById('searchClear');
             const searchContainer = document.getElementById('searchContainer');
             const headerActions = document.querySelector('.header-actions');
 
@@ -778,7 +850,7 @@
                 tbody.innerHTML = `
                     <tr>
                         <td><input type="text" class="code-input" placeholder="Sku" maxlength="9"></td>
-                        <td><input type="text" placeholder="Cód. Fab" style="width: 100%;"></td>
+                        <td><input type="text" class="factory-code-input" placeholder="Cód. Fab"></td>
                         <td><input type="text" placeholder="Descripción"></td>
                         <td><input type="number" placeholder="0" min="1"></td>
                         <td><input type="text" placeholder="Ej: Quebrado"></td>
@@ -791,6 +863,9 @@
                 
                 // Agregar event listeners a los botones de eliminar
                 addDeleteRowListeners();
+                
+                // Agregar event listeners para ajustar tamaño de inputs
+                addInputResizeListeners();
                 
                 // Ocultar elementos
                 reportsList.style.display = 'none';
@@ -813,13 +888,48 @@
                 isCreatingNewReport = false;
             }
 
+            // Agregar event listeners para ajustar tamaño de inputs
+            function addInputResizeListeners() {
+                const factoryCodeInputs = document.querySelectorAll('.factory-code-input');
+                
+                factoryCodeInputs.forEach(input => {
+                    // Ajustar tamaño inicial
+                    resizeInput(input);
+                    
+                    // Agregar event listener para cambios
+                    input.addEventListener('input', function() {
+                        resizeInput(this);
+                    });
+                });
+            }
+
+            // Función para ajustar el tamaño del input basado en su contenido
+            function resizeInput(input) {
+                const minWidth = 60;
+                const maxWidth = 150;
+                const tempSpan = document.createElement('span');
+                
+                tempSpan.style.visibility = 'hidden';
+                tempSpan.style.whiteSpace = 'nowrap';
+                tempSpan.style.fontSize = window.getComputedStyle(input).fontSize;
+                tempSpan.style.fontFamily = window.getComputedStyle(input).fontFamily;
+                tempSpan.style.padding = window.getComputedStyle(input).padding;
+                tempSpan.innerHTML = input.value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                
+                document.body.appendChild(tempSpan);
+                const width = Math.min(Math.max(tempSpan.offsetWidth + 20, minWidth), maxWidth);
+                document.body.removeChild(tempSpan);
+                
+                input.style.width = width + 'px';
+            }
+
             // Agregar nueva fila a la tabla de productos
             function addProductRow() {
                 const tbody = productsTable.querySelector('tbody');
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = `
                     <td><input type="text" class="code-input" placeholder="Sku" maxlength="9"></td>
-                    <td><input type="text" placeholder="Cód. Fab" style="width: 100%;"></td>
+                    <td><input type="text" class="factory-code-input" placeholder="Cód. Fab"></td>
                     <td><input type="text" placeholder="Descripción"></td>
                     <td><input type="number" placeholder="0" min="1"></td>
                     <td><input type="text" placeholder="Ej: Quebrado"></td>
@@ -836,7 +946,16 @@
                         // Si es la última fila, limpiar los campos
                         const inputs = newRow.querySelectorAll('input');
                         inputs.forEach(input => input.value = '');
+                        // Ajustar tamaño del input de código de fábrica
+                        const factoryInput = newRow.querySelector('.factory-code-input');
+                        resizeInput(factoryInput);
                     }
+                });
+                
+                // Agregar event listener para ajustar tamaño del input de código de fábrica
+                const factoryInput = newRow.querySelector('.factory-code-input');
+                factoryInput.addEventListener('input', function() {
+                    resizeInput(this);
                 });
             }
 
@@ -854,6 +973,9 @@
                             // Si es la última fila, limpiar los campos
                             const inputs = row.querySelectorAll('input');
                             inputs.forEach(input => input.value = '');
+                            // Ajustar tamaño del input de código de fábrica
+                            const factoryInput = row.querySelector('.factory-code-input');
+                            resizeInput(factoryInput);
                         }
                     });
                 });
@@ -908,6 +1030,8 @@
             async function saveReport() {
                 if (!validateForm()) return;
                 
+                showLoading();
+                
                 const reportData = {
                     id: currentReportId,
                     supplier: toUpperCase(supplierInput.value.trim()),
@@ -923,63 +1047,51 @@
                 // Verificar si estamos editando o creando nuevo
                 const isEditing = saveReportBtn.innerHTML.includes('Actualizar');
                 
-                if (isEditing) {
-                    // Mantener los datos existentes que no se editan
-                    const originalReport = reports.find(r => r.id === currentReportId);
-                    if (originalReport) {
-                        reportData.status = originalReport.status;
-                        reportData.createdAt = originalReport.createdAt;
-                        reportData.reportNumber = originalReport.reportNumber;
+                try {
+                    if (isEditing) {
+                        // Mantener los datos existentes que no se editan
+                        const originalReport = reports.find(r => r.id === currentReportId);
+                        if (originalReport) {
+                            reportData.status = originalReport.status;
+                            reportData.createdAt = originalReport.createdAt;
+                            reportData.reportNumber = originalReport.reportNumber;
+                            
+                            // Mantener el estado de los productos
+                            reportData.products.forEach((product, index) => {
+                                if (originalReport.products && originalReport.products[index]) {
+                                    product.status = originalReport.products[index].status;
+                                    product.receivedDate = originalReport.products[index].receivedDate;
+                                } else {
+                                    product.status = 'pending';
+                                    product.receivedDate = null;
+                                }
+                            });
+                        }
                         
-                        // Mantener el estado de los productos
-                        reportData.products.forEach((product, index) => {
-                            if (originalReport.products && originalReport.products[index]) {
-                                product.status = originalReport.products[index].status;
-                                product.receivedDate = originalReport.products[index].receivedDate;
-                            } else {
-                                product.status = 'pending';
-                                product.receivedDate = null;
-                            }
+                        await db.collection("reportesMalEstado").doc(currentReportId).update(reportData);
+                        await showSuccessAlert('Reporte actualizado', 'El reporte se ha actualizado correctamente');
+                    } else {
+                        // Es un nuevo reporte
+                        reportData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                        reportData.status = 'active';
+                        
+                        // Establecer estado inicial de los productos
+                        reportData.products.forEach(product => {
+                            product.status = 'pending';
+                            product.receivedDate = null;
                         });
+                        
+                        await db.collection("reportesMalEstado").doc(currentReportId).set(reportData);
+                        await showSuccessAlert('Reporte guardado', 'El reporte se ha guardado correctamente');
                     }
                     
-                    db.collection("reportesMalEstado").doc(currentReportId)
-                        .update(reportData)
-                        .then(() => {
-                            showSuccessAlert('Reporte actualizado', 'El reporte se ha actualizado correctamente')
-                                .then(() => {
-                                    hideReturnForm();
-                                    loadReports();
-                                });
-                        })
-                        .catch(error => {
-                            console.error("Error al actualizar el reporte:", error);
-                            showErrorAlert('Error', 'Ocurrió un error al actualizar el reporte');
-                        });
-                } else {
-                    // Es un nuevo reporte
-                    reportData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-                    reportData.status = 'active';
-                    
-                    // Establecer estado inicial de los productos
-                    reportData.products.forEach(product => {
-                        product.status = 'pending';
-                        product.receivedDate = null;
-                    });
-                    
-                    db.collection("reportesMalEstado").doc(currentReportId)
-                        .set(reportData)
-                        .then(() => {
-                            showSuccessAlert('Reporte guardado', 'El reporte se ha guardado correctamente')
-                                .then(() => {
-                                    hideReturnForm();
-                                    loadReports();
-                                });
-                        })
-                        .catch(error => {
-                            console.error("Error al guardar el reporte:", error);
-                            showErrorAlert('Error', 'Ocurrió un error al guardar el reporte');
-                        });
+                    hideReturnForm();
+                    await loadReports();
+                } catch (error) {
+                    console.error("Error al guardar el reporte:", error);
+                    showErrorAlert('Error', 'Ocurrió un error al guardar el reporte');
+                } finally {
+                    hideLoading();
                 }
             }
 
@@ -1004,6 +1116,8 @@
 
             // Cargar reportes desde Firebase
             function loadReports() {
+                showLoading();
+                
                 db.collection("reportesMalEstado")
                     .orderBy("createdAt", "desc")
                     .get()
@@ -1044,6 +1158,9 @@
                     .catch(error => {
                         console.error("Error al cargar reportes:", error);
                         showErrorAlert('Error', 'Ocurrió un error al cargar los reportes');
+                    })
+                    .finally(() => {
+                        hideLoading();
                     });
             }
 
@@ -1157,6 +1274,7 @@
                 showConfirmAlert('¿Anular reporte?', '¿Estás seguro que deseas anular este reporte?', 'Sí, anular')
                     .then((result) => {
                         if (result.isConfirmed) {
+                            showLoading();
                             db.collection("reportesMalEstado").doc(reportId)
                                 .update({
                                     status: 'cancelled',
@@ -1186,6 +1304,9 @@
                                 .catch(error => {
                                     console.error("Error al anular el reporte:", error);
                                     showErrorAlert('Error', 'Ocurrió un error al anular el reporte');
+                                })
+                                .finally(() => {
+                                    hideLoading();
                                 });
                         }
                     });
@@ -1222,17 +1343,24 @@
                     const newRow = document.createElement('tr');
                     newRow.innerHTML = `
                         <td><input type="text" class="code-input" value="${product.sku || ''}" placeholder="Sku" maxlength="9"></td>
-                        <td><input type="text" value="${product.factoryCode || ''}" placeholder="Cód. Fab" style="width: 100%;"></td>
+                        <td><input type="text" class="factory-code-input" value="${product.factoryCode || ''}" placeholder="Cód. Fab"></td>
                         <td><input type="text" value="${product.description}" placeholder="Descripción"></td>
                         <td><input type="number" value="${product.quantity}" placeholder="0" min="1"></td>
                         <td><input type="text" value="${product.reason}" placeholder="Ej: Quebrado"></td>
                         <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                     `;
                     tbody.appendChild(newRow);
+                    
+                    // Ajustar tamaño del input de código de fábrica
+                    const factoryInput = newRow.querySelector('.factory-code-input');
+                    resizeInput(factoryInput);
                 });
                 
                 // Agregar event listeners a los botones de eliminar
                 addDeleteRowListeners();
+                
+                // Agregar event listeners para ajustar tamaño de inputs
+                addInputResizeListeners();
                 
                 // Ocultar elementos
                 reportsList.style.display = 'none';
@@ -1261,6 +1389,8 @@
                 
                 const product = report.products[productIndex];
                 const newStatus = product.status === 'pending' ? 'received' : 'pending';
+                
+                showLoading();
                 
                 // Actualizar estado del producto
                 product.status = newStatus;
@@ -1305,6 +1435,9 @@
                     .catch(error => {
                         console.error("Error al actualizar el producto:", error);
                         showErrorAlert('Error', 'Ocurrió un error al actualizar el producto');
+                    })
+                    .finally(() => {
+                        hideLoading();
                     });
             };
 
@@ -1417,124 +1550,147 @@
                 const report = reports.find(r => r.id === reportId);
                 if (!report) return;
                 
-                const doc = new jsPDF();
+                showLoading();
                 
-                // Configuración de márgenes
-                const marginLeft = 15;
-                const marginRight = 15;
-                const pageWidth = doc.internal.pageSize.getWidth();
-                const contentWidth = pageWidth - marginLeft - marginRight;
-                
-                // Logo de la empresa y nombre
-                doc.addImage(companyLogo, 'PNG', marginLeft, 10, 40, 15);
-                doc.setFontSize(14);
-                doc.setFont('helvetica', 'bold');
-                doc.text(companyName, pageWidth / 2, 20, { align: 'center' });
-                
-                // Título del documento
-                doc.setFontSize(12);
-                doc.setFont('helvetica', 'normal');
-                doc.text('Reporte de Productos en Mal Estado', pageWidth / 2, 30, { align: 'center' });
-                
-                // Línea separadora
-                doc.setDrawColor(200, 200, 200);
-                doc.line(marginLeft, 35, pageWidth - marginRight, 35);
-                
-                // Información del reporte
-                doc.setFontSize(10);
-                let yPosition = 45;
-                
-                // Textos alineados a la izquierda
-                const leftTexts = [
-                    `Proveedor: ${report.supplier}`,
-                    `Número de Factura: ${report.invoiceNumber}`,
-                    `Serie de Factura: ${report.invoiceSeries}`
-                ];
-                
-                // Textos alineados a la derecha
-                const rightTexts = [
-                    `Número de Reporte: ${report.id}`,
-                    `Fecha de Reporte: ${formatDate(report.date)}`
-                ];
-                
-                // Calcular posición vertical para alinear ambos lados
-                const lineHeight = 7;
-                const maxLines = Math.max(leftTexts.length, rightTexts.length);
-                
-                for (let i = 0; i < maxLines; i++) {
-                    if (i < leftTexts.length) {
-                        doc.text(leftTexts[i], marginLeft, yPosition + (i * lineHeight));
+                setTimeout(() => {
+                    try {
+                        const doc = new jsPDF();
+                        
+                        // Configuración de márgenes
+                        const marginLeft = 15;
+                        const marginRight = 15;
+                        const pageWidth = doc.internal.pageSize.getWidth();
+                        const contentWidth = pageWidth - marginLeft - marginRight;
+                        
+                        // Logo de la empresa y nombre
+                        doc.addImage(companyLogo, 'PNG', marginLeft, 10, 40, 15);
+                        doc.setFontSize(14);
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(companyName, pageWidth / 2, 20, { align: 'center' });
+                        
+                        // Título del documento
+                        doc.setFontSize(12);
+                        doc.setFont('helvetica', 'normal');
+                        doc.text('Reporte de Productos en Mal Estado', pageWidth / 2, 30, { align: 'center' });
+                        
+                        // Línea separadora
+                        doc.setDrawColor(200, 200, 200);
+                        doc.line(marginLeft, 35, pageWidth - marginRight, 35);
+                        
+                        // Información del reporte
+                        doc.setFontSize(10);
+                        let yPosition = 45;
+                        
+                        // Textos alineados a la izquierda
+                        const leftTexts = [
+                            `Proveedor: ${report.supplier}`,
+                            `Número de Factura: ${report.invoiceNumber}`,
+                            `Serie de Factura: ${report.invoiceSeries}`
+                        ];
+                        
+                        // Textos alineados a la derecha
+                        const rightTexts = [
+                            `Número de Reporte: ${report.id}`,
+                            `Fecha de Reporte: ${formatDate(report.date)}`
+                        ];
+                        
+                        // Calcular posición vertical para alinear ambos lados
+                        const lineHeight = 7;
+                        const maxLines = Math.max(leftTexts.length, rightTexts.length);
+                        
+                        for (let i = 0; i < maxLines; i++) {
+                            if (i < leftTexts.length) {
+                                doc.text(leftTexts[i], marginLeft, yPosition + (i * lineHeight));
+                            }
+                            
+                            if (i < rightTexts.length) {
+                                const text = rightTexts[i];
+                                const textWidth = doc.getStringUnitWidth(text) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+                                doc.text(text, pageWidth - marginRight - textWidth, yPosition + (i * lineHeight));
+                            }
+                        }
+                        
+                        yPosition += (maxLines * lineHeight) + 10;
+                        
+                        if (report.notes) {
+                            const splitNotes = doc.splitTextToSize(`Observaciones: ${report.notes}`, contentWidth);
+                            doc.text(splitNotes, marginLeft, yPosition);
+                            yPosition += splitNotes.length * 5 + 10;
+                        } else {
+                            yPosition += 10;
+                        }
+                        
+                        // Tabla de productos con bordes
+                        const tableData = report.products ? report.products.map(product => [
+                            product.sku || '',
+                            product.factoryCode || '-',
+                            product.description,
+                            product.quantity.toString(),
+                            product.reason,
+                            product.status === 'pending' ? 'Pendiente' : product.status === 'received' ? `Recibido\n${formatDateTime(product.receivedDate)}` : 'Anulado'
+                        ]) : [];
+                        
+                        doc.autoTable({
+                            startY: yPosition,
+                            head: [['Sku', 'Cód. Fábrica', 'Descripción', 'Cantidad', 'Motivo', 'Estado']],
+                            body: tableData,
+                            margin: { left: marginLeft, right: marginRight },
+                            styles: {
+                                fontSize: 9,
+                                cellPadding: 3,
+                                valign: 'middle',
+                                lineWidth: 0.2,
+                                lineColor: 50
+                            },
+                            headStyles: {
+                                fillColor: [67, 97, 238],
+                                textColor: 255,
+                                fontStyle: 'bold',
+                                lineWidth: 0.2
+                            },
+                            bodyStyles: {
+                                lineWidth: 0.2
+                            },
+                            columnStyles: {
+                                0: { cellWidth: 20 },
+                                1: { cellWidth: 20 },
+                                2: { cellWidth: 'auto' },
+                                3: { cellWidth: 15 },
+                                4: { cellWidth: 30 },
+                                5: { cellWidth: 30 }
+                            }
+                        });
+                        
+                        // Firmas más separadas y con letra más grande
+                        const lastY = doc.lastAutoTable.finalY + 30;
+                        
+                        doc.setFontSize(14);
+                        doc.text('Fecha de Entrega: ________________________', marginLeft, lastY);
+                        doc.text('Recibe: _________________________________', marginLeft, lastY + 20);
+                        doc.text('Entrega: ________________________________', marginLeft, lastY + 40);
+                        
+                        // Guardar PDF
+                        doc.save(`Reporte_${report.id}.pdf`);
+                    } catch (error) {
+                        console.error("Error al generar PDF:", error);
+                        showErrorAlert('Error', 'Ocurrió un error al generar el PDF');
+                    } finally {
+                        hideLoading();
                     }
-                    
-                    if (i < rightTexts.length) {
-                        const text = rightTexts[i];
-                        const textWidth = doc.getStringUnitWidth(text) * doc.internal.getFontSize() / doc.internal.scaleFactor;
-                        doc.text(text, pageWidth - marginRight - textWidth, yPosition + (i * lineHeight));
-                    }
-                }
-                
-                yPosition += (maxLines * lineHeight) + 10;
-                
-                if (report.notes) {
-                    const splitNotes = doc.splitTextToSize(`Observaciones: ${report.notes}`, contentWidth);
-                    doc.text(splitNotes, marginLeft, yPosition);
-                    yPosition += splitNotes.length * 5 + 10;
-                } else {
-                    yPosition += 10;
-                }
-                
-                // Tabla de productos con bordes
-                const tableData = report.products ? report.products.map(product => [
-                    product.sku || '',
-                    product.factoryCode || '-',
-                    product.description,
-                    product.quantity.toString(),
-                    product.reason,
-                    product.status === 'pending' ? 'Pendiente' : product.status === 'received' ? `Recibido\n${formatDateTime(product.receivedDate)}` : 'Anulado'
-                ]) : [];
-                
-                doc.autoTable({
-                    startY: yPosition,
-                    head: [['Sku', 'Cód. Fábrica', 'Descripción', 'Cantidad', 'Motivo', 'Estado']],
-                    body: tableData,
-                    margin: { left: marginLeft, right: marginRight },
-                    styles: {
-                        fontSize: 9,
-                        cellPadding: 3,
-                        valign: 'middle',
-                        lineWidth: 0.2,
-                        lineColor: 50
-                    },
-                    headStyles: {
-                        fillColor: [67, 97, 238],
-                        textColor: 255,
-                        fontStyle: 'bold',
-                        lineWidth: 0.2
-                    },
-                    bodyStyles: {
-                        lineWidth: 0.2
-                    },
-                    columnStyles: {
-                        0: { cellWidth: 20 },
-                        1: { cellWidth: 20 },
-                        2: { cellWidth: 'auto' },
-                        3: { cellWidth: 15 },
-                        4: { cellWidth: 30 },
-                        5: { cellWidth: 30 }
-                    }
-                });
-                
-                // Firmas más separadas y con letra más grande
-                const lastY = doc.lastAutoTable.finalY + 30;
-                
-                doc.setFontSize(14);
-                doc.text('Fecha de Entrega: ________________________', marginLeft, lastY);
-                doc.text('Recibe: _________________________________', marginLeft, lastY + 20);
-                doc.text('Entrega: ________________________________', marginLeft, lastY + 40);
-                
-                // Guardar PDF
-                doc.save(`Reporte_${report.id}.pdf`);
+                }, 100);
             };
+
+            // Event listeners para el buscador
+            searchInput.addEventListener('input', function() {
+                searchClear.style.display = this.value ? 'block' : 'none';
+                if (!this.value) searchReports();
+            });
+
+            searchClear.addEventListener('click', function() {
+                searchInput.value = '';
+                searchClear.style.display = 'none';
+                searchReports();
+            });
 
             // Event listeners
             newReportBtn.addEventListener('click', showNewReportForm);
