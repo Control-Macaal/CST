@@ -534,6 +534,17 @@
                 </div>
             </div>
             
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="invoiceNumber">Número de Factura (Opcional)</label>
+                    <input type="text" class="form-control" id="invoiceNumber" placeholder="XXXXX">
+                </div>
+                <div class="form-group">
+                    <label for="invoiceSeries">Serie de Factura (Opcional)</label>
+                    <input type="text" class="form-control" id="invoiceSeries" placeholder="XXXXX">
+                </div>
+            </div>
+            
             <div class="form-group">
                 <label for="notes">Observaciones (Opcional)</label>
                 <textarea class="form-control" id="notes" style="min-height: 50px;"></textarea>
@@ -634,6 +645,8 @@
             const reportNumberSpan = document.getElementById('reportNumber');
             const supplierInput = document.getElementById('supplier');
             const reportDateInput = document.getElementById('reportDate');
+            const invoiceNumberInput = document.getElementById('invoiceNumber');
+            const invoiceSeriesInput = document.getElementById('invoiceSeries');
             const notesInput = document.getElementById('notes');
             const searchInput = document.getElementById('searchInput');
             const searchBtn = document.getElementById('searchBtn');
@@ -692,7 +705,7 @@
             // Generar número de reporte consecutivo
             function generateReportNumber() {
                 reportCounter++;
-                return `DEV-#${reportCounter}`;
+                return `#${reportCounter}`;
             }
 
             // Mostrar formulario de nueva devolución
@@ -711,6 +724,8 @@
                 
                 // Limpiar campos
                 supplierInput.value = '';
+                invoiceNumberInput.value = '';
+                invoiceSeriesInput.value = '';
                 notesInput.value = '';
                 
                 // Limpiar tabla de productos (dejar solo una fila vacía)
@@ -848,6 +863,8 @@
                     id: currentReportId,
                     supplier: toUpperCase(supplierInput.value.trim()),
                     date: reportDateInput.value,
+                    invoiceNumber: invoiceNumberInput.value.trim() || 'XXXXX',
+                    invoiceSeries: invoiceSeriesInput.value.trim() || 'XXXXX',
                     notes: notesInput.value.trim(), // Notas se mantienen como se escriben
                     products: getProductsFromTable(),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -958,6 +975,13 @@
                                         product.code = '';
                                     }
                                 });
+                            }
+                            // Asegurar que existan los campos de factura
+                            if (!data.invoiceNumber) {
+                                data.invoiceNumber = 'XXXXX';
+                            }
+                            if (!data.invoiceSeries) {
+                                data.invoiceSeries = 'XXXXX';
                             }
                             reports.push(data);
                         });
@@ -1137,6 +1161,8 @@
                 // Llenar campos del formulario
                 supplierInput.value = report.supplier;
                 reportDateInput.value = report.date.split('T')[0];
+                invoiceNumberInput.value = report.invoiceNumber === 'XXXXX' ? '' : report.invoiceNumber;
+                invoiceSeriesInput.value = report.invoiceSeries === 'XXXXX' ? '' : report.invoiceSeries;
                 notesInput.value = report.notes || '';
                 
                 // Llenar tabla de productos
@@ -1257,6 +1283,14 @@
                         <label>Fecha de Reporte</label>
                         <div class="form-control" style="background: #f8f9fa;">${formatDate(report.date)}</div>
                     </div>
+                    <div class="form-group">
+                        <label>Número de Factura</label>
+                        <div class="form-control" style="background: #f8f9fa;">${report.invoiceNumber}</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Serie de Factura</label>
+                        <div class="form-control" style="background: #f8f9fa;">${report.invoiceSeries}</div>
+                    </div>
                     ${report.notes ? `
                     <div class="form-group">
                         <label>Observaciones</label>
@@ -1354,18 +1388,29 @@
                 doc.setDrawColor(200, 200, 200);
                 doc.line(marginLeft, 35, pageWidth - marginRight, 35);
                 
-                // Información del reporte - alineado a la izquierda
+                // Información del reporte - alineado a la derecha el número de reporte y fecha
                 doc.setFontSize(10);
                 let yPosition = 45;
                 
-                doc.text(`Número de Reporte: ${report.id}`, marginLeft, yPosition);
-                yPosition += 7;
+                // Número de reporte alineado a la derecha
+                const reportNumberText = `Número de Reporte: ${report.id}`;
+                const reportNumberWidth = doc.getStringUnitWidth(reportNumberText) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+                doc.text(reportNumberText, pageWidth - marginRight - reportNumberWidth, yPosition);
                 
-                // Fecha de Reporte alineada a la izquierda
-                doc.text(`Fecha de Reporte: ${formatDate(report.date)}`, marginLeft, yPosition);
-                yPosition += 7;
+                // Fecha de Reporte alineada a la derecha
+                const reportDateText = `Fecha de Reporte: ${formatDate(report.date)}`;
+                const reportDateWidth = doc.getStringUnitWidth(reportDateText) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+                doc.text(reportDateText, pageWidth - marginRight - reportDateWidth, yPosition + 7);
+                
+                yPosition += 14;
                 
                 doc.text(`Proveedor: ${report.supplier}`, marginLeft, yPosition);
+                yPosition += 7;
+                
+                doc.text(`Número de Factura: ${report.invoiceNumber}`, marginLeft, yPosition);
+                yPosition += 7;
+                
+                doc.text(`Serie de Factura: ${report.invoiceSeries}`, marginLeft, yPosition);
                 yPosition += 7;
                 
                 if (report.notes) {
@@ -1448,7 +1493,7 @@
 
             // Convertir automáticamente a mayúsculas mientras se escribe
             document.addEventListener('input', function(e) {
-                if (e.target.matches('#supplier, #productsTable input[type="text"]:not(.code-input)')) {
+                if (e.target.matches('#supplier, #productsTable input[type="text"]:not(.code-input), #invoiceNumber, #invoiceSeries')) {
                     e.target.value = e.target.value.toUpperCase();
                 }
             });
