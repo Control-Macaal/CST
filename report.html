@@ -6,10 +6,12 @@
     <title>Reportes de Producto Mal Estado</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
             --primary: #4361ee;
@@ -21,9 +23,9 @@
             --card-bg: #ffffff;
             --text: #2b2d42;
             --text-light: #8d99ae;
-            --danger: #f72585;
-            --warning: #f8961e;
-            --success: #4cc9f0;
+            --danger: #fc0303;
+            --warning: #fc7703;
+            --success: #03fc41;
             --border-radius: 8px;
             --shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             --transition: all 0.2s ease;
@@ -114,7 +116,6 @@
 
         .btn:hover {
             background: var(--primary-hover);
-            transform: translateY(-2px);
         }
 
         .btn-danger {
@@ -122,7 +123,7 @@
         }
 
         .btn-success {
-            background: var(--success);
+            background: var(--primary);
         }
 
         .btn-pdf {
@@ -137,7 +138,6 @@
             background: var(--secondary);
         }
 
-        /* Formulario de devolución */
         .return-form {
             background: var(--card-bg);
             border-radius: var(--border-radius);
@@ -192,12 +192,11 @@
         }
 
         textarea.form-control {
-            min-height: 60px;
+            min-height: 40px;
             resize: vertical;
             font-size: 0.9rem;
         }
 
-        /* Tabla de productos */
         .products-table {
             width: 100%;
             border-collapse: collapse;
@@ -226,12 +225,27 @@
             border-bottom: none;
         }
 
-        .products-table input {
+        .products-table input[type="text"] {
             width: 100%;
             padding: 0.5rem;
             border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: 4px;
             font-size: 0.9rem;
+        }
+
+        .products-table input[type="number"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        /* Código más pequeño (9 caracteres) */
+        .products-table input.code-input {
+            width: 80px; /* Ancho reducido */
+            font-family: monospace;
+            letter-spacing: 1px;
         }
 
         .product-status {
@@ -244,10 +258,14 @@
         }
 
         .status-pending {
-            background-color: var(--success);
+            background-color: var(--warning);
         }
 
         .status-received {
+            background-color: var(--success);
+        }
+
+        .status-cancelled {
             background-color: var(--danger);
         }
 
@@ -258,6 +276,11 @@
             margin-top: 2px;
         }
 
+        .status-cell {
+            cursor: pointer;
+            position: relative;
+        }
+
         .add-row-btn {
             margin-top: 0.5rem;
             background: var(--accent);
@@ -265,7 +288,6 @@
             padding: 0.5rem 0.75rem;
         }
 
-        /* Lista de reportes */
         .reports-list {
             display: grid;
             gap: 1rem;
@@ -276,12 +298,6 @@
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
             padding: 1.25rem;
-            transition: var(--transition);
-        }
-
-        .report-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         .report-header {
@@ -317,6 +333,8 @@
             color: var(--text-light);
             margin-bottom: 1rem;
             font-size: 0.9rem;
+            max-height: 60px;
+            overflow-y: auto;
         }
 
         .report-products {
@@ -350,7 +368,6 @@
             margin-top: 1rem;
         }
 
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -374,6 +391,7 @@
             max-height: 90vh;
             overflow-y: auto;
             padding: 1.25rem;
+            position: relative;
         }
 
         .modal-header {
@@ -387,15 +405,6 @@
             font-size: 1.2rem;
         }
 
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-light);
-        }
-
-        /* Responsive */
         @media (max-width: 768px) {
             .form-row {
                 grid-template-columns: 1fr;
@@ -450,8 +459,8 @@
             </button>
         </header>
 
-        <!-- Buscador -->
-        <div class="search-container">
+        <!-- Buscador (se ocultará al crear nueva devolución) -->
+        <div class="search-container" id="searchContainer">
             <input type="text" class="search-input" id="searchInput" placeholder="Buscar por número de reporte o fecha...">
             <button class="search-btn" id="searchBtn">
                 <i class="fas fa-search"></i>
@@ -488,7 +497,7 @@
             
             <div class="form-group">
                 <label for="notes">Observaciones (Opcional)</label>
-                <textarea class="form-control" id="notes"></textarea>
+                <textarea class="form-control" id="notes" style="min-height: 40px;"></textarea>
             </div>
             
             <h3 style="margin: 1rem 0 0.5rem; font-size: 1.1rem;">Productos en mal estado</h3>
@@ -496,6 +505,7 @@
             <table class="products-table" id="productsTable">
                 <thead>
                     <tr>
+                        <th>Código</th>
                         <th>Descripción</th>
                         <th style="width: 80px;">Cantidad</th>
                         <th style="width: 120px;">Motivo</th>
@@ -504,7 +514,8 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><input type="text" placeholder="Código y descripción"></td>
+                        <td><input type="text" class="code-input" placeholder="Código" maxlength="9"></td>
+                        <td><input type="text" placeholder="Descripción"></td>
                         <td><input type="number" placeholder="0" min="1"></td>
                         <td><input type="text" placeholder="Ej: Quebrado"></td>
                         <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
@@ -533,7 +544,6 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2><i class="fas fa-file-alt"></i> Detalle de Reporte</h2>
-                <button class="modal-close" id="modalCloseBtn">&times;</button>
             </div>
             <div id="modalReportContent">
                 <!-- Contenido del reporte se cargará aquí -->
@@ -565,6 +575,7 @@
         let reports = [];
         let currentReportId = null;
         let reportCounter = 0;
+        let isCreatingNewReport = false;
         const companyName = "MACAAL S.A";
         const companyLogo = new Image();
         companyLogo.src = 'images/logo/logo.png';
@@ -579,7 +590,6 @@
             const productsTable = document.getElementById('productsTable');
             const reportsList = document.getElementById('reportsList');
             const reportModal = document.getElementById('reportModal');
-            const modalCloseBtn = document.getElementById('modalCloseBtn');
             const modalReportContent = document.getElementById('modalReportContent');
             const modalReportActions = document.getElementById('modalReportActions');
             const reportNumberSpan = document.getElementById('reportNumber');
@@ -588,6 +598,51 @@
             const notesInput = document.getElementById('notes');
             const searchInput = document.getElementById('searchInput');
             const searchBtn = document.getElementById('searchBtn');
+            const searchContainer = document.getElementById('searchContainer');
+
+            // Mostrar alerta de confirmación con SweetAlert
+            function showConfirmAlert(title, text, confirmButtonText) {
+                return Swal.fire({
+                    title: title,
+                    text: text,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: confirmButtonText || 'Confirmar',
+                    cancelButtonText: 'Cancelar'
+                });
+            }
+
+            // Mostrar alerta de éxito
+            function showSuccessAlert(title, text) {
+                return Swal.fire({
+                    title: title,
+                    text: text,
+                    icon: 'success',
+                    confirmButtonColor: '#3085d6'
+                });
+            }
+
+            // Mostrar alerta de error
+            function showErrorAlert(title, text) {
+                return Swal.fire({
+                    title: title,
+                    text: text,
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6'
+                });
+            }
+
+            // Mostrar alerta de validación
+            function showValidationAlert(message) {
+                return Swal.fire({
+                    title: 'Validación requerida',
+                    text: message,
+                    icon: 'info',
+                    confirmButtonColor: '#3085d6'
+                });
+            }
 
             // Generar número de reporte consecutivo
             function generateReportNumber() {
@@ -597,6 +652,11 @@
 
             // Mostrar formulario de nueva devolución
             function showNewReportForm() {
+                if (isCreatingNewReport) {
+                    showErrorAlert('Operación en curso', 'Ya tienes una devolución en proceso. Termina o cancela la actual antes de crear una nueva.');
+                    return;
+                }
+
                 currentReportId = generateReportNumber();
                 reportNumberSpan.textContent = currentReportId;
                 
@@ -612,22 +672,37 @@
                 const tbody = productsTable.querySelector('tbody');
                 tbody.innerHTML = `
                     <tr>
-                        <td><input type="text" placeholder="Código y descripción"></td>
+                        <td><input type="text" class="code-input" placeholder="Código" maxlength="9"></td>
+                        <td><input type="text" placeholder="Descripción"></td>
                         <td><input type="number" placeholder="0" min="1"></td>
                         <td><input type="text" placeholder="Ej: Quebrado"></td>
                         <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                     </tr>
                 `;
                 
+                // Restaurar texto del botón de guardar
+                saveReportBtn.innerHTML = '<i class="fas fa-save"></i> Guardar';
+                
                 // Agregar event listeners a los botones de eliminar
                 addDeleteRowListeners();
                 
+                // Ocultar la lista de reportes y barra de búsqueda
+                reportsList.style.display = 'none';
+                searchContainer.style.display = 'none';
+                
+                // Mostrar el formulario
                 returnForm.style.display = 'block';
+                
+                // Marcar que estamos creando un nuevo reporte
+                isCreatingNewReport = true;
             }
 
             // Ocultar formulario de devolución
             function hideReturnForm() {
                 returnForm.style.display = 'none';
+                reportsList.style.display = 'grid';
+                searchContainer.style.display = 'flex';
+                isCreatingNewReport = false;
             }
 
             // Agregar nueva fila a la tabla de productos
@@ -635,7 +710,8 @@
                 const tbody = productsTable.querySelector('tbody');
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = `
-                    <td><input type="text" placeholder="Código y descripción"></td>
+                    <td><input type="text" class="code-input" placeholder="Código" maxlength="9"></td>
+                    <td><input type="text" placeholder="Descripción"></td>
                     <td><input type="number" placeholder="0" min="1"></td>
                     <td><input type="text" placeholder="Ej: Quebrado"></td>
                     <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
@@ -681,17 +757,19 @@
                 
                 rows.forEach(row => {
                     const inputs = row.querySelectorAll('input');
-                    const description = inputs[0].value.trim();
-                    const quantity = inputs[1].value.trim();
-                    const reason = inputs[2].value.trim();
+                    const code = inputs[0].value.trim();
+                    const description = inputs[1].value.trim();
+                    const quantity = inputs[2].value.trim();
+                    const reason = inputs[3].value.trim();
                     
-                    if (description && quantity && reason) {
+                    if (code && description && quantity && reason) {
                         products.push({
+                            code: code,
                             description: description,
                             quantity: parseInt(quantity),
                             reason: reason,
-                            status: 'pending', // Estado inicial
-                            receivedDate: null // Fecha de recepción inicialmente nula
+                            status: 'pending',
+                            receivedDate: null
                         });
                     }
                 });
@@ -702,13 +780,13 @@
             // Validar formulario
             function validateForm() {
                 if (!supplierInput.value.trim()) {
-                    alert('Por favor ingresa el nombre del proveedor');
+                    showValidationAlert('Por favor ingresa el nombre del proveedor');
                     return false;
                 }
                 
                 const products = getProductsFromTable();
                 if (products.length === 0) {
-                    alert('Debes agregar al menos un producto');
+                    showValidationAlert('Debes agregar al menos un producto');
                     return false;
                 }
                 
@@ -725,22 +803,66 @@
                     date: reportDateInput.value,
                     notes: notesInput.value.trim(),
                     products: getProductsFromTable(),
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    reportNumber: reportCounter,
-                    status: 'active'
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
                 
-                db.collection("reportesMalEstado").doc(currentReportId)
-                    .set(reportData)
-                    .then(() => {
-                        alert('Reporte guardado correctamente');
-                        hideReturnForm();
-                        loadReports();
-                    })
-                    .catch(error => {
-                        console.error("Error al guardar el reporte:", error);
-                        alert('Ocurrió un error al guardar el reporte');
+                const isEditing = saveReportBtn.innerHTML.includes('Actualizar');
+                
+                if (isEditing) {
+                    const originalReport = reports.find(r => r.id === currentReportId);
+                    if (originalReport) {
+                        reportData.status = originalReport.status;
+                        reportData.createdAt = originalReport.createdAt;
+                        reportData.reportNumber = originalReport.reportNumber;
+                        
+                        reportData.products.forEach((product, index) => {
+                            if (originalReport.products && originalReport.products[index]) {
+                                product.status = originalReport.products[index].status;
+                                product.receivedDate = originalReport.products[index].receivedDate;
+                            } else {
+                                product.status = 'pending';
+                                product.receivedDate = null;
+                            }
+                        });
+                    }
+                    
+                    db.collection("reportesMalEstado").doc(currentReportId)
+                        .update(reportData)
+                        .then(() => {
+                            showSuccessAlert('Reporte actualizado', 'El reporte se ha actualizado correctamente')
+                                .then(() => {
+                                    hideReturnForm();
+                                    loadReports();
+                                });
+                        })
+                        .catch(error => {
+                            console.error("Error al actualizar el reporte:", error);
+                            showErrorAlert('Error', 'Ocurrió un error al actualizar el reporte');
+                        });
+                } else {
+                    reportData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                    reportData.status = 'active';
+                    reportData.reportNumber = reportCounter;
+                    
+                    reportData.products.forEach(product => {
+                        product.status = 'pending';
+                        product.receivedDate = null;
                     });
+                    
+                    db.collection("reportesMalEstado").doc(currentReportId)
+                        .set(reportData)
+                        .then(() => {
+                            showSuccessAlert('Reporte guardado', 'El reporte se ha guardado correctamente')
+                                .then(() => {
+                                    hideReturnForm();
+                                    loadReports();
+                                });
+                        })
+                        .catch(error => {
+                            console.error("Error al guardar el reporte:", error);
+                            showErrorAlert('Error', 'Ocurrió un error al guardar el reporte');
+                        });
+                }
             }
 
             // Buscar reportes
@@ -752,7 +874,6 @@
                     return;
                 }
                 
-                // Buscar por número de reporte o fecha
                 const filteredReports = reports.filter(report => {
                     return report.id.toLowerCase().includes(searchTerm) || 
                            formatDate(report.date).toLowerCase().includes(searchTerm);
@@ -770,7 +891,6 @@
                         reports = [];
                         querySnapshot.forEach(doc => {
                             const data = doc.data();
-                            // Asegurarse de que todos los productos tengan status
                             if (data.products) {
                                 data.products.forEach(product => {
                                     if (!product.status) {
@@ -779,12 +899,14 @@
                                     if (!product.receivedDate && product.status === 'received') {
                                         product.receivedDate = new Date().toISOString();
                                     }
+                                    if (!product.code) {
+                                        product.code = '';
+                                    }
                                 });
                             }
                             reports.push(data);
                         });
                         
-                        // Establecer el contador al máximo número de reporte + 1
                         if (reports.length > 0) {
                             const maxNumber = Math.max(...reports.map(r => r.reportNumber || 0));
                             reportCounter = maxNumber;
@@ -794,6 +916,7 @@
                     })
                     .catch(error => {
                         console.error("Error al cargar reportes:", error);
+                        showErrorAlert('Error', 'Ocurrió un error al cargar los reportes');
                     });
             }
 
@@ -816,7 +939,6 @@
                     const reportCard = document.createElement('div');
                     reportCard.className = 'report-card';
                     
-                    // Contar productos recibidos
                     const receivedCount = report.products ? report.products.filter(p => p.status === 'received').length : 0;
                     const totalCount = report.products ? report.products.length : 0;
                     
@@ -825,8 +947,8 @@
                             <div>
                                 <span class="report-id">${report.id}</span>
                                 <span class="report-date">${formatDate(report.date)}</span>
-                                <div style="margin-top: 0.25rem; font-size: 0.85rem; color: ${receivedCount === totalCount ? 'var(--danger)' : 'var(--success)'}">
-                                    ${receivedCount}/${totalCount} productos recibidos
+                                <div style="margin-top: 0.25rem; font-size: 0.85rem; color: ${report.status === 'cancelled' ? 'var(--danger)' : receivedCount === totalCount ? 'var(--success)' : 'var(--warning)'}">
+                                    ${report.status === 'cancelled' ? 'ANULADO' : `${receivedCount}/${totalCount} productos recibidos`}
                                 </div>
                             </div>
                             <div style="display: flex; gap: 0.5rem;">
@@ -853,6 +975,7 @@
                         <table class="report-products">
                             <thead>
                                 <tr>
+                                    <th>Código</th>
                                     <th>Descripción</th>
                                     <th style="width: 60px;">Cantidad</th>
                                     <th style="width: 100px;">Motivo</th>
@@ -862,12 +985,13 @@
                             <tbody>
                                 ${report.products ? report.products.map(product => `
                                     <tr>
+                                        <td>${product.code || ''}</td>
                                         <td>${product.description}</td>
                                         <td>${product.quantity}</td>
                                         <td>${product.reason}</td>
                                         <td>
                                             <span class="product-status status-${product.status}"></span>
-                                            ${product.status === 'pending' ? 'Pendiente' : 'Recibido'}
+                                            ${product.status === 'pending' ? 'Pendiente' : product.status === 'received' ? 'Recibido' : 'Anulado'}
                                         </td>
                                     </tr>
                                 `).join('') : ''}
@@ -900,21 +1024,40 @@
 
             // Anular reporte
             window.cancelReport = function(reportId) {
-                if (confirm('¿Estás seguro que deseas anular este reporte?')) {
-                    db.collection("reportesMalEstado").doc(reportId)
-                        .update({
-                            status: 'cancelled',
-                            cancelledAt: firebase.firestore.FieldValue.serverTimestamp()
-                        })
-                        .then(() => {
-                            alert('Reporte anulado correctamente');
-                            loadReports();
-                        })
-                        .catch(error => {
-                            console.error("Error al anular el reporte:", error);
-                            alert('Ocurrió un error al anular el reporte');
-                        });
-                }
+                showConfirmAlert('¿Anular reporte?', '¿Estás seguro que deseas anular este reporte?', 'Sí, anular')
+                    .then((result) => {
+                        if (result.isConfirmed) {
+                            db.collection("reportesMalEstado").doc(reportId)
+                                .update({
+                                    status: 'cancelled',
+                                    cancelledAt: firebase.firestore.FieldValue.serverTimestamp()
+                                })
+                                .then(() => {
+                                    const report = reports.find(r => r.id === reportId);
+                                    if (report && report.products) {
+                                        report.products.forEach(product => {
+                                            product.status = 'cancelled';
+                                        });
+                                        return db.collection("reportesMalEstado").doc(reportId)
+                                            .update({
+                                                products: report.products
+                                            });
+                                    }
+                                    return Promise.resolve();
+                                })
+                                .then(() => {
+                                    showSuccessAlert('Reporte anulado', 'El reporte ha sido anulado correctamente')
+                                        .then(() => {
+                                            loadReports();
+                                            closeModal();
+                                        });
+                                })
+                                .catch(error => {
+                                    console.error("Error al anular el reporte:", error);
+                                    showErrorAlert('Error', 'Ocurrió un error al anular el reporte');
+                                });
+                        }
+                    });
             };
 
             // Editar reporte
@@ -923,26 +1066,27 @@
                 if (!report) return;
                 
                 if (report.status !== 'active') {
-                    alert('Solo se pueden editar reportes activos');
+                    showErrorAlert('Error', 'Solo se pueden editar reportes activos');
                     return;
                 }
 
                 currentReportId = report.id;
                 reportNumberSpan.textContent = report.id;
                 
-                // Llenar campos del formulario
+                saveReportBtn.innerHTML = '<i class="fas fa-save"></i> Actualizar';
+                
                 supplierInput.value = report.supplier;
                 reportDateInput.value = report.date.split('T')[0];
                 notesInput.value = report.notes || '';
                 
-                // Llenar tabla de productos
                 const tbody = productsTable.querySelector('tbody');
                 tbody.innerHTML = '';
                 
                 report.products.forEach(product => {
                     const newRow = document.createElement('tr');
                     newRow.innerHTML = `
-                        <td><input type="text" value="${product.description}" placeholder="Código y descripción"></td>
+                        <td><input type="text" class="code-input" value="${product.code || ''}" placeholder="Código" maxlength="9"></td>
+                        <td><input type="text" value="${product.description}" placeholder="Descripción"></td>
                         <td><input type="number" value="${product.quantity}" placeholder="0" min="1"></td>
                         <td><input type="text" value="${product.reason}" placeholder="Ej: Quebrado"></td>
                         <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
@@ -950,16 +1094,68 @@
                     tbody.appendChild(newRow);
                 });
                 
-                // Agregar event listeners a los botones de eliminar
                 addDeleteRowListeners();
                 
+                reportsList.style.display = 'none';
+                searchContainer.style.display = 'none';
                 returnForm.style.display = 'block';
                 
-                // Cambiar texto del botón de guardar
-                saveReportBtn.innerHTML = '<i class="fas fa-save"></i> Actualizar';
+                isCreatingNewReport = true;
                 
-                // Desplazar hasta el formulario
+                closeModal();
+                
                 returnForm.scrollIntoView({ behavior: 'smooth' });
+            };
+
+            // Cambiar estado del producto
+            window.toggleProductStatus = function(reportId, productIndex, event) {
+                if (event) event.stopPropagation();
+                
+                const report = reports.find(r => r.id === reportId);
+                if (!report || !report.products || !report.products[productIndex] || report.status !== 'active') return;
+                
+                const product = report.products[productIndex];
+                const newStatus = product.status === 'pending' ? 'received' : 'pending';
+                
+                product.status = newStatus;
+                if (newStatus === 'received') {
+                    product.receivedDate = new Date().toISOString();
+                } else {
+                    product.receivedDate = null;
+                }
+                
+                db.collection("reportesMalEstado").doc(reportId)
+                    .update({
+                        products: report.products
+                    })
+                    .then(() => {
+                        const allReceived = report.products.every(p => p.status === 'received');
+                        if (allReceived) {
+                            return db.collection("reportesMalEstado").doc(reportId)
+                                .update({
+                                    status: 'completed',
+                                    completedAt: firebase.firestore.FieldValue.serverTimestamp()
+                                });
+                        } else if (report.status === 'completed') {
+                            return db.collection("reportesMalEstado").doc(reportId)
+                                .update({
+                                    status: 'active',
+                                    completedAt: firebase.firestore.FieldValue.delete()
+                                });
+                        }
+                        return Promise.resolve();
+                    })
+                    .then(() => {
+                        loadReports();
+                        const currentModalReport = reports.find(r => r.id === reportId);
+                        if (currentModalReport) {
+                            viewReport(reportId);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error al actualizar el producto:", error);
+                        showErrorAlert('Error', 'Ocurrió un error al actualizar el producto');
+                    });
             };
 
             // Ver reporte completo en modal
@@ -973,8 +1169,9 @@
                             <span class="report-id">${report.id}</span>
                             <span class="report-date">${formatDate(report.date)}</span>
                             <div style="margin-top: 0.25rem; font-size: 0.9rem; color: ${report.status === 'cancelled' ? 'var(--danger)' : report.status === 'completed' ? 'var(--success)' : 'var(--warning)'}">
-                                Estado: ${report.status === 'active' ? 'Activo' : report.status === 'cancelled' ? 'Anulado' : 'Completado'}
+                                Estado: ${report.status === 'active' ? 'Activo' : report.status === 'cancelled' ? 'ANULADO' : 'Completado'}
                                 ${report.cancelledAt ? `<span class="status-date">Anulado el: ${formatDateTime(report.cancelledAt.toDate ? report.cancelledAt.toDate().toISOString() : report.cancelledAt)}</span>` : ''}
+                                ${report.completedAt ? `<span class="status-date">Completado el: ${formatDateTime(report.completedAt.toDate ? report.completedAt.toDate().toISOString() : report.completedAt)}</span>` : ''}
                             </div>
                         </div>
                     </div>
@@ -997,6 +1194,7 @@
                         <table class="report-products" style="width: 100%; margin-top: 0;">
                             <thead>
                                 <tr>
+                                    <th>Código</th>
                                     <th>Descripción</th>
                                     <th style="width: 60px;">Cantidad</th>
                                     <th style="width: 100px;">Motivo</th>
@@ -1007,22 +1205,21 @@
                             <tbody>
                                 ${report.products ? report.products.map((product, index) => `
                                     <tr>
+                                        <td>${product.code || ''}</td>
                                         <td>${product.description}</td>
                                         <td>${product.quantity}</td>
                                         <td>${product.reason}</td>
-                                        <td onclick="toggleProductStatus('${report.id}', ${index})" style="cursor: pointer;">
+                                        <td class="status-cell" onclick="toggleProductStatus('${report.id}', ${index}, event)">
                                             <span class="product-status status-${product.status}"></span>
-                                            ${product.status === 'pending' ? 'Pendiente' : 'Recibido'}
+                                            ${product.status === 'pending' ? 'Pendiente' : product.status === 'received' ? 'Recibido' : 'Anulado'}
                                             ${product.receivedDate ? `<span class="status-date">Recibido el: ${formatDateTime(product.receivedDate)}</span>` : ''}
                                         </td>
                                         ${report.status === 'active' ? `
                                         <td>
-                                            ${product.status === 'pending' ? `
                                             <button class="btn btn-success" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" 
-                                                onclick="markAsReceived('${report.id}', ${index})">
-                                                <i class="fas fa-check"></i> Recibido
+                                                onclick="toggleProductStatus('${report.id}', ${index}, event)">
+                                                <i class="fas fa-check"></i> ${product.status === 'pending' ? 'Recibido' : 'Pendiente'}
                                             </button>
-                                            ` : ''}
                                         </td>
                                         ` : ''}
                                     </tr>
@@ -1041,6 +1238,9 @@
                     <button class="btn btn-secondary" onclick="editReport('${report.id}')">
                         <i class="fas fa-edit"></i> Editar
                     </button>
+                    <button class="btn btn-danger" onclick="cancelReport('${report.id}')">
+                        <i class="fas fa-ban"></i> Anular
+                    </button>
                     ` : ''}
                     <button class="btn" onclick="closeModal()">
                         <i class="fas fa-times"></i>
@@ -1052,64 +1252,6 @@
                 document.body.style.overflow = 'hidden';
             };
 
-            // Cambiar estado del producto al hacer clic en el status
-            window.toggleProductStatus = function(reportId, productIndex) {
-                const report = reports.find(r => r.id === reportId);
-                if (!report || !report.products || !report.products[productIndex] || report.status !== 'active') return;
-                
-                markAsReceived(reportId, productIndex);
-            };
-
-            // Marcar producto como recibido
-            window.markAsReceived = function(reportId, productIndex) {
-                const report = reports.find(r => r.id === reportId);
-                if (!report || !report.products || !report.products[productIndex]) return;
-                
-                const product = report.products[productIndex];
-                const newStatus = product.status === 'pending' ? 'received' : 'pending';
-                
-                // Actualizar estado del producto
-                product.status = newStatus;
-                if (newStatus === 'received') {
-                    product.receivedDate = new Date().toISOString();
-                } else {
-                    product.receivedDate = null;
-                }
-                
-                // Actualizar en Firebase
-                db.collection("reportesMalEstado").doc(reportId)
-                    .update({
-                        products: report.products
-                    })
-                    .then(() => {
-                        // Verificar si todos los productos están recibidos
-                        const allReceived = report.products.every(p => p.status === 'received');
-                        if (allReceived) {
-                            return db.collection("reportesMalEstado").doc(reportId)
-                                .update({
-                                    status: 'completed',
-                                    completedAt: firebase.firestore.FieldValue.serverTimestamp()
-                                });
-                        } else if (report.status === 'completed') {
-                            // Si ya estaba completado pero ahora no todos están recibidos
-                            return db.collection("reportesMalEstado").doc(reportId)
-                                .update({
-                                    status: 'active',
-                                    completedAt: firebase.firestore.FieldValue.delete()
-                                });
-                        }
-                        return Promise.resolve();
-                    })
-                    .then(() => {
-                        loadReports();
-                        viewReport(reportId); // Recargar el modal
-                    })
-                    .catch(error => {
-                        console.error("Error al actualizar el producto:", error);
-                        alert('Ocurrió un error al actualizar el producto');
-                    });
-            };
-
             // Generar PDF del reporte
             window.generatePDF = function(reportId) {
                 const report = reports.find(r => r.id === reportId);
@@ -1117,28 +1259,23 @@
                 
                 const doc = new jsPDF();
                 
-                // Configuración de márgenes
                 const marginLeft = 15;
                 const marginRight = 15;
                 const pageWidth = doc.internal.pageSize.getWidth();
                 const contentWidth = pageWidth - marginLeft - marginRight;
                 
-                // Logo de la empresa y nombre
                 doc.addImage(companyLogo, 'PNG', marginLeft, 10, 40, 15);
                 doc.setFontSize(14);
                 doc.setFont('helvetica', 'bold');
                 doc.text(companyName, pageWidth / 2, 20, { align: 'center' });
                 
-                // Título del documento
                 doc.setFontSize(12);
                 doc.setFont('helvetica', 'normal');
                 doc.text('Reporte de Productos en Mal Estado', pageWidth / 2, 30, { align: 'center' });
                 
-                // Línea separadora
                 doc.setDrawColor(200, 200, 200);
                 doc.line(marginLeft, 35, pageWidth - marginRight, 35);
                 
-                // Información del reporte
                 doc.setFontSize(10);
                 let yPosition = 45;
                 
@@ -1157,17 +1294,17 @@
                     yPosition += 5;
                 }
                 
-                // Tabla de productos
                 const tableData = report.products ? report.products.map(product => [
+                    product.code || '',
                     product.description,
                     product.quantity.toString(),
                     product.reason,
-                    product.status === 'pending' ? 'Pendiente' : `Recibido\n${formatDateTime(product.receivedDate)}`
+                    product.status === 'pending' ? 'Pendiente' : product.status === 'received' ? `Recibido\n${formatDateTime(product.receivedDate)}` : 'Anulado'
                 ]) : [];
                 
                 doc.autoTable({
                     startY: yPosition,
-                    head: [['Descripción', 'Cantidad', 'Motivo', 'Estado']],
+                    head: [['Código', 'Descripción', 'Cantidad', 'Motivo', 'Estado']],
                     body: tableData,
                     margin: { left: marginLeft, right: marginRight },
                     styles: {
@@ -1181,23 +1318,21 @@
                         fontStyle: 'bold'
                     },
                     columnStyles: {
-                        0: { cellWidth: 'auto' },
-                        1: { cellWidth: 20 },
-                        2: { cellWidth: 40 },
-                        3: { cellWidth: 40 }
+                        0: { cellWidth: 25 },
+                        1: { cellWidth: 'auto' },
+                        2: { cellWidth: 20 },
+                        3: { cellWidth: 30 },
+                        4: { cellWidth: 30 }
                     }
                 });
                 
-                // Firmas en la parte inferior
                 const lastY = doc.lastAutoTable.finalY + 20;
                 
-                // Fecha de entrega y firmas
                 doc.setFontSize(10);
                 doc.text('Fecha de Entrega: ________________', marginLeft, lastY);
                 doc.text('Recibe: ___________', marginLeft, lastY + 10);
                 doc.text('Entrega: ___________', marginLeft, lastY + 20);
                 
-                // Guardar PDF
                 doc.save(`Reporte_${report.id}.pdf`);
             };
 
@@ -1212,7 +1347,6 @@
             cancelReportBtn.addEventListener('click', hideReturnForm);
             saveReportBtn.addEventListener('click', saveReport);
             addRowBtn.addEventListener('click', addProductRow);
-            modalCloseBtn.addEventListener('click', closeModal);
             reportModal.addEventListener('click', (e) => {
                 if (e.target === reportModal) closeModal();
             });
