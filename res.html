@@ -988,6 +988,8 @@
                         confirmButtonColor: '#3085d6'
                     });
                 } else {
+                     // Mostrar spinner en el botón
+                    saveReportBtn.innerHTML = '<span class="spinner"></span> Guardando...';
                     // Es un nuevo reporte
                     reportData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
                     reportData.status = 'active';
