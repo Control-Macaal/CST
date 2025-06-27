@@ -1824,7 +1824,7 @@
                 doc.text('Entrega: ________________________________', marginLeft, lastY + 40);
                 
                 // Guardar PDF con el nuevo nombre
-                const fileName = `Reporte${report.id}_${report.supplier.replace(/\s+/g, '_')}.pdf`;
+                const fileName = `NotaDeCambio${report.id}_${report.supplier.replace(/\s+/g, '_')}.pdf`;
                 doc.save(fileName);
             } catch (error) {
                 console.error("Error al generar PDF:", error);
