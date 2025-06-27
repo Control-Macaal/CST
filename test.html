@@ -480,6 +480,53 @@
             font-size: 0.9rem;
         }
 
+        /* Dropdown de acciones */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-btn {
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 1rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .dropdown-content a {
+            color: var(--text);
+            padding: 0.8rem 1rem;
+            text-decoration: none;
+            display: block;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
         @media (max-width: 768px) {
             .form-row, .invoice-fields {
                 grid-template-columns: 1fr;
@@ -529,6 +576,11 @@
                 min-width: auto;
                 margin-bottom: 0.5rem;
             }
+
+            .dropdown-content {
+                right: auto;
+                left: 0;
+            }
         }
     </style>
 </head>
@@ -553,7 +605,7 @@
         <!-- Buscador -->
         <div class="search-container" id="searchContainer">
             <div class="search-input-container">
-                <input type="text" class="search-input" id="searchInput" placeholder="Buscar por número, fecha o proveedor...">
+                <input type="text" class="search-input" id="searchInput" name="searchInput" placeholder="Buscar por número, fecha o proveedor...">
                 <button class="search-clear" id="searchClear">
                     <i class="fas fa-times"></i>
                 </button>
@@ -573,28 +625,28 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="supplier">Proveedor</label>
-                    <input type="text" class="form-control" id="supplier" required>
+                    <input type="text" class="form-control" id="supplier" name="supplier" required>
                 </div>
                 <div class="form-group">
                     <label for="reportDate">Fecha</label>
-                    <input type="date" class="form-control" id="reportDate" required>
+                    <input type="date" class="form-control" id="reportDate" name="reportDate" required>
                 </div>
             </div>
             
             <div class="invoice-fields">
                 <div class="form-group">
                     <label for="invoiceNumber">Número de Factura (Opcional)</label>
-                    <input type="text" class="form-control" id="invoiceNumber" placeholder="Ingrese número">
+                    <input type="text" class="form-control" id="invoiceNumber" name="invoiceNumber" placeholder="Ingrese número">
                 </div>
                 <div class="form-group">
                     <label for="invoiceSeries">Serie de Factura (Opcional)</label>
-                    <input type="text" class="form-control" id="invoiceSeries" placeholder="Ingrese serie">
+                    <input type="text" class="form-control" id="invoiceSeries" name="invoiceSeries" placeholder="Ingrese serie">
                 </div>
             </div>
             
             <div class="form-group">
                 <label for="notes">Observaciones (Opcional)</label>
-                <textarea class="form-control" id="notes" style="min-height: 40px;"></textarea>
+                <textarea class="form-control" id="notes" name="notes" style="min-height: 40px;"></textarea>
             </div>
             
             <h3 style="margin: 1rem 0 0.5rem; font-size: 1.1rem;">Productos en mal estado</h3>
@@ -612,11 +664,11 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><input type="text" class="code-input" placeholder="Sku" maxlength="9" required></td>
-                        <td><input type="text" class="factory-code-input" placeholder="Cód. Fab"></td>
-                        <td><input type="text" placeholder="Descripción" required></td>
-                        <td><input type="number" placeholder="0" min="1" required></td>
-                        <td><input type="text" placeholder="Ej: Quebrado" required></td>
+                        <td><input type="text" class="code-input" id="productSku1" name="productSku1" placeholder="Sku" maxlength="9" required></td>
+                        <td><input type="text" class="factory-code-input" id="factoryCode1" name="factoryCode1" placeholder="Cód. Fab"></td>
+                        <td><input type="text" id="productDescription1" name="productDescription1" placeholder="Descripción" required></td>
+                        <td><input type="number" id="productQuantity1" name="productQuantity1" placeholder="0" min="1" required></td>
+                        <td><input type="text" id="productReason1" name="productReason1" placeholder="Ej: Quebrado" required></td>
                         <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                     </tr>
                 </tbody>
@@ -688,8 +740,6 @@
         let reportCounter = 0;
         let isCreatingNewReport = false;
         const companyName = "MACAAL S.A";
-        const companyLogo = new Image();
-        companyLogo.src = 'images/logo/logo.png';
 
         // Función para cerrar modal (ahora está en el ámbito global)
         window.closeModal = function() {
@@ -775,14 +825,14 @@
                 const tbody = document.getElementById('productsTable').querySelector('tbody');
                 tbody.innerHTML = '';
                 
-                formData.products.forEach(product => {
+                formData.products.forEach((product, index) => {
                     const newRow = document.createElement('tr');
                     newRow.innerHTML = `
-                        <td><input type="text" class="code-input" value="${product.sku || ''}" placeholder="Sku" maxlength="9" required></td>
-                        <td><input type="text" class="factory-code-input" value="${product.factoryCode || ''}" placeholder="Cód. Fab"></td>
-                        <td><input type="text" value="${product.description || ''}" placeholder="Descripción" required></td>
-                        <td><input type="number" value="${product.quantity || ''}" placeholder="0" min="1" required></td>
-                        <td><input type="text" value="${product.reason || ''}" placeholder="Ej: Quebrado" required></td>
+                        <td><input type="text" class="code-input" id="productSku${index+1}" name="productSku${index+1}" value="${product.sku || ''}" placeholder="Sku" maxlength="9" required></td>
+                        <td><input type="text" class="factory-code-input" id="factoryCode${index+1}" name="factoryCode${index+1}" value="${product.factoryCode || ''}" placeholder="Cód. Fab"></td>
+                        <td><input type="text" id="productDescription${index+1}" name="productDescription${index+1}" value="${product.description || ''}" placeholder="Descripción" required></td>
+                        <td><input type="number" id="productQuantity${index+1}" name="productQuantity${index+1}" value="${product.quantity || ''}" placeholder="0" min="1" required></td>
+                        <td><input type="text" id="productReason${index+1}" name="productReason${index+1}" value="${product.reason || ''}" placeholder="Ej: Quebrado" required></td>
                         <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                     `;
                     tbody.appendChild(newRow);
@@ -845,11 +895,11 @@
             const tbody = document.getElementById('productsTable').querySelector('tbody');
             tbody.innerHTML = `
                 <tr>
-                    <td><input type="text" class="code-input" placeholder="Sku" maxlength="9" required></td>
-                    <td><input type="text" class="factory-code-input" placeholder="Cód. Fab"></td>
-                    <td><input type="text" placeholder="Descripción" required></td>
-                    <td><input type="number" placeholder="0" min="1" required></td>
-                    <td><input type="text" placeholder="Ej: Quebrado" required></td>
+                    <td><input type="text" class="code-input" id="productSku1" name="productSku1" placeholder="Sku" maxlength="9" required></td>
+                    <td><input type="text" class="factory-code-input" id="factoryCode1" name="factoryCode1" placeholder="Cód. Fab"></td>
+                    <td><input type="text" id="productDescription1" name="productDescription1" placeholder="Descripción" required></td>
+                    <td><input type="number" id="productQuantity1" name="productQuantity1" placeholder="0" min="1" required></td>
+                    <td><input type="text" id="productReason1" name="productReason1" placeholder="Ej: Quebrado" required></td>
                     <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                 </tr>
             `;
@@ -879,30 +929,39 @@
             clearFormLocalStorage();
         }
 
-        // Ocultar formulario de devolución
-        function hideReturnForm() {
-            Swal.fire({
-                title: '¿Cancelar operación?',
-                text: '¿Estás seguro que deseas cancelar esta operación? Los datos no guardados se perderán.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, cancelar',
-                cancelButtonText: 'No, continuar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('returnForm').style.display = 'none';
-                    document.getElementById('reportsList').style.display = 'grid';
-                    document.getElementById('searchContainer').style.display = 'flex';
-                    document.querySelector('.header-actions').style.display = 'flex';
-                    document.getElementById('backButton').style.display = 'flex';
-                    isCreatingNewReport = false;
-                    
-                    // Limpiar localStorage al cancelar
-                    clearFormLocalStorage();
-                }
-            });
+        // Función auxiliar para ocultar el formulario sin confirmación
+        function actuallyHideForm() {
+            document.getElementById('returnForm').style.display = 'none';
+            document.getElementById('reportsList').style.display = 'grid';
+            document.getElementById('searchContainer').style.display = 'flex';
+            document.querySelector('.header-actions').style.display = 'flex';
+            document.getElementById('backButton').style.display = 'flex';
+            isCreatingNewReport = false;
+            
+            // Limpiar localStorage al cancelar
+            clearFormLocalStorage();
+        }
+
+        // Ocultar formulario de devolución (modificado)
+        function hideReturnForm(showConfirmation = true) {
+            if (showConfirmation) {
+                Swal.fire({
+                    title: '¿Cancelar operación?',
+                    text: '¿Estás seguro que deseas cancelar esta operación? Los datos no guardados se perderán.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Sí, cancelar',
+                    cancelButtonText: 'No, continuar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        actuallyHideForm();
+                    }
+                });
+            } else {
+                actuallyHideForm();
+            }
         }
 
         // Agregar event listeners para ajustar tamaño de inputs
@@ -943,13 +1002,14 @@
         // Agregar nueva fila a la tabla de productos
         function addProductRow() {
             const tbody = document.getElementById('productsTable').querySelector('tbody');
+            const rowCount = tbody.childElementCount + 1;
             const newRow = document.createElement('tr');
             newRow.innerHTML = `
-                <td><input type="text" class="code-input" placeholder="Sku" maxlength="9" required></td>
-                <td><input type="text" class="factory-code-input" placeholder="Cód. Fab"></td>
-                <td><input type="text" placeholder="Descripción" required></td>
-                <td><input type="number" placeholder="0" min="1" required></td>
-                <td><input type="text" placeholder="Ej: Quebrado" required></td>
+                <td><input type="text" class="code-input" id="productSku${rowCount}" name="productSku${rowCount}" placeholder="Sku" maxlength="9" required></td>
+                <td><input type="text" class="factory-code-input" id="factoryCode${rowCount}" name="factoryCode${rowCount}" placeholder="Cód. Fab"></td>
+                <td><input type="text" id="productDescription${rowCount}" name="productDescription${rowCount}" placeholder="Descripción" required></td>
+                <td><input type="number" id="productQuantity${rowCount}" name="productQuantity${rowCount}" placeholder="0" min="1" required></td>
+                <td><input type="text" id="productReason${rowCount}" name="productReason${rowCount}" placeholder="Ej: Quebrado" required></td>
                 <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
             `;
             tbody.appendChild(newRow);
@@ -1156,6 +1216,9 @@
                         icon: 'success',
                         confirmButtonColor: '#3085d6'
                     });
+                    
+                    // Cambio aquí: pasar false para no mostrar confirmación
+                    hideReturnForm(false);
                 } else {
                      // Mostrar spinner en el botón
                     saveReportBtn.innerHTML = '<span class="spinner"></span> Guardando...';
@@ -1176,9 +1239,11 @@
                         icon: 'success',
                         confirmButtonColor: '#3085d6'
                     });
+                    
+                    // Cambio aquí: pasar false para no mostrar confirmación
+                    hideReturnForm(false);
                 }
                 
-                hideReturnForm();
                 await loadReports();
                 
                 // Limpiar localStorage después de guardar
@@ -1299,23 +1364,26 @@
                                 ${report.status === 'cancelled' ? 'ANULADO' : `${receivedCount}/${totalCount} productos recibidos`}
                             </div>
                         </div>
-                        <div style="display: flex; gap: 0.8rem;">
-                            <button class="btn" onclick="viewReport('${report.id}')">
-                                <i class="fas fa-eye"></i> Ver
+                        <div class="dropdown" style="display: flex; gap: 0.8rem;">
+                            <button class="dropdown-btn">
+                                <i class="fas fa-ellipsis-v"></i> Acciones
                             </button>
-                            <button class="btn btn-pdf" onclick="generatePDF('${report.id}')">
-                                <i class="fas fa-file-pdf"></i> PDF
-                            </button>
-                            ${report.status === 'active' ? `
-                            <button class="btn btn-danger" onclick="cancelReport('${report.id}')">
-                                <i class="fas fa-ban"></i> Anular
-                            </button>
-                            ` : ''}
-                            ${report.status === 'active' ? `
-                            <button class="btn btn-secondary" onclick="confirmEditReport('${report.id}')">
-                                <i class="fas fa-edit"></i> Editar
-                            </button>
-                            ` : ''}
+                            <div class="dropdown-content">
+                                <a href="#" onclick="viewReport('${report.id}'); return false;">
+                                    <i class="fas fa-eye"></i> Ver
+                                </a>
+                                <a href="#" onclick="generatePDF('${report.id}'); return false;">
+                                    <i class="fas fa-file-pdf"></i> Generar PDF
+                                </a>
+                                ${report.status === 'active' ? `
+                                <a href="#" onclick="confirmEditReport('${report.id}'); return false;">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                <a href="#" onclick="cancelReport('${report.id}'); return false;" style="color: var(--danger);">
+                                    <i class="fas fa-ban"></i> Anular
+                                </a>
+                                ` : ''}
+                            </div>
                         </div>
                     </div>
                     <div class="report-supplier">Proveedor: ${report.supplier}</div>
@@ -1422,14 +1490,14 @@
             const tbody = document.getElementById('productsTable').querySelector('tbody');
             tbody.innerHTML = '';
             
-            report.products.forEach(product => {
+            report.products.forEach((product, index) => {
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = `
-                    <td><input type="text" class="code-input" value="${product.sku || ''}" placeholder="Sku" maxlength="9" required></td>
-                    <td><input type="text" class="factory-code-input" value="${product.factoryCode || ''}" placeholder="Cód. Fab"></td>
-                    <td><input type="text" value="${product.description}" placeholder="Descripción" required></td>
-                    <td><input type="number" value="${product.quantity}" placeholder="0" min="1" required></td>
-                    <td><input type="text" value="${product.reason}" placeholder="Ej: Quebrado" required></td>
+                    <td><input type="text" class="code-input" id="productSku${index+1}" name="productSku${index+1}" value="${product.sku || ''}" placeholder="Sku" maxlength="9" required></td>
+                    <td><input type="text" class="factory-code-input" id="factoryCode${index+1}" name="factoryCode${index+1}" value="${product.factoryCode || ''}" placeholder="Cód. Fab"></td>
+                    <td><input type="text" id="productDescription${index+1}" name="productDescription${index+1}" value="${product.description}" placeholder="Descripción" required></td>
+                    <td><input type="number" id="productQuantity${index+1}" name="productQuantity${index+1}" value="${product.quantity}" placeholder="0" min="1" required></td>
+                    <td><input type="text" id="productReason${index+1}" name="productReason${index+1}" value="${product.reason}" placeholder="Ej: Quebrado" required></td>
                     <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                 `;
                 tbody.appendChild(newRow);
@@ -1533,6 +1601,35 @@
             const product = report.products[productIndex];
             const newStatus = product.status === 'pending' ? 'received' : 'pending';
             
+            // Mostrar confirmación solo cuando se marca como recibido
+            if (newStatus === 'received') {
+                Swal.fire({
+                    title: '¿Marcar como recibido?',
+                    text: '¿Estás seguro de que deseas marcar este producto como recibido?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Sí, recibido',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        updateProductStatus(reportId, productIndex, newStatus);
+                    }
+                });
+            } else {
+                // No mostrar confirmación cuando se deshace (vuelve a pendiente)
+                updateProductStatus(reportId, productIndex, newStatus);
+            }
+        };
+
+        // Función para actualizar el estado del producto
+        function updateProductStatus(reportId, productIndex, newStatus) {
+            const report = reports.find(r => r.id === reportId);
+            if (!report || !report.products || !report.products[productIndex]) return;
+            
+            const product = report.products[productIndex];
+            
             // Actualizar estado del producto
             product.status = newStatus;
             if (newStatus === 'received') {
@@ -1582,7 +1679,7 @@
                         confirmButtonColor: '#3085d6'
                     });
                 });
-        };
+        }
 
         // Ver reporte completo en modal
         window.viewReport = function(reportId) {
@@ -1652,9 +1749,9 @@
                                     </td>
                                     ${report.status === 'active' ? `
                                     <td>
-                                        <button class="btn btn-success" style="padding: 0.3rem 0.6rem; font-size: 0.85rem;" 
+                                        <button class="btn ${product.status === 'pending' ? 'btn-success' : 'btn-warning'}" style="padding: 0.3rem 0.6rem; font-size: 0.85rem;" 
                                             onclick="toggleProductStatus('${report.id}', ${index}, event)">
-                                            <i class="fas fa-check"></i> ${product.status === 'pending' ? 'Recibido' : 'Pendiente'}
+                                            <i class="fas ${product.status === 'pending' ? 'fa-check' : 'fa-undo'}"></i> ${product.status === 'pending' ? 'Recibido' : 'Deshacer'}
                                         </button>
                                     </td>
                                     ` : ''}
@@ -1702,8 +1799,7 @@
                 const pageWidth = doc.internal.pageSize.getWidth();
                 const contentWidth = pageWidth - marginLeft - marginRight;
                 
-                // Logo de la empresa y nombre
-                doc.addImage(companyLogo, 'PNG', marginLeft, 10, 40, 15);
+                // Título del documento
                 doc.setFontSize(14);
                 doc.setFont('helvetica', 'bold');
                 doc.text(companyName, pageWidth / 2, 20, { align: 'center' });
@@ -1853,7 +1949,7 @@
 
             // Event listeners principales
             document.getElementById('newReportBtn').addEventListener('click', showNewReportForm);
-            document.getElementById('cancelReportBtn').addEventListener('click', hideReturnForm);
+            document.getElementById('cancelReportBtn').addEventListener('click', () => hideReturnForm(true));
             document.getElementById('saveReportBtn').addEventListener('click', saveReport);
             document.getElementById('addRowBtn').addEventListener('click', addProductRow);
             document.getElementById('reportModal').addEventListener('click', (e) => {
