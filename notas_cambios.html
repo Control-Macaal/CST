@@ -740,6 +740,8 @@
         let reportCounter = 0;
         let isCreatingNewReport = false;
         const companyName = "MACAAL S.A";
+        const companyLogo = new Image();
+        companyLogo.src = 'images/logo/logo.png';
 
         // Función para cerrar modal (ahora está en el ámbito global)
         window.closeModal = function() {
@@ -1601,26 +1603,8 @@
             const product = report.products[productIndex];
             const newStatus = product.status === 'pending' ? 'received' : 'pending';
             
-            // Mostrar confirmación solo cuando se marca como recibido
-            if (newStatus === 'received') {
-                Swal.fire({
-                    title: '¿Marcar como recibido?',
-                    text: '¿Estás seguro de que deseas marcar este producto como recibido?',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Sí, recibido',
-                    cancelButtonText: 'Cancelar'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        updateProductStatus(reportId, productIndex, newStatus);
-                    }
-                });
-            } else {
-                // No mostrar confirmación cuando se deshace (vuelve a pendiente)
-                updateProductStatus(reportId, productIndex, newStatus);
-            }
+            // Actualizar estado sin confirmación
+            updateProductStatus(reportId, productIndex, newStatus);
         };
 
         // Función para actualizar el estado del producto
@@ -1742,16 +1726,16 @@
                                     <td>${product.description}</td>
                                     <td>${product.quantity}</td>
                                     <td>${product.reason}</td>
-                                    <td class="status-cell" onclick="toggleProductStatus('${report.id}', ${index}, event)">
+                                    <td class="status-cell">
                                         <span class="product-status status-${product.status}"></span>
                                         ${product.status === 'pending' ? 'Pendiente' : product.status === 'received' ? 'Recibido' : 'Anulado'}
                                         ${product.receivedDate ? `<span class="status-date">Recibido el: ${formatDateTime(product.receivedDate)}</span>` : ''}
                                     </td>
                                     ${report.status === 'active' ? `
                                     <td>
-                                        <button class="btn ${product.status === 'pending' ? 'btn-success' : 'btn-warning'}" style="padding: 0.3rem 0.6rem; font-size: 0.85rem;" 
+                                        <button class="btn ${product.status === 'pending' ? 'btn-success' : 'btn-secondary'}" style="padding: 0.3rem 0.6rem; font-size: 0.85rem;" 
                                             onclick="toggleProductStatus('${report.id}', ${index}, event)">
-                                            <i class="fas ${product.status === 'pending' ? 'fa-check' : 'fa-undo'}"></i> ${product.status === 'pending' ? 'Recibido' : 'Deshacer'}
+                                            <i class="fas fa-check"></i> ${product.status === 'pending' ? 'Recibido' : ''}
                                         </button>
                                     </td>
                                     ` : ''}
@@ -1799,6 +1783,11 @@
                 const pageWidth = doc.internal.pageSize.getWidth();
                 const contentWidth = pageWidth - marginLeft - marginRight;
                 
+                // Agregar logo de la empresa
+                if (companyLogo.complete) {
+                    doc.addImage(companyLogo, 'PNG', marginLeft, 10, 40, 15);
+                }
+                
                 // Título del documento
                 doc.setFontSize(14);
                 doc.setFont('helvetica', 'bold');
@@ -1815,7 +1804,7 @@
                 
                 // Información del reporte
                 doc.setFontSize(10);
-                let yPosition = 45;
+                let yPosition = companyLogo.complete ? 50 : 45;
                 
                 // Textos alineados a la izquierda
                 const leftTexts = [
