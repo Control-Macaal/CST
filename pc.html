@@ -821,8 +821,8 @@
         const USER_PERMISSIONS = {
             'hogar': 'admin',
             'Hogar': 'admin',
-            'bodega': 'viewer',
-            'Bodega': 'viewer'
+            'macaal': 'viewer',
+            'Macaal': 'viewer'
         };
         
         const VIEW_PIN = '1901';
@@ -907,7 +907,7 @@
                     const appGrid = document.getElementById('appGrid');
                     const bodegaCard = document.getElementById('bodegaCard');
                     
-                    if (auth.toLowerCase() === 'bodega') {
+                    if (auth.toLowerCase() === 'macaal') {
                         bodegaCard.style.display = 'block';
                         appGrid.insertBefore(bodegaCard, appGrid.firstChild);
                     } else {
@@ -957,7 +957,7 @@
                 const bodegaCard = document.getElementById('bodegaCard');
                 
                 // Mostrar/ocultar y reordenar la card de bodega
-                if (password.toLowerCase() === 'bodega') {
+                if (password.toLowerCase() === 'macaal') {
                     bodegaCard.style.display = 'block';
                     appGrid.insertBefore(bodegaCard, appGrid.firstChild);
                 } else {
@@ -1027,6 +1027,12 @@
 
         // Funciones para el PIN de visualización
         function requestPin(action) {
+            // Permitir acceso directo si el usuario es macaal
+            if (document.getElementById('loginInput').value.toLowerCase() === 'macaal') {
+                window.open(VIEW_URLS[action], '_blank');
+                return;
+            }
+            
             if (Date.now() < blockedUntil) {
                 const remaining = Math.ceil((blockedUntil - Date.now()) / 60000);
                 showPinError(`Demasiados intentos. Espere ${remaining} minuto(s)`);
