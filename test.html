@@ -923,10 +923,8 @@
                 const serverTime = await fetchServerTime();
                 const today = serverTime ? new Date(serverTime) : new Date();
                 
-                // Establecer la fecha de mañana como valor predeterminado
-                const tomorrow = new Date(today);
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                const formattedDate = tomorrow.toISOString().split('T')[0];
+                // Mostrar fecha actual en el formulario
+                const formattedDate = today.toISOString().split('T')[0];
                 document.getElementById('reportDate').value = formattedDate;
                 
                 // Limpiar campos
@@ -1246,7 +1244,7 @@
             const notesInput = document.getElementById('notes');
             const saveReportBtn = document.getElementById('saveReportBtn');
             
-            // Obtener la fecha del input y sumar un día
+            // Obtener la fecha del input y sumar un día para guardar
             const inputDate = new Date(reportDateInput.value);
             const tomorrow = new Date(inputDate);
             tomorrow.setDate(tomorrow.getDate() + 1);
@@ -1567,7 +1565,7 @@
             
             // Llenar campos del formulario
             document.getElementById('supplier').value = report.supplier;
-            document.getElementById('reportDate').value = report.date.split('T')[0]; // Mostrar la fecha en formato YYYY-MM-DD
+            document.getElementById('reportDate').value = report.date.split('T')[0]; // Mostrar la fecha guardada
             document.getElementById('invoiceNumber').value = report.invoiceNumber === 'XXXXX' ? '' : report.invoiceNumber;
             document.getElementById('invoiceSeries').value = report.invoiceSeries === 'XXXXX' ? '' : report.invoiceSeries;
             document.getElementById('notes').value = report.notes || '';
