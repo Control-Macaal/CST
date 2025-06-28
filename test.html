@@ -52,6 +52,29 @@
             width: 100%;
         }
 
+        /* Spinner de carga inicial */
+        .initial-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .initial-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4361ee;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
         header {
             display: flex;
             justify-content: space-between;
@@ -310,6 +333,28 @@
             transition: width 0.2s ease;
         }
 
+        /* Input de motivo que se expande */
+        .reason-input-container {
+            position: relative;
+            min-width: 180px;
+        }
+
+        .reason-input {
+            width: 100%;
+            min-width: 180px;
+            padding: 0.6rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            resize: none;
+            overflow: hidden;
+            min-height: 38px;
+            height: 38px;
+            line-height: 1.4;
+        }
+
+        /* Nuevos estatus para productos */
         .product-status {
             width: 15px;
             height: 15px;
@@ -325,6 +370,10 @@
 
         .status-received {
             background-color: var(--success);
+        }
+
+        .status-credit-note {
+            background-color: var(--primary);
         }
 
         .status-cancelled {
@@ -614,6 +663,11 @@
     </style>
 </head>
 <body>
+    <!-- Spinner de carga inicial -->
+    <div class="initial-loader" id="initialLoader">
+        <div class="initial-spinner"></div>
+    </div>
+
     <div class="container">
         <header>
             <div class="header-title">
@@ -697,7 +751,7 @@
                         <td><input type="text" class="factory-code-input" id="factoryCode1" name="factoryCode1" placeholder="Cód. Fab"></td>
                         <td><input type="text" id="productDescription1" name="productDescription1" placeholder="Descripción" required></td>
                         <td><input type="number" id="productQuantity1" name="productQuantity1" placeholder="0" min="1" required></td>
-                        <td><input type="text" id="productReason1" name="productReason1" placeholder="Ej: Quebrado" required></td>
+                        <td><div class="reason-input-container"><textarea class="reason-input" id="productReason1" name="productReason1" placeholder="Ej: Quebrado" required></textarea></div></td>
                         <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                     </tr>
                 </tbody>
@@ -772,6 +826,14 @@
         const companyLogo = new Image();
         companyLogo.src = 'images/logo/logo.png';
 
+        // Función para mostrar/ocultar spinner inicial
+        function toggleInitialLoader(show) {
+            document.getElementById('initialLoader').style.display = show ? 'flex' : 'none';
+        }
+
+        // Al cargar la página, mostrar spinner inicial
+        toggleInitialLoader(true);
+
         // Función para cerrar modal (ahora está en el ámbito global)
         window.closeModal = function() {
             document.getElementById('reportModal').style.display = 'none';
@@ -820,7 +882,7 @@
             
             const rows = document.getElementById('productsTable').querySelectorAll('tbody tr');
             rows.forEach(row => {
-                const inputs = row.querySelectorAll('input');
+                const inputs = row.querySelectorAll('input, textarea');
                 formData.products.push({
                     sku: inputs[0].value,
                     factoryCode: inputs[1].value,
@@ -863,7 +925,7 @@
                         <td><input type="text" class="factory-code-input" id="factoryCode${index+1}" name="factoryCode${index+1}" value="${product.factoryCode || ''}" placeholder="Cód. Fab"></td>
                         <td><input type="text" id="productDescription${index+1}" name="productDescription${index+1}" value="${product.description || ''}" placeholder="Descripción" required></td>
                         <td><input type="number" id="productQuantity${index+1}" name="productQuantity${index+1}" value="${product.quantity || ''}" placeholder="0" min="1" required></td>
-                        <td><input type="text" id="productReason${index+1}" name="productReason${index+1}" value="${product.reason || ''}" placeholder="Ej: Quebrado" required></td>
+                        <td><div class="reason-input-container"><textarea class="reason-input" id="productReason${index+1}" name="productReason${index+1}" placeholder="Ej: Quebrado" required>${product.reason || ''}</textarea></div></td>
                         <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                     `;
                     tbody.appendChild(newRow);
@@ -871,6 +933,10 @@
                     // Ajustar tamaño del input de código de fábrica
                     const factoryInput = newRow.querySelector('.factory-code-input');
                     resizeInput(factoryInput);
+                    
+                    // Ajustar altura del textarea de motivo
+                    const reasonTextarea = newRow.querySelector('.reason-input');
+                    adjustTextareaHeight(reasonTextarea);
                 });
                 
                 // Mostrar el formulario
@@ -941,7 +1007,7 @@
                         <td><input type="text" class="factory-code-input" id="factoryCode1" name="factoryCode1" placeholder="Cód. Fab"></td>
                         <td><input type="text" id="productDescription1" name="productDescription1" placeholder="Descripción" required></td>
                         <td><input type="number" id="productQuantity1" name="productQuantity1" placeholder="0" min="1" required></td>
-                        <td><input type="text" id="productReason1" name="productReason1" placeholder="Ej: Quebrado" required></td>
+                        <td><div class="reason-input-container"><textarea class="reason-input" id="productReason1" name="productReason1" placeholder="Ej: Quebrado" required></textarea></div></td>
                         <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                     </tr>
                 `;
@@ -1035,9 +1101,16 @@
             }
         }
 
+        // Ajustar altura del textarea según su contenido
+        function adjustTextareaHeight(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = (textarea.scrollHeight) + 'px';
+        }
+
         // Agregar event listeners para ajustar tamaño de inputs
         function addInputResizeListeners() {
             const factoryCodeInputs = document.querySelectorAll('.factory-code-input');
+            const reasonTextareas = document.querySelectorAll('.reason-input');
             
             factoryCodeInputs.forEach(input => {
                 // Ajustar tamaño inicial
@@ -1046,6 +1119,16 @@
                 // Agregar event listener para cambios
                 input.addEventListener('input', function() {
                     resizeInput(this);
+                });
+            });
+            
+            reasonTextareas.forEach(textarea => {
+                // Ajustar altura inicial
+                adjustTextareaHeight(textarea);
+                
+                // Agregar event listener para cambios
+                textarea.addEventListener('input', function() {
+                    adjustTextareaHeight(this);
                 });
             });
         }
@@ -1080,7 +1163,7 @@
                 <td><input type="text" class="factory-code-input" id="factoryCode${rowCount}" name="factoryCode${rowCount}" placeholder="Cód. Fab"></td>
                 <td><input type="text" id="productDescription${rowCount}" name="productDescription${rowCount}" placeholder="Descripción" required></td>
                 <td><input type="number" id="productQuantity${rowCount}" name="productQuantity${rowCount}" placeholder="0" min="1" required></td>
-                <td><input type="text" id="productReason${rowCount}" name="productReason${rowCount}" placeholder="Ej: Quebrado" required></td>
+                <td><div class="reason-input-container"><textarea class="reason-input" id="productReason${rowCount}" name="productReason${rowCount}" placeholder="Ej: Quebrado" required></textarea></div></td>
                 <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
             `;
             tbody.appendChild(newRow);
@@ -1092,11 +1175,14 @@
                     tbody.removeChild(newRow);
                 } else {
                     // Si es la última fila, limpiar los campos
-                    const inputs = newRow.querySelectorAll('input');
+                    const inputs = newRow.querySelectorAll('input, textarea');
                     inputs.forEach(input => input.value = '');
                     // Ajustar tamaño del input de código de fábrica
                     const factoryInput = newRow.querySelector('.factory-code-input');
                     resizeInput(factoryInput);
+                    // Ajustar altura del textarea de motivo
+                    const reasonTextarea = newRow.querySelector('.reason-input');
+                    adjustTextareaHeight(reasonTextarea);
                 }
             });
             
@@ -1104,6 +1190,12 @@
             const factoryInput = newRow.querySelector('.factory-code-input');
             factoryInput.addEventListener('input', function() {
                 resizeInput(this);
+            });
+            
+            // Agregar event listener para ajustar altura del textarea de motivo
+            const reasonTextarea = newRow.querySelector('.reason-input');
+            reasonTextarea.addEventListener('input', function() {
+                adjustTextareaHeight(this);
             });
         }
 
@@ -1119,11 +1211,14 @@
                         tbody.removeChild(row);
                     } else {
                         // Si es la última fila, limpiar los campos
-                        const inputs = row.querySelectorAll('input');
+                        const inputs = row.querySelectorAll('input, textarea');
                         inputs.forEach(input => input.value = '');
                         // Ajustar tamaño del input de código de fábrica
                         const factoryInput = row.querySelector('.factory-code-input');
                         resizeInput(factoryInput);
+                        // Ajustar altura del textarea de motivo
+                        const reasonTextarea = row.querySelector('.reason-input');
+                        adjustTextareaHeight(reasonTextarea);
                     }
                 });
             });
@@ -1135,7 +1230,7 @@
             const rows = document.getElementById('productsTable').querySelectorAll('tbody tr');
             
             rows.forEach(row => {
-                const inputs = row.querySelectorAll('input');
+                const inputs = row.querySelectorAll('input, textarea');
                 const sku = toUpperCase(inputs[0].value.trim());
                 const factoryCode = toUpperCase(inputs[1].value.trim()) || '-';
                 const description = toUpperCase(inputs[2].value.trim());
@@ -1150,7 +1245,8 @@
                         quantity: parseInt(quantity),
                         reason: reason,
                         status: 'pending',
-                        receivedDate: null
+                        receivedDate: null,
+                        receptionType: 'received'
                     });
                 }
             });
@@ -1198,7 +1294,7 @@
             // Validar que todos los productos tengan los campos obligatorios
             const rows = document.getElementById('productsTable').querySelectorAll('tbody tr');
             for (let i = 0; i < rows.length; i++) {
-                const inputs = rows[i].querySelectorAll('input');
+                const inputs = rows[i].querySelectorAll('input, textarea');
                 const sku = inputs[0].value.trim();
                 const description = inputs[2].value.trim();
                 const quantity = inputs[3].value.trim();
@@ -1284,9 +1380,11 @@
                             if (originalReport.products && originalReport.products[index]) {
                                 product.status = originalReport.products[index].status;
                                 product.receivedDate = originalReport.products[index].receivedDate;
+                                product.receptionType = originalReport.products[index].receptionType || 'received';
                             } else {
                                 product.status = 'pending';
                                 product.receivedDate = null;
+                                product.receptionType = 'received';
                             }
                         });
                     }
@@ -1309,6 +1407,7 @@
                     reportData.products.forEach(product => {
                         product.status = 'pending';
                         product.receivedDate = null;
+                        product.receptionType = 'received';
                     });
                     
                     await db.collection("reportesMalEstado").doc(currentReportId).set(reportData);
@@ -1366,6 +1465,8 @@
 
         // Cargar reportes desde Firebase
         function loadReports() {
+            toggleInitialLoader(true); // Mostrar spinner al cargar
+            
             db.collection("reportesMalEstado")
                 .orderBy("createdAt", "desc")
                 .get()
@@ -1373,38 +1474,27 @@
                     reports = [];
                     querySnapshot.forEach(doc => {
                         const data = doc.data();
-                        // Asegurarse de que todos los productos tengan status
+                        // Asegurar que los productos tengan status
                         if (data.products) {
                             data.products.forEach(product => {
                                 if (!product.status) {
                                     product.status = 'pending';
                                 }
-                                if (!product.receivedDate && product.status === 'received') {
-                                    product.receivedDate = new Date().toISOString();
-                                }
-                                // Asegurar que todos los productos tengan código
-                                if (!product.sku) {
-                                    product.sku = '';
-                                }
-                                if (!product.factoryCode) {
-                                    product.factoryCode = '-';
+                                // Establecer tipo de recepción por defecto si no existe
+                                if (!product.receptionType) {
+                                    product.receptionType = 'received';
                                 }
                             });
-                        }
-                        // Asegurar que existan los campos de factura
-                        if (!data.invoiceNumber) {
-                            data.invoiceNumber = 'XXXXX';
-                        }
-                        if (!data.invoiceSeries) {
-                            data.invoiceSeries = 'XXXXX';
                         }
                         reports.push(data);
                     });
                     
                     renderReportsList(reports);
+                    toggleInitialLoader(false); // Ocultar spinner cuando se cargan los datos
                 })
                 .catch(error => {
                     console.error("Error al cargar reportes:", error);
+                    toggleInitialLoader(false); // Ocultar spinner si hay error
                     Swal.fire({
                         title: 'Error',
                         text: 'Ocurrió un error al cargar los reportes',
@@ -1414,7 +1504,7 @@
                 });
         }
 
-        // Mostrar lista de reportes
+        // Mostrar lista de reportes con los nuevos estados
         function renderReportsList(reportsToRender = reports) {
             const reportsList = document.getElementById('reportsList');
             
@@ -1435,8 +1525,11 @@
                 const reportCard = document.createElement('div');
                 reportCard.className = 'report-card';
                 
-                // Contar productos recibidos
-                const receivedCount = report.products ? report.products.filter(p => p.status === 'received').length : 0;
+                // Contar productos por estado
+                const receivedCount = report.products ? report.products.filter(p => p.status === 'received' && p.receptionType === 'received').length : 0;
+                const creditNoteCount = report.products ? report.products.filter(p => p.status === 'received' && p.receptionType === 'credit-note').length : 0;
+                const pendingCount = report.products ? report.products.filter(p => p.status === 'pending').length : 0;
+                const cancelledCount = report.products ? report.products.filter(p => p.status === 'cancelled').length : 0;
                 const totalCount = report.products ? report.products.length : 0;
                 
                 reportCard.innerHTML = `
@@ -1444,8 +1537,10 @@
                         <div>
                             <span class="report-id">${report.id}</span>
                             <span class="report-date">${formatDate(report.date)}</span>
-                            <div style="margin-top: 0.3rem; font-size: 0.9rem; color: ${report.status === 'cancelled' ? 'var(--danger)' : receivedCount === totalCount ? 'var(--success)' : 'var(--warning)'}">
-                                ${report.status === 'cancelled' ? 'ANULADO' : `${receivedCount}/${totalCount} productos recibidos`}
+                            <div style="margin-top: 0.3rem; font-size: 0.9rem; color: ${report.status === 'cancelled' ? 'var(--danger)' : (receivedCount + creditNoteCount) === totalCount ? 'var(--success)' : 'var(--warning)'}">
+                                ${report.status === 'cancelled' ? 'ANULADO' : 
+                                 `${receivedCount + creditNoteCount}/${totalCount} productos recibidos`}
+                                ${creditNoteCount > 0 ? ` (${creditNoteCount} por Nota de Crédito)` : ''}
                             </div>
                         </div>
                         <div class="dropdown" style="display: flex; gap: 0.8rem;">
@@ -1480,7 +1575,7 @@
                                 <th>Descripción</th>
                                 <th style="width: 70px;">Cantidad</th>
                                 <th style="width: 120px;">Motivo</th>
-                                <th style="width: 110px;">Estado</th>
+                                <th style="width: 120px;">Estado</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1492,8 +1587,10 @@
                                     <td>${product.quantity}</td>
                                     <td>${product.reason}</td>
                                     <td>
-                                        <span class="product-status status-${product.status}"></span>
-                                        ${product.status === 'pending' ? 'Pendiente' : product.status === 'received' ? 'Recibido' : 'Anulado'}
+                                        <span class="product-status status-${product.status === 'received' ? product.receptionType === 'credit-note' ? 'credit-note' : 'received' : product.status}"></span>
+                                        ${product.status === 'pending' ? 'Pendiente' : 
+                                          product.status === 'received' ? (product.receptionType === 'credit-note' ? 'Nota Crédito' : 'Recibido') : 
+                                          'Anulado'}
                                     </td>
                                 </tr>
                             `).join('') : ''}
@@ -1581,7 +1678,7 @@
                     <td><input type="text" class="factory-code-input" id="factoryCode${index+1}" name="factoryCode${index+1}" value="${product.factoryCode || ''}" placeholder="Cód. Fab"></td>
                     <td><input type="text" id="productDescription${index+1}" name="productDescription${index+1}" value="${product.description}" placeholder="Descripción" required></td>
                     <td><input type="number" id="productQuantity${index+1}" name="productQuantity${index+1}" value="${product.quantity}" placeholder="0" min="1" required></td>
-                    <td><input type="text" id="productReason${index+1}" name="productReason${index+1}" value="${product.reason}" placeholder="Ej: Quebrado" required></td>
+                    <td><div class="reason-input-container"><textarea class="reason-input" id="productReason${index+1}" name="productReason${index+1}" placeholder="Ej: Quebrado" required>${product.reason}</textarea></div></td>
                     <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                 `;
                 tbody.appendChild(newRow);
@@ -1589,6 +1686,10 @@
                 // Ajustar tamaño del input de código de fábrica
                 const factoryInput = newRow.querySelector('.factory-code-input');
                 resizeInput(factoryInput);
+                
+                // Ajustar altura del textarea de motivo
+                const reasonTextarea = newRow.querySelector('.reason-input');
+                adjustTextareaHeight(reasonTextarea);
             });
             
             // Agregar event listeners a los botones de eliminar
@@ -1675,22 +1776,8 @@
             });
         };
 
-        // Cambiar estado del producto
-        window.toggleProductStatus = function(reportId, productIndex, event) {
-            if (event) event.stopPropagation(); // Evitar que se propague el evento
-            
-            const report = reports.find(r => r.id === reportId);
-            if (!report || !report.products || !report.products[productIndex] || report.status !== 'active') return;
-            
-            const product = report.products[productIndex];
-            const newStatus = product.status === 'pending' ? 'received' : 'pending';
-            
-            // Actualizar estado sin confirmación
-            updateProductStatus(reportId, productIndex, newStatus);
-        };
-
-        // Función para actualizar el estado del producto
-        function updateProductStatus(reportId, productIndex, newStatus) {
+        // Función para actualizar el estado del producto con tipo de recepción
+        function updateProductStatus(reportId, productIndex, newStatus, receptionType = 'received') {
             const report = reports.find(r => r.id === reportId);
             if (!report || !report.products || !report.products[productIndex]) return;
             
@@ -1700,8 +1787,10 @@
             product.status = newStatus;
             if (newStatus === 'received') {
                 product.receivedDate = new Date().toISOString();
+                product.receptionType = receptionType;
             } else {
                 product.receivedDate = null;
+                product.receptionType = null;
             }
             
             // Actualizar en Firebase
@@ -1747,7 +1836,7 @@
                 });
         }
 
-        // Ver reporte completo en modal
+        // Ver reporte completo en modal con los nuevos estados
         window.viewReport = function(reportId) {
             const report = reports.find(r => r.id === reportId);
             if (!report) return;
@@ -1809,16 +1898,27 @@
                                     <td>${product.quantity}</td>
                                     <td>${product.reason}</td>
                                     <td class="status-cell">
-                                        <span class="product-status status-${product.status}"></span>
-                                        ${product.status === 'pending' ? 'Pendiente' : product.status === 'received' ? 'Recibido' : 'Anulado'}
+                                        <span class="product-status status-${product.status === 'received' ? product.receptionType === 'credit-note' ? 'credit-note' : 'received' : product.status}"></span>
+                                        ${product.status === 'pending' ? 'Pendiente' : 
+                                          product.status === 'received' ? (product.receptionType === 'credit-note' ? 'Nota Crédito' : 'Recibido') : 
+                                          'Anulado'}
                                         ${product.receivedDate ? `<span class="status-date">Recibido el: ${formatDateTime(product.receivedDate)}</span>` : ''}
                                     </td>
                                     ${report.status === 'active' ? `
                                     <td>
-                                        <button class="btn ${product.status === 'pending' ? 'btn-success' : 'btn-secondary'}" style="padding: 0.3rem 0.6rem; font-size: 0.85rem;" 
-                                            onclick="toggleProductStatus('${report.id}', ${index}, event)">
-                                            <i class="fas fa-check"></i> ${product.status === 'pending' ? 'Recibido' : ''}
-                                        </button>
+                                        <div class="dropdown">
+                                            <button class="btn ${product.status === 'pending' ? 'btn-success' : 'btn-secondary'}" style="padding: 0.3rem 0.6rem; font-size: 0.85rem;">
+                                                <i class="fas fa-check"></i> ${product.status === 'pending' ? 'Recibir' : ''}
+                                            </button>
+                                            <div class="dropdown-content" style="min-width: 120px;">
+                                                <a href="#" onclick="updateProductStatus('${report.id}', ${index}, 'received', 'received'); return false;">
+                                                    <i class="fas fa-check" style="color: var(--success);"></i> Recibido
+                                                </a>
+                                                <a href="#" onclick="updateProductStatus('${report.id}', ${index}, 'received', 'credit-note'); return false;">
+                                                    <i class="fas fa-file-invoice" style="color: var(--primary);"></i> Nota Crédito
+                                                </a>
+                                            </div>
+                                        </div>
                                     </td>
                                     ` : ''}
                                 </tr>
@@ -1936,7 +2036,8 @@
                     { content: product.reason, styles: { cellWidth: 30, fontStyle: 'normal' } },
                     { 
                         content: product.status === 'pending' ? 'Pendiente' : 
-                                product.status === 'received' ? `Recibido\n${formatDateTime(product.receivedDate)}` : 'Anulado',
+                                product.status === 'received' ? (product.receptionType === 'credit-note' ? 'Nota Crédito' : `Recibido\n${formatDateTime(product.receivedDate)}`) : 
+                                'Anulado',
                         styles: { cellWidth: 30, fontStyle: 'normal' }
                     }
                 ]) : [];
