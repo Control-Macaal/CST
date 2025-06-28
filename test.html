@@ -544,6 +544,14 @@
             margin-right: 8px;
         }
 
+        .btn-loading .spinner {
+            display: inline-block;
+        }
+
+        .btn-loading .btn-text {
+            display: none;
+        }
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -617,8 +625,8 @@
                     <i class="fas fa-arrow-left"></i> Volver
                 </a>
                 <button class="btn" id="newReportBtn">
-                    <i class="fas fa-plus"></i>
-                    Nueva Devolución
+                    <span class="spinner" style="display: none;"></span>
+                    <span class="btn-text"><i class="fas fa-plus"></i> Nueva Devolución</span>
                 </button>
             </div>
         </header>
@@ -706,8 +714,8 @@
                     Cancelar
                 </button>
                 <button class="btn btn-success" id="saveReportBtn">
-                    <i class="fas fa-save"></i>
-                    Guardar
+                    <span class="spinner" style="display: none;"></span>
+                    <span class="btn-text"><i class="fas fa-save"></i> Guardar</span>
                 </button>
             </div>
         </div>
@@ -901,60 +909,99 @@
                 return;
             }
 
-            currentReportId = await generateReportNumber();
-            document.getElementById('reportNumber').textContent = currentReportId;
-            
-            // Establecer fecha actual y formatearla
-            const today = new Date();
-            const formattedDate = today.toLocaleDateString('es-ES', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            });
-            document.getElementById('reportDate').value = formattedDate;
-            
-            // Limpiar campos
-            document.getElementById('supplier').value = '';
-            document.getElementById('invoiceNumber').value = '';
-            document.getElementById('invoiceSeries').value = '';
-            document.getElementById('notes').value = '';
-            
-            // Limpiar tabla de productos (dejar solo una fila vacía)
-            const tbody = document.getElementById('productsTable').querySelector('tbody');
-            tbody.innerHTML = `
-                <tr>
-                    <td><input type="text" class="code-input" id="productSku1" name="productSku1" placeholder="Sku" maxlength="9" required></td>
-                    <td><input type="text" class="factory-code-input" id="factoryCode1" name="factoryCode1" placeholder="Cód. Fab"></td>
-                    <td><input type="text" id="productDescription1" name="productDescription1" placeholder="Descripción" required></td>
-                    <td><input type="number" id="productQuantity1" name="productQuantity1" placeholder="0" min="1" required></td>
-                    <td><input type="text" id="productReason1" name="productReason1" placeholder="Ej: Quebrado" required></td>
-                    <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
-                </tr>
-            `;
-            
-            // Restaurar texto del botón de guardar
-            document.getElementById('saveReportBtn').innerHTML = '<i class="fas fa-save"></i> Guardar';
-            
-            // Agregar event listeners a los botones de eliminar
-            addDeleteRowListeners();
-            
-            // Agregar event listeners para ajustar tamaño de inputs
-            addInputResizeListeners();
-            
-            // Ocultar elementos
-            document.getElementById('reportsList').style.display = 'none';
-            document.getElementById('searchContainer').style.display = 'none';
-            document.querySelector('.header-actions').style.display = 'none';
-            document.getElementById('backButton').style.display = 'none';
-            
-            // Mostrar el formulario
-            document.getElementById('returnForm').style.display = 'block';
-            
-            // Marcar que estamos creando un nuevo reporte
-            isCreatingNewReport = true;
-            
-            // Limpiar localStorage
-            clearFormLocalStorage();
+            // Mostrar spinner en el botón
+            const newReportBtn = document.getElementById('newReportBtn');
+            newReportBtn.classList.add('btn-loading');
+            newReportBtn.querySelector('.spinner').style.display = 'inline-block';
+            newReportBtn.querySelector('.btn-text').style.display = 'none';
+
+            try {
+                currentReportId = await generateReportNumber();
+                document.getElementById('reportNumber').textContent = currentReportId;
+                
+                // Obtener fecha actual del servidor Firebase
+                const serverTime = await fetchServerTime();
+                const today = serverTime ? new Date(serverTime) : new Date();
+                
+                // Formatear fecha para mostrar
+                const formattedDate = today.toLocaleDateString('es-ES', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                document.getElementById('reportDate').value = formattedDate;
+                
+                // Limpiar campos
+                document.getElementById('supplier').value = '';
+                document.getElementById('invoiceNumber').value = '';
+                document.getElementById('invoiceSeries').value = '';
+                document.getElementById('notes').value = '';
+                
+                // Limpiar tabla de productos (dejar solo una fila vacía)
+                const tbody = document.getElementById('productsTable').querySelector('tbody');
+                tbody.innerHTML = `
+                    <tr>
+                        <td><input type="text" class="code-input" id="productSku1" name="productSku1" placeholder="Sku" maxlength="9" required></td>
+                        <td><input type="text" class="factory-code-input" id="factoryCode1" name="factoryCode1" placeholder="Cód. Fab"></td>
+                        <td><input type="text" id="productDescription1" name="productDescription1" placeholder="Descripción" required></td>
+                        <td><input type="number" id="productQuantity1" name="productQuantity1" placeholder="0" min="1" required></td>
+                        <td><input type="text" id="productReason1" name="productReason1" placeholder="Ej: Quebrado" required></td>
+                        <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
+                    </tr>
+                `;
+                
+                // Restaurar texto del botón de guardar
+                document.getElementById('saveReportBtn').innerHTML = '<span class="spinner" style="display: none;"></span><span class="btn-text"><i class="fas fa-save"></i> Guardar</span>';
+                
+                // Agregar event listeners a los botones de eliminar
+                addDeleteRowListeners();
+                
+                // Agregar event listeners para ajustar tamaño de inputs
+                addInputResizeListeners();
+                
+                // Ocultar elementos
+                document.getElementById('reportsList').style.display = 'none';
+                document.getElementById('searchContainer').style.display = 'none';
+                document.querySelector('.header-actions').style.display = 'none';
+                document.getElementById('backButton').style.display = 'none';
+                
+                // Mostrar el formulario
+                document.getElementById('returnForm').style.display = 'block';
+                
+                // Marcar que estamos creando un nuevo reporte
+                isCreatingNewReport = true;
+                
+                // Limpiar localStorage
+                clearFormLocalStorage();
+            } catch (error) {
+                console.error("Error al crear nuevo reporte:", error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Ocurrió un error al crear el nuevo reporte',
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6'
+                });
+            } finally {
+                // Ocultar spinner en el botón
+                newReportBtn.classList.remove('btn-loading');
+                newReportBtn.querySelector('.spinner').style.display = 'none';
+                newReportBtn.querySelector('.btn-text').style.display = 'inline';
+            }
+        }
+
+        // Obtener hora del servidor Firebase
+        async function fetchServerTime() {
+            try {
+                const ref = db.collection("serverTime").doc("current");
+                const doc = await ref.get();
+                if (doc.exists) {
+                    return doc.data().timestamp.toDate();
+                }
+                return null;
+            } catch (error) {
+                console.error("Error al obtener hora del servidor:", error);
+                return null;
+            }
         }
 
         // Función auxiliar para ocultar el formulario sin confirmación
@@ -1201,8 +1248,9 @@
             const notesInput = document.getElementById('notes');
             const saveReportBtn = document.getElementById('saveReportBtn');
             
-            // Obtener la fecha actual en formato ISO
-            const today = new Date();
+            // Obtener fecha actual del servidor Firebase
+            const serverTime = await fetchServerTime();
+            const today = serverTime ? new Date(serverTime) : new Date();
             const isoDate = today.toISOString().split('T')[0];
             
             const reportData = {
@@ -1218,11 +1266,13 @@
             };
             
             // Verificar si estamos editando o creando nuevo
-            const isEditing = saveReportBtn.innerHTML.includes('Actualizar');
+            const isEditing = saveReportBtn.querySelector('.btn-text').innerHTML.includes('Actualizar');
             
             try {
                 // Mostrar spinner en el botón
-                saveReportBtn.innerHTML = '<span class="spinner"></span> Guardando...';
+                saveReportBtn.classList.add('btn-loading');
+                saveReportBtn.querySelector('.spinner').style.display = 'inline-block';
+                saveReportBtn.querySelector('.btn-text').style.display = 'none';
                 
                 if (isEditing) {
                     // Mantener los datos existentes que no se editan
@@ -1289,7 +1339,10 @@
                 });
             } finally {
                 // Restaurar texto del botón
-                saveReportBtn.innerHTML = isEditing ? '<i class="fas fa-save"></i> Actualizar' : '<i class="fas fa-save"></i> Guardar';
+                saveReportBtn.classList.remove('btn-loading');
+                saveReportBtn.querySelector('.spinner').style.display = 'none';
+                saveReportBtn.querySelector('.btn-text').style.display = 'inline';
+                saveReportBtn.querySelector('.btn-text').innerHTML = isEditing ? '<i class="fas fa-save"></i> Actualizar' : '<i class="fas fa-save"></i> Guardar';
             }
         }
 
@@ -1511,7 +1564,7 @@
             document.getElementById('reportNumber').textContent = report.id;
             
             // Cambiar el texto del botón de guardar
-            document.getElementById('saveReportBtn').innerHTML = '<i class="fas fa-save"></i> Actualizar';
+            document.getElementById('saveReportBtn').innerHTML = '<span class="spinner" style="display: none;"></span><span class="btn-text"><i class="fas fa-save"></i> Actualizar</span>';
             
             // Llenar campos del formulario
             document.getElementById('supplier').value = report.supplier;
