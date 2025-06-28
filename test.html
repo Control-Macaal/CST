@@ -239,6 +239,11 @@
             text-transform: uppercase;
         }
 
+        .form-control:read-only {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+        }
+
         textarea.form-control {
             min-height: 40px;
             resize: vertical;
@@ -527,6 +532,22 @@
             display: block;
         }
 
+        /* Spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         @media (max-width: 768px) {
             .form-row, .invoice-fields {
                 grid-template-columns: 1fr;
@@ -629,7 +650,7 @@
                 </div>
                 <div class="form-group">
                     <label for="reportDate">Fecha</label>
-                    <input type="date" class="form-control" id="reportDate" name="reportDate" required>
+                    <input type="text" class="form-control" id="reportDate" name="reportDate" readonly>
                 </div>
             </div>
             
@@ -883,9 +904,14 @@
             currentReportId = await generateReportNumber();
             document.getElementById('reportNumber').textContent = currentReportId;
             
-            // Establecer fecha actual
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('reportDate').value = today;
+            // Establecer fecha actual y formatearla
+            const today = new Date();
+            const formattedDate = today.toLocaleDateString('es-ES', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            document.getElementById('reportDate').value = formattedDate;
             
             // Limpiar campos
             document.getElementById('supplier').value = '';
@@ -1175,22 +1201,29 @@
             const notesInput = document.getElementById('notes');
             const saveReportBtn = document.getElementById('saveReportBtn');
             
+            // Obtener la fecha actual en formato ISO
+            const today = new Date();
+            const isoDate = today.toISOString().split('T')[0];
+            
             const reportData = {
                 id: currentReportId,
                 supplier: toUpperCase(supplierInput.value.trim()),
-                date: reportDateInput.value,
+                date: isoDate,
                 invoiceNumber: invoiceNumberInput.value.trim() || 'XXXXX',
                 invoiceSeries: invoiceSeriesInput.value.trim() || 'XXXXX',
-                notes: notesInput.value.trim(), // Notas se mantienen como se escriben
+                notes: notesInput.value.trim(),
                 products: getProductsFromTable(),
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                reportNumber: parseInt(currentReportId.replace('#', '')) // Guardamos como número sin #
+                reportNumber: parseInt(currentReportId.replace('#', ''))
             };
             
             // Verificar si estamos editando o creando nuevo
             const isEditing = saveReportBtn.innerHTML.includes('Actualizar');
             
             try {
+                // Mostrar spinner en el botón
+                saveReportBtn.innerHTML = '<span class="spinner"></span> Guardando...';
+                
                 if (isEditing) {
                     // Mantener los datos existentes que no se editan
                     const originalReport = reports.find(r => r.id === currentReportId);
@@ -1219,11 +1252,8 @@
                         confirmButtonColor: '#3085d6'
                     });
                     
-                    // Cambio aquí: pasar false para no mostrar confirmación
                     hideReturnForm(false);
                 } else {
-                     // Mostrar spinner en el botón
-                    saveReportBtn.innerHTML = '<span class="spinner"></span> Guardando...';
                     // Es un nuevo reporte
                     reportData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
                     reportData.status = 'active';
@@ -1242,7 +1272,6 @@
                         confirmButtonColor: '#3085d6'
                     });
                     
-                    // Cambio aquí: pasar false para no mostrar confirmación
                     hideReturnForm(false);
                 }
                 
@@ -1258,6 +1287,9 @@
                     icon: 'error',
                     confirmButtonColor: '#3085d6'
                 });
+            } finally {
+                // Restaurar texto del botón
+                saveReportBtn.innerHTML = isEditing ? '<i class="fas fa-save"></i> Actualizar' : '<i class="fas fa-save"></i> Guardar';
             }
         }
 
@@ -1483,7 +1515,7 @@
             
             // Llenar campos del formulario
             document.getElementById('supplier').value = report.supplier;
-            document.getElementById('reportDate').value = report.date.split('T')[0];
+            document.getElementById('reportDate').value = formatDate(report.date);
             document.getElementById('invoiceNumber').value = report.invoiceNumber === 'XXXXX' ? '' : report.invoiceNumber;
             document.getElementById('invoiceSeries').value = report.invoiceSeries === 'XXXXX' ? '' : report.invoiceSeries;
             document.getElementById('notes').value = report.notes || '';
