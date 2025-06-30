@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notas de Cambios y/o Devoluciones</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -269,9 +270,10 @@
 
         textarea.form-control {
             min-height: 40px;
-            resize: vertical;
+            resize: none;
             font-size: 0.9rem;
             text-transform: none;
+            overflow: hidden; /* Elimina las flechitas de scroll */
         }
 
         .products-table {
@@ -331,27 +333,6 @@
             width: auto;
             max-width: 150px;
             transition: width 0.2s ease;
-        }
-
-        /* Input de motivo que se expande */
-        .reason-input-container {
-            position: relative;
-            min-width: 180px;
-        }
-
-        .reason-input {
-            width: 100%;
-            min-width: 180px;
-            padding: 0.6rem;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            border-radius: 4px;
-            font-size: 0.95rem;
-            text-transform: uppercase;
-            resize: none;
-            overflow: hidden;
-            min-height: 38px;
-            height: 38px;
-            line-height: 1.4;
         }
 
         /* Nuevos estatus para productos */
@@ -712,7 +693,7 @@
                 </div>
                 <div class="form-group">
                     <label for="reportDate">Fecha</label>
-                    <input type="date" class="form-control" id="reportDate" name="reportDate">
+                    <input type="date" class="form-control" id="reportDate" name="reportDate" required>
                 </div>
             </div>
             
@@ -751,7 +732,7 @@
                         <td><input type="text" class="factory-code-input" id="factoryCode1" name="factoryCode1" placeholder="Cód. Fab"></td>
                         <td><input type="text" id="productDescription1" name="productDescription1" placeholder="Descripción" required></td>
                         <td><input type="number" id="productQuantity1" name="productQuantity1" placeholder="0" min="1" required></td>
-                        <td><div class="reason-input-container"><textarea class="reason-input" id="productReason1" name="productReason1" placeholder="Ej: Quebrado" required></textarea></div></td>
+                        <td><textarea class="form-control" id="productReason1" name="productReason1" placeholder="Ej: Quebrado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem;"></textarea></td>
                         <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                     </tr>
                 </tbody>
@@ -925,7 +906,7 @@
                         <td><input type="text" class="factory-code-input" id="factoryCode${index+1}" name="factoryCode${index+1}" value="${product.factoryCode || ''}" placeholder="Cód. Fab"></td>
                         <td><input type="text" id="productDescription${index+1}" name="productDescription${index+1}" value="${product.description || ''}" placeholder="Descripción" required></td>
                         <td><input type="number" id="productQuantity${index+1}" name="productQuantity${index+1}" value="${product.quantity || ''}" placeholder="0" min="1" required></td>
-                        <td><div class="reason-input-container"><textarea class="reason-input" id="productReason${index+1}" name="productReason${index+1}" placeholder="Ej: Quebrado" required>${product.reason || ''}</textarea></div></td>
+                        <td><textarea class="form-control" id="productReason${index+1}" name="productReason${index+1}" placeholder="Ej: Quebrado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem;">${product.reason || ''}</textarea></td>
                         <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                     `;
                     tbody.appendChild(newRow);
@@ -933,10 +914,6 @@
                     // Ajustar tamaño del input de código de fábrica
                     const factoryInput = newRow.querySelector('.factory-code-input');
                     resizeInput(factoryInput);
-                    
-                    // Ajustar altura del textarea de motivo
-                    const reasonTextarea = newRow.querySelector('.reason-input');
-                    adjustTextareaHeight(reasonTextarea);
                 });
                 
                 // Mostrar el formulario
@@ -985,16 +962,14 @@
                 currentReportId = await generateReportNumber();
                 document.getElementById('reportNumber').textContent = currentReportId;
                 
-                // Obtener fecha actual del servidor Firebase
-                const serverTime = await fetchServerTime();
-                const today = serverTime ? new Date(serverTime) : new Date();
+                // Limpiar campos (incluyendo fecha)
+                document.getElementById('supplier').value = '';
                 
-                // Mostrar fecha actual en el formulario
+                // Establecer fecha actual en el input
+                const today = new Date();
                 const formattedDate = today.toISOString().split('T')[0];
                 document.getElementById('reportDate').value = formattedDate;
                 
-                // Limpiar campos
-                document.getElementById('supplier').value = '';
                 document.getElementById('invoiceNumber').value = '';
                 document.getElementById('invoiceSeries').value = '';
                 document.getElementById('notes').value = '';
@@ -1007,7 +982,7 @@
                         <td><input type="text" class="factory-code-input" id="factoryCode1" name="factoryCode1" placeholder="Cód. Fab"></td>
                         <td><input type="text" id="productDescription1" name="productDescription1" placeholder="Descripción" required></td>
                         <td><input type="number" id="productQuantity1" name="productQuantity1" placeholder="0" min="1" required></td>
-                        <td><div class="reason-input-container"><textarea class="reason-input" id="productReason1" name="productReason1" placeholder="Ej: Quebrado" required></textarea></div></td>
+                        <td><textarea class="form-control" id="productReason1" name="productReason1" placeholder="Ej: Quebrado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem;"></textarea></td>
                         <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                     </tr>
                 `;
@@ -1051,21 +1026,6 @@
             }
         }
 
-        // Obtener hora del servidor Firebase
-        async function fetchServerTime() {
-            try {
-                const ref = db.collection("serverTime").doc("current");
-                const doc = await ref.get();
-                if (doc.exists) {
-                    return doc.data().timestamp.toDate();
-                }
-                return null;
-            } catch (error) {
-                console.error("Error al obtener hora del servidor:", error);
-                return null;
-            }
-        }
-
         // Función auxiliar para ocultar el formulario sin confirmación
         function actuallyHideForm() {
             document.getElementById('returnForm').style.display = 'none';
@@ -1101,16 +1061,9 @@
             }
         }
 
-        // Ajustar altura del textarea según su contenido
-        function adjustTextareaHeight(textarea) {
-            textarea.style.height = 'auto';
-            textarea.style.height = (textarea.scrollHeight) + 'px';
-        }
-
         // Agregar event listeners para ajustar tamaño de inputs
         function addInputResizeListeners() {
             const factoryCodeInputs = document.querySelectorAll('.factory-code-input');
-            const reasonTextareas = document.querySelectorAll('.reason-input');
             
             factoryCodeInputs.forEach(input => {
                 // Ajustar tamaño inicial
@@ -1119,16 +1072,6 @@
                 // Agregar event listener para cambios
                 input.addEventListener('input', function() {
                     resizeInput(this);
-                });
-            });
-            
-            reasonTextareas.forEach(textarea => {
-                // Ajustar altura inicial
-                adjustTextareaHeight(textarea);
-                
-                // Agregar event listener para cambios
-                textarea.addEventListener('input', function() {
-                    adjustTextareaHeight(this);
                 });
             });
         }
@@ -1163,7 +1106,7 @@
                 <td><input type="text" class="factory-code-input" id="factoryCode${rowCount}" name="factoryCode${rowCount}" placeholder="Cód. Fab"></td>
                 <td><input type="text" id="productDescription${rowCount}" name="productDescription${rowCount}" placeholder="Descripción" required></td>
                 <td><input type="number" id="productQuantity${rowCount}" name="productQuantity${rowCount}" placeholder="0" min="1" required></td>
-                <td><div class="reason-input-container"><textarea class="reason-input" id="productReason${rowCount}" name="productReason${rowCount}" placeholder="Ej: Quebrado" required></textarea></div></td>
+                <td><textarea class="form-control" id="productReason${rowCount}" name="productReason${rowCount}" placeholder="Ej: Quebrado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem;"></textarea></td>
                 <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
             `;
             tbody.appendChild(newRow);
@@ -1180,9 +1123,6 @@
                     // Ajustar tamaño del input de código de fábrica
                     const factoryInput = newRow.querySelector('.factory-code-input');
                     resizeInput(factoryInput);
-                    // Ajustar altura del textarea de motivo
-                    const reasonTextarea = newRow.querySelector('.reason-input');
-                    adjustTextareaHeight(reasonTextarea);
                 }
             });
             
@@ -1190,12 +1130,6 @@
             const factoryInput = newRow.querySelector('.factory-code-input');
             factoryInput.addEventListener('input', function() {
                 resizeInput(this);
-            });
-            
-            // Agregar event listener para ajustar altura del textarea de motivo
-            const reasonTextarea = newRow.querySelector('.reason-input');
-            reasonTextarea.addEventListener('input', function() {
-                adjustTextareaHeight(this);
             });
         }
 
@@ -1216,9 +1150,6 @@
                         // Ajustar tamaño del input de código de fábrica
                         const factoryInput = row.querySelector('.factory-code-input');
                         resizeInput(factoryInput);
-                        // Ajustar altura del textarea de motivo
-                        const reasonTextarea = row.querySelector('.reason-input');
-                        adjustTextareaHeight(reasonTextarea);
                     }
                 });
             });
@@ -1678,7 +1609,7 @@
                     <td><input type="text" class="factory-code-input" id="factoryCode${index+1}" name="factoryCode${index+1}" value="${product.factoryCode || ''}" placeholder="Cód. Fab"></td>
                     <td><input type="text" id="productDescription${index+1}" name="productDescription${index+1}" value="${product.description}" placeholder="Descripción" required></td>
                     <td><input type="number" id="productQuantity${index+1}" name="productQuantity${index+1}" value="${product.quantity}" placeholder="0" min="1" required></td>
-                    <td><div class="reason-input-container"><textarea class="reason-input" id="productReason${index+1}" name="productReason${index+1}" placeholder="Ej: Quebrado" required>${product.reason}</textarea></div></td>
+                    <td><textarea class="form-control" id="productReason${index+1}" name="productReason${index+1}" placeholder="Ej: Quebrado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem;">${product.reason}</textarea></td>
                     <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                 `;
                 tbody.appendChild(newRow);
@@ -1686,10 +1617,6 @@
                 // Ajustar tamaño del input de código de fábrica
                 const factoryInput = newRow.querySelector('.factory-code-input');
                 resizeInput(factoryInput);
-                
-                // Ajustar altura del textarea de motivo
-                const reasonTextarea = newRow.querySelector('.reason-input');
-                adjustTextareaHeight(reasonTextarea);
             });
             
             // Agregar event listeners a los botones de eliminar
