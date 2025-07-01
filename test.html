@@ -732,7 +732,7 @@
                         <td><input type="text" class="factory-code-input" id="factoryCode1" name="factoryCode1" placeholder="Cód. Fab"></td>
                         <td><input type="text" id="productDescription1" name="productDescription1" placeholder="Descripción" required></td>
                         <td><input type="number" id="productQuantity1" name="productQuantity1" placeholder="0" min="1" required></td>
-                        <td><textarea class="form-control" id="productReason1" name="productReason1" placeholder="Ej: Quebrado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem;"></textarea></td>
+                        <td><textarea class="form-control" id="productReason1" name="productReason1" placeholder="Ej: Quebrado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;"></textarea></td>
                         <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                     </tr>
                 </tbody>
@@ -906,7 +906,7 @@
                         <td><input type="text" class="factory-code-input" id="factoryCode${index+1}" name="factoryCode${index+1}" value="${product.factoryCode || ''}" placeholder="Cód. Fab"></td>
                         <td><input type="text" id="productDescription${index+1}" name="productDescription${index+1}" value="${product.description || ''}" placeholder="Descripción" required></td>
                         <td><input type="number" id="productQuantity${index+1}" name="productQuantity${index+1}" value="${product.quantity || ''}" placeholder="0" min="1" required></td>
-                        <td><textarea class="form-control" id="productReason${index+1}" name="productReason${index+1}" placeholder="Ej: Quebrado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem;">${product.reason || ''}</textarea></td>
+                        <td><textarea class="form-control" id="productReason${index+1}" name="productReason${index+1}" placeholder="Ej: Quebrado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;">${product.reason || ''}</textarea></td>
                         <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                     `;
                     tbody.appendChild(newRow);
@@ -982,7 +982,7 @@
                         <td><input type="text" class="factory-code-input" id="factoryCode1" name="factoryCode1" placeholder="Cód. Fab"></td>
                         <td><input type="text" id="productDescription1" name="productDescription1" placeholder="Descripción" required></td>
                         <td><input type="number" id="productQuantity1" name="productQuantity1" placeholder="0" min="1" required></td>
-                        <td><textarea class="form-control" id="productReason1" name="productReason1" placeholder="Ej: Quebrado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem;"></textarea></td>
+                        <td><textarea class="form-control" id="productReason1" name="productReason1" placeholder="Ej: Quebrado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;"></textarea></td>
                         <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                     </tr>
                 `;
@@ -1106,7 +1106,7 @@
                 <td><input type="text" class="factory-code-input" id="factoryCode${rowCount}" name="factoryCode${rowCount}" placeholder="Cód. Fab"></td>
                 <td><input type="text" id="productDescription${rowCount}" name="productDescription${rowCount}" placeholder="Descripción" required></td>
                 <td><input type="number" id="productQuantity${rowCount}" name="productQuantity${rowCount}" placeholder="0" min="1" required></td>
-                <td><textarea class="form-control" id="productReason${rowCount}" name="productReason${rowCount}" placeholder="Ej: Quebrado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem;"></textarea></td>
+                <td><textarea class="form-control" id="productReason${rowCount}" name="productReason${rowCount}" placeholder="Ej: Quebrado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;"></textarea></td>
                 <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
             `;
             tbody.appendChild(newRow);
@@ -1468,7 +1468,7 @@
                         <div>
                             <span class="report-id">${report.id}</span>
                             <span class="report-date">${formatDate(report.date)}</span>
-                            <div style="margin-top: 0.3rem; font-size: 0.9rem; color: ${report.status === 'cancelled' ? 'var(--danger)' : (receivedCount + creditNoteCount) === totalCount ? 'var(--success)' : 'var(--warning)'}">
+                            <div style="margin-top: 0.3rem; font-size: 0.95rem; color: ${report.status === 'cancelled' ? 'var(--danger)' : (receivedCount + creditNoteCount) === totalCount ? 'var(--success)' : 'var(--warning)'}">
                                 ${report.status === 'cancelled' ? 'ANULADO' : 
                                  `${receivedCount + creditNoteCount}/${totalCount} productos recibidos`}
                                 ${creditNoteCount > 0 ? ` (${creditNoteCount} por Nota de Crédito)` : ''}
@@ -1609,7 +1609,7 @@
                     <td><input type="text" class="factory-code-input" id="factoryCode${index+1}" name="factoryCode${index+1}" value="${product.factoryCode || ''}" placeholder="Cód. Fab"></td>
                     <td><input type="text" id="productDescription${index+1}" name="productDescription${index+1}" value="${product.description}" placeholder="Descripción" required></td>
                     <td><input type="number" id="productQuantity${index+1}" name="productQuantity${index+1}" value="${product.quantity}" placeholder="0" min="1" required></td>
-                    <td><textarea class="form-control" id="productReason${index+1}" name="productReason${index+1}" placeholder="Ej: Quebrado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem;">${product.reason}</textarea></td>
+                    <td><textarea class="form-control" id="productReason${index+1}" name="productReason${index+1}" placeholder="Ej: Quebrado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;">${product.reason}</textarea></td>
                     <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                 `;
                 tbody.appendChild(newRow);
@@ -1894,7 +1894,7 @@
                 
                 // Agregar logo de la empresa
                 if (companyLogo.complete) {
-                    doc.addImage(companyLogo, 'PNG', marginLeft, 10, 40, 15);
+                    doc.addImage(companyLogo, 'PNG', marginLeft, 10, 30, 15);
                 }
                 
                 // Título del documento
@@ -2061,7 +2061,7 @@
 
             // Convertir automáticamente a mayúsculas mientras se escribe
             document.addEventListener('input', function(e) {
-                if (e.target.matches('#supplier, #productsTable input[type="text"]:not(.code-input), #invoiceNumber, #invoiceSeries')) {
+                if (e.target.matches('#supplier, #productsTable input[type="text"]:not(.code-input), #invoiceNumber, #invoiceSeries, #productsTable textarea')) {
                     e.target.value = e.target.value.toUpperCase();
                 }
             });
