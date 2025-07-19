@@ -273,7 +273,7 @@
             resize: none;
             font-size: 0.9rem;
             text-transform: none;
-            overflow: hidden; /* Elimina las flechitas de scroll */
+            overflow: hidden;
         }
 
         .products-table {
@@ -335,7 +335,6 @@
             transition: width 0.2s ease;
         }
 
-        /* Nuevos estatus para productos */
         .product-status {
             width: 15px;
             height: 15px;
@@ -515,7 +514,6 @@
             font-size: 0.9rem;
         }
 
-        /* Dropdown de acciones */
         .dropdown {
             position: relative;
             display: inline-block;
@@ -562,7 +560,6 @@
             display: block;
         }
 
-        /* Spinner */
         .spinner {
             display: inline-block;
             width: 16px;
@@ -840,11 +837,11 @@
                 }
                 
                 reportCounter++;
-                return `#${reportCounter}`; // Ahora con # prefijo
+                return `#${reportCounter}`;
             } catch (error) {
                 console.error("Error al obtener último reporte:", error);
                 reportCounter++;
-                return `#${reportCounter}`; // Ahora con # prefijo
+                return `#${reportCounter}`;
             }
         }
 
@@ -1280,7 +1277,7 @@
             const reportData = {
                 id: currentReportId,
                 supplier: toUpperCase(supplierInput.value.trim()),
-                date: isoDate, // Guardamos la fecha de mañana
+                date: isoDate,
                 invoiceNumber: invoiceNumberInput.value.trim() || 'XXXXX',
                 invoiceSeries: invoiceSeriesInput.value.trim() || 'XXXXX',
                 notes: notesInput.value.trim(),
@@ -1396,7 +1393,7 @@
 
         // Cargar reportes desde Firebase
         function loadReports() {
-            toggleInitialLoader(true); // Mostrar spinner al cargar
+            toggleInitialLoader(true);
             
             db.collection("reportesMalEstado")
                 .orderBy("createdAt", "desc")
@@ -1405,13 +1402,11 @@
                     reports = [];
                     querySnapshot.forEach(doc => {
                         const data = doc.data();
-                        // Asegurar que los productos tengan status
                         if (data.products) {
                             data.products.forEach(product => {
                                 if (!product.status) {
                                     product.status = 'pending';
                                 }
-                                // Establecer tipo de recepción por defecto si no existe
                                 if (!product.receptionType) {
                                     product.receptionType = 'received';
                                 }
@@ -1421,11 +1416,11 @@
                     });
                     
                     renderReportsList(reports);
-                    toggleInitialLoader(false); // Ocultar spinner cuando se cargan los datos
+                    toggleInitialLoader(false);
                 })
                 .catch(error => {
                     console.error("Error al cargar reportes:", error);
-                    toggleInitialLoader(false); // Ocultar spinner si hay error
+                    toggleInitialLoader(false);
                     Swal.fire({
                         title: 'Error',
                         text: 'Ocurrió un error al cargar los reportes',
@@ -1593,7 +1588,7 @@
             
             // Llenar campos del formulario
             document.getElementById('supplier').value = report.supplier;
-            document.getElementById('reportDate').value = report.date.split('T')[0]; // Mostrar la fecha guardada
+            document.getElementById('reportDate').value = report.date.split('T')[0];
             document.getElementById('invoiceNumber').value = report.invoiceNumber === 'XXXXX' ? '' : report.invoiceNumber;
             document.getElementById('invoiceSeries').value = report.invoiceSeries === 'XXXXX' ? '' : report.invoiceSeries;
             document.getElementById('notes').value = report.notes || '';
@@ -1894,7 +1889,7 @@
                 
                 // Agregar logo de la empresa
                 if (companyLogo.complete) {
-                    doc.addImage(companyLogo, 'PNG', marginLeft, 10, 35, 20);
+                    doc.addImage(companyLogo, 'PNG', marginLeft, 10, 40, 15);
                 }
                 
                 // Título del documento
@@ -1969,6 +1964,7 @@
                     }
                 ]) : [];
                 
+                // Configuración de la tabla
                 doc.autoTable({
                     startY: yPosition,
                     head: [['Sku', 'Cód. Fábrica', 'Descripción', 'Cantidad', 'Motivo', 'Estado']],
@@ -2002,7 +1998,7 @@
                     didDrawCell: (data) => {
                         // Ajustar altura de celda si el contenido es muy largo
                         if (data.section === 'body' && data.column.index === 2) {
-                            const lines = data.cell.text.length / 30; // Aproximación de líneas
+                            const lines = data.cell.text.length / 30;
                             if (lines > 1) {
                                 data.row.height = lines * 7;
                             }
@@ -2010,13 +2006,26 @@
                     }
                 });
                 
-                // Firmas más separadas y con letra más grande
-                const lastY = doc.lastAutoTable.finalY + 30;
+                // Verificar espacio para las firmas al final del documento
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const marginBottom = 20;
+                const firmasHeight = 60;
                 
+                // Posición después de la tabla
+                let firmasY = doc.lastAutoTable.finalY + 20;
+                
+                // Verificar si hay espacio suficiente para las firmas
+                if (firmasY + firmasHeight > pageHeight - marginBottom) {
+                    // No hay espacio suficiente, añadir nueva página
+                    doc.addPage();
+                    firmasY = 20;
+                }
+                
+                // Firmas más separadas y con letra más grande
                 doc.setFontSize(14);
-                doc.text('Fecha de Entrega: ________________________', marginLeft, lastY);
-                doc.text('Recibe: _________________________________', marginLeft, lastY + 20);
-                doc.text('Entrega: ________________________________', marginLeft, lastY + 40);
+                doc.text('Fecha de Entrega: ________________________', marginLeft, firmasY);
+                doc.text('Recibe: _________________________________', marginLeft, firmasY + 20);
+                doc.text('Entrega: ________________________________', marginLeft, firmasY + 40);
                 
                 // Guardar PDF con el nuevo nombre
                 const fileName = `NotaDeCambio${report.id}_${report.supplier.replace(/\s+/g, '_')}.pdf`;
