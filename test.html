@@ -273,7 +273,7 @@
             resize: none;
             font-size: 0.9rem;
             text-transform: none;
-            overflow: hidden;
+            overflow: hidden; /* Elimina las flechitas de scroll */
         }
 
         .products-table {
@@ -335,6 +335,7 @@
             transition: width 0.2s ease;
         }
 
+        /* Nuevos estatus para productos */
         .product-status {
             width: 15px;
             height: 15px;
@@ -514,6 +515,7 @@
             font-size: 0.9rem;
         }
 
+        /* Dropdown de acciones */
         .dropdown {
             position: relative;
             display: inline-block;
@@ -560,6 +562,7 @@
             display: block;
         }
 
+        /* Spinner */
         .spinner {
             display: inline-block;
             width: 16px;
@@ -837,11 +840,11 @@
                 }
                 
                 reportCounter++;
-                return `#${reportCounter}`;
+                return `#${reportCounter}`; // Ahora con # prefijo
             } catch (error) {
                 console.error("Error al obtener último reporte:", error);
                 reportCounter++;
-                return `#${reportCounter}`;
+                return `#${reportCounter}`; // Ahora con # prefijo
             }
         }
 
@@ -1277,7 +1280,7 @@
             const reportData = {
                 id: currentReportId,
                 supplier: toUpperCase(supplierInput.value.trim()),
-                date: isoDate,
+                date: isoDate, // Guardamos la fecha de mañana
                 invoiceNumber: invoiceNumberInput.value.trim() || 'XXXXX',
                 invoiceSeries: invoiceSeriesInput.value.trim() || 'XXXXX',
                 notes: notesInput.value.trim(),
@@ -1393,7 +1396,7 @@
 
         // Cargar reportes desde Firebase
         function loadReports() {
-            toggleInitialLoader(true);
+            toggleInitialLoader(true); // Mostrar spinner al cargar
             
             db.collection("reportesMalEstado")
                 .orderBy("createdAt", "desc")
@@ -1402,11 +1405,13 @@
                     reports = [];
                     querySnapshot.forEach(doc => {
                         const data = doc.data();
+                        // Asegurar que los productos tengan status
                         if (data.products) {
                             data.products.forEach(product => {
                                 if (!product.status) {
                                     product.status = 'pending';
                                 }
+                                // Establecer tipo de recepción por defecto si no existe
                                 if (!product.receptionType) {
                                     product.receptionType = 'received';
                                 }
@@ -1416,11 +1421,11 @@
                     });
                     
                     renderReportsList(reports);
-                    toggleInitialLoader(false);
+                    toggleInitialLoader(false); // Ocultar spinner cuando se cargan los datos
                 })
                 .catch(error => {
                     console.error("Error al cargar reportes:", error);
-                    toggleInitialLoader(false);
+                    toggleInitialLoader(false); // Ocultar spinner si hay error
                     Swal.fire({
                         title: 'Error',
                         text: 'Ocurrió un error al cargar los reportes',
@@ -1588,7 +1593,7 @@
             
             // Llenar campos del formulario
             document.getElementById('supplier').value = report.supplier;
-            document.getElementById('reportDate').value = report.date.split('T')[0];
+            document.getElementById('reportDate').value = report.date.split('T')[0]; // Mostrar la fecha guardada
             document.getElementById('invoiceNumber').value = report.invoiceNumber === 'XXXXX' ? '' : report.invoiceNumber;
             document.getElementById('invoiceSeries').value = report.invoiceSeries === 'XXXXX' ? '' : report.invoiceSeries;
             document.getElementById('notes').value = report.notes || '';
@@ -1873,7 +1878,7 @@
             document.body.style.overflow = 'hidden';
         };
 
-        // Generar PDF del reporte con ajustes de texto
+        // Generar PDF del reporte con verificación de espacio para firmas
         window.generatePDF = function(reportId) {
             const report = reports.find(r => r.id === reportId);
             if (!report) return;
@@ -1886,10 +1891,11 @@
                 const marginRight = 15;
                 const pageWidth = doc.internal.pageSize.getWidth();
                 const contentWidth = pageWidth - marginLeft - marginRight;
+                const pageHeight = doc.internal.pageSize.getHeight();
                 
                 // Agregar logo de la empresa
                 if (companyLogo.complete) {
-                    doc.addImage(companyLogo, 'PNG', marginLeft, 10, 40, 15);
+                    doc.addImage(companyLogo, 'PNG', marginLeft, 10, 35, 20);
                 }
                 
                 // Título del documento
@@ -1964,7 +1970,6 @@
                     }
                 ]) : [];
                 
-                // Configuración de la tabla
                 doc.autoTable({
                     startY: yPosition,
                     head: [['Sku', 'Cód. Fábrica', 'Descripción', 'Cantidad', 'Motivo', 'Estado']],
@@ -1998,7 +2003,7 @@
                     didDrawCell: (data) => {
                         // Ajustar altura de celda si el contenido es muy largo
                         if (data.section === 'body' && data.column.index === 2) {
-                            const lines = data.cell.text.length / 30;
+                            const lines = data.cell.text.length / 30; // Aproximación de líneas
                             if (lines > 1) {
                                 data.row.height = lines * 7;
                             }
@@ -2006,26 +2011,24 @@
                     }
                 });
                 
-                // Verificar espacio para las firmas al final del documento
-                const pageHeight = doc.internal.pageSize.getHeight();
-                const marginBottom = 20;
-                const firmasHeight = 60;
+                // Verificar espacio para firmas (necesitamos al menos 60mm de espacio)
+                const lastY = doc.lastAutoTable.finalY;
+                const spaceNeeded = 60;
+                const spaceAvailable = pageHeight - lastY - 20; // 20mm de margen inferior
                 
-                // Posición después de la tabla
-                let firmasY = doc.lastAutoTable.finalY + 20;
-                
-                // Verificar si hay espacio suficiente para las firmas
-                if (firmasY + firmasHeight > pageHeight - marginBottom) {
-                    // No hay espacio suficiente, añadir nueva página
+                // Si no hay suficiente espacio, añadir nueva página
+                if (spaceAvailable < spaceNeeded) {
                     doc.addPage();
-                    firmasY = 20;
+                    doc.setPage(doc.internal.getNumberOfPages());
                 }
                 
                 // Firmas más separadas y con letra más grande
+                const finalY = doc.internal.getNumberOfPages() > 1 ? 20 : lastY + 30;
+                
                 doc.setFontSize(14);
-                doc.text('Fecha de Entrega: ________________________', marginLeft, firmasY);
-                doc.text('Recibe: _________________________________', marginLeft, firmasY + 20);
-                doc.text('Entrega: ________________________________', marginLeft, firmasY + 40);
+                doc.text('Fecha de Entrega: ________________________', marginLeft, finalY);
+                doc.text('Recibe: _________________________________', marginLeft, finalY + 20);
+                doc.text('Entrega: ________________________________', marginLeft, finalY + 40);
                 
                 // Guardar PDF con el nuevo nombre
                 const fileName = `NotaDeCambio${report.id}_${report.supplier.replace(/\s+/g, '_')}.pdf`;
