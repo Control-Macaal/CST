@@ -13,7 +13,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
     <style>
         :root {
             --primary: #4361ee;
@@ -28,6 +27,7 @@
             --danger: #fc0303;
             --warning: #fc7703;
             --success: #03fc41;
+            --attachment: #ffd700;
             --border-radius: 8px;
             --shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             --transition: all 0.2s ease;
@@ -54,7 +54,6 @@
             width: 100%;
         }
 
-        /* Spinner de carga inicial */
         .initial-loader {
             position: fixed;
             top: 0;
@@ -188,6 +187,11 @@
             background: var(--primary);
         }
 
+        .btn-attachment {
+            background: var(--attachment);
+            color: var(--dark);
+        }
+
         .return-form {
             background: var(--card-bg);
             border-radius: var(--border-radius);
@@ -274,7 +278,7 @@
             resize: none;
             font-size: 0.9rem;
             text-transform: none;
-            overflow: hidden; /* Elimina las flechitas de scroll */
+            overflow: hidden;
         }
 
         .products-table {
@@ -336,7 +340,6 @@
             transition: width 0.2s ease;
         }
 
-        /* Nuevos estatus para productos */
         .product-status {
             width: 15px;
             height: 15px;
@@ -391,6 +394,12 @@
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
             padding: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .report-card.has-attachment {
+            background-color: rgba(255, 215, 0, 0.1);
+            border-left: 4px solid var(--attachment);
         }
 
         .report-header {
@@ -461,6 +470,32 @@
             margin-top: 1rem;
         }
 
+        .attachment-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+
+        .attachment-info i {
+            color: var(--attachment);
+        }
+
+        .attachment-link {
+            color: var(--primary);
+            text-decoration: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .attachment-link:hover {
+            text-decoration: underline;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -516,7 +551,6 @@
             font-size: 0.9rem;
         }
 
-        /* Dropdown de acciones */
         .dropdown {
             position: relative;
             display: inline-block;
@@ -563,7 +597,6 @@
             display: block;
         }
 
-        /* Spinner */
         .spinner {
             display: inline-block;
             width: 16px;
@@ -583,78 +616,53 @@
             display: none;
         }
 
-        /* Estilos para adjuntos */
-        .attachment-section {
-            margin-top: 1.5rem;
-            padding-top: 1rem;
-            border-top: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
-        .attachment-preview {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-top: 0.5rem;
-            padding: 0.8rem;
-            background-color: #f8f9fa;
-            border-radius: var(--border-radius);
-        }
-
-        .attachment-preview img {
-            width: 40px;
-            height: 40px;
-            object-fit: cover;
-            border-radius: 4px;
-        }
-
-        .attachment-info {
-            flex: 1;
-        }
-
-        .attachment-name {
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-
-        .attachment-size {
-            font-size: 0.8rem;
-            color: var(--text-light);
-        }
-
-        .attachment-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .attachment-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--primary);
-            font-size: 1rem;
-        }
-
-        .attachment-btn:hover {
-            color: var(--primary-hover);
-        }
-
-        .attachment-btn-danger {
-            color: var(--danger);
-        }
-
-        .attachment-btn-danger:hover {
-            color: #d32f2f;
-        }
-
-        .no-attachment {
-            text-align: center;
-            padding: 1.5rem;
-            color: var(--text-light);
-            font-style: italic;
-        }
-
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+
+        .file-input-container {
+            position: relative;
+            margin-top: 0.5rem;
+        }
+
+        .file-input {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background: var(--attachment);
+            color: var(--dark);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .file-input-label:hover {
+            background: #ffed4a;
+        }
+
+        .upload-status {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            display: none;
+        }
+
+        .upload-status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .upload-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
         @media (max-width: 768px) {
@@ -711,21 +719,10 @@
                 right: auto;
                 left: 0;
             }
-
-            .attachment-preview {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.5rem;
-            }
-
-            .attachment-actions {
-                align-self: flex-end;
-            }
         }
     </style>
 </head>
 <body>
-    <!-- Spinner de carga inicial -->
     <div class="initial-loader" id="initialLoader">
         <div class="initial-spinner"></div>
     </div>
@@ -747,7 +744,6 @@
             </div>
         </header>
 
-        <!-- Buscador -->
         <div class="search-container" id="searchContainer">
             <div class="search-input-container">
                 <input type="text" class="search-input" id="searchInput" name="searchInput" placeholder="Buscar por número, fecha o proveedor...">
@@ -760,7 +756,6 @@
             </button>
         </div>
 
-        <!-- Formulario de nueva devolución -->
         <div class="return-form" id="returnForm">
             <div class="form-header">
                 <h2><i class="fas fa-file-alt"></i> Nueva Devolución</h2>
@@ -824,24 +819,6 @@
                 Agregar Producto
             </button>
 
-            <!-- Sección de adjuntos -->
-            <div class="attachment-section">
-                <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">
-                    <i class="fas fa-paperclip"></i> Archivo Adjunto (PDF)
-                </h3>
-                <div id="attachmentPreview" class="no-attachment">
-                    No hay archivo adjunto
-                </div>
-                <div style="margin-top: 1rem;">
-                    <button type="button" class="btn" id="uploadAttachmentBtn">
-                        <i class="fas fa-upload"></i> Subir Archivo
-                    </button>
-                    <button type="button" class="btn btn-danger" id="removeAttachmentBtn" style="display: none;">
-                        <i class="fas fa-trash"></i> Eliminar Archivo
-                    </button>
-                </div>
-            </div>
-
             <div class="form-header-actions">
                 <button class="btn btn-danger" id="cancelReportBtn">
                     <i class="fas fa-times"></i>
@@ -854,7 +831,6 @@
             </div>
         </div>
 
-        <!-- Lista de reportes -->
         <div class="reports-list" id="reportsList">
             <div class="no-reports" style="text-align: center; padding: 2.5rem; color: var(--text-light);">
                 <i class="fas fa-box-open" style="font-size: 2.5rem; margin-bottom: 1.2rem; opacity: 0.5;"></i>
@@ -864,7 +840,6 @@
         </div>
     </div>
 
-    <!-- Modal para ver reporte completo -->
     <div class="modal" id="reportModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -872,10 +847,36 @@
                 <button onclick="window.closeModal()" style="background: none; border: none; cursor: pointer; font-size: 1.5rem;">&times;</button>
             </div>
             <div class="modal-body" id="modalReportContent">
-                <!-- Contenido del reporte se cargará aquí -->
             </div>
             <div class="report-actions" id="modalReportActions">
-                <!-- Acciones del reporte se cargarán aquí -->
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="attachmentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-paperclip"></i> Adjuntar Archivo</h2>
+                <button onclick="window.closeAttachmentModal()" style="background: none; border: none; cursor: pointer; font-size: 1.5rem;">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Seleccionar archivo PDF</label>
+                    <div class="file-input-container">
+                        <input type="file" id="fileInput" class="file-input" accept=".pdf">
+                        <label for="fileInput" class="file-input-label">
+                            <i class="fas fa-cloud-upload-alt"></i> Seleccionar Archivo PDF
+                        </label>
+                    </div>
+                    <div id="uploadStatus" class="upload-status">
+                        <div id="uploadStatusContent"></div>
+                        <div style="margin-top: 0.5rem;">
+                            <button class="btn btn-success" id="saveAttachmentBtn" style="display: none;">
+                                <i class="fas fa-save"></i> Guardar Adjunto
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -893,11 +894,8 @@
         };
 
         // Configuración de Cloudinary
-        const cloudinaryConfig = {
-            cloudName: 'dnho7qdz3',
-            apiKey: '128857923119499',
-            uploadPreset: 'notas_cambio' // Necesitarás crear este preset en Cloudinary
-        };
+        const CLOUDINARY_CLOUD_NAME = 'dnho7qdz3';
+        const CLOUDINARY_UPLOAD_PRESET = 'notas_cambio_macaal';
 
         // Inicializa Firebase
         firebase.initializeApp(firebaseConfig);
@@ -909,23 +907,129 @@
         let currentReportId = null;
         let reportCounter = 0;
         let isCreatingNewReport = false;
-        let currentAttachment = null; // Para almacenar datos del archivo adjunto actual
+        let currentAttachmentUrl = null;
+        let currentAttachmentName = null;
+        let currentReportForAttachment = null;
         const companyName = "MACAAL S.A";
-        const companyLogo = new Image();
-        companyLogo.src = 'images/logo/logo.png';
+
+        // ========== FUNCIONES DE CLOUDINARY ==========
+
+        // Función para subir archivo a Cloudinary
+        async function uploadToCloudinary(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            
+            try {
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Error ${response.status}: ${errorText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Respuesta Cloudinary:', data);
+                
+                return {
+                    url: data.secure_url,
+                    publicId: data.public_id,
+                    fileName: file.name,
+                    resourceType: data.resource_type,
+                    format: data.format
+                };
+            } catch (error) {
+                console.error('Error subiendo archivo:', error);
+                throw error;
+            }
+        }
+
+        // Función para manejar la subida de archivos
+        async function handleFileUpload(file) {
+            const uploadStatus = document.getElementById('uploadStatus');
+            const uploadStatusContent = document.getElementById('uploadStatusContent');
+            const saveAttachmentBtn = document.getElementById('saveAttachmentBtn');
+            
+            // Validar que sea PDF
+            if (file.type !== 'application/pdf') {
+                uploadStatus.className = 'upload-status error';
+                uploadStatusContent.innerHTML = '<i class="fas fa-exclamation-circle"></i> Error: Solo se permiten archivos PDF';
+                uploadStatus.style.display = 'block';
+                return;
+            }
+            
+            // Validar tamaño (10MB máximo)
+            if (file.size > 10 * 1024 * 1024) {
+                uploadStatus.className = 'upload-status error';
+                uploadStatusContent.innerHTML = '<i class="fas fa-exclamation-circle"></i> Error: El archivo es demasiado grande (máximo 10MB)';
+                uploadStatus.style.display = 'block';
+                return;
+            }
+            
+            try {
+                // Mostrar estado de subida
+                uploadStatus.className = 'upload-status';
+                uploadStatusContent.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subiendo archivo...';
+                uploadStatus.style.display = 'block';
+                saveAttachmentBtn.style.display = 'none';
+                
+                // Subir a Cloudinary
+                const result = await uploadToCloudinary(file);
+                
+                // Actualizar estado con éxito
+                currentAttachmentUrl = result.url;
+                currentAttachmentName = result.fileName;
+                
+                uploadStatus.className = 'upload-status success';
+                uploadStatusContent.innerHTML = `
+                    <i class="fas fa-check-circle"></i> Archivo subido correctamente
+                    <div style="margin-top: 0.5rem; font-size: 0.9rem;">
+                        <strong>Nombre:</strong> ${result.fileName}<br>
+                        <strong>Tamaño:</strong> ${(file.size / 1024 / 1024).toFixed(2)} MB<br>
+                        <strong>Tipo:</strong> ${result.resourceType} / ${result.format}
+                    </div>
+                `;
+                
+                saveAttachmentBtn.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error en la subida:', error);
+                uploadStatus.className = 'upload-status error';
+                uploadStatusContent.innerHTML = `
+                    <i class="fas fa-exclamation-circle"></i> Error al subir el archivo
+                    <div style="margin-top: 0.5rem; font-size: 0.9rem;">
+                        ${error.message || 'No se pudo subir el archivo. Verifica la configuración de Cloudinary.'}
+                    </div>
+                `;
+                saveAttachmentBtn.style.display = 'none';
+            }
+        }
+
+        // ========== FUNCIONES PRINCIPALES ==========
 
         // Función para mostrar/ocultar spinner inicial
         function toggleInitialLoader(show) {
             document.getElementById('initialLoader').style.display = show ? 'flex' : 'none';
         }
 
-        // Al cargar la página, mostrar spinner inicial
-        toggleInitialLoader(true);
-
-        // Función para cerrar modal (ahora está en el ámbito global)
+        // Función para cerrar modal
         window.closeModal = function() {
             document.getElementById('reportModal').style.display = 'none';
             document.body.style.overflow = '';
+        };
+
+        // Función para cerrar modal de adjuntos
+        window.closeAttachmentModal = function() {
+            document.getElementById('attachmentModal').style.display = 'none';
+            document.body.style.overflow = '';
+            currentAttachmentUrl = null;
+            currentAttachmentName = null;
+            document.getElementById('uploadStatus').style.display = 'none';
+            document.getElementById('saveAttachmentBtn').style.display = 'none';
+            document.getElementById('fileInput').value = '';
         };
 
         // Convertir texto a mayúsculas
@@ -933,125 +1037,7 @@
             return text ? text.toUpperCase() : '';
         }
 
-        // Configurar Cloudinary Upload Widget
-        function setupCloudinaryWidget() {
-            return cloudinary.createUploadWidget(
-                {
-                    cloudName: cloudinaryConfig.cloudName,
-                    uploadPreset: cloudinaryConfig.uploadPreset,
-                    sources: ['local'],
-                    resourceType: 'auto',
-                    multiple: false,
-                    maxFileSize: 5000000, // 5MB
-                    clientAllowedFormats: ['pdf'],
-                    showAdvancedOptions: false,
-                    cropping: false,
-                    showPoweredBy: false,
-                    language: 'es'
-                },
-                (error, result) => {
-                    if (!error && result && result.event === "success") {
-                        // Guardar información del archivo subido
-                        currentAttachment = {
-                            publicId: result.info.public_id,
-                            secureUrl: result.info.secure_url,
-                            originalName: result.info.original_filename,
-                            format: result.info.format,
-                            size: result.info.bytes,
-                            uploadedAt: new Date().toISOString()
-                        };
-                        
-                        // Mostrar vista previa del archivo
-                        showAttachmentPreview(currentAttachment);
-                    } else if (error) {
-                        console.error("Error al subir archivo:", error);
-                        Swal.fire({
-                            title: 'Error',
-                            text: 'Ocurrió un error al subir el archivo',
-                            icon: 'error',
-                            confirmButtonColor: '#3085d6'
-                        });
-                    }
-                }
-            );
-        }
-
-        // Mostrar vista previa del archivo adjunto
-        function showAttachmentPreview(attachment) {
-            const previewContainer = document.getElementById('attachmentPreview');
-            const removeBtn = document.getElementById('removeAttachmentBtn');
-            
-            if (attachment) {
-                previewContainer.innerHTML = `
-                    <div class="attachment-preview">
-                        <i class="fas fa-file-pdf" style="font-size: 2rem; color: #e74c3c;"></i>
-                        <div class="attachment-info">
-                            <div class="attachment-name">${attachment.originalName}.${attachment.format}</div>
-                            <div class="attachment-size">${formatFileSize(attachment.size)}</div>
-                        </div>
-                        <div class="attachment-actions">
-                            <button class="attachment-btn" onclick="viewAttachment('${attachment.secureUrl}')" title="Ver archivo">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="attachment-btn" onclick="downloadAttachment('${attachment.secureUrl}', '${attachment.originalName}.${attachment.format}')" title="Descargar archivo">
-                                <i class="fas fa-download"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                removeBtn.style.display = 'inline-block';
-            } else {
-                previewContainer.innerHTML = 'No hay archivo adjunto';
-                previewContainer.className = 'no-attachment';
-                removeBtn.style.display = 'none';
-            }
-        }
-
-        // Formatear tamaño de archivo
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        // Ver archivo adjunto
-        window.viewAttachment = function(url) {
-            window.open(url, '_blank');
-        };
-
-        // Descargar archivo adjunto
-        window.downloadAttachment = function(url, filename) {
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = filename;
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        };
-
-        // Eliminar archivo adjunto
-        function removeAttachment() {
-            Swal.fire({
-                title: '¿Eliminar archivo adjunto?',
-                text: 'Esta acción no se puede deshacer',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    currentAttachment = null;
-                    showAttachmentPreview(null);
-                }
-            });
-        }
-
-        // Generar número de reporte consecutivo basado en el último existente (ahora con #)
+        // Generar número de reporte consecutivo
         async function generateReportNumber() {
             try {
                 const snapshot = await db.collection("reportesMalEstado")
@@ -1065,111 +1051,195 @@
                 }
                 
                 reportCounter++;
-                return `#${reportCounter}`; // Ahora con # prefijo
+                return `#${reportCounter}`;
             } catch (error) {
                 console.error("Error al obtener último reporte:", error);
                 reportCounter++;
-                return `#${reportCounter}`; // Ahora con # prefijo
+                return `#${reportCounter}`;
             }
         }
 
-        // Guardar datos del formulario en localStorage
-        function saveFormToLocalStorage() {
-            if (!isCreatingNewReport) return;
+        // Función para adjuntar archivo a un reporte
+        window.attachFile = function(reportId) {
+            currentReportForAttachment = reportId;
+            document.getElementById('attachmentModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
             
-            const formData = {
-                supplier: document.getElementById('supplier').value,
-                reportDate: document.getElementById('reportDate').value,
-                invoiceNumber: document.getElementById('invoiceNumber').value,
-                invoiceSeries: document.getElementById('invoiceSeries').value,
-                notes: document.getElementById('notes').value,
-                products: [],
-                attachment: currentAttachment
-            };
-            
-            const rows = document.getElementById('productsTable').querySelectorAll('tbody tr');
-            rows.forEach(row => {
-                const inputs = row.querySelectorAll('input, textarea');
-                formData.products.push({
-                    sku: inputs[0].value,
-                    factoryCode: inputs[1].value,
-                    description: inputs[2].value,
-                    quantity: inputs[3].value,
-                    reason: inputs[4].value
-                });
-            });
-            
-            localStorage.setItem('currentReportForm', JSON.stringify(formData));
-            localStorage.setItem('currentReportId', currentReportId);
-        }
+            // Resetear el estado
+            document.getElementById('uploadStatus').style.display = 'none';
+            document.getElementById('saveAttachmentBtn').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+        };
 
-        // Cargar datos del formulario desde localStorage
-        function loadFormFromLocalStorage() {
-            const savedForm = localStorage.getItem('currentReportForm');
-            const savedReportId = localStorage.getItem('currentReportId');
+        // ========== FUNCIONES DE GESTIÓN DE REPORTES ==========
+
+        // Cargar reportes desde Firebase
+        function loadReports() {
+            toggleInitialLoader(true);
             
-            if (savedForm && savedReportId) {
-                const formData = JSON.parse(savedForm);
-                
-                currentReportId = savedReportId;
-                document.getElementById('reportNumber').textContent = currentReportId;
-                
-                // Llenar campos del formulario
-                document.getElementById('supplier').value = formData.supplier;
-                document.getElementById('reportDate').value = formData.reportDate;
-                document.getElementById('invoiceNumber').value = formData.invoiceNumber;
-                document.getElementById('invoiceSeries').value = formData.invoiceSeries;
-                document.getElementById('notes').value = formData.notes;
-                
-                // Cargar adjunto si existe
-                if (formData.attachment) {
-                    currentAttachment = formData.attachment;
-                    showAttachmentPreview(currentAttachment);
-                }
-                
-                // Llenar tabla de productos
-                const tbody = document.getElementById('productsTable').querySelector('tbody');
-                tbody.innerHTML = '';
-                
-                formData.products.forEach((product, index) => {
-                    const newRow = document.createElement('tr');
-                    newRow.innerHTML = `
-                        <td><input type="text" class="code-input" id="productSku${index+1}" name="productSku${index+1}" value="${product.sku || ''}" placeholder="Sku" maxlength="9" required></td>
-                        <td><input type="text" class="factory-code-input" id="factoryCode${index+1}" name="factoryCode${index+1}" value="${product.factoryCode || ''}" placeholder="Cód. Fab"></td>
-                        <td><input type="text" id="productDescription${index+1}" name="productDescription${index+1}" value="${product.description || ''}" placeholder="Descripción" required></td>
-                        <td><input type="number" id="productQuantity${index+1}" name="productQuantity${index+1}" value="${product.quantity || ''}" placeholder="0" min="1" required></td>
-                        <td><textarea class="form-control" id="productReason${index+1}" name="productReason${index+1}" placeholder="Ej: Quebrado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;">${product.reason || ''}</textarea></td>
-                        <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
-                    `;
-                    tbody.appendChild(newRow);
+            db.collection("reportesMalEstado")
+                .orderBy("createdAt", "desc")
+                .get()
+                .then(querySnapshot => {
+                    reports = [];
+                    querySnapshot.forEach(doc => {
+                        const data = doc.data();
+                        // Asegurar que los productos tengan status
+                        if (data.products) {
+                            data.products.forEach(product => {
+                                if (!product.status) {
+                                    product.status = 'pending';
+                                }
+                                if (!product.receptionType) {
+                                    product.receptionType = 'received';
+                                }
+                            });
+                        }
+                        reports.push(data);
+                    });
                     
-                    // Ajustar tamaño del input de código de fábrica
-                    const factoryInput = newRow.querySelector('.factory-code-input');
-                    resizeInput(factoryInput);
+                    renderReportsList(reports);
+                    toggleInitialLoader(false);
+                })
+                .catch(error => {
+                    console.error("Error al cargar reportes:", error);
+                    toggleInitialLoader(false);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Ocurrió un error al cargar los reportes',
+                        icon: 'error',
+                        confirmButtonColor: '#3085d6'
+                    });
                 });
-                
-                // Mostrar el formulario
-                document.getElementById('returnForm').style.display = 'block';
-                document.getElementById('reportsList').style.display = 'none';
-                document.getElementById('searchContainer').style.display = 'none';
-                document.querySelector('.header-actions').style.display = 'none';
-                document.getElementById('backButton').style.display = 'none';
-                
-                // Marcar que estamos creando/editando un reporte
-                isCreatingNewReport = true;
-                
-                // Agregar event listeners a los botones de eliminar
-                addDeleteRowListeners();
-                
-                // Agregar event listeners para ajustar tamaño de inputs
-                addInputResizeListeners();
-            }
         }
 
-        // Limpiar datos del formulario en localStorage
-        function clearFormLocalStorage() {
-            localStorage.removeItem('currentReportForm');
-            localStorage.removeItem('currentReportId');
+        // Mostrar lista de reportes
+        function renderReportsList(reportsToRender = reports) {
+            const reportsList = document.getElementById('reportsList');
+            
+            if (reportsToRender.length === 0) {
+                reportsList.innerHTML = `
+                    <div class="no-reports" style="text-align: center; padding: 2.5rem; color: var(--text-light);">
+                        <i class="fas fa-box-open" style="font-size: 2.5rem; margin-bottom: 1.2rem; opacity: 0.5;"></i>
+                        <h3>No se encontraron reportes</h3>
+                        <p>No hay reportes que coincidan con tu búsqueda</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            reportsList.innerHTML = '';
+            
+            reportsToRender.forEach(report => {
+                const reportCard = document.createElement('div');
+                reportCard.className = `report-card ${report.attachmentUrl ? 'has-attachment' : ''}`;
+                
+                // Contar productos por estado
+                const receivedCount = report.products ? report.products.filter(p => p.status === 'received' && p.receptionType === 'received').length : 0;
+                const creditNoteCount = report.products ? report.products.filter(p => p.status === 'received' && p.receptionType === 'credit-note').length : 0;
+                const pendingCount = report.products ? report.products.filter(p => p.status === 'pending').length : 0;
+                const cancelledCount = report.products ? report.products.filter(p => p.status === 'cancelled').length : 0;
+                const totalCount = report.products ? report.products.length : 0;
+                
+                reportCard.innerHTML = `
+                    <div class="report-header">
+                        <div>
+                            <span class="report-id">${report.id}</span>
+                            <span class="report-date">${formatDate(report.date)}</span>
+                            <div style="margin-top: 0.3rem; font-size: 0.95rem; color: ${report.status === 'cancelled' ? 'var(--danger)' : (receivedCount + creditNoteCount) === totalCount ? 'var(--success)' : 'var(--warning)'}">
+                                ${report.status === 'cancelled' ? 'ANULADO' : 
+                                 `${receivedCount + creditNoteCount}/${totalCount} productos recibidos`}
+                                ${creditNoteCount > 0 ? ` (${creditNoteCount} por Nota de Crédito)` : ''}
+                            </div>
+                        </div>
+                        <div class="dropdown" style="display: flex; gap: 0.8rem;">
+                            <button class="dropdown-btn">
+                                <i class="fas fa-ellipsis-v"></i> Acciones
+                            </button>
+                            <div class="dropdown-content">
+                                <a href="#" onclick="viewReport('${report.id}'); return false;">
+                                    <i class="fas fa-eye"></i> Ver
+                                </a>
+                                <a href="#" onclick="generatePDF('${report.id}'); return false;">
+                                    <i class="fas fa-file-pdf"></i> Generar PDF
+                                </a>
+                                ${report.status === 'active' ? `
+                                <a href="#" onclick="confirmEditReport('${report.id}'); return false;">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                <a href="#" onclick="attachFile('${report.id}'); return false;">
+                                    <i class="fas fa-paperclip"></i> Adjuntar Archivo
+                                </a>
+                                <a href="#" onclick="cancelReport('${report.id}'); return false;" style="color: var(--danger);">
+                                    <i class="fas fa-ban"></i> Anular
+                                </a>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="report-supplier">Proveedor: ${report.supplier}</div>
+                    ${report.notes ? `<div class="report-notes">Observaciones: ${report.notes}</div>` : ''}
+                    ${report.attachmentUrl ? `
+                    <div class="attachment-info">
+                        <i class="fas fa-paperclip"></i>
+                        <span>Archivo adjunto:</span>
+                        <a href="${report.attachmentUrl}" target="_blank" class="attachment-link">
+                            <i class="fas fa-file-pdf"></i> ${report.attachmentName || 'Ver archivo'}
+                        </a>
+                    </div>
+                    ` : ''}
+                    <table class="report-products">
+                        <thead>
+                            <tr>
+                                <th style="width: 100px;">Sku</th>
+                                <th style="width: 80px;">Cód. Fábrica</th>
+                                <th>Descripción</th>
+                                <th style="width: 70px;">Cantidad</th>
+                                <th style="width: 120px;">Motivo</th>
+                                <th style="width: 120px;">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${report.products ? report.products.map(product => `
+                                <tr>
+                                    <td>${product.sku || ''}</td>
+                                    <td>${product.factoryCode || '-'}</td>
+                                    <td>${product.description}</td>
+                                    <td>${product.quantity}</td>
+                                    <td>${product.reason}</td>
+                                    <td>
+                                        <span class="product-status status-${product.status === 'received' ? product.receptionType === 'credit-note' ? 'credit-note' : 'received' : product.status}"></span>
+                                        ${product.status === 'pending' ? 'Pendiente' : 
+                                          product.status === 'received' ? (product.receptionType === 'credit-note' ? 'Nota Crédito' : 'Recibido') : 
+                                          'Anulado'}
+                                    </td>
+                                </tr>
+                            `).join('') : ''}
+                        </tbody>
+                    </table>
+                `;
+                
+                reportsList.appendChild(reportCard);
+            });
+        }
+
+        // Formatear fecha
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('es-ES', options);
+        }
+
+        // Formatear fecha y hora
+        function formatDateTime(dateString) {
+            if (!dateString) return 'No especificada';
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            return new Date(dateString).toLocaleDateString('es-ES', options);
         }
 
         // Mostrar formulario de nueva devolución
@@ -1184,7 +1254,6 @@
                 return;
             }
 
-            // Mostrar spinner en el botón
             const newReportBtn = document.getElementById('newReportBtn');
             newReportBtn.classList.add('btn-loading');
             newReportBtn.querySelector('.spinner').style.display = 'inline-block';
@@ -1194,19 +1263,16 @@
                 currentReportId = await generateReportNumber();
                 document.getElementById('reportNumber').textContent = currentReportId;
                 
-                // Limpiar campos (incluyendo fecha)
+                // Limpiar campos
                 document.getElementById('supplier').value = '';
-                
-                // Establecer fecha actual en el input
                 const today = new Date();
                 const formattedDate = today.toISOString().split('T')[0];
                 document.getElementById('reportDate').value = formattedDate;
-                
                 document.getElementById('invoiceNumber').value = '';
                 document.getElementById('invoiceSeries').value = '';
                 document.getElementById('notes').value = '';
                 
-                // Limpiar tabla de productos (dejar solo una fila vacía)
+                // Limpiar tabla de productos
                 const tbody = document.getElementById('productsTable').querySelector('tbody');
                 tbody.innerHTML = `
                     <tr>
@@ -1219,33 +1285,15 @@
                     </tr>
                 `;
                 
-                // Limpiar adjunto
-                currentAttachment = null;
-                showAttachmentPreview(null);
-                
-                // Restaurar texto del botón de guardar
-                document.getElementById('saveReportBtn').innerHTML = '<span class="spinner" style="display: none;"></span><span class="btn-text"><i class="fas fa-save"></i> Guardar</span>';
-                
-                // Agregar event listeners a los botones de eliminar
-                addDeleteRowListeners();
-                
-                // Agregar event listeners para ajustar tamaño de inputs
-                addInputResizeListeners();
-                
-                // Ocultar elementos
+                // Ocultar elementos y mostrar formulario
                 document.getElementById('reportsList').style.display = 'none';
                 document.getElementById('searchContainer').style.display = 'none';
                 document.querySelector('.header-actions').style.display = 'none';
                 document.getElementById('backButton').style.display = 'none';
-                
-                // Mostrar el formulario
                 document.getElementById('returnForm').style.display = 'block';
                 
-                // Marcar que estamos creando un nuevo reporte
                 isCreatingNewReport = true;
                 
-                // Limpiar localStorage
-                clearFormLocalStorage();
             } catch (error) {
                 console.error("Error al crear nuevo reporte:", error);
                 Swal.fire({
@@ -1255,27 +1303,13 @@
                     confirmButtonColor: '#3085d6'
                 });
             } finally {
-                // Ocultar spinner en el botón
                 newReportBtn.classList.remove('btn-loading');
                 newReportBtn.querySelector('.spinner').style.display = 'none';
                 newReportBtn.querySelector('.btn-text').style.display = 'inline';
             }
         }
 
-        // Función auxiliar para ocultar el formulario sin confirmación
-        function actuallyHideForm() {
-            document.getElementById('returnForm').style.display = 'none';
-            document.getElementById('reportsList').style.display = 'grid';
-            document.getElementById('searchContainer').style.display = 'flex';
-            document.querySelector('.header-actions').style.display = 'flex';
-            document.getElementById('backButton').style.display = 'flex';
-            isCreatingNewReport = false;
-            
-            // Limpiar localStorage al cancelar
-            clearFormLocalStorage();
-        }
-
-        // Ocultar formulario de devolución (modificado)
+        // Ocultar formulario de devolución
         function hideReturnForm(showConfirmation = true) {
             if (showConfirmation) {
                 Swal.fire({
@@ -1297,39 +1331,13 @@
             }
         }
 
-        // Agregar event listeners para ajustar tamaño de inputs
-        function addInputResizeListeners() {
-            const factoryCodeInputs = document.querySelectorAll('.factory-code-input');
-            
-            factoryCodeInputs.forEach(input => {
-                // Ajustar tamaño inicial
-                resizeInput(input);
-                
-                // Agregar event listener para cambios
-                input.addEventListener('input', function() {
-                    resizeInput(this);
-                });
-            });
-        }
-
-        // Función para ajustar el tamaño del input basado en su contenido
-        function resizeInput(input) {
-            const minWidth = 60;
-            const maxWidth = 150;
-            const tempSpan = document.createElement('span');
-            
-            tempSpan.style.visibility = 'hidden';
-            tempSpan.style.whiteSpace = 'nowrap';
-            tempSpan.style.fontSize = window.getComputedStyle(input).fontSize;
-            tempSpan.style.fontFamily = window.getComputedStyle(input).fontFamily;
-            tempSpan.style.padding = window.getComputedStyle(input).padding;
-            tempSpan.innerHTML = input.value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            
-            document.body.appendChild(tempSpan);
-            const width = Math.min(Math.max(tempSpan.offsetWidth + 20, minWidth), maxWidth);
-            document.body.removeChild(tempSpan);
-            
-            input.style.width = width + 'px';
+        function actuallyHideForm() {
+            document.getElementById('returnForm').style.display = 'none';
+            document.getElementById('reportsList').style.display = 'grid';
+            document.getElementById('searchContainer').style.display = 'flex';
+            document.querySelector('.header-actions').style.display = 'flex';
+            document.getElementById('backButton').style.display = 'flex';
+            isCreatingNewReport = false;
         }
 
         // Agregar nueva fila a la tabla de productos
@@ -1356,38 +1364,7 @@
                     // Si es la última fila, limpiar los campos
                     const inputs = newRow.querySelectorAll('input, textarea');
                     inputs.forEach(input => input.value = '');
-                    // Ajustar tamaño del input de código de fábrica
-                    const factoryInput = newRow.querySelector('.factory-code-input');
-                    resizeInput(factoryInput);
                 }
-            });
-            
-            // Agregar event listener para ajustar tamaño del input de código de fábrica
-            const factoryInput = newRow.querySelector('.factory-code-input');
-            factoryInput.addEventListener('input', function() {
-                resizeInput(this);
-            });
-        }
-
-        // Agregar event listeners a los botones de eliminar fila
-        function addDeleteRowListeners() {
-            const deleteBtns = document.getElementById('productsTable').querySelectorAll('.fa-trash-alt');
-            const tbody = document.getElementById('productsTable').querySelector('tbody');
-            
-            deleteBtns.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const row = e.target.closest('tr');
-                    if (tbody.childElementCount > 1) {
-                        tbody.removeChild(row);
-                    } else {
-                        // Si es la última fila, limpiar los campos
-                        const inputs = row.querySelectorAll('input, textarea');
-                        inputs.forEach(input => input.value = '');
-                        // Ajustar tamaño del input de código de fábrica
-                        const factoryInput = row.querySelector('.factory-code-input');
-                        resizeInput(factoryInput);
-                    }
-                });
             });
         }
 
@@ -1458,41 +1435,6 @@
                 return false;
             }
             
-            // Validar que todos los productos tengan los campos obligatorios
-            const rows = document.getElementById('productsTable').querySelectorAll('tbody tr');
-            for (let i = 0; i < rows.length; i++) {
-                const inputs = rows[i].querySelectorAll('input, textarea');
-                const sku = inputs[0].value.trim();
-                const description = inputs[2].value.trim();
-                const quantity = inputs[3].value.trim();
-                const reason = inputs[4].value.trim();
-                
-                if (!sku || !description || !quantity || !reason) {
-                    Swal.fire({
-                        title: 'Validación requerida',
-                        text: `Por favor completa todos los campos obligatorios en la fila ${i + 1}`,
-                        icon: 'info',
-                        confirmButtonColor: '#3085d6'
-                    });
-                    
-                    // Resaltar campos vacíos
-                    if (!sku) inputs[0].style.borderColor = 'var(--danger)';
-                    if (!description) inputs[2].style.borderColor = 'var(--danger)';
-                    if (!quantity) inputs[3].style.borderColor = 'var(--danger)';
-                    if (!reason) inputs[4].style.borderColor = 'var(--danger)';
-                    
-                    // Quitar el resaltado después de 2 segundos
-                    setTimeout(() => {
-                        inputs[0].style.borderColor = '';
-                        inputs[2].style.borderColor = '';
-                        inputs[3].style.borderColor = '';
-                        inputs[4].style.borderColor = '';
-                    }, 2000);
-                    
-                    return false;
-                }
-            }
-            
             return true;
         }
 
@@ -1507,16 +1449,10 @@
             const notesInput = document.getElementById('notes');
             const saveReportBtn = document.getElementById('saveReportBtn');
             
-            // Obtener la fecha del input y sumar un día para guardar
-            const inputDate = new Date(reportDateInput.value);
-            const tomorrow = new Date(inputDate);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            const isoDate = tomorrow.toISOString().split('T')[0];
-            
             const reportData = {
                 id: currentReportId,
                 supplier: toUpperCase(supplierInput.value.trim()),
-                date: isoDate, // Guardamos la fecha de mañana
+                date: reportDateInput.value,
                 invoiceNumber: invoiceNumberInput.value.trim() || 'XXXXX',
                 invoiceSeries: invoiceSeriesInput.value.trim() || 'XXXXX',
                 notes: notesInput.value.trim(),
@@ -1525,78 +1461,31 @@
                 reportNumber: parseInt(currentReportId.replace('#', ''))
             };
             
-            // Agregar información del adjunto si existe
-            if (currentAttachment) {
-                reportData.attachment = currentAttachment;
-            }
-            
-            // Verificar si estamos editando o creando nuevo
-            const isEditing = saveReportBtn.querySelector('.btn-text').innerHTML.includes('Actualizar');
-            
             try {
-                // Mostrar spinner en el botón
                 saveReportBtn.classList.add('btn-loading');
                 saveReportBtn.querySelector('.spinner').style.display = 'inline-block';
                 saveReportBtn.querySelector('.btn-text').style.display = 'none';
                 
-                if (isEditing) {
-                    // Mantener los datos existentes que no se editan
-                    const originalReport = reports.find(r => r.id === currentReportId);
-                    if (originalReport) {
-                        reportData.status = originalReport.status;
-                        reportData.createdAt = originalReport.createdAt;
-                        reportData.reportNumber = originalReport.reportNumber;
-                        
-                        // Mantener el estado de los productos
-                        reportData.products.forEach((product, index) => {
-                            if (originalReport.products && originalReport.products[index]) {
-                                product.status = originalReport.products[index].status;
-                                product.receivedDate = originalReport.products[index].receivedDate;
-                                product.receptionType = originalReport.products[index].receptionType || 'received';
-                            } else {
-                                product.status = 'pending';
-                                product.receivedDate = null;
-                                product.receptionType = 'received';
-                            }
-                        });
-                    }
-                    
-                    await db.collection("reportesMalEstado").doc(currentReportId).update(reportData);
-                    await Swal.fire({
-                        title: 'Reporte actualizado',
-                        text: 'El reporte se ha actualizado correctamente',
-                        icon: 'success',
-                        confirmButtonColor: '#3085d6'
-                    });
-                    
-                    hideReturnForm(false);
-                } else {
-                    // Es un nuevo reporte
-                    reportData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-                    reportData.status = 'active';
-                    
-                    // Establecer estado inicial de los productos
-                    reportData.products.forEach(product => {
-                        product.status = 'pending';
-                        product.receivedDate = null;
-                        product.receptionType = 'received';
-                    });
-                    
-                    await db.collection("reportesMalEstado").doc(currentReportId).set(reportData);
-                    await Swal.fire({
-                        title: 'Reporte guardado',
-                        text: 'El reporte se ha guardado correctamente',
-                        icon: 'success',
-                        confirmButtonColor: '#3085d6'
-                    });
-                    
-                    hideReturnForm(false);
-                }
+                reportData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                reportData.status = 'active';
                 
+                reportData.products.forEach(product => {
+                    product.status = 'pending';
+                    product.receivedDate = null;
+                    product.receptionType = 'received';
+                });
+                
+                await db.collection("reportesMalEstado").doc(currentReportId).set(reportData);
+                await Swal.fire({
+                    title: 'Reporte guardado',
+                    text: 'El reporte se ha guardado correctamente',
+                    icon: 'success',
+                    confirmButtonColor: '#3085d6'
+                });
+                
+                hideReturnForm(false);
                 await loadReports();
                 
-                // Limpiar localStorage después de guardar
-                clearFormLocalStorage();
             } catch (error) {
                 console.error("Error al guardar el reporte:", error);
                 Swal.fire({
@@ -1606,428 +1495,18 @@
                     confirmButtonColor: '#3085d6'
                 });
             } finally {
-                // Restaurar texto del botón
                 saveReportBtn.classList.remove('btn-loading');
                 saveReportBtn.querySelector('.spinner').style.display = 'none';
                 saveReportBtn.querySelector('.btn-text').style.display = 'inline';
-                saveReportBtn.querySelector('.btn-text').innerHTML = isEditing ? '<i class="fas fa-save"></i> Actualizar' : '<i class="fas fa-save"></i> Guardar';
             }
         }
 
-        // Buscar reportes (compatible con #)
-        function searchReports() {
-            const searchInput = document.getElementById('searchInput');
-            const searchTerm = searchInput.value.trim().toLowerCase().replace('#', '');
-            
-            if (searchTerm === '') {
-                loadReports();
-                return;
-            }
-            
-            // Buscar por número de reporte (con o sin #), fecha o proveedor
-            const filteredReports = reports.filter(report => {
-                const reportId = report.id.replace('#', '').toLowerCase();
-                return reportId.includes(searchTerm) || 
-                       formatDate(report.date).toLowerCase().includes(searchTerm) ||
-                       report.supplier.toLowerCase().includes(searchTerm);
-            });
-            
-            renderReportsList(filteredReports);
-        }
+        // ========== FUNCIONES DE VISUALIZACIÓN ==========
 
-        // Cargar reportes desde Firebase
-        function loadReports() {
-            toggleInitialLoader(true); // Mostrar spinner al cargar
-            
-            db.collection("reportesMalEstado")
-                .orderBy("createdAt", "desc")
-                .get()
-                .then(querySnapshot => {
-                    reports = [];
-                    querySnapshot.forEach(doc => {
-                        const data = doc.data();
-                        // Asegurar que los productos tengan status
-                        if (data.products) {
-                            data.products.forEach(product => {
-                                if (!product.status) {
-                                    product.status = 'pending';
-                                }
-                                // Establecer tipo de recepción por defecto si no existe
-                                if (!product.receptionType) {
-                                    product.receptionType = 'received';
-                                }
-                            });
-                        }
-                        reports.push(data);
-                    });
-                    
-                    renderReportsList(reports);
-                    toggleInitialLoader(false); // Ocultar spinner cuando se cargan los datos
-                })
-                .catch(error => {
-                    console.error("Error al cargar reportes:", error);
-                    toggleInitialLoader(false); // Ocultar spinner si hay error
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'Ocurrió un error al cargar los reportes',
-                        icon: 'error',
-                        confirmButtonColor: '#3085d6'
-                    });
-                });
-        }
-
-        // Mostrar lista de reportes con los nuevos estados
-        function renderReportsList(reportsToRender = reports) {
-            const reportsList = document.getElementById('reportsList');
-            
-            if (reportsToRender.length === 0) {
-                reportsList.innerHTML = `
-                    <div class="no-reports" style="text-align: center; padding: 2.5rem; color: var(--text-light);">
-                        <i class="fas fa-box-open" style="font-size: 2.5rem; margin-bottom: 1.2rem; opacity: 0.5;"></i>
-                        <h3>No se encontraron reportes</h3>
-                        <p>No hay reportes que coincidan con tu búsqueda</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            reportsList.innerHTML = '';
-            
-            reportsToRender.forEach(report => {
-                const reportCard = document.createElement('div');
-                reportCard.className = 'report-card';
-                
-                // Contar productos por estado
-                const receivedCount = report.products ? report.products.filter(p => p.status === 'received' && p.receptionType === 'received').length : 0;
-                const creditNoteCount = report.products ? report.products.filter(p => p.status === 'received' && p.receptionType === 'credit-note').length : 0;
-                const pendingCount = report.products ? report.products.filter(p => p.status === 'pending').length : 0;
-                const cancelledCount = report.products ? report.products.filter(p => p.status === 'cancelled').length : 0;
-                const totalCount = report.products ? report.products.length : 0;
-                
-                // Verificar si tiene adjunto
-                const hasAttachment = report.attachment && report.attachment.secureUrl;
-                
-                reportCard.innerHTML = `
-                    <div class="report-header">
-                        <div>
-                            <span class="report-id">${report.id}</span>
-                            <span class="report-date">${formatDate(report.date)}</span>
-                            <div style="margin-top: 0.3rem; font-size: 0.95rem; color: ${report.status === 'cancelled' ? 'var(--danger)' : (receivedCount + creditNoteCount) === totalCount ? 'var(--success)' : 'var(--warning)'}">
-                                ${report.status === 'cancelled' ? 'ANULADO' : 
-                                 `${receivedCount + creditNoteCount}/${totalCount} productos recibidos`}
-                                ${creditNoteCount > 0 ? ` (${creditNoteCount} por Nota de Crédito)` : ''}
-                            </div>
-                            ${hasAttachment ? `
-                            <div style="margin-top: 0.3rem; font-size: 0.85rem; color: var(--primary);">
-                                <i class="fas fa-paperclip"></i> Tiene archivo adjunto
-                            </div>
-                            ` : ''}
-                        </div>
-                        <div class="dropdown" style="display: flex; gap: 0.8rem;">
-                            <button class="dropdown-btn">
-                                <i class="fas fa-ellipsis-v"></i> Acciones
-                            </button>
-                            <div class="dropdown-content">
-                                <a href="#" onclick="viewReport('${report.id}'); return false;">
-                                    <i class="fas fa-eye"></i> Ver
-                                </a>
-                                <a href="#" onclick="generatePDF('${report.id}'); return false;">
-                                    <i class="fas fa-file-pdf"></i> Generar PDF
-                                </a>
-                                ${report.status === 'active' ? `
-                                <a href="#" onclick="confirmEditReport('${report.id}'); return false;">
-                                    <i class="fas fa-edit"></i> Editar
-                                </a>
-                                <a href="#" onclick="cancelReport('${report.id}'); return false;" style="color: var(--danger);">
-                                    <i class="fas fa-ban"></i> Anular
-                                </a>
-                                ` : ''}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="report-supplier">Proveedor: ${report.supplier}</div>
-                    ${report.notes ? `<div class="report-notes">Observaciones: ${report.notes}</div>` : ''}
-                    <table class="report-products">
-                        <thead>
-                            <tr>
-                                <th style="width: 100px;">Sku</th>
-                                <th style="width: 80px;">Cód. Fábrica</th>
-                                <th>Descripción</th>
-                                <th style="width: 70px;">Cantidad</th>
-                                <th style="width: 120px;">Motivo</th>
-                                <th style="width: 120px;">Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${report.products ? report.products.map(product => `
-                                <tr>
-                                    <td>${product.sku || ''}</td>
-                                    <td>${product.factoryCode || '-'}</td>
-                                    <td>${product.description}</td>
-                                    <td>${product.quantity}</td>
-                                    <td>${product.reason}</td>
-                                    <td>
-                                        <span class="product-status status-${product.status === 'received' ? product.receptionType === 'credit-note' ? 'credit-note' : 'received' : product.status}"></span>
-                                        ${product.status === 'pending' ? 'Pendiente' : 
-                                          product.status === 'received' ? (product.receptionType === 'credit-note' ? 'Nota Crédito' : 'Recibido') : 
-                                          'Anulado'}
-                                    </td>
-                                </tr>
-                            `).join('') : ''}
-                        </tbody>
-                    </table>
-                `;
-                
-                reportsList.appendChild(reportCard);
-            });
-        }
-
-        // Formatear fecha
-        function formatDate(dateString) {
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            return new Date(dateString).toLocaleDateString('es-ES', options);
-        }
-
-        // Formatear fecha y hora
-        function formatDateTime(dateString) {
-            if (!dateString) return 'No especificada';
-            const options = { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            };
-            return new Date(dateString).toLocaleDateString('es-ES', options);
-        }
-
-        // Confirmación para editar reporte
-        window.confirmEditReport = function(reportId) {
-            Swal.fire({
-                title: '¿Editar reporte?',
-                text: '¿Estás seguro que deseas editar este reporte?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, editar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    editReport(reportId);
-                }
-            });
-        };
-
-        // Editar reporte
-        function editReport(reportId) {
-            const report = reports.find(r => r.id === reportId);
-            if (!report) return;
-            
-            if (report.status !== 'active') {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Solo se pueden editar reportes activos',
-                    icon: 'error',
-                    confirmButtonColor: '#3085d6'
-                });
-                return;
-            }
-
-            currentReportId = report.id;
-            document.getElementById('reportNumber').textContent = report.id;
-            
-            // Cambiar el texto del botón de guardar
-            document.getElementById('saveReportBtn').innerHTML = '<span class="spinner" style="display: none;"></span><span class="btn-text"><i class="fas fa-save"></i> Actualizar</span>';
-            
-            // Llenar campos del formulario
-            document.getElementById('supplier').value = report.supplier;
-            document.getElementById('reportDate').value = report.date.split('T')[0]; // Mostrar la fecha guardada
-            document.getElementById('invoiceNumber').value = report.invoiceNumber === 'XXXXX' ? '' : report.invoiceNumber;
-            document.getElementById('invoiceSeries').value = report.invoiceSeries === 'XXXXX' ? '' : report.invoiceSeries;
-            document.getElementById('notes').value = report.notes || '';
-            
-            // Cargar adjunto si existe
-            if (report.attachment) {
-                currentAttachment = report.attachment;
-                showAttachmentPreview(currentAttachment);
-            } else {
-                currentAttachment = null;
-                showAttachmentPreview(null);
-            }
-            
-            // Llenar tabla de productos
-            const tbody = document.getElementById('productsTable').querySelector('tbody');
-            tbody.innerHTML = '';
-            
-            report.products.forEach((product, index) => {
-                const newRow = document.createElement('tr');
-                newRow.innerHTML = `
-                    <td><input type="text" class="code-input" id="productSku${index+1}" name="productSku${index+1}" value="${product.sku || ''}" placeholder="Sku" maxlength="9" required></td>
-                    <td><input type="text" class="factory-code-input" id="factoryCode${index+1}" name="factoryCode${index+1}" value="${product.factoryCode || ''}" placeholder="Cód. Fab"></td>
-                    <td><input type="text" id="productDescription${index+1}" name="productDescription${index+1}" value="${product.description}" placeholder="Descripción" required></td>
-                    <td><input type="number" id="productQuantity${index+1}" name="productQuantity${index+1}" value="${product.quantity}" placeholder="0" min="1" required></td>
-                    <td><textarea class="form-control" id="productReason${index+1}" name="productReason${index+1}" placeholder="Ej: Quebrado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;">${product.reason}</textarea></td>
-                    <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
-                `;
-                tbody.appendChild(newRow);
-                
-                // Ajustar tamaño del input de código de fábrica
-                const factoryInput = newRow.querySelector('.factory-code-input');
-                resizeInput(factoryInput);
-            });
-            
-            // Agregar event listeners a los botones de eliminar
-            addDeleteRowListeners();
-            
-            // Agregar event listeners para ajustar tamaño de inputs
-            addInputResizeListeners();
-            
-            // Ocultar elementos
-            document.getElementById('reportsList').style.display = 'none';
-            document.getElementById('searchContainer').style.display = 'none';
-            document.querySelector('.header-actions').style.display = 'none';
-            document.getElementById('backButton').style.display = 'none';
-            
-            // Mostrar el formulario
-            document.getElementById('returnForm').style.display = 'block';
-            
-            // Marcar que estamos editando un reporte
-            isCreatingNewReport = true;
-            
-            // Guardar datos en localStorage
-            saveFormToLocalStorage();
-            
-            // Cerrar el modal si está abierto
-            window.closeModal();
-            
-            // Desplazar hasta el formulario
-            document.getElementById('returnForm').scrollIntoView({ behavior: 'smooth' });
-        };
-
-        // Anular reporte
-        window.cancelReport = function(reportId) {
-            Swal.fire({
-                title: '¿Anular reporte?',
-                text: '¿Estás seguro que deseas anular este reporte? Esta acción no se puede deshacer.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, anular',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    db.collection("reportesMalEstado").doc(reportId)
-                        .update({
-                            status: 'cancelled',
-                            cancelledAt: firebase.firestore.FieldValue.serverTimestamp()
-                        })
-                        .then(() => {
-                            // Actualizar el estado de todos los productos a 'cancelled'
-                            const report = reports.find(r => r.id === reportId);
-                            if (report && report.products) {
-                                report.products.forEach(product => {
-                                    product.status = 'cancelled';
-                                });
-                                return db.collection("reportesMalEstado").doc(reportId)
-                                    .update({
-                                        products: report.products
-                                    });
-                            }
-                            return Promise.resolve();
-                        })
-                        .then(() => {
-                            Swal.fire({
-                                title: 'Reporte anulado',
-                                text: 'El reporte ha sido anulado correctamente',
-                                icon: 'success',
-                                confirmButtonColor: '#3085d6'
-                            }).then(() => {
-                                loadReports();
-                                window.closeModal();
-                            });
-                        })
-                        .catch(error => {
-                            console.error("Error al anular el reporte:", error);
-                            Swal.fire({
-                                title: 'Error',
-                                text: 'Ocurrió un error al anular el reporte',
-                                icon: 'error',
-                                confirmButtonColor: '#3085d6'
-                            });
-                        });
-                }
-            });
-        };
-
-        // Función para actualizar el estado del producto con tipo de recepción
-        function updateProductStatus(reportId, productIndex, newStatus, receptionType = 'received') {
-            const report = reports.find(r => r.id === reportId);
-            if (!report || !report.products || !report.products[productIndex]) return;
-            
-            const product = report.products[productIndex];
-            
-            // Actualizar estado del producto
-            product.status = newStatus;
-            if (newStatus === 'received') {
-                product.receivedDate = new Date().toISOString();
-                product.receptionType = receptionType;
-            } else {
-                product.receivedDate = null;
-                product.receptionType = null;
-            }
-            
-            // Actualizar en Firebase
-            db.collection("reportesMalEstado").doc(reportId)
-                .update({
-                    products: report.products
-                })
-                .then(() => {
-                    // Verificar si todos los productos están recibidos
-                    const allReceived = report.products.every(p => p.status === 'received');
-                    if (allReceived) {
-                        return db.collection("reportesMalEstado").doc(reportId)
-                            .update({
-                                status: 'completed',
-                                completedAt: firebase.firestore.FieldValue.serverTimestamp()
-                            });
-                    } else if (report.status === 'completed') {
-                        // Si ya estaba completado pero ahora no todos están recibidos
-                        return db.collection("reportesMalEstado").doc(reportId)
-                            .update({
-                                status: 'active',
-                                completedAt: firebase.firestore.FieldValue.delete()
-                            });
-                    }
-                    return Promise.resolve();
-                })
-                .then(() => {
-                    loadReports();
-                    // Volver a abrir el modal para ver los cambios
-                    const currentModalReport = reports.find(r => r.id === reportId);
-                    if (currentModalReport) {
-                        viewReport(reportId);
-                    }
-                })
-                .catch(error => {
-                    console.error("Error al actualizar el producto:", error);
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'Ocurrió un error al actualizar el producto',
-                        icon: 'error',
-                        confirmButtonColor: '#3085d6'
-                    });
-                });
-        }
-
-        // Ver reporte completo en modal con los nuevos estados
+        // Ver reporte completo en modal
         window.viewReport = function(reportId) {
             const report = reports.find(r => r.id === reportId);
             if (!report) return;
-            
-            // Verificar si tiene adjunto
-            const hasAttachment = report.attachment && report.attachment.secureUrl;
             
             document.getElementById('modalReportContent').innerHTML = `
                 <div class="report-header">
@@ -2036,14 +1515,7 @@
                         <span class="report-date">${formatDate(report.date)}</span>
                         <div style="margin-top: 0.3rem; font-size: 0.95rem; color: ${report.status === 'cancelled' ? 'var(--danger)' : report.status === 'completed' ? 'var(--success)' : 'var(--warning)'}">
                             Estado: ${report.status === 'active' ? 'Activo' : report.status === 'cancelled' ? 'ANULADO' : 'Completado'}
-                            ${report.cancelledAt ? `<span class="status-date">Anulado el: ${formatDateTime(report.cancelledAt.toDate ? report.cancelledAt.toDate().toISOString() : report.cancelledAt)}</span>` : ''}
-                            ${report.completedAt ? `<span class="status-date">Completado el: ${formatDateTime(report.completedAt.toDate ? report.completedAt.toDate().toISOString() : report.completedAt)}</span>` : ''}
                         </div>
-                        ${hasAttachment ? `
-                        <div style="margin-top: 0.3rem; font-size: 0.85rem; color: var(--primary);">
-                            <i class="fas fa-paperclip"></i> Tiene archivo adjunto
-                        </div>
-                        ` : ''}
                     </div>
                 </div>
                 <div class="form-group">
@@ -2068,23 +1540,15 @@
                     <div class="form-control" style="background: #f8f9fa; min-height: auto;">${report.notes}</div>
                 </div>
                 ` : ''}
-                ${hasAttachment ? `
+                ${report.attachmentUrl ? `
                 <div class="form-group">
                     <label>Archivo Adjunto</label>
-                    <div class="attachment-preview">
-                        <i class="fas fa-file-pdf" style="font-size: 2rem; color: #e74c3c;"></i>
-                        <div class="attachment-info">
-                            <div class="attachment-name">${report.attachment.originalName}.${report.attachment.format}</div>
-                            <div class="attachment-size">${formatFileSize(report.attachment.size)}</div>
-                        </div>
-                        <div class="attachment-actions">
-                            <button class="attachment-btn" onclick="viewAttachment('${report.attachment.secureUrl}')" title="Ver archivo">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="attachment-btn" onclick="downloadAttachment('${report.attachment.secureUrl}', '${report.attachment.originalName}.${report.attachment.format}')" title="Descargar archivo">
-                                <i class="fas fa-download"></i>
-                            </button>
-                        </div>
+                    <div class="attachment-info" style="margin-top: 0.5rem;">
+                        <i class="fas fa-paperclip"></i>
+                        <span>Archivo adjunto:</span>
+                        <a href="${report.attachmentUrl}" target="_blank" class="attachment-link">
+                            <i class="fas fa-file-pdf"></i> ${report.attachmentName || 'Ver archivo'}
+                        </a>
                     </div>
                 </div>
                 ` : ''}
@@ -2099,7 +1563,6 @@
                                 <th style="width: 70px;">Cantidad</th>
                                 <th style="width: 120px;">Motivo</th>
                                 <th style="width: 120px;">Estado</th>
-                                ${report.status === 'active' ? '<th style="width: 90px;">Acción</th>' : ''}
                             </tr>
                         </thead>
                         <tbody>
@@ -2117,23 +1580,6 @@
                                           'Anulado'}
                                         ${product.receivedDate ? `<span class="status-date">Recibido el: ${formatDateTime(product.receivedDate)}</span>` : ''}
                                     </td>
-                                    ${report.status === 'active' ? `
-                                    <td>
-                                        <div class="dropdown">
-                                            <button class="btn ${product.status === 'pending' ? 'btn-success' : 'btn-secondary'}" style="padding: 0.3rem 0.6rem; font-size: 0.85rem;">
-                                                <i class="fas fa-check"></i> ${product.status === 'pending' ? 'Recibir' : ''}
-                                            </button>
-                                            <div class="dropdown-content" style="min-width: 120px;">
-                                                <a href="#" onclick="updateProductStatus('${report.id}', ${index}, 'received', 'received'); return false;">
-                                                    <i class="fas fa-check" style="color: var(--success);"></i> Recibido
-                                                </a>
-                                                <a href="#" onclick="updateProductStatus('${report.id}', ${index}, 'received', 'credit-note'); return false;">
-                                                    <i class="fas fa-file-invoice" style="color: var(--primary);"></i> Nota Crédito
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    ` : ''}
                                 </tr>
                             `).join('') : ''}
                         </tbody>
@@ -2147,11 +1593,8 @@
                     Generar PDF
                 </button>
                 ${report.status === 'active' ? `
-                <button class="btn btn-secondary" onclick="confirmEditReport('${report.id}')">
-                    <i class="fas fa-edit"></i> Editar
-                </button>
-                <button class="btn btn-danger" onclick="cancelReport('${report.id}')">
-                    <i class="fas fa-ban"></i> Anular
+                <button class="btn btn-attachment" onclick="attachFile('${report.id}')">
+                    <i class="fas fa-paperclip"></i> Adjuntar Archivo
                 </button>
                 ` : ''}
                 <button class="btn" onclick="window.closeModal()">
@@ -2164,7 +1607,7 @@
             document.body.style.overflow = 'hidden';
         };
 
-        // Generar PDF del reporte con ajustes de texto
+        // Generar PDF del reporte
         window.generatePDF = function(reportId) {
             const report = reports.find(r => r.id === reportId);
             if (!report) return;
@@ -2172,87 +1615,43 @@
             try {
                 const doc = new jsPDF();
                 
-                // Configuración de márgenes
+                // Configuración básica del PDF
                 const marginLeft = 15;
                 const marginRight = 15;
                 const pageWidth = doc.internal.pageSize.getWidth();
-                const contentWidth = pageWidth - marginLeft - marginRight;
                 
-                // Agregar logo de la empresa
-                if (companyLogo.complete) {
-                    doc.addImage(companyLogo, 'PNG', marginLeft, 10, 35, 20);
-                }
-                
-                // Título del documento
+                // Título
                 doc.setFontSize(14);
                 doc.setFont('helvetica', 'bold');
                 doc.text(companyName, pageWidth / 2, 20, { align: 'center' });
                 
-                // Título del documento
                 doc.setFontSize(12);
                 doc.setFont('helvetica', 'normal');
                 doc.text('Nota de Cambios y/o devoluciones.', pageWidth / 2, 30, { align: 'center' });
                 
-                // Línea separadora
-                doc.setDrawColor(200, 200, 200);
-                doc.line(marginLeft, 35, pageWidth - marginRight, 35);
-                
                 // Información del reporte
                 doc.setFontSize(10);
-                let yPosition = companyLogo.complete ? 50 : 45;
+                let yPosition = 50;
                 
-                // Textos alineados a la izquierda
-                const leftTexts = [
-                    `Proveedor: ${report.supplier}`,
-                    `Número de Factura: ${report.invoiceNumber}`,
-                    `Serie de Factura: ${report.invoiceSeries}`
-                ];
+                doc.text(`Proveedor: ${report.supplier}`, marginLeft, yPosition);
+                doc.text(`Número de Reporte: ${report.id}`, pageWidth - marginRight - 60, yPosition);
                 
-                // Textos alineados a la derecha
-                const rightTexts = [
-                    `Número de Reporte: ${report.id}`,
-                    `Fecha de Reporte: ${formatDate(report.date)}`
-                ];
+                yPosition += 10;
+                doc.text(`Fecha de Reporte: ${formatDate(report.date)}`, marginLeft, yPosition);
+                doc.text(`Factura: ${report.invoiceNumber} / ${report.invoiceSeries}`, pageWidth - marginRight - 60, yPosition);
                 
-                // Calcular posición vertical para alinear ambos lados
-                const lineHeight = 7;
-                const maxLines = Math.max(leftTexts.length, rightTexts.length);
+                yPosition += 15;
                 
-                for (let i = 0; i < maxLines; i++) {
-                    if (i < leftTexts.length) {
-                        doc.text(leftTexts[i], marginLeft, yPosition + (i * lineHeight));
-                    }
-                    
-                    if (i < rightTexts.length) {
-                        const text = rightTexts[i];
-                        const textWidth = doc.getStringUnitWidth(text) * doc.internal.getFontSize() / doc.internal.scaleFactor;
-                        doc.text(text, pageWidth - marginRight - textWidth, yPosition + (i * lineHeight));
-                    }
-                }
-                
-                yPosition += (maxLines * lineHeight) + 10;
-                
-                if (report.notes) {
-                    const splitNotes = doc.splitTextToSize(`Observaciones: ${report.notes}`, contentWidth);
-                    doc.text(splitNotes, marginLeft, yPosition);
-                    yPosition += splitNotes.length * 5 + 10;
-                } else {
-                    yPosition += 10;
-                }
-                
-                // Tabla de productos con bordes y ajuste de texto
+                // Tabla de productos
                 const tableData = report.products ? report.products.map(product => [
                     product.sku || '',
                     product.factoryCode || '-',
-                    { content: product.description, styles: { cellWidth: 'auto', fontStyle: 'normal' } },
-                    { content: product.quantity.toString(), styles: { halign: 'center' } },
-                    { content: product.reason, styles: { cellWidth: 30, fontStyle: 'normal' } },
-                    { 
-                        content: product.status === 'pending' ? 'Pendiente' : 
-                                product.status === 'received' ? (product.receptionType === 'credit-note' ? 'Nota Crédito' : `Recibido\n${formatDateTime(product.receivedDate)}`) : 
-                                'Anulado',
-                        styles: { cellWidth: 30, fontStyle: 'normal' }
-                    }
+                    product.description,
+                    product.quantity.toString(),
+                    product.reason,
+                    product.status === 'pending' ? 'Pendiente' : 
+                    product.status === 'received' ? (product.receptionType === 'credit-note' ? 'Nota Crédito' : 'Recibido') : 
+                    'Anulado'
                 ]) : [];
                 
                 doc.autoTable({
@@ -2263,48 +1662,15 @@
                     styles: {
                         fontSize: 9,
                         cellPadding: 3,
-                        valign: 'middle',
-                        lineWidth: 0.2,
-                        lineColor: 50,
-                        overflow: 'linebreak'
                     },
                     headStyles: {
                         fillColor: [67, 97, 238],
                         textColor: 255,
                         fontStyle: 'bold',
-                        lineWidth: 0.2
-                    },
-                    bodyStyles: {
-                        lineWidth: 0.2
-                    },
-                    columnStyles: {
-                        0: { cellWidth: 20, halign: 'center' },
-                        1: { cellWidth: 20, halign: 'center' },
-                        2: { cellWidth: 'auto', halign: 'left' },
-                        3: { cellWidth: 20, halign: 'center' },
-                        4: { cellWidth: 30, halign: 'left' },
-                        5: { cellWidth: 30, halign: 'left' }
-                    },
-                    didDrawCell: (data) => {
-                        // Ajustar altura de celda si el contenido es muy largo
-                        if (data.section === 'body' && data.column.index === 2) {
-                            const lines = data.cell.text.length / 30; // Aproximación de líneas
-                            if (lines > 1) {
-                                data.row.height = lines * 7;
-                            }
-                        }
                     }
                 });
                 
-                // Firmas más separadas y con letra más grande
-                const lastY = doc.lastAutoTable.finalY + 30;
-                
-                doc.setFontSize(14);
-                doc.text('Fecha de Entrega: ________________________', marginLeft, lastY);
-                doc.text('Recibe: _________________________________', marginLeft, lastY + 20);
-                doc.text('Entrega: ________________________________', marginLeft, lastY + 40);
-                
-                // Guardar PDF con el nuevo nombre
+                // Guardar PDF
                 const fileName = `NotaDeCambio${report.id}_${report.supplier.replace(/\s+/g, '_')}.pdf`;
                 doc.save(fileName);
             } catch (error) {
@@ -2318,42 +1684,89 @@
             }
         };
 
-        // Inicialización cuando el DOM está listo
-        document.addEventListener('DOMContentLoaded', () => {
-            // Inicializar Cloudinary Upload Widget
-            const cloudinaryWidget = setupCloudinaryWidget();
+        // ========== INICIALIZACIÓN COMPLETA ==========
+
+        // Guardar adjunto en el reporte
+        document.getElementById('saveAttachmentBtn').addEventListener('click', function() {
+            if (!currentReportForAttachment || !currentAttachmentUrl) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No hay archivo para adjuntar',
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
             
-            // Event listeners para el buscador
-            document.getElementById('searchInput').addEventListener('input', function() {
-                document.getElementById('searchClear').style.display = this.value ? 'block' : 'none';
-                if (!this.value) searchReports();
-            });
+            const saveBtn = this;
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+            saveBtn.disabled = true;
+            
+            db.collection("reportesMalEstado").doc(currentReportForAttachment)
+                .update({
+                    attachmentUrl: currentAttachmentUrl,
+                    attachmentName: currentAttachmentName,
+                    attachmentDate: firebase.firestore.FieldValue.serverTimestamp()
+                })
+                .then(() => {
+                    Swal.fire({
+                        title: 'Archivo adjuntado',
+                        text: 'El archivo se ha adjuntado correctamente al reporte',
+                        icon: 'success',
+                        confirmButtonColor: '#3085d6'
+                    }).then(() => {
+                        window.closeAttachmentModal();
+                        loadReports();
+                        if (document.getElementById('reportModal').style.display === 'flex') {
+                            viewReport(currentReportForAttachment);
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error("Error al adjuntar archivo:", error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Ocurrió un error al adjuntar el archivo',
+                        icon: 'error',
+                        confirmButtonColor: '#3085d6'
+                    });
+                })
+                .finally(() => {
+                    saveBtn.innerHTML = originalText;
+                    saveBtn.disabled = false;
+                });
+        });
 
-            document.getElementById('searchClear').addEventListener('click', function() {
-                document.getElementById('searchInput').value = '';
-                this.style.display = 'none';
-                searchReports();
-            });
+        // Event listener para el input de archivo
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFileUpload(file);
+            }
+        });
 
+        // Inicialización cuando el DOM está listo
+        document.addEventListener('DOMContentLoaded', function() {
             // Event listeners principales
             document.getElementById('newReportBtn').addEventListener('click', showNewReportForm);
             document.getElementById('cancelReportBtn').addEventListener('click', () => hideReturnForm(true));
             document.getElementById('saveReportBtn').addEventListener('click', saveReport);
             document.getElementById('addRowBtn').addEventListener('click', addProductRow);
+            
+            // Event listeners para modales
             document.getElementById('reportModal').addEventListener('click', (e) => {
                 if (e.target === document.getElementById('reportModal')) window.closeModal();
             });
+            document.getElementById('attachmentModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('attachmentModal')) window.closeAttachmentModal();
+            });
+            
+            // Event listeners para búsqueda
             document.getElementById('searchBtn').addEventListener('click', searchReports);
             document.getElementById('searchInput').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') searchReports();
             });
-
-            // Event listeners para adjuntos
-            document.getElementById('uploadAttachmentBtn').addEventListener('click', () => {
-                cloudinaryWidget.open();
-            });
-            
-            document.getElementById('removeAttachmentBtn').addEventListener('click', removeAttachment);
 
             // Convertir automáticamente a mayúsculas mientras se escribe
             document.addEventListener('input', function(e) {
@@ -2362,28 +1775,57 @@
                 }
             });
 
-            // Guardar datos del formulario periódicamente
-            setInterval(saveFormToLocalStorage, 3000);
-
             // Cargar reportes al iniciar
             loadReports();
-            
-            // Intentar cargar formulario guardado en localStorage
-            loadFormFromLocalStorage();
-            
-            // Guardar datos antes de recargar o cerrar la página
-            window.addEventListener('beforeunload', function(e) {
-                if (isCreatingNewReport) {
-                    saveFormToLocalStorage();
-                    // Mostrar mensaje de confirmación solo si hay datos sin guardar
-                    const formData = localStorage.getItem('currentReportForm');
-                    if (formData) {
-                        e.preventDefault();
-                        e.returnValue = 'Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?';
-                    }
-                }
-            });
         });
+
+        // Función de búsqueda
+        function searchReports() {
+            const searchInput = document.getElementById('searchInput');
+            const searchTerm = searchInput.value.trim().toLowerCase().replace('#', '');
+            
+            if (searchTerm === '') {
+                loadReports();
+                return;
+            }
+            
+            const filteredReports = reports.filter(report => {
+                const reportId = report.id.replace('#', '').toLowerCase();
+                return reportId.includes(searchTerm) || 
+                       formatDate(report.date).toLowerCase().includes(searchTerm) ||
+                       report.supplier.toLowerCase().includes(searchTerm);
+            });
+            
+            renderReportsList(filteredReports);
+        }
+
+        // Funciones placeholder para acciones no implementadas
+        window.confirmEditReport = function(reportId) {
+            Swal.fire({
+                title: 'Función no implementada',
+                text: 'La edición de reportes no está implementada en esta versión',
+                icon: 'info',
+                confirmButtonColor: '#3085d6'
+            });
+        };
+
+        window.cancelReport = function(reportId) {
+            Swal.fire({
+                title: 'Función no implementada',
+                text: 'La anulación de reportes no está implementada en esta versión',
+                icon: 'info',
+                confirmButtonColor: '#3085d6'
+            });
+        };
+
+        window.updateProductStatus = function(reportId, productIndex, newStatus, receptionType) {
+            Swal.fire({
+                title: 'Función no implementada',
+                text: 'La actualización de estado de productos no está implementada en esta versión',
+                icon: 'info',
+                confirmButtonColor: '#3085d6'
+            });
+        };
     </script>
 </body>
 </html>
