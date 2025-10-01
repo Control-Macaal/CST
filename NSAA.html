@@ -1004,21 +1004,20 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label>Seleccionar archivo PDF</label>
-                    <div style="margin-top: 0.5rem;">
-                        <input type="file" id="fileInput" accept=".pdf" style="display: none;">
-                        <button class="btn btn-attachment" id="uploadFileBtn">
+                    <div id="uploadWidgetContainer" style="margin-top: 0.5rem;">
+                        <button class="btn btn-attachment" id="uploadWidgetBtn">
                             <i class="fas fa-cloud-upload-alt"></i> Subir Archivo
                         </button>
                     </div>
-                    <div id="uploadStatus" style="display: none;">
+                    <div id="uploadStatus" style="margin-top: 1rem; display: none;">
                         <div class="upload-info">
                             <h4><i class="fas fa-check-circle"></i> Archivo subido correctamente</h4>
                             <p><strong>Nombre:</strong> <span id="uploadFileName">archivo.pdf</span></p>
                             <p><strong>Tamaño:</strong> <span id="uploadFileSize">0 KB</span></p>
                             <p><strong>Tipo:</strong> <span id="uploadFileType">PDF</span> <span class="file-type-badge" id="fileTypeBadge">PDF</span></p>
                         </div>
-                        <div style="margin-top: 1.5rem; text-align: right;">
-                            <button class="btn btn-success" id="saveAttachmentBtn">
+                        <div style="margin-top: 1rem;">
+                            <button class="btn btn-success" id="saveAttachmentBtn" style="display: none;">
                                 <i class="fas fa-save"></i> Guardar Adjunto
                             </button>
                         </div>
@@ -1038,6 +1037,13 @@
             messagingSenderId: "324827723523",
             appId: "1:324827723523:web:09519c3cacff88759c9b36",
             measurementId: "G-VX2Z79123W"
+        };
+
+        // Configuración de Cloudinary
+        const cloudinaryConfig = {
+            cloudName: 'dnho7qdz3',
+            apiKey: '128857923119499',
+            uploadPreset: 'notas_cambio_macaal'
         };
 
         // Inicializa Firebase
@@ -1081,7 +1087,7 @@
             currentAttachmentName = null;
             currentAttachmentSize = null;
             document.getElementById('uploadStatus').style.display = 'none';
-            document.getElementById('fileInput').value = '';
+            document.getElementById('saveAttachmentBtn').style.display = 'none';
         };
 
         // Función para alternar el desplegable de filtros
@@ -1129,7 +1135,7 @@
             return 'Archivo';
         }
 
-        // Filtrar reportes por estado
+        // Filtrar reportes por estado - CORREGIDO
         function filterReports() {
             const showCompleted = document.getElementById('filterCompleted').checked;
             const showPending = document.getElementById('filterPending').checked;
@@ -1140,31 +1146,34 @@
             
             let filteredReports = reports;
             
-            // Si todos los filtros están desactivados, mostrar todos los reportes
-            if (!showCompleted && !showPending && !showCancelled) {
-                filteredReports = reports;
-            } else {
-                // Aplicar filtros de estado
-                filteredReports = filteredReports.filter(report => {
-                    if (report.status === 'cancelled') return showCancelled;
-                    
-                    // Contar productos por estado
-                    const receivedCount = report.products ? report.products.filter(p => p.status === 'received').length : 0;
-                    const totalCount = report.products ? report.products.length : 0;
-                    const isCompleted = receivedCount === totalCount;
-                    
-                    if (isCompleted) return showCompleted;
+            // Aplicar filtros de estado - CORREGIDO
+            filteredReports = filteredReports.filter(report => {
+                if (report.status === 'cancelled') {
+                    return showCancelled;
+                }
+                
+                // Contar productos por estado
+                const receivedCount = report.products ? report.products.filter(p => p.status === 'received').length : 0;
+                const totalCount = report.products ? report.products.length : 0;
+                const isCompleted = receivedCount === totalCount && totalCount > 0;
+                
+                if (isCompleted) {
+                    return showCompleted;
+                } else {
                     return showPending;
-                });
-            }
+                }
+            });
             
             // Aplicar búsqueda si hay término
             if (searchTerm) {
                 filteredReports = filteredReports.filter(report => {
                     const reportId = report.id.replace('#', '').toLowerCase();
+                    const reportDate = formatDate(report.date).toLowerCase();
+                    const reportSupplier = report.supplier.toLowerCase();
+                    
                     return reportId.includes(searchTerm) || 
-                           formatDate(report.date).toLowerCase().includes(searchTerm) ||
-                           report.supplier.toLowerCase().includes(searchTerm);
+                           reportDate.includes(searchTerm) ||
+                           reportSupplier.includes(searchTerm);
                 });
             }
             
@@ -1193,54 +1202,69 @@
             }
         }
 
-        // Función para manejar la subida de archivos local
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            // Validar que sea PDF
-            if (file.type !== 'application/pdf') {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Solo se permiten archivos PDF',
-                    icon: 'error',
-                    confirmButtonColor: '#3085d6'
-                });
-                return;
-            }
-            
-            // Validar tamaño (5MB máximo)
-            if (file.size > 5 * 1024 * 1024) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'El archivo es demasiado grande. Máximo 5MB',
-                    icon: 'error',
-                    confirmButtonColor: '#3085d6'
-                });
-                return;
-            }
-            
-            // Simular subida de archivo
-            currentAttachmentName = file.name;
-            currentAttachmentSize = file.size;
-            
-            // Mostrar información del archivo
-            document.getElementById('uploadFileName').textContent = currentAttachmentName;
-            document.getElementById('uploadFileSize').textContent = formatFileSize(currentAttachmentSize);
-            document.getElementById('uploadFileType').textContent = 'PDF';
-            document.getElementById('fileTypeBadge').textContent = 'PDF';
-            
-            document.getElementById('uploadStatus').style.display = 'block';
-            
-            // Simular URL de archivo subido
-            currentAttachmentUrl = URL.createObjectURL(file);
-            
-            Swal.fire({
-                title: 'Archivo listo',
-                text: 'El archivo está listo para ser adjuntado al reporte',
-                icon: 'success',
-                confirmButtonColor: '#3085d6'
+        // Función para manejar la subida de archivos con Cloudinary
+        function handleCloudinaryUpload() {
+            const uploadWidget = cloudinary.createUploadWidget({
+                cloudName: cloudinaryConfig.cloudName,
+                uploadPreset: cloudinaryConfig.uploadPreset,
+                sources: ['local'],
+                resourceType: 'raw',
+                clientAllowedFormats: ['pdf'],
+                maxFileSize: 5000000, // 5MB
+                multiple: false,
+                cropping: false,
+                showAdvancedOptions: false,
+                styles: {
+                    palette: {
+                        window: "#F5F5F5",
+                        sourceBg: "#FFFFFF",
+                        windowBorder: "#90a0b3",
+                        tabIcon: "#0094c7",
+                        inactiveTabIcon: "#69778A",
+                        menuIcons: "#0094C7",
+                        link: "#53ad9d",
+                        action: "#8F5DA5",
+                        inProgress: "#0194c7",
+                        complete: "#53ad9d",
+                        error: "#c43737",
+                        textDark: "#000000",
+                        textLight: "#FFFFFF"
+                    }
+                }
+            }, (error, result) => {
+                if (!error && result && result.event === "success") {
+                    currentAttachmentUrl = result.info.secure_url;
+                    currentAttachmentName = result.info.original_filename;
+                    currentAttachmentSize = result.info.bytes;
+                    
+                    // Mostrar información del archivo subido
+                    document.getElementById('uploadFileName').textContent = currentAttachmentName;
+                    document.getElementById('uploadFileSize').textContent = formatFileSize(currentAttachmentSize);
+                    document.getElementById('uploadFileType').textContent = getFileType(result.info.resource_type);
+                    document.getElementById('fileTypeBadge').textContent = getFileType(result.info.resource_type);
+                    
+                    document.getElementById('uploadStatus').style.display = 'block';
+                    document.getElementById('saveAttachmentBtn').style.display = 'block';
+                    
+                    Swal.fire({
+                        title: 'Archivo subido correctamente',
+                        text: 'El archivo se ha subido correctamente. Haz clic en "Guardar Adjunto" para asociarlo al reporte.',
+                        icon: 'success',
+                        confirmButtonColor: '#3085d6'
+                    });
+                } else if (error) {
+                    console.error("Error al subir archivo:", error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Ocurrió un error al subir el archivo',
+                        icon: 'error',
+                        confirmButtonColor: '#3085d6'
+                    });
+                }
             });
+            
+            // Abrir el widget de Cloudinary
+            uploadWidget.open();
         }
 
         // Guardar datos del formulario en localStorage
@@ -1841,15 +1865,17 @@
                 const pendingCount = report.products ? report.products.filter(p => p.status === 'pending').length : 0;
                 const cancelledCount = report.products ? report.products.filter(p => p.status === 'cancelled').length : 0;
                 const totalCount = report.products ? report.products.length : 0;
+                const isCompleted = (receivedCount + creditNoteCount) === totalCount && totalCount > 0;
                 
                 reportCard.innerHTML = `
                     <div class="report-header">
                         <div>
                             <span class="report-id">${report.id}</span>
                             <span class="report-date">${formatDate(report.date)}</span>
-                            <div style="margin-top: 0.3rem; font-size: 0.95rem; color: ${report.status === 'cancelled' ? 'var(--danger)' : (receivedCount + creditNoteCount) === totalCount ? 'var(--success)' : 'var(--warning)'}">
+                            <div style="margin-top: 0.3rem; font-size: 0.95rem; color: ${report.status === 'cancelled' ? 'var(--danger)' : isCompleted ? 'var(--success)' : 'var(--warning)'}">
                                 ${report.status === 'cancelled' ? 'ANULADO' : 
-                                 `${receivedCount + creditNoteCount}/${totalCount} productos recibidos`}
+                                 isCompleted ? 'COMPLETADO' : 'PENDIENTE'}
+                                ${isCompleted ? ` (${receivedCount + creditNoteCount}/${totalCount} productos recibidos)` : ` (${receivedCount + creditNoteCount}/${totalCount} productos recibidos)`}
                                 ${creditNoteCount > 0 ? ` (${creditNoteCount} por Nota de Crédito)` : ''}
                             </div>
                         </div>
@@ -2292,7 +2318,7 @@
             
             // Resetear el estado del modal
             document.getElementById('uploadStatus').style.display = 'none';
-            document.getElementById('fileInput').value = '';
+            document.getElementById('saveAttachmentBtn').style.display = 'none';
             currentAttachmentUrl = null;
             currentAttachmentName = null;
             currentAttachmentSize = null;
@@ -2518,12 +2544,8 @@
             // Event listener para el botón de filtros (CLICK)
             document.getElementById('filterBtn').addEventListener('click', toggleFilterDropdown);
 
-            // Event listener para subir archivo local
-            document.getElementById('uploadFileBtn').addEventListener('click', function() {
-                document.getElementById('fileInput').click();
-            });
-
-            document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+            // Event listener para subir archivo con Cloudinary
+            document.getElementById('uploadWidgetBtn').addEventListener('click', handleCloudinaryUpload);
 
             // Event listeners principales
             document.getElementById('newReportBtn').addEventListener('click', showNewReportForm);
