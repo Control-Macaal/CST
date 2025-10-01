@@ -150,12 +150,47 @@
             background: var(--primary-hover);
         }
 
-        /* Filtros de estado */
-        .filter-container {
+        /* Filtros de estado - BOTÓN DESPLEGABLE */
+        .filter-dropdown {
+            position: relative;
+            display: inline-block;
             margin-bottom: 1.5rem;
+        }
+
+        .filter-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.2rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
             display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .filter-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .filter-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 220px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 100;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            top: 100%;
+            left: 0;
+            margin-top: 0.5rem;
+        }
+
+        .filter-dropdown:hover .filter-content {
+            display: block;
         }
 
         .filter-checkbox {
@@ -163,15 +198,14 @@
             align-items: center;
             gap: 0.5rem;
             cursor: pointer;
-            padding: 0.5rem 1rem;
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
+            padding: 0.5rem 0;
             transition: var(--transition);
         }
 
         .filter-checkbox:hover {
             background: #f5f5f5;
+            border-radius: 4px;
+            padding: 0.5rem;
         }
 
         .filter-checkbox input[type="checkbox"] {
@@ -316,7 +350,7 @@
             resize: none;
             font-size: 0.9rem;
             text-transform: none;
-            overflow: hidden; /* Elimina las flechitas de scroll */
+            overflow: hidden;
         }
 
         .products-table {
@@ -437,7 +471,7 @@
             border-left: 4px solid transparent;
         }
 
-        /* Eliminado el fondo amarillo para reportes con archivos adjuntos */
+        /* SOLO borde izquierdo dorado para archivos adjuntos */
         .report-card.has-attachment {
             border-left-color: var(--attachment);
         }
@@ -574,51 +608,62 @@
         }
 
         .modal-body .form-group {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0.8rem;
+            margin-bottom: 1rem;
         }
 
         .modal-body .form-group label {
-            min-width: 120px;
-            margin-bottom: 0;
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
             font-size: 0.9rem;
         }
 
         .modal-body .form-control {
-            flex: 1;
+            width: 100%;
             padding: 0.6rem;
             font-size: 0.9rem;
         }
 
-        /* Estilos para la información del archivo subido */
+        /* Estilos para la información del archivo subido - MÁS SEPARADO */
         .upload-info {
             background: #f8f9fa;
             border-radius: var(--border-radius);
-            padding: 1rem;
-            margin-top: 1rem;
+            padding: 1.5rem;
+            margin: 2rem 0 1rem 0;
             border-left: 4px solid var(--success);
+            border: 1px solid #e9ecef;
         }
 
         .upload-info h4 {
             color: var(--success);
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .upload-info p {
-            margin-bottom: 0.3rem;
-            font-size: 0.9rem;
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .upload-info strong {
+            min-width: 80px;
+            display: inline-block;
         }
 
         .file-type-badge {
             display: inline-block;
-            padding: 0.2rem 0.5rem;
+            padding: 0.3rem 0.8rem;
             background: var(--primary);
             color: white;
-            border-radius: 4px;
+            border-radius: 20px;
             font-size: 0.8rem;
-            margin-left: 0.5rem;
+            margin-left: 0.8rem;
+            font-weight: 500;
         }
 
         /* Dropdown de acciones */
@@ -747,8 +792,10 @@
                 left: 0;
             }
 
-            .filter-container {
-                flex-direction: column;
+            .filter-content {
+                left: 0;
+                right: auto;
+                min-width: 200px;
             }
         }
     </style>
@@ -789,19 +836,24 @@
             </button>
         </div>
 
-        <!-- Filtros de estado -->
-        <div class="filter-container" id="filterContainer">
-            <div class="filter-checkbox">
-                <input type="checkbox" id="filterCompleted" checked>
-                <label for="filterCompleted">Reportes Completos</label>
-            </div>
-            <div class="filter-checkbox">
-                <input type="checkbox" id="filterPending" checked>
-                <label for="filterPending">Reportes Pendientes</label>
-            </div>
-            <div class="filter-checkbox">
-                <input type="checkbox" id="filterCancelled" checked>
-                <label for="filterCancelled">Reportes Anulados</label>
+        <!-- Filtros de estado - BOTÓN DESPLEGABLE -->
+        <div class="filter-dropdown">
+            <button class="filter-btn">
+                <i class="fas fa-filter"></i> Filtros
+            </button>
+            <div class="filter-content">
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="filterCompleted" checked>
+                    <label for="filterCompleted">Reportes Completos</label>
+                </div>
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="filterPending" checked>
+                    <label for="filterPending">Reportes Pendientes</label>
+                </div>
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="filterCancelled" checked>
+                    <label for="filterCancelled">Reportes Anulados</label>
+                </div>
             </div>
         </div>
 
@@ -917,20 +969,21 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label>Seleccionar archivo PDF</label>
-                    <div id="uploadWidgetContainer" style="margin-top: 0.5rem;">
-                        <button class="btn btn-attachment" id="uploadWidgetBtn">
+                    <div style="margin-top: 0.5rem;">
+                        <input type="file" id="fileInput" accept=".pdf" style="display: none;">
+                        <button class="btn btn-attachment" id="uploadFileBtn">
                             <i class="fas fa-cloud-upload-alt"></i> Subir Archivo
                         </button>
                     </div>
-                    <div id="uploadStatus" style="margin-top: 1rem; display: none;">
+                    <div id="uploadStatus" style="display: none;">
                         <div class="upload-info">
                             <h4><i class="fas fa-check-circle"></i> Archivo subido correctamente</h4>
                             <p><strong>Nombre:</strong> <span id="uploadFileName">archivo.pdf</span></p>
                             <p><strong>Tamaño:</strong> <span id="uploadFileSize">0 KB</span></p>
                             <p><strong>Tipo:</strong> <span id="uploadFileType">PDF</span> <span class="file-type-badge" id="fileTypeBadge">PDF</span></p>
                         </div>
-                        <div style="margin-top: 1rem;">
-                            <button class="btn btn-success" id="saveAttachmentBtn" style="display: none;">
+                        <div style="margin-top: 1.5rem; text-align: right;">
+                            <button class="btn btn-success" id="saveAttachmentBtn">
                                 <i class="fas fa-save"></i> Guardar Adjunto
                             </button>
                         </div>
@@ -950,13 +1003,6 @@
             messagingSenderId: "324827723523",
             appId: "1:324827723523:web:09519c3cacff88759c9b36",
             measurementId: "G-VX2Z79123W"
-        };
-
-        // Configuración de Cloudinary
-        const cloudinaryConfig = {
-            cloudName: 'dnho7qdz3',
-            apiKey: '128857923119499',
-            uploadPreset: 'notas_cambio_macaal'
         };
 
         // Inicializa Firebase
@@ -999,7 +1045,7 @@
             currentAttachmentName = null;
             currentAttachmentSize = null;
             document.getElementById('uploadStatus').style.display = 'none';
-            document.getElementById('saveAttachmentBtn').style.display = 'none';
+            document.getElementById('fileInput').value = '';
         };
 
         // Convertir texto a mayúsculas
@@ -1034,18 +1080,23 @@
             
             let filteredReports = reports;
             
-            // Aplicar filtros de estado
-            filteredReports = filteredReports.filter(report => {
-                if (report.status === 'cancelled') return showCancelled;
-                
-                // Contar productos por estado
-                const receivedCount = report.products ? report.products.filter(p => p.status === 'received').length : 0;
-                const totalCount = report.products ? report.products.length : 0;
-                const isCompleted = receivedCount === totalCount;
-                
-                if (isCompleted) return showCompleted;
-                return showPending;
-            });
+            // Si todos los filtros están desactivados, mostrar todos los reportes
+            if (!showCompleted && !showPending && !showCancelled) {
+                filteredReports = reports;
+            } else {
+                // Aplicar filtros de estado
+                filteredReports = filteredReports.filter(report => {
+                    if (report.status === 'cancelled') return showCancelled;
+                    
+                    // Contar productos por estado
+                    const receivedCount = report.products ? report.products.filter(p => p.status === 'received').length : 0;
+                    const totalCount = report.products ? report.products.length : 0;
+                    const isCompleted = receivedCount === totalCount;
+                    
+                    if (isCompleted) return showCompleted;
+                    return showPending;
+                });
+            }
             
             // Aplicar búsqueda si hay término
             if (searchTerm) {
@@ -1074,12 +1125,62 @@
                 }
                 
                 reportCounter++;
-                return `#${reportCounter}`; // Ahora con # prefijo
+                return `#${reportCounter}`;
             } catch (error) {
                 console.error("Error al obtener último reporte:", error);
                 reportCounter++;
-                return `#${reportCounter}`; // Ahora con # prefijo
+                return `#${reportCounter}`;
             }
+        }
+
+        // Función para manejar la subida de archivos local
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Validar que sea PDF
+            if (file.type !== 'application/pdf') {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Solo se permiten archivos PDF',
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+            
+            // Validar tamaño (5MB máximo)
+            if (file.size > 5 * 1024 * 1024) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'El archivo es demasiado grande. Máximo 5MB',
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+            
+            // Simular subida de archivo
+            currentAttachmentName = file.name;
+            currentAttachmentSize = file.size;
+            
+            // Mostrar información del archivo
+            document.getElementById('uploadFileName').textContent = currentAttachmentName;
+            document.getElementById('uploadFileSize').textContent = formatFileSize(currentAttachmentSize);
+            document.getElementById('uploadFileType').textContent = 'PDF';
+            document.getElementById('fileTypeBadge').textContent = 'PDF';
+            
+            document.getElementById('uploadStatus').style.display = 'block';
+            
+            // Simular URL de archivo subido
+            currentAttachmentUrl = URL.createObjectURL(file);
+            
+            Swal.fire({
+                title: 'Archivo listo',
+                text: 'El archivo está listo para ser adjuntado al reporte',
+                icon: 'success',
+                confirmButtonColor: '#3085d6'
+            });
         }
 
         // Guardar datos del formulario en localStorage
@@ -1234,7 +1335,6 @@
                 // Ocultar elementos
                 document.getElementById('reportsList').style.display = 'none';
                 document.getElementById('searchContainer').style.display = 'none';
-                document.getElementById('filterContainer').style.display = 'none';
                 document.querySelector('.header-actions').style.display = 'none';
                 document.getElementById('backButton').style.display = 'none';
                 
@@ -1267,7 +1367,6 @@
             document.getElementById('returnForm').style.display = 'none';
             document.getElementById('reportsList').style.display = 'grid';
             document.getElementById('searchContainer').style.display = 'flex';
-            document.getElementById('filterContainer').style.display = 'flex';
             document.querySelector('.header-actions').style.display = 'flex';
             document.getElementById('backButton').style.display = 'flex';
             isCreatingNewReport = false;
@@ -1517,7 +1616,7 @@
             const reportData = {
                 id: currentReportId,
                 supplier: toUpperCase(supplierInput.value.trim()),
-                date: isoDate, // Guardamos la fecha de mañana
+                date: isoDate,
                 invoiceNumber: invoiceNumberInput.value.trim() || 'XXXXX',
                 invoiceSeries: invoiceSeriesInput.value.trim() || 'XXXXX',
                 notes: notesInput.value.trim(),
@@ -1612,12 +1711,12 @@
 
         // Buscar reportes (compatible con #)
         function searchReports() {
-            filterReports(); // Usar la función de filtrado que incluye búsqueda
+            filterReports();
         }
 
         // Cargar reportes desde Firebase
         function loadReports() {
-            toggleInitialLoader(true); // Mostrar spinner al cargar
+            toggleInitialLoader(true);
             
             db.collection("reportesMalEstado")
                 .orderBy("createdAt", "desc")
@@ -1641,12 +1740,12 @@
                         reports.push(data);
                     });
                     
-                    filterReports(); // Aplicar filtros después de cargar
-                    toggleInitialLoader(false); // Ocultar spinner cuando se cargan los datos
+                    filterReports();
+                    toggleInitialLoader(false);
                 })
                 .catch(error => {
                     console.error("Error al cargar reportes:", error);
-                    toggleInitialLoader(false); // Ocultar spinner si hay error
+                    toggleInitialLoader(false);
                     Swal.fire({
                         title: 'Error',
                         text: 'Ocurrió un error al cargar los reportes',
@@ -1826,7 +1925,7 @@
             
             // Llenar campos del formulario
             document.getElementById('supplier').value = report.supplier;
-            document.getElementById('reportDate').value = report.date.split('T')[0]; // Mostrar la fecha guardada
+            document.getElementById('reportDate').value = report.date.split('T')[0];
             document.getElementById('invoiceNumber').value = report.invoiceNumber === 'XXXXX' ? '' : report.invoiceNumber;
             document.getElementById('invoiceSeries').value = report.invoiceSeries === 'XXXXX' ? '' : report.invoiceSeries;
             document.getElementById('notes').value = report.notes || '';
@@ -1861,7 +1960,6 @@
             // Ocultar elementos
             document.getElementById('reportsList').style.display = 'none';
             document.getElementById('searchContainer').style.display = 'none';
-            document.getElementById('filterContainer').style.display = 'none';
             document.querySelector('.header-actions').style.display = 'none';
             document.getElementById('backButton').style.display = 'none';
             
@@ -2133,70 +2231,12 @@
             document.getElementById('attachmentModal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
             
-            // Inicializar el widget de Cloudinary
-            const uploadWidget = cloudinary.createUploadWidget({
-                cloudName: cloudinaryConfig.cloudName,
-                uploadPreset: cloudinaryConfig.uploadPreset,
-                sources: ['local'],
-                resourceType: 'raw',
-                clientAllowedFormats: ['pdf'],
-                maxFileSize: 5000000, // 5MB
-                multiple: false,
-                cropping: false,
-                showAdvancedOptions: false,
-                styles: {
-                    palette: {
-                        window: "#F5F5F5",
-                        sourceBg: "#FFFFFF",
-                        windowBorder: "#90a0b3",
-                        tabIcon: "#0094c7",
-                        inactiveTabIcon: "#69778A",
-                        menuIcons: "#0094C7",
-                        link: "#53ad9d",
-                        action: "#8F5DA5",
-                        inProgress: "#0194c7",
-                        complete: "#53ad9d",
-                        error: "#c43737",
-                        textDark: "#000000",
-                        textLight: "#FFFFFF"
-                    }
-                }
-            }, (error, result) => {
-                if (!error && result && result.event === "success") {
-                    currentAttachmentUrl = result.info.secure_url;
-                    currentAttachmentName = result.info.original_filename;
-                    currentAttachmentSize = result.info.bytes;
-                    
-                    // Mostrar información del archivo subido
-                    document.getElementById('uploadFileName').textContent = currentAttachmentName;
-                    document.getElementById('uploadFileSize').textContent = formatFileSize(currentAttachmentSize);
-                    document.getElementById('uploadFileType').textContent = getFileType(result.info.resource_type);
-                    document.getElementById('fileTypeBadge').textContent = getFileType(result.info.resource_type);
-                    
-                    document.getElementById('uploadStatus').style.display = 'block';
-                    document.getElementById('saveAttachmentBtn').style.display = 'block';
-                    
-                    Swal.fire({
-                        title: 'Archivo subido correctamente',
-                        text: 'El archivo se ha subido correctamente. Haz clic en "Guardar Adjunto" para asociarlo al reporte.',
-                        icon: 'success',
-                        confirmButtonColor: '#3085d6'
-                    });
-                } else if (error) {
-                    console.error("Error al subir archivo:", error);
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'Ocurrió un error al subir el archivo',
-                        icon: 'error',
-                        confirmButtonColor: '#3085d6'
-                    });
-                }
-            });
-            
-            // Asignar el evento de clic al botón de subir
-            document.getElementById('uploadWidgetBtn').onclick = () => {
-                uploadWidget.open();
-            };
+            // Resetear el estado del modal
+            document.getElementById('uploadStatus').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+            currentAttachmentUrl = null;
+            currentAttachmentName = null;
+            currentAttachmentSize = null;
         };
 
         // Guardar adjunto en el reporte
@@ -2227,7 +2267,6 @@
                     }).then(() => {
                         window.closeAttachmentModal();
                         loadReports();
-                        // Si el modal de reporte está abierto, actualizarlo
                         if (document.getElementById('reportModal').style.display === 'flex') {
                             viewReport(currentReportForAttachment);
                         }
@@ -2368,7 +2407,7 @@
                     didDrawCell: (data) => {
                         // Ajustar altura de celda si el contenido es muy largo
                         if (data.section === 'body' && data.column.index === 2) {
-                            const lines = data.cell.text.length / 30; // Aproximación de líneas
+                            const lines = data.cell.text.length / 30;
                             if (lines > 1) {
                                 data.row.height = lines * 7;
                             }
@@ -2417,6 +2456,13 @@
             document.getElementById('filterPending').addEventListener('change', filterReports);
             document.getElementById('filterCancelled').addEventListener('change', filterReports);
 
+            // Event listener para subir archivo local
+            document.getElementById('uploadFileBtn').addEventListener('click', function() {
+                document.getElementById('fileInput').click();
+            });
+
+            document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+
             // Event listeners principales
             document.getElementById('newReportBtn').addEventListener('click', showNewReportForm);
             document.getElementById('cancelReportBtn').addEventListener('click', () => hideReturnForm(true));
@@ -2453,7 +2499,6 @@
             window.addEventListener('beforeunload', function(e) {
                 if (isCreatingNewReport) {
                     saveFormToLocalStorage();
-                    // Mostrar mensaje de confirmación solo si hay datos sin guardar
                     const formData = localStorage.getItem('currentReportForm');
                     if (formData) {
                         e.preventDefault();
