@@ -109,6 +109,7 @@
             display: flex;
             gap: 0.5rem;
             position: relative;
+            align-items: center;
         }
 
         .search-input-container {
@@ -144,31 +145,36 @@
             border-radius: var(--border-radius);
             cursor: pointer;
             transition: var(--transition);
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .search-btn:hover {
             background: var(--primary-hover);
         }
 
-        /* Filtros de estado - BOTÓN DESPLEGABLE */
+        /* Filtros de estado - BOTÓN DESPLEGABLE AL LADO DEL BUSCADOR */
         .filter-dropdown {
             position: relative;
             display: inline-block;
-            margin-bottom: 1.5rem;
         }
 
         .filter-btn {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 0.8rem 1.2rem;
+            padding: 0.8rem;
             border-radius: var(--border-radius);
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
             transition: var(--transition);
             font-size: 0.9rem;
+            height: 45px;
+            width: 45px;
         }
 
         .filter-btn:hover {
@@ -178,14 +184,14 @@
         .filter-content {
             display: none;
             position: absolute;
+            right: 0;
             background-color: white;
-            min-width: 220px;
+            min-width: 200px;
             box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
             z-index: 100;
             border-radius: var(--border-radius);
-            padding: 1rem;
+            overflow: hidden;
             top: 100%;
-            left: 0;
             margin-top: 0.5rem;
         }
 
@@ -198,14 +204,17 @@
             align-items: center;
             gap: 0.5rem;
             cursor: pointer;
-            padding: 0.5rem 0;
+            padding: 0.8rem 1rem;
             transition: var(--transition);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-checkbox:last-child {
+            border-bottom: none;
         }
 
         .filter-checkbox:hover {
-            background: #f5f5f5;
-            border-radius: 4px;
-            padding: 0.5rem;
+            background-color: #f1f1f1;
         }
 
         .filter-checkbox input[type="checkbox"] {
@@ -218,6 +227,7 @@
             cursor: pointer;
             font-size: 0.9rem;
             font-weight: 500;
+            flex: 1;
         }
 
         .btn {
@@ -468,12 +478,7 @@
             box-shadow: var(--shadow);
             padding: 1.2rem;
             transition: var(--transition);
-            border-left: 4px solid transparent;
-        }
-
-        /* SOLO borde izquierdo dorado para archivos adjuntos */
-        .report-card.has-attachment {
-            border-left-color: var(--attachment);
+            /* SE ELIMINÓ EL BORDE IZQUIERDO DORADO */
         }
 
         .report-header {
@@ -775,6 +780,11 @@
 
             .search-btn {
                 padding: 0.8rem;
+                height: auto;
+            }
+
+            .filter-dropdown {
+                align-self: flex-start;
             }
 
             .modal-body .form-group {
@@ -793,9 +803,8 @@
             }
 
             .filter-content {
-                left: 0;
                 right: auto;
-                min-width: 200px;
+                left: 0;
             }
         }
     </style>
@@ -823,7 +832,7 @@
             </div>
         </header>
 
-        <!-- Buscador -->
+        <!-- Buscador con Filtros al lado -->
         <div class="search-container" id="searchContainer">
             <div class="search-input-container">
                 <input type="text" class="search-input" id="searchInput" name="searchInput" placeholder="Buscar por número, fecha o proveedor...">
@@ -834,25 +843,23 @@
             <button class="search-btn" id="searchBtn">
                 <i class="fas fa-search"></i>
             </button>
-        </div>
-
-        <!-- Filtros de estado - BOTÓN DESPLEGABLE -->
-        <div class="filter-dropdown">
-            <button class="filter-btn">
-                <i class="fas fa-filter"></i> Filtros
-            </button>
-            <div class="filter-content">
-                <div class="filter-checkbox">
-                    <input type="checkbox" id="filterCompleted" checked>
-                    <label for="filterCompleted">Reportes Completos</label>
-                </div>
-                <div class="filter-checkbox">
-                    <input type="checkbox" id="filterPending" checked>
-                    <label for="filterPending">Reportes Pendientes</label>
-                </div>
-                <div class="filter-checkbox">
-                    <input type="checkbox" id="filterCancelled" checked>
-                    <label for="filterCancelled">Reportes Anulados</label>
+            <div class="filter-dropdown" id="filterDropdown">
+                <button class="filter-btn" title="Filtros">
+                    <i class="fas fa-filter"></i>
+                </button>
+                <div class="filter-content">
+                    <div class="filter-checkbox">
+                        <input type="checkbox" id="filterCompleted" checked>
+                        <label for="filterCompleted">Reportes Completos</label>
+                    </div>
+                    <div class="filter-checkbox">
+                        <input type="checkbox" id="filterPending" checked>
+                        <label for="filterPending">Reportes Pendientes</label>
+                    </div>
+                    <div class="filter-checkbox">
+                        <input type="checkbox" id="filterCancelled" checked>
+                        <label for="filterCancelled">Reportes Anulados</label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1255,7 +1262,6 @@
                 document.getElementById('returnForm').style.display = 'block';
                 document.getElementById('reportsList').style.display = 'none';
                 document.getElementById('searchContainer').style.display = 'none';
-                document.getElementById('filterContainer').style.display = 'none';
                 document.querySelector('.header-actions').style.display = 'none';
                 document.getElementById('backButton').style.display = 'none';
                 
@@ -1332,7 +1338,7 @@
                 // Agregar event listeners para ajustar tamaño de inputs
                 addInputResizeListeners();
                 
-                // Ocultar elementos
+                // Ocultar elementos (INCLUYENDO EL FILTRO)
                 document.getElementById('reportsList').style.display = 'none';
                 document.getElementById('searchContainer').style.display = 'none';
                 document.querySelector('.header-actions').style.display = 'none';
@@ -1774,7 +1780,7 @@
             
             reportsToRender.forEach(report => {
                 const reportCard = document.createElement('div');
-                reportCard.className = `report-card ${report.attachmentUrl ? 'has-attachment' : ''}`;
+                reportCard.className = 'report-card'; // SE ELIMINÓ LA CLASE has-attachment
                 
                 // Contar productos por estado
                 const receivedCount = report.products ? report.products.filter(p => p.status === 'received' && p.receptionType === 'received').length : 0;
@@ -1957,7 +1963,7 @@
             // Agregar event listeners para ajustar tamaño de inputs
             addInputResizeListeners();
             
-            // Ocultar elementos
+            // Ocultar elementos (INCLUYENDO EL FILTRO)
             document.getElementById('reportsList').style.display = 'none';
             document.getElementById('searchContainer').style.display = 'none';
             document.querySelector('.header-actions').style.display = 'none';
