@@ -195,7 +195,7 @@
             margin-top: 0.5rem;
         }
 
-        .filter-dropdown:hover .filter-content {
+        .filter-content.show {
             display: block;
         }
 
@@ -348,6 +348,19 @@
             border-radius: var(--border-radius);
             font-size: 0.95rem;
             text-transform: uppercase;
+            /* ELIMINAR EL FONDO CELESTE AL LLENARSE */
+            background-color: white;
+        }
+
+        /* ELIMINAR EL FONDO CELESTE EN INPUTS LLENOS */
+        .form-control:not(:placeholder-shown) {
+            background-color: white !important;
+        }
+
+        .form-control:focus {
+            background-color: white;
+            border-color: var(--primary);
+            outline: none;
         }
 
         .form-control:read-only {
@@ -361,6 +374,8 @@
             font-size: 0.9rem;
             text-transform: none;
             overflow: hidden;
+            /* ELIMINAR EL FONDO CELESTE AL LLENARSE */
+            background-color: white;
         }
 
         .products-table {
@@ -398,6 +413,8 @@
             border-radius: 4px;
             font-size: 0.95rem;
             text-transform: uppercase;
+            /* ELIMINAR EL FONDO CELESTE AL LLENARSE */
+            background-color: white;
         }
 
         .products-table input[type="number"] {
@@ -406,6 +423,8 @@
             border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: 4px;
             font-size: 0.95rem;
+            /* ELIMINAR EL FONDO CELESTE AL LLENARSE */
+            background-color: white;
         }
 
         .products-table input.code-input {
@@ -413,6 +432,8 @@
             font-family: monospace;
             letter-spacing: 1px;
             padding: 0.6rem;
+            /* ELIMINAR EL FONDO CELESTE AL LLENARSE */
+            background-color: white;
         }
 
         .factory-code-input {
@@ -420,6 +441,13 @@
             width: auto;
             max-width: 150px;
             transition: width 0.2s ease;
+            /* ELIMINAR EL FONDO CELESTE AL LLENARSE */
+            background-color: white;
+        }
+
+        /* ELIMINAR EL FONDO CELESTE EN TODOS LOS INPUTS CUANDO TIENEN CONTENIDO */
+        input:not(:placeholder-shown), textarea:not(:placeholder-shown) {
+            background-color: white !important;
         }
 
         /* Nuevos estatus para productos */
@@ -478,7 +506,6 @@
             box-shadow: var(--shadow);
             padding: 1.2rem;
             transition: var(--transition);
-            /* SE ELIMINÓ EL BORDE IZQUIERDO DORADO */
         }
 
         .report-header {
@@ -627,6 +654,7 @@
             width: 100%;
             padding: 0.6rem;
             font-size: 0.9rem;
+            background-color: white;
         }
 
         /* Estilos para la información del archivo subido - MÁS SEPARADO */
@@ -844,10 +872,10 @@
                 <i class="fas fa-search"></i>
             </button>
             <div class="filter-dropdown" id="filterDropdown">
-                <button class="filter-btn" title="Filtros">
+                <button class="filter-btn" id="filterBtn" title="Filtros">
                     <i class="fas fa-filter"></i>
                 </button>
-                <div class="filter-content">
+                <div class="filter-content" id="filterContent">
                     <div class="filter-checkbox">
                         <input type="checkbox" id="filterCompleted" checked>
                         <label for="filterCompleted">Reportes Completos</label>
@@ -874,7 +902,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="supplier">Proveedor</label>
-                    <input type="text" class="form-control" id="supplier" name="supplier" required>
+                    <input type="text" class="form-control" id="supplier" name="supplier" placeholder="Ingrese proveedor" required>
                 </div>
                 <div class="form-group">
                     <label for="reportDate">Fecha</label>
@@ -895,7 +923,7 @@
             
             <div class="form-group">
                 <label for="notes">Observaciones (Opcional)</label>
-                <textarea class="form-control" id="notes" name="notes" style="min-height: 40px;"></textarea>
+                <textarea class="form-control" id="notes" name="notes" placeholder="Ingrese observaciones" style="min-height: 40px;"></textarea>
             </div>
             
             <h3 style="margin: 1rem 0 0.5rem; font-size: 1.1rem;">Productos en mal estado</h3>
@@ -1026,6 +1054,7 @@
         let currentAttachmentName = null;
         let currentAttachmentSize = null;
         let currentReportForAttachment = null;
+        let isFilterOpen = false;
         const companyName = "MACAAL S.A";
         const companyLogo = new Image();
         companyLogo.src = 'images/logo/logo.png';
@@ -1054,6 +1083,30 @@
             document.getElementById('uploadStatus').style.display = 'none';
             document.getElementById('fileInput').value = '';
         };
+
+        // Función para alternar el desplegable de filtros
+        function toggleFilterDropdown() {
+            const filterContent = document.getElementById('filterContent');
+            isFilterOpen = !isFilterOpen;
+            
+            if (isFilterOpen) {
+                filterContent.classList.add('show');
+            } else {
+                filterContent.classList.remove('show');
+            }
+        }
+
+        // Cerrar el desplegable de filtros al hacer clic fuera
+        document.addEventListener('click', function(event) {
+            const filterDropdown = document.getElementById('filterDropdown');
+            const filterBtn = document.getElementById('filterBtn');
+            const filterContent = document.getElementById('filterContent');
+            
+            if (isFilterOpen && !filterDropdown.contains(event.target) && event.target !== filterBtn) {
+                filterContent.classList.remove('show');
+                isFilterOpen = false;
+            }
+        });
 
         // Convertir texto a mayúsculas
         function toUpperCase(text) {
@@ -1780,7 +1833,7 @@
             
             reportsToRender.forEach(report => {
                 const reportCard = document.createElement('div');
-                reportCard.className = 'report-card'; // SE ELIMINÓ LA CLASE has-attachment
+                reportCard.className = 'report-card';
                 
                 // Contar productos por estado
                 const receivedCount = report.products ? report.products.filter(p => p.status === 'received' && p.receptionType === 'received').length : 0;
@@ -2461,6 +2514,9 @@
             document.getElementById('filterCompleted').addEventListener('change', filterReports);
             document.getElementById('filterPending').addEventListener('change', filterReports);
             document.getElementById('filterCancelled').addEventListener('change', filterReports);
+
+            // Event listener para el botón de filtros (CLICK)
+            document.getElementById('filterBtn').addEventListener('click', toggleFilterDropdown);
 
             // Event listener para subir archivo local
             document.getElementById('uploadFileBtn').addEventListener('click', function() {
