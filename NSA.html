@@ -1,4 +1,4 @@
-quiero que a este codigo le agregues que a cada registro despues de creado se pueda agregar un archivo adjunto. si el reporte tiene un archivo adjunto que se muestre en amarillo y se pueda ver. usare claudinary para almacenar pdf = Cloud name: dnho7qdz3  API Key= 128857923119499 API SECRET = gbubOGqbJ_LUTai37OquOnYPxro este es el proyecto damelo todo funcional =  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -13,6 +13,7 @@ quiero que a este codigo le agregues que a cada registro despues de creado se pu
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
     <style>
         :root {
             --primary: #4361ee;
@@ -582,6 +583,76 @@ quiero que a este codigo le agregues que a cada registro despues de creado se pu
             display: none;
         }
 
+        /* Estilos para adjuntos */
+        .attachment-section {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .attachment-preview {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 0.5rem;
+            padding: 0.8rem;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+        }
+
+        .attachment-preview img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .attachment-info {
+            flex: 1;
+        }
+
+        .attachment-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .attachment-size {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .attachment-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .attachment-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--primary);
+            font-size: 1rem;
+        }
+
+        .attachment-btn:hover {
+            color: var(--primary-hover);
+        }
+
+        .attachment-btn-danger {
+            color: var(--danger);
+        }
+
+        .attachment-btn-danger:hover {
+            color: #d32f2f;
+        }
+
+        .no-attachment {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-light);
+            font-style: italic;
+        }
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -639,6 +710,16 @@ quiero que a este codigo le agregues que a cada registro despues de creado se pu
             .dropdown-content {
                 right: auto;
                 left: 0;
+            }
+
+            .attachment-preview {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .attachment-actions {
+                align-self: flex-end;
             }
         }
     </style>
@@ -743,6 +824,24 @@ quiero que a este codigo le agregues que a cada registro despues de creado se pu
                 Agregar Producto
             </button>
 
+            <!-- Sección de adjuntos -->
+            <div class="attachment-section">
+                <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">
+                    <i class="fas fa-paperclip"></i> Archivo Adjunto (PDF)
+                </h3>
+                <div id="attachmentPreview" class="no-attachment">
+                    No hay archivo adjunto
+                </div>
+                <div style="margin-top: 1rem;">
+                    <button type="button" class="btn" id="uploadAttachmentBtn">
+                        <i class="fas fa-upload"></i> Subir Archivo
+                    </button>
+                    <button type="button" class="btn btn-danger" id="removeAttachmentBtn" style="display: none;">
+                        <i class="fas fa-trash"></i> Eliminar Archivo
+                    </button>
+                </div>
+            </div>
+
             <div class="form-header-actions">
                 <button class="btn btn-danger" id="cancelReportBtn">
                     <i class="fas fa-times"></i>
@@ -784,14 +883,21 @@ quiero que a este codigo le agregues que a cada registro despues de creado se pu
     <script>
         // Configuración de Firebase
         const firebaseConfig = {
-  apiKey: "AIzaSyC_vGhJItABa8s62qyHsVTWmTGmWZWF6mY",
-  authDomain: "inventario-productos-faltantes.firebaseapp.com",
-  projectId: "inventario-productos-faltantes",
-  storageBucket: "inventario-productos-faltantes.firebasestorage.app",
-  messagingSenderId: "324827723523",
-  appId: "1:324827723523:web:09519c3cacff88759c9b36",
-  measurementId: "G-VX2Z79123W"
-};
+            apiKey: "AIzaSyC_vGhJItABa8s62qyHsVTWmTGmWZWF6mY",
+            authDomain: "inventario-productos-faltantes.firebaseapp.com",
+            projectId: "inventario-productos-faltantes",
+            storageBucket: "inventario-productos-faltantes.firebasestorage.app",
+            messagingSenderId: "324827723523",
+            appId: "1:324827723523:web:09519c3cacff88759c9b36",
+            measurementId: "G-VX2Z79123W"
+        };
+
+        // Configuración de Cloudinary
+        const cloudinaryConfig = {
+            cloudName: 'dnho7qdz3',
+            apiKey: '128857923119499',
+            uploadPreset: 'notas_cambio' // Necesitarás crear este preset en Cloudinary
+        };
 
         // Inicializa Firebase
         firebase.initializeApp(firebaseConfig);
@@ -803,6 +909,7 @@ quiero que a este codigo le agregues que a cada registro despues de creado se pu
         let currentReportId = null;
         let reportCounter = 0;
         let isCreatingNewReport = false;
+        let currentAttachment = null; // Para almacenar datos del archivo adjunto actual
         const companyName = "MACAAL S.A";
         const companyLogo = new Image();
         companyLogo.src = 'images/logo/logo.png';
@@ -824,6 +931,124 @@ quiero que a este codigo le agregues que a cada registro despues de creado se pu
         // Convertir texto a mayúsculas
         function toUpperCase(text) {
             return text ? text.toUpperCase() : '';
+        }
+
+        // Configurar Cloudinary Upload Widget
+        function setupCloudinaryWidget() {
+            return cloudinary.createUploadWidget(
+                {
+                    cloudName: cloudinaryConfig.cloudName,
+                    uploadPreset: cloudinaryConfig.uploadPreset,
+                    sources: ['local'],
+                    resourceType: 'auto',
+                    multiple: false,
+                    maxFileSize: 5000000, // 5MB
+                    clientAllowedFormats: ['pdf'],
+                    showAdvancedOptions: false,
+                    cropping: false,
+                    showPoweredBy: false,
+                    language: 'es'
+                },
+                (error, result) => {
+                    if (!error && result && result.event === "success") {
+                        // Guardar información del archivo subido
+                        currentAttachment = {
+                            publicId: result.info.public_id,
+                            secureUrl: result.info.secure_url,
+                            originalName: result.info.original_filename,
+                            format: result.info.format,
+                            size: result.info.bytes,
+                            uploadedAt: new Date().toISOString()
+                        };
+                        
+                        // Mostrar vista previa del archivo
+                        showAttachmentPreview(currentAttachment);
+                    } else if (error) {
+                        console.error("Error al subir archivo:", error);
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Ocurrió un error al subir el archivo',
+                            icon: 'error',
+                            confirmButtonColor: '#3085d6'
+                        });
+                    }
+                }
+            );
+        }
+
+        // Mostrar vista previa del archivo adjunto
+        function showAttachmentPreview(attachment) {
+            const previewContainer = document.getElementById('attachmentPreview');
+            const removeBtn = document.getElementById('removeAttachmentBtn');
+            
+            if (attachment) {
+                previewContainer.innerHTML = `
+                    <div class="attachment-preview">
+                        <i class="fas fa-file-pdf" style="font-size: 2rem; color: #e74c3c;"></i>
+                        <div class="attachment-info">
+                            <div class="attachment-name">${attachment.originalName}.${attachment.format}</div>
+                            <div class="attachment-size">${formatFileSize(attachment.size)}</div>
+                        </div>
+                        <div class="attachment-actions">
+                            <button class="attachment-btn" onclick="viewAttachment('${attachment.secureUrl}')" title="Ver archivo">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="attachment-btn" onclick="downloadAttachment('${attachment.secureUrl}', '${attachment.originalName}.${attachment.format}')" title="Descargar archivo">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                removeBtn.style.display = 'inline-block';
+            } else {
+                previewContainer.innerHTML = 'No hay archivo adjunto';
+                previewContainer.className = 'no-attachment';
+                removeBtn.style.display = 'none';
+            }
+        }
+
+        // Formatear tamaño de archivo
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Ver archivo adjunto
+        window.viewAttachment = function(url) {
+            window.open(url, '_blank');
+        };
+
+        // Descargar archivo adjunto
+        window.downloadAttachment = function(url, filename) {
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        // Eliminar archivo adjunto
+        function removeAttachment() {
+            Swal.fire({
+                title: '¿Eliminar archivo adjunto?',
+                text: 'Esta acción no se puede deshacer',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    currentAttachment = null;
+                    showAttachmentPreview(null);
+                }
+            });
         }
 
         // Generar número de reporte consecutivo basado en el último existente (ahora con #)
@@ -858,7 +1083,8 @@ quiero que a este codigo le agregues que a cada registro despues de creado se pu
                 invoiceNumber: document.getElementById('invoiceNumber').value,
                 invoiceSeries: document.getElementById('invoiceSeries').value,
                 notes: document.getElementById('notes').value,
-                products: []
+                products: [],
+                attachment: currentAttachment
             };
             
             const rows = document.getElementById('productsTable').querySelectorAll('tbody tr');
@@ -894,6 +1120,12 @@ quiero que a este codigo le agregues que a cada registro despues de creado se pu
                 document.getElementById('invoiceNumber').value = formData.invoiceNumber;
                 document.getElementById('invoiceSeries').value = formData.invoiceSeries;
                 document.getElementById('notes').value = formData.notes;
+                
+                // Cargar adjunto si existe
+                if (formData.attachment) {
+                    currentAttachment = formData.attachment;
+                    showAttachmentPreview(currentAttachment);
+                }
                 
                 // Llenar tabla de productos
                 const tbody = document.getElementById('productsTable').querySelector('tbody');
@@ -986,6 +1218,10 @@ quiero que a este codigo le agregues que a cada registro despues de creado se pu
                         <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                     </tr>
                 `;
+                
+                // Limpiar adjunto
+                currentAttachment = null;
+                showAttachmentPreview(null);
                 
                 // Restaurar texto del botón de guardar
                 document.getElementById('saveReportBtn').innerHTML = '<span class="spinner" style="display: none;"></span><span class="btn-text"><i class="fas fa-save"></i> Guardar</span>';
@@ -1289,6 +1525,11 @@ quiero que a este codigo le agregues que a cada registro despues de creado se pu
                 reportNumber: parseInt(currentReportId.replace('#', ''))
             };
             
+            // Agregar información del adjunto si existe
+            if (currentAttachment) {
+                reportData.attachment = currentAttachment;
+            }
+            
             // Verificar si estamos editando o creando nuevo
             const isEditing = saveReportBtn.querySelector('.btn-text').innerHTML.includes('Actualizar');
             
@@ -1463,6 +1704,9 @@ quiero que a este codigo le agregues que a cada registro despues de creado se pu
                 const cancelledCount = report.products ? report.products.filter(p => p.status === 'cancelled').length : 0;
                 const totalCount = report.products ? report.products.length : 0;
                 
+                // Verificar si tiene adjunto
+                const hasAttachment = report.attachment && report.attachment.secureUrl;
+                
                 reportCard.innerHTML = `
                     <div class="report-header">
                         <div>
@@ -1473,6 +1717,11 @@ quiero que a este codigo le agregues que a cada registro despues de creado se pu
                                  `${receivedCount + creditNoteCount}/${totalCount} productos recibidos`}
                                 ${creditNoteCount > 0 ? ` (${creditNoteCount} por Nota de Crédito)` : ''}
                             </div>
+                            ${hasAttachment ? `
+                            <div style="margin-top: 0.3rem; font-size: 0.85rem; color: var(--primary);">
+                                <i class="fas fa-paperclip"></i> Tiene archivo adjunto
+                            </div>
+                            ` : ''}
                         </div>
                         <div class="dropdown" style="display: flex; gap: 0.8rem;">
                             <button class="dropdown-btn">
@@ -1597,6 +1846,15 @@ quiero que a este codigo le agregues que a cada registro despues de creado se pu
             document.getElementById('invoiceNumber').value = report.invoiceNumber === 'XXXXX' ? '' : report.invoiceNumber;
             document.getElementById('invoiceSeries').value = report.invoiceSeries === 'XXXXX' ? '' : report.invoiceSeries;
             document.getElementById('notes').value = report.notes || '';
+            
+            // Cargar adjunto si existe
+            if (report.attachment) {
+                currentAttachment = report.attachment;
+                showAttachmentPreview(currentAttachment);
+            } else {
+                currentAttachment = null;
+                showAttachmentPreview(null);
+            }
             
             // Llenar tabla de productos
             const tbody = document.getElementById('productsTable').querySelector('tbody');
@@ -1768,6 +2026,9 @@ quiero que a este codigo le agregues que a cada registro despues de creado se pu
             const report = reports.find(r => r.id === reportId);
             if (!report) return;
             
+            // Verificar si tiene adjunto
+            const hasAttachment = report.attachment && report.attachment.secureUrl;
+            
             document.getElementById('modalReportContent').innerHTML = `
                 <div class="report-header">
                     <div>
@@ -1778,6 +2039,11 @@ quiero que a este codigo le agregues que a cada registro despues de creado se pu
                             ${report.cancelledAt ? `<span class="status-date">Anulado el: ${formatDateTime(report.cancelledAt.toDate ? report.cancelledAt.toDate().toISOString() : report.cancelledAt)}</span>` : ''}
                             ${report.completedAt ? `<span class="status-date">Completado el: ${formatDateTime(report.completedAt.toDate ? report.completedAt.toDate().toISOString() : report.completedAt)}</span>` : ''}
                         </div>
+                        ${hasAttachment ? `
+                        <div style="margin-top: 0.3rem; font-size: 0.85rem; color: var(--primary);">
+                            <i class="fas fa-paperclip"></i> Tiene archivo adjunto
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
                 <div class="form-group">
@@ -1800,6 +2066,26 @@ quiero que a este codigo le agregues que a cada registro despues de creado se pu
                 <div class="form-group">
                     <label>Observaciones</label>
                     <div class="form-control" style="background: #f8f9fa; min-height: auto;">${report.notes}</div>
+                </div>
+                ` : ''}
+                ${hasAttachment ? `
+                <div class="form-group">
+                    <label>Archivo Adjunto</label>
+                    <div class="attachment-preview">
+                        <i class="fas fa-file-pdf" style="font-size: 2rem; color: #e74c3c;"></i>
+                        <div class="attachment-info">
+                            <div class="attachment-name">${report.attachment.originalName}.${report.attachment.format}</div>
+                            <div class="attachment-size">${formatFileSize(report.attachment.size)}</div>
+                        </div>
+                        <div class="attachment-actions">
+                            <button class="attachment-btn" onclick="viewAttachment('${report.attachment.secureUrl}')" title="Ver archivo">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="attachment-btn" onclick="downloadAttachment('${report.attachment.secureUrl}', '${report.attachment.originalName}.${report.attachment.format}')" title="Descargar archivo">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 ` : ''}
                 <div class="form-group">
@@ -2034,6 +2320,9 @@ quiero que a este codigo le agregues que a cada registro despues de creado se pu
 
         // Inicialización cuando el DOM está listo
         document.addEventListener('DOMContentLoaded', () => {
+            // Inicializar Cloudinary Upload Widget
+            const cloudinaryWidget = setupCloudinaryWidget();
+            
             // Event listeners para el buscador
             document.getElementById('searchInput').addEventListener('input', function() {
                 document.getElementById('searchClear').style.display = this.value ? 'block' : 'none';
@@ -2058,6 +2347,13 @@ quiero que a este codigo le agregues que a cada registro despues de creado se pu
             document.getElementById('searchInput').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') searchReports();
             });
+
+            // Event listeners para adjuntos
+            document.getElementById('uploadAttachmentBtn').addEventListener('click', () => {
+                cloudinaryWidget.open();
+            });
+            
+            document.getElementById('removeAttachmentBtn').addEventListener('click', removeAttachment);
 
             // Convertir automáticamente a mayúsculas mientras se escribe
             document.addEventListener('input', function(e) {
