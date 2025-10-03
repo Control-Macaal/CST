@@ -2597,7 +2597,7 @@
                 // Título del documento - NOTA DE PENDIENTES
                 doc.setFontSize(12);
                 doc.setFont('helvetica', 'normal');
-                doc.text('NOTA DE PENDIENTES - Cambios y/o devoluciones', pageWidth / 2, 30, { align: 'center' });
+                doc.text('Nota de Cambios y/o devoluciones', pageWidth / 2, 30, { align: 'center' });
                 
                 // Línea separadora
                 doc.setDrawColor(200, 200, 200);
@@ -2641,12 +2641,12 @@
                 
                 // Nota especial indicando que es solo productos pendientes
                 doc.setFont('helvetica', 'bold');
-                doc.text('NOTA: Este documento muestra únicamente los productos pendientes de recibir', marginLeft, yPosition);
+                doc.text('', marginLeft, yPosition);
                 doc.setFont('helvetica', 'normal');
                 yPosition += 10;
                 
                 if (report.notes) {
-                    const splitNotes = doc.splitTextToSize(`Observaciones originales: ${report.notes}`, contentWidth);
+                    const splitNotes = doc.splitTextToSize(`Observaciones: ${report.notes}`, contentWidth);
                     doc.text(splitNotes, marginLeft, yPosition);
                     yPosition += splitNotes.length * 5 + 10;
                 } else {
@@ -2681,7 +2681,7 @@
                         overflow: 'linebreak'
                     },
                     headStyles: {
-                        fillColor: [255, 140, 0], // Color naranja para diferenciar
+                        fillColor: [67, 97, 238], // Color naranja para diferenciar
                         textColor: 255,
                         fontStyle: 'bold',
                         lineWidth: 0.2
