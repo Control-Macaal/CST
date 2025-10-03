@@ -1133,13 +1133,13 @@
     <div class="modal" id="fusionModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-object-group"></i> Fusión de Notas de Crédito</h2>
+                <h2><i class="fas fa-object-group"></i> Fusión de Notas de Cambio</h2>
                 <button onclick="window.closeFusionModal()" style="background: none; border: none; cursor: pointer; font-size: 1.5rem;">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="fusion-info">
                     <h4>Instrucciones</h4>
-                    <p>Selecciona los reportes que deseas fusionar. Los productos pendientes de los reportes seleccionados se transferirán a un nuevo reporte y se marcarán como "De baja" en los reportes originales.</p>
+                    <p>Selecciona los reportes que deseas fusionar. Los productos pendientes de los reportes seleccionados se transferirán a un nuevo reporte y se marcarán como "De baja" en los reportes originales.Importante seleccionar reportes del mismo Proveedor</p>
                 </div>
 
                 <!-- Barra de búsqueda para fusión -->
@@ -3163,7 +3163,7 @@
                 // Título del documento - NOTA DE PENDIENTES
                 doc.setFontSize(12);
                 doc.setFont('helvetica', 'normal');
-                doc.text('Nota de Cambios y/o devoluciones - Productos Pendientes', pageWidth / 2, 30, { align: 'center' });
+                doc.text('Nota de Cambios y/o devoluciones', pageWidth / 2, 30, { align: 'center' });
                 
                 // Línea separadora
                 doc.setDrawColor(200, 200, 200);
@@ -3184,7 +3184,6 @@
                 const rightTexts = [
                     `Número de Reporte: ${report.id}`,
                     `Fecha de Reporte: ${formatDate(report.date)}`,
-                    `Productos pendientes: ${pendingProducts.length}`
                 ];
                 
                 // Calcular posición vertical para alinear ambos lados
@@ -3254,7 +3253,7 @@
                         2: { cellWidth: 'auto', halign: 'left' },
                         3: { cellWidth: 20, halign: 'center' },
                         4: { cellWidth: 30, halign: 'left' },
-                        5: { cellWidth: 30, halign: 'center', fontStyle: 'normal' } // Texto normal, no en rojo
+                        5: { cellWidth: 30, halign: 'center', fontStyle: 'bold' } // Texto normal, no en rojo
                     },
                     didDrawCell: (data) => {
                         // Ajustar altura de celda si el contenido es muy largo
