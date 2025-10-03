@@ -2618,7 +2618,6 @@
                 const rightTexts = [
                     `Número de Reporte: ${report.id}`,
                     `Fecha de Reporte: ${formatDate(report.date)}`,
-                    `Productos pendientes: ${pendingProducts.length}`
                 ];
                 
                 // Calcular posición vertical para alinear ambos lados
@@ -2638,12 +2637,6 @@
                 }
                 
                 yPosition += (maxLines * lineHeight) + 10;
-                
-                // Nota especial indicando que es solo productos pendientes
-                doc.setFont('helvetica', 'bold');
-                doc.text('', marginLeft, yPosition);
-                doc.setFont('helvetica', 'normal');
-                yPosition += 10;
                 
                 if (report.notes) {
                     const splitNotes = doc.splitTextToSize(`Observaciones: ${report.notes}`, contentWidth);
