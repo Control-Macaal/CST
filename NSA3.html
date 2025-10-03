@@ -2738,7 +2738,7 @@
                 .update({
                     attachmentUrl: currentAttachmentUrl,
                     attachmentName: currentAttachmentName,
-                    attachmentSize = currentAttachmentSize,
+                    attachmentSize: currentAttachmentSize,
                     attachmentDate: firebase.firestore.FieldValue.serverTimestamp()
                 })
                 .then(() => {
