@@ -15,6 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
     <style>
+        /* Estilos existentes se mantienen igual */
         :root {
             --primary: #4361ee;
             --primary-hover: #3a56d4;
@@ -274,6 +275,18 @@
             color: var(--dark);
         }
 
+        /* Botones solo con icono */
+        .btn-icon-only {
+            padding: 0.8rem;
+            width: 45px;
+            height: 45px;
+            justify-content: center;
+        }
+
+        .btn-icon-only .btn-text {
+            display: none;
+        }
+
         .return-form {
             background: var(--card-bg);
             border-radius: var(--border-radius);
@@ -476,6 +489,10 @@
             background-color: var(--danger);
         }
 
+        .status-low {
+            background-color: #6c757d;
+        }
+
         .status-date {
             font-size: 0.8rem;
             color: var(--text-light);
@@ -506,6 +523,11 @@
             box-shadow: var(--shadow);
             padding: 1.2rem;
             transition: var(--transition);
+        }
+
+        .report-card.selected {
+            border: 2px solid var(--primary);
+            background-color: rgba(67, 97, 238, 0.05);
         }
 
         .report-header {
@@ -766,6 +788,102 @@
             display: none;
         }
 
+        /* Checkbox para selección de reportes */
+        .report-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .fusion-info {
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-left: 4px solid var(--primary);
+        }
+
+        .fusion-info h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .fusion-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .fusion-stat {
+            background: white;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            border: 1px solid #e9ecef;
+        }
+
+        .fusion-stat h5 {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .fusion-stat .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        /* Barra de búsqueda en modal de fusión */
+        .fusion-search-container {
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .fusion-search-input {
+            width: 100%;
+            padding: 0.75rem 2.5rem 0.75rem 0.75rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            font-size: 0.95rem;
+        }
+
+        .fusion-search-clear {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            display: none;
+        }
+
+        /* Estilos para reportes fusionados */
+        .fusion-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+
+        .fusion-badge i {
+            font-size: 0.9rem;
+        }
+
+        .fusion-report-card {
+            border-left: 4px solid var(--primary);
+            background-color: rgba(67, 97, 238, 0.03);
+        }
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -834,6 +952,10 @@
                 right: auto;
                 left: 0;
             }
+
+            .fusion-stats {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -877,7 +999,7 @@
                 </button>
                 <div class="filter-content" id="filterContent">
                     <div class="filter-checkbox">
-                        <input type="checkbox" id="filterCompleted" checked>
+                        <input type="checkbox" id="filterCompleted">
                         <label for="filterCompleted">Reportes Completos</label>
                     </div>
                     <div class="filter-checkbox">
@@ -885,11 +1007,14 @@
                         <label for="filterPending">Reportes Pendientes</label>
                     </div>
                     <div class="filter-checkbox">
-                        <input type="checkbox" id="filterCancelled" checked>
+                        <input type="checkbox" id="filterCancelled">
                         <label for="filterCancelled">Reportes Anulados</label>
                     </div>
                 </div>
             </div>
+            <button class="btn" id="fusionBtn">
+                <i class="fas fa-object-group"></i> Fusión NC
+            </button>
         </div>
 
         <!-- Formulario de nueva devolución -->
@@ -1027,6 +1152,64 @@
         </div>
     </div>
 
+    <!-- Modal para Fusión NC -->
+    <div class="modal" id="fusionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-object-group"></i> Fusión de Notas de Cambio</h2>
+                <button onclick="window.closeFusionModal()" style="background: none; border: none; cursor: pointer; font-size: 1.5rem;">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="fusion-info">
+                    <h4>Instrucciones</h4>
+                    <p>Selecciona los reportes que deseas fusionar. Los productos pendientes de los reportes seleccionados se transferirán a un nuevo reporte y se marcarán como "De baja" en los reportes originales.</p>
+                </div>
+
+                <!-- Barra de búsqueda para fusión -->
+                <div class="fusion-search-container">
+                    <input type="text" class="fusion-search-input" id="fusionSearchInput" placeholder="Buscar por número, fecha o proveedor...">
+                    <button class="fusion-search-clear" id="fusionSearchClear">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <label>Proveedor para el nuevo reporte fusionado</label>
+                    <input type="text" class="form-control" id="fusionSupplier" placeholder="Ingrese el proveedor">
+                </div>
+
+                <div id="fusionStats" class="fusion-stats" style="display: none;">
+                    <div class="fusion-stat">
+                        <h5>Reportes seleccionados</h5>
+                        <div class="value" id="selectedReportsCount">0</div>
+                    </div>
+                    <div class="fusion-stat">
+                        <h5>Productos pendientes</h5>
+                        <div class="value" id="pendingProductsCount">0</div>
+                    </div>
+                    <div class="fusion-stat">
+                        <h5>Total productos</h5>
+                        <div class="value" id="totalProductsCount">0</div>
+                    </div>
+                </div>
+
+                <div id="fusionReportsList" style="max-height: 400px; overflow-y: auto; margin-top: 1rem;">
+                    <!-- Lista de reportes para fusión se cargará aquí -->
+                </div>
+
+                <div class="form-header-actions" style="margin-top: 1.5rem;">
+                    <button class="btn btn-danger" onclick="window.closeFusionModal()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button class="btn btn-success" id="confirmFusionBtn" disabled>
+                        <span class="spinner" style="display: none;"></span>
+                        <span class="btn-text"><i class="fas fa-object-group"></i> Crear Fusión</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Configuración de Firebase
         const firebaseConfig = {
@@ -1061,6 +1244,8 @@
         let currentAttachmentSize = null;
         let currentReportForAttachment = null;
         let isFilterOpen = false;
+        let selectedReportsForFusion = new Set();
+        let fusionFilteredReports = [];
         const companyName = "MACAAL S.A";
         const companyLogo = new Image();
         companyLogo.src = 'images/logo/logo.png';
@@ -1088,6 +1273,18 @@
             currentAttachmentSize = null;
             document.getElementById('uploadStatus').style.display = 'none';
             document.getElementById('saveAttachmentBtn').style.display = 'none';
+        };
+
+        // Función para cerrar modal de fusión
+        window.closeFusionModal = function() {
+            document.getElementById('fusionModal').style.display = 'none';
+            document.body.style.overflow = '';
+            selectedReportsForFusion.clear();
+            document.getElementById('fusionSupplier').value = '';
+            document.getElementById('fusionSearchInput').value = '';
+            document.getElementById('fusionSearchClear').style.display = 'none';
+            document.getElementById('confirmFusionBtn').disabled = true;
+            document.getElementById('fusionStats').style.display = 'none';
         };
 
         // Función para alternar el desplegable de filtros
@@ -1135,13 +1332,13 @@
             return 'Archivo';
         }
 
-        // Función para verificar si hay productos pendientes en un reporte
-        function hasPendingProducts(reportId) {
+        // Función para verificar si hay productos recibidos o por nota de crédito en un reporte
+        function hasReceivedOrCreditNoteProducts(reportId) {
             const report = reports.find(r => r.id === reportId);
             if (!report || !report.products) return false;
             
             return report.products.some(product => 
-                product.status === 'pending' || 
+                product.status === 'received' || 
                 (product.status === 'received' && product.receptionType === 'credit-note')
             );
         }
@@ -1152,9 +1349,338 @@
             if (!report || !report.products) return 0;
             
             return report.products.filter(product => 
-                product.status === 'pending' || 
-                (product.status === 'received' && product.receptionType === 'credit-note')
+                product.status === 'pending'
             ).length;
+        }
+
+        // Función para verificar si un reporte tiene productos con estado "low"
+        function hasLowProducts(reportId) {
+            const report = reports.find(r => r.id === reportId);
+            if (!report || !report.products) return false;
+            
+            return report.products.some(product => product.status === 'low');
+        }
+
+        // Función para verificar si un reporte está completado (todos los productos tienen estado final)
+        function isReportCompleted(reportId) {
+            const report = reports.find(r => r.id === reportId);
+            if (!report || !report.products) return false;
+            
+            // Un reporte está completado cuando todos los productos tienen estado final
+            // (received, credit-note, low, o cancelled)
+            return report.products.every(product => 
+                product.status === 'received' || 
+                (product.status === 'received' && product.receptionType === 'credit-note') ||
+                product.status === 'low' || 
+                product.status === 'cancelled'
+            );
+        }
+
+        // Función para filtrar reportes en modal de fusión
+        function filterFusionReports() {
+            const searchTerm = document.getElementById('fusionSearchInput').value.trim().toLowerCase().replace('#', '');
+            const fusionReportsList = document.getElementById('fusionReportsList');
+            
+            if (!searchTerm) {
+                renderFusionReportsList(fusionFilteredReports);
+                return;
+            }
+            
+            const filtered = fusionFilteredReports.filter(report => {
+                const reportId = report.id.replace('#', '').toLowerCase();
+                const reportDate = formatDate(report.date).toLowerCase();
+                const reportSupplier = report.supplier.toLowerCase();
+                
+                return reportId.includes(searchTerm) || 
+                       reportDate.includes(searchTerm) ||
+                       reportSupplier.includes(searchTerm);
+            });
+            
+            renderFusionReportsList(filtered);
+        }
+
+        // Función para renderizar lista de reportes en modal de fusión
+        function renderFusionReportsList(reportsToRender) {
+            const fusionReportsList = document.getElementById('fusionReportsList');
+            fusionReportsList.innerHTML = '';
+
+            if (reportsToRender.length === 0) {
+                fusionReportsList.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--text-light);">
+                        <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p>No se encontraron reportes que coincidan con la búsqueda</p>
+                    </div>
+                `;
+                return;
+            }
+
+            reportsToRender.forEach(report => {
+                const pendingCount = countPendingProducts(report.id);
+                const isSelected = selectedReportsForFusion.has(report.id);
+                const reportCard = document.createElement('div');
+                reportCard.className = `report-card ${isSelected ? 'selected' : ''}`;
+                reportCard.innerHTML = `
+                    <div class="report-header">
+                        <div style="display: flex; align-items: center;">
+                            <input type="checkbox" class="report-checkbox" data-report-id="${report.id}" 
+                                   onchange="toggleReportSelection('${report.id}')" ${isSelected ? 'checked' : ''}>
+                            <div>
+                                <span class="report-id">${report.id}</span>
+                                <span class="report-date">${formatDate(report.date)}</span>
+                                <div style="margin-top: 0.3rem; font-size: 0.95rem; color: var(--warning);">
+                                    ${pendingCount} producto(s) pendiente(s)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="report-supplier">Proveedor: ${report.supplier}</div>
+                    ${report.notes ? `<div class="report-notes">Observaciones: ${report.notes}</div>` : ''}
+                `;
+                fusionReportsList.appendChild(reportCard);
+            });
+        }
+
+        // Función para abrir modal de fusión
+        function openFusionModal() {
+            // Filtrar solo reportes activos que tengan productos pendientes
+            fusionFilteredReports = reports.filter(report => 
+                report.status === 'active' && 
+                report.products && 
+                report.products.some(p => p.status === 'pending') &&
+                !hasLowProducts(report.id) // Excluir reportes con productos de baja
+            );
+
+            if (fusionFilteredReports.length === 0) {
+                Swal.fire({
+                    title: 'No hay reportes para fusionar',
+                    text: 'No se encontraron reportes activos con productos pendientes y sin productos de baja',
+                    icon: 'info',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+
+            selectedReportsForFusion.clear();
+            document.getElementById('fusionSearchInput').value = '';
+            document.getElementById('fusionSearchClear').style.display = 'none';
+            renderFusionReportsList(fusionFilteredReports);
+            updateFusionStats();
+
+            document.getElementById('fusionModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Función para alternar selección de reportes para fusión
+        function toggleReportSelection(reportId) {
+            if (selectedReportsForFusion.has(reportId)) {
+                selectedReportsForFusion.delete(reportId);
+            } else {
+                selectedReportsForFusion.add(reportId);
+            }
+
+            updateFusionStats();
+            // Volver a renderizar para actualizar estilos de selección
+            const searchTerm = document.getElementById('fusionSearchInput').value.trim();
+            if (searchTerm) {
+                filterFusionReports();
+            } else {
+                renderFusionReportsList(fusionFilteredReports);
+            }
+        }
+
+        // Función para actualizar estadísticas de fusión
+        function updateFusionStats() {
+            const selectedCount = selectedReportsForFusion.size;
+            let pendingCount = 0;
+            let totalProducts = 0;
+
+            selectedReportsForFusion.forEach(reportId => {
+                const report = reports.find(r => r.id === reportId);
+                if (report && report.products) {
+                    const reportPending = report.products.filter(p => p.status === 'pending').length;
+                    pendingCount += reportPending;
+                    totalProducts += report.products.length;
+                }
+            });
+
+            document.getElementById('selectedReportsCount').textContent = selectedCount;
+            document.getElementById('pendingProductsCount').textContent = pendingCount;
+            document.getElementById('totalProductsCount').textContent = totalProducts;
+
+            const fusionStats = document.getElementById('fusionStats');
+            const confirmBtn = document.getElementById('confirmFusionBtn');
+
+            if (selectedCount > 0) {
+                fusionStats.style.display = 'grid';
+                confirmBtn.disabled = false;
+            } else {
+                fusionStats.style.display = 'none';
+                confirmBtn.disabled = true;
+            }
+        }
+
+        // Función para crear la fusión de reportes
+        async function createFusion() {
+            const supplier = document.getElementById('fusionSupplier').value.trim();
+
+            if (!supplier) {
+                Swal.fire({
+                    title: 'Proveedor requerido',
+                    text: 'Por favor ingresa el proveedor para el reporte fusionado',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+
+            if (selectedReportsForFusion.size === 0) {
+                Swal.fire({
+                    title: 'No hay reportes seleccionados',
+                    text: 'Por favor selecciona al menos un reporte para fusionar',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+
+            const confirmBtn = document.getElementById('confirmFusionBtn');
+            confirmBtn.classList.add('btn-loading');
+            confirmBtn.querySelector('.spinner').style.display = 'inline-block';
+            confirmBtn.querySelector('.btn-text').style.display = 'none';
+
+            try {
+                // Generar nuevo número de reporte
+                const newReportId = await generateReportNumber();
+                
+                // Recolectar productos pendientes de los reportes seleccionados
+                const fusionProducts = [];
+                const reportsToUpdate = [];
+
+                for (const reportId of selectedReportsForFusion) {
+                    const report = reports.find(r => r.id === reportId);
+                    if (report && report.products) {
+                        const pendingProducts = report.products.filter(p => p.status === 'pending');
+                        
+                        // Agregar productos pendientes al nuevo reporte
+                        pendingProducts.forEach(product => {
+                            fusionProducts.push({
+                                ...product,
+                                status: 'pending',
+                                receivedDate: null,
+                                receptionType: 'received'
+                            });
+                        });
+
+                        // Marcar productos como "De baja" en el reporte original
+                        const updatedProducts = report.products.map(product => {
+                            if (product.status === 'pending') {
+                                return {
+                                    ...product,
+                                    status: 'low',
+                                    lowDate: new Date().toISOString()
+                                };
+                            }
+                            return product;
+                        });
+
+                        reportsToUpdate.push({
+                            reportId: reportId,
+                            products: updatedProducts,
+                            // Guardar información de la fusión en los reportes originales
+                            fusionInfo: {
+                                isFusionSource: true,
+                                fusionTarget: newReportId,
+                                fusionDate: new Date().toISOString()
+                            }
+                        });
+                    }
+                }
+
+                if (fusionProducts.length === 0) {
+                    throw new Error('No se encontraron productos pendientes en los reportes seleccionados');
+                }
+
+                // Crear el nuevo reporte fusionado
+                const fusionReportData = {
+                    id: newReportId,
+                    supplier: toUpperCase(supplier),
+                    date: new Date().toISOString().split('T')[0],
+                    invoiceNumber: 'FUSIÓN',
+                    invoiceSeries: 'FUSIÓN',
+                    notes: `Fusión de reportes: ${Array.from(selectedReportsForFusion).join(', ')}`,
+                    products: fusionProducts,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: 'active',
+                    reportNumber: parseInt(newReportId.replace('#', '')),
+                    isFusion: true,
+                    sourceReports: Array.from(selectedReportsForFusion)
+                };
+
+                // Guardar el nuevo reporte fusionado
+                await db.collection("reportesMalEstado").doc(newReportId).set(fusionReportData);
+
+                // Actualizar los reportes originales
+                const updatePromises = reportsToUpdate.map(async ({ reportId, products, fusionInfo }) => {
+                    // Verificar si después de marcar como baja, el reporte queda completado
+                    const allProductsFinal = products.every(product => 
+                        product.status === 'received' || 
+                        (product.status === 'received' && product.receptionType === 'credit-note') ||
+                        product.status === 'low' || 
+                        product.status === 'cancelled'
+                    );
+
+                    const updateData = {
+                        products: products,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        ...fusionInfo
+                    };
+
+                    // Si todos los productos tienen estado final, marcar el reporte como completado
+                    if (allProductsFinal) {
+                        updateData.status = 'completed';
+                        updateData.completedAt = firebase.firestore.FieldValue.serverTimestamp();
+                    }
+
+                    await db.collection("reportesMalEstado").doc(reportId).update(updateData);
+                });
+
+                await Promise.all(updatePromises);
+
+                // Mostrar resumen de la fusión
+                await Swal.fire({
+                    title: 'Fusión completada',
+                    html: `
+                        <div style="text-align: left;">
+                            <p><strong>Nuevo reporte:</strong> ${newReportId}</p>
+                            <p><strong>Proveedor:</strong> ${toUpperCase(supplier)}</p>
+                            <p><strong>Reportes fusionados:</strong> ${selectedReportsForFusion.size}</p>
+                            <p><strong>Productos transferidos:</strong> ${fusionProducts.length}</p>
+                            <p><strong>Estado en reportes originales:</strong> Marcados como "De baja"</p>
+                        </div>
+                    `,
+                    icon: 'success',
+                    confirmButtonColor: '#3085d6'
+                });
+
+                // Cerrar modal y recargar reportes
+                window.closeFusionModal();
+                await loadReports();
+
+            } catch (error) {
+                console.error("Error al crear fusión:", error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Ocurrió un error al crear la fusión: ' + error.message,
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6'
+                });
+            } finally {
+                // Restaurar botón
+                confirmBtn.classList.remove('btn-loading');
+                confirmBtn.querySelector('.spinner').style.display = 'none';
+                confirmBtn.querySelector('.btn-text').style.display = 'inline';
+            }
         }
 
         // Filtrar reportes por estado - CORREGIDO
@@ -1174,10 +1700,8 @@
                     return showCancelled;
                 }
                 
-                // Contar productos por estado
-                const receivedCount = report.products ? report.products.filter(p => p.status === 'received').length : 0;
-                const totalCount = report.products ? report.products.length : 0;
-                const isCompleted = receivedCount === totalCount && totalCount > 0;
+                // Verificar si el reporte está completado (todos los productos tienen estado final)
+                const isCompleted = isReportCompleted(report.id);
                 
                 if (isCompleted) {
                     return showCompleted;
@@ -1879,26 +2403,42 @@
             
             reportsToRender.forEach(report => {
                 const reportCard = document.createElement('div');
-                reportCard.className = 'report-card';
                 
-                // Contar productos por estado
-                const receivedCount = report.products ? report.products.filter(p => p.status === 'received' && p.receptionType === 'received').length : 0;
+                // Determinar si es un reporte fusionado (de baja por fusión)
+                const isFusionSource = report.isFusionSource || false;
+                const fusionTarget = report.fusionTarget || '';
+                
+                // Aplicar clase especial para reportes fusionados
+                reportCard.className = isFusionSource ? 'report-card fusion-report-card' : 'report-card';
+                
+                // Contar productos por estado (incluyendo el nuevo estado "low")
+                const receivedCount = report.products ? report.products.filter(p => p.status === 'received').length : 0;
                 const creditNoteCount = report.products ? report.products.filter(p => p.status === 'received' && p.receptionType === 'credit-note').length : 0;
                 const pendingCount = report.products ? report.products.filter(p => p.status === 'pending').length : 0;
+                const lowCount = report.products ? report.products.filter(p => p.status === 'low').length : 0;
                 const cancelledCount = report.products ? report.products.filter(p => p.status === 'cancelled').length : 0;
                 const totalCount = report.products ? report.products.length : 0;
-                const isCompleted = (receivedCount + creditNoteCount) === totalCount && totalCount > 0;
+                const isCompleted = isReportCompleted(report.id);
+                const hasLow = lowCount > 0;
                 
                 reportCard.innerHTML = `
                     <div class="report-header">
                         <div>
-                            <span class="report-id">${report.id}</span>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span class="report-id">${report.id}</span>
+                                ${isFusionSource ? `
+                                <span class="fusion-badge" title="Este reporte fue fusionado en ${fusionTarget}">
+                                    <i class="fas fa-object-group"></i> Fusionado en ${fusionTarget}
+                                </span>
+                                ` : ''}
+                            </div>
                             <span class="report-date">${formatDate(report.date)}</span>
                             <div style="margin-top: 0.3rem; font-size: 0.95rem; color: ${report.status === 'cancelled' ? 'var(--danger)' : isCompleted ? 'var(--success)' : 'var(--warning)'}">
                                 ${report.status === 'cancelled' ? 'ANULADO' : 
                                  isCompleted ? 'COMPLETADO' : 'PENDIENTE'}
-                                ${isCompleted ? ` (${receivedCount + creditNoteCount}/${totalCount} productos recibidos)` : ` (${receivedCount + creditNoteCount}/${totalCount} productos recibidos)`}
+                                ${isCompleted ? ` (${receivedCount + creditNoteCount + lowCount}/${totalCount} productos finalizados)` : ` (${receivedCount + creditNoteCount}/${totalCount} productos recibidos)`}
                                 ${creditNoteCount > 0 ? ` (${creditNoteCount} por Nota de Crédito)` : ''}
+                                ${lowCount > 0 ? ` (${lowCount} de baja)` : ''}
                             </div>
                         </div>
                         <div class="dropdown" style="display: flex; gap: 0.8rem;">
@@ -1912,12 +2452,12 @@
                                 <a href="#" onclick="generatePDF('${report.id}'); return false;">
                                     <i class="fas fa-file-pdf"></i> Generar PDF
                                 </a>
-                                ${report.status === 'active' && hasPendingProducts(report.id) ? `
+                                ${report.status === 'active' && hasReceivedOrCreditNoteProducts(report.id) && countPendingProducts(report.id) > 0 ? `
                                 <a href="#" onclick="generatePendingPDF('${report.id}'); return false;">
                                     <i class="fas fa-hourglass-half"></i> Imprimir Pendientes
                                 </a>
                                 ` : ''}
-                                ${report.status === 'active' ? `
+                                ${report.status === 'active' && !hasLow && !isFusionSource ? `
                                 <a href="#" onclick="confirmEditReport('${report.id}'); return false;">
                                     <i class="fas fa-edit"></i> Editar
                                 </a>
@@ -1926,6 +2466,11 @@
                                 </a>
                                 <a href="#" onclick="cancelReport('${report.id}'); return false;" style="color: var(--danger);">
                                     <i class="fas fa-ban"></i> Anular
+                                </a>
+                                ` : ''}
+                                ${hasLow || isFusionSource ? `
+                                <a href="#" style="color: var(--text-light); cursor: not-allowed;">
+                                    <i class="fas fa-lock"></i> No editable (${isFusionSource ? 'fusionado' : 'tiene productos de baja'})
                                 </a>
                                 ` : ''}
                             </div>
@@ -1962,9 +2507,10 @@
                                     <td>${product.quantity}</td>
                                     <td>${product.reason}</td>
                                     <td>
-                                        <span class="product-status status-${product.status === 'received' ? product.receptionType === 'credit-note' ? 'credit-note' : 'received' : product.status}"></span>
+                                        <span class="product-status status-${product.status === 'received' ? product.receptionType === 'credit-note' ? 'credit-note' : 'received' : product.status === 'low' ? 'low' : product.status}"></span>
                                         ${product.status === 'pending' ? 'Pendiente' : 
                                           product.status === 'received' ? (product.receptionType === 'credit-note' ? 'Nota Crédito' : 'Recibido') : 
+                                          product.status === 'low' ? 'De baja' :
                                           'Anulado'}
                                     </td>
                                 </tr>
@@ -1998,6 +2544,20 @@
 
         // Confirmación para editar reporte
         window.confirmEditReport = function(reportId) {
+            const report = reports.find(r => r.id === reportId);
+            if (!report) return;
+            
+            // Verificar si el reporte tiene productos con estado "low" o es una fuente de fusión
+            if (hasLowProducts(reportId) || report.isFusionSource) {
+                Swal.fire({
+                    title: 'No se puede editar',
+                    text: 'Este reporte no se puede editar porque contiene productos con estado "De baja" o fue fusionado.',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+            
             Swal.fire({
                 title: '¿Editar reporte?',
                 text: '¿Estás seguro que deseas editar este reporte?',
@@ -2024,6 +2584,17 @@
                     title: 'Error',
                     text: 'Solo se pueden editar reportes activos',
                     icon: 'error',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+
+            // Verificar si el reporte tiene productos con estado "low" o es una fuente de fusión
+            if (hasLowProducts(reportId) || report.isFusionSource) {
+                Swal.fire({
+                    title: 'No se puede editar',
+                    text: 'Este reporte no se puede editar porque contiene productos con estado "De baja" o fue fusionado.',
+                    icon: 'warning',
                     confirmButtonColor: '#3085d6'
                 });
                 return;
@@ -2093,6 +2664,19 @@
 
         // Anular reporte
         window.cancelReport = function(reportId) {
+            const report = reports.find(r => r.id === reportId);
+            
+            // Verificar si el reporte tiene productos con estado "low" o es una fuente de fusión
+            if (hasLowProducts(reportId) || report.isFusionSource) {
+                Swal.fire({
+                    title: 'No se puede anular',
+                    text: 'Este reporte no se puede anular porque contiene productos con estado "De baja" o fue fusionado.',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+            
             Swal.fire({
                 title: '¿Anular reporte?',
                 text: '¿Estás seguro que deseas anular este reporte? Esta acción no se puede deshacer.',
@@ -2170,16 +2754,22 @@
                     products: report.products
                 })
                 .then(() => {
-                    // Verificar si todos los productos están recibidos
-                    const allReceived = report.products.every(p => p.status === 'received');
-                    if (allReceived) {
+                    // Verificar si todos los productos están en estado final (completado)
+                    const allFinal = report.products.every(p => 
+                        p.status === 'received' || 
+                        (p.status === 'received' && p.receptionType === 'credit-note') ||
+                        p.status === 'low' || 
+                        p.status === 'cancelled'
+                    );
+                    
+                    if (allFinal) {
                         return db.collection("reportesMalEstado").doc(reportId)
                             .update({
                                 status: 'completed',
                                 completedAt: firebase.firestore.FieldValue.serverTimestamp()
                             });
                     } else if (report.status === 'completed') {
-                        // Si ya estaba completado pero ahora no todos están recibidos
+                        // Si ya estaba completado pero ahora no todos están en estado final
                         return db.collection("reportesMalEstado").doc(reportId)
                             .update({
                                 status: 'active',
@@ -2212,15 +2802,28 @@
             const report = reports.find(r => r.id === reportId);
             if (!report) return;
             
+            const hasLow = hasLowProducts(reportId);
+            const isCompleted = isReportCompleted(reportId);
+            const isFusionSource = report.isFusionSource || false;
+            const fusionTarget = report.fusionTarget || '';
+            
             document.getElementById('modalReportContent').innerHTML = `
                 <div class="report-header">
                     <div>
-                        <span class="report-id">${report.id}</span>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="report-id">${report.id}</span>
+                            ${isFusionSource ? `
+                            <span class="fusion-badge" title="Este reporte fue fusionado en ${fusionTarget}">
+                                <i class="fas fa-object-group"></i> Fusionado en ${fusionTarget}
+                            </span>
+                            ` : ''}
+                        </div>
                         <span class="report-date">${formatDate(report.date)}</span>
-                        <div style="margin-top: 0.3rem; font-size: 0.95rem; color: ${report.status === 'cancelled' ? 'var(--danger)' : report.status === 'completed' ? 'var(--success)' : 'var(--warning)'}">
+                        <div style="margin-top: 0.3rem; font-size: 0.95rem; color: ${report.status === 'cancelled' ? 'var(--danger)' : isCompleted ? 'var(--success)' : 'var(--warning)'}">
                             Estado: ${report.status === 'active' ? 'Activo' : report.status === 'cancelled' ? 'ANULADO' : 'Completado'}
                             ${report.cancelledAt ? `<span class="status-date">Anulado el: ${formatDateTime(report.cancelledAt.toDate ? report.cancelledAt.toDate().toISOString() : report.cancelledAt)}</span>` : ''}
                             ${report.completedAt ? `<span class="status-date">Completado el: ${formatDateTime(report.completedAt.toDate ? report.completedAt.toDate().toISOString() : report.completedAt)}</span>` : ''}
+                            ${hasLow || isFusionSource ? `<div style="color: var(--warning); margin-top: 0.5rem;"><i class="fas fa-exclamation-triangle"></i> Este reporte ${isFusionSource ? 'fue fusionado' : 'contiene productos con estado "De baja"'} y no es editable</div>` : ''}
                         </div>
                     </div>
                 </div>
@@ -2269,7 +2872,7 @@
                                 <th style="width: 70px;">Cantidad</th>
                                 <th style="width: 120px;">Motivo</th>
                                 <th style="width: 120px;">Estado</th>
-                                ${report.status === 'active' ? '<th style="width: 90px;">Acción</th>' : ''}
+                                ${report.status === 'active' && !hasLow && !isFusionSource ? '<th style="width: 90px;">Acción</th>' : ''}
                             </tr>
                         </thead>
                         <tbody>
@@ -2281,13 +2884,14 @@
                                     <td>${product.quantity}</td>
                                     <td>${product.reason}</td>
                                     <td class="status-cell">
-                                        <span class="product-status status-${product.status === 'received' ? product.receptionType === 'credit-note' ? 'credit-note' : 'received' : product.status}"></span>
+                                        <span class="product-status status-${product.status === 'received' ? product.receptionType === 'credit-note' ? 'credit-note' : 'received' : product.status === 'low' ? 'low' : product.status}"></span>
                                         ${product.status === 'pending' ? 'Pendiente' : 
                                           product.status === 'received' ? (product.receptionType === 'credit-note' ? 'Nota Crédito' : 'Recibido') : 
+                                          product.status === 'low' ? 'De baja' :
                                           'Anulado'}
                                         ${product.receivedDate ? `<span class="status-date">Recibido el: ${formatDateTime(product.receivedDate)}</span>` : ''}
                                     </td>
-                                    ${report.status === 'active' ? `
+                                    ${report.status === 'active' && !hasLow && !isFusionSource ? `
                                     <td>
                                         <div class="dropdown">
                                             <button class="btn ${product.status === 'pending' ? 'btn-success' : 'btn-secondary'}" style="padding: 0.3rem 0.6rem; font-size: 0.85rem;">
@@ -2311,30 +2915,35 @@
                 </div>
             `;
             
+            // Botones solo con icono en el modal
             document.getElementById('modalReportActions').innerHTML = `
-                <button class="btn btn-pdf" onclick="generatePDF('${report.id}')">
+                <button class="btn btn-pdf btn-icon-only" onclick="generatePDF('${report.id}')" title="Generar PDF">
                     <i class="fas fa-file-pdf"></i>
-                    Generar PDF
+                    <span class="btn-text">Generar PDF</span>
                 </button>
-                ${report.status === 'active' && hasPendingProducts(report.id) ? `
-                <button class="btn btn-warning" onclick="generatePendingPDF('${report.id}')">
-                    <i class="fas fa-hourglass-half"></i> Imprimir Pendientes
-                </button>
-                ` : ''}
-                ${report.status === 'active' ? `
-                <button class="btn btn-secondary" onclick="confirmEditReport('${report.id}')">
-                    <i class="fas fa-edit"></i> Editar
-                </button>
-                <button class="btn btn-attachment" onclick="attachFile('${report.id}')">
-                    <i class="fas fa-paperclip"></i> Adjuntar Archivo
-                </button>
-                <button class="btn btn-danger" onclick="cancelReport('${report.id}')">
-                    <i class="fas fa-ban"></i> Anular
+                ${report.status === 'active' && hasReceivedOrCreditNoteProducts(report.id) && countPendingProducts(report.id) > 0 ? `
+                <button class="btn btn-warning btn-icon-only" onclick="generatePendingPDF('${report.id}')" title="Imprimir Pendientes">
+                    <i class="fas fa-hourglass-half"></i>
+                    <span class="btn-text">Imprimir Pendientes</span>
                 </button>
                 ` : ''}
-                <button class="btn" onclick="window.closeModal()">
+                ${report.status === 'active' && !hasLow && !isFusionSource ? `
+                <button class="btn btn-secondary btn-icon-only" onclick="confirmEditReport('${report.id}')" title="Editar">
+                    <i class="fas fa-edit"></i>
+                    <span class="btn-text">Editar</span>
+                </button>
+                <button class="btn btn-attachment btn-icon-only" onclick="attachFile('${report.id}')" title="Adjuntar Archivo">
+                    <i class="fas fa-paperclip"></i>
+                    <span class="btn-text">Adjuntar Archivo</span>
+                </button>
+                <button class="btn btn-danger btn-icon-only" onclick="cancelReport('${report.id}')" title="Anular">
+                    <i class="fas fa-ban"></i>
+                    <span class="btn-text">Anular</span>
+                </button>
+                ` : ''}
+                <button class="btn btn-icon-only" onclick="window.closeModal()" title="Cerrar">
                     <i class="fas fa-times"></i>
-                    Cerrar
+                    <span class="btn-text">Cerrar</span>
                 </button>
             `;
             
@@ -2344,6 +2953,19 @@
 
         // Función para adjuntar archivo a un reporte
         window.attachFile = function(reportId) {
+            const report = reports.find(r => r.id === reportId);
+            
+            // Verificar si el reporte tiene productos con estado "low" o es una fuente de fusión
+            if (hasLowProducts(reportId) || report.isFusionSource) {
+                Swal.fire({
+                    title: 'No se puede adjuntar archivo',
+                    text: 'Este reporte no se puede modificar porque contiene productos con estado "De baja" o fue fusionado.',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+            
             currentReportForAttachment = reportId;
             document.getElementById('attachmentModal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
@@ -2486,6 +3108,7 @@
                     { 
                         content: product.status === 'pending' ? 'Pendiente' : 
                                 product.status === 'received' ? (product.receptionType === 'credit-note' ? 'Nota Crédito' : `Recibido\n${formatDateTime(product.receivedDate)}`) : 
+                                product.status === 'low' ? 'De baja' :
                                 'Anulado',
                         styles: { cellWidth: 30, fontStyle: 'normal' }
                     }
@@ -2561,8 +3184,7 @@
             
             // Filtrar solo productos pendientes
             const pendingProducts = report.products ? report.products.filter(product => 
-                product.status === 'pending' || 
-                (product.status === 'received' && product.receptionType === 'credit-note')
+                product.status === 'pending'
             ) : [];
             
             if (pendingProducts.length === 0) {
@@ -2654,9 +3276,8 @@
                     { content: product.quantity.toString(), styles: { halign: 'center' } },
                     { content: product.reason, styles: { cellWidth: 30, fontStyle: 'normal' } },
                     { 
-                        content: product.status === 'pending' ? 'PENDIENTE' : 
-                                (product.receptionType === 'credit-note' ? 'POR NOTA CRÉDITO' : 'POR RECIBIR'),
-                        styles: { cellWidth: 30, fontStyle: 'bold', textColor: [255, 0, 0] }
+                        content: 'PENDIENTE',
+                        styles: { cellWidth: 30, fontStyle: 'normal' }
                     }
                 ]);
                 
@@ -2674,7 +3295,7 @@
                         overflow: 'linebreak'
                     },
                     headStyles: {
-                        fillColor: [67, 97, 238], // Color naranja para diferenciar
+                        fillColor: [67, 97, 238], // Mismo color azul que el PDF normal
                         textColor: 255,
                         fontStyle: 'bold',
                         lineWidth: 0.2
@@ -2688,7 +3309,7 @@
                         2: { cellWidth: 'auto', halign: 'left' },
                         3: { cellWidth: 20, halign: 'center' },
                         4: { cellWidth: 30, halign: 'left' },
-                        5: { cellWidth: 30, halign: 'center', fontStyle: 'bold' }
+                        5: { cellWidth: 30, halign: 'center', fontStyle: 'bold' } // Texto normal, no en rojo
                     },
                     didDrawCell: (data) => {
                         // Ajustar altura de celda si el contenido es muy largo
@@ -2748,6 +3369,18 @@
             // Event listener para subir archivo con Cloudinary
             document.getElementById('uploadWidgetBtn').addEventListener('click', handleCloudinaryUpload);
 
+            // Event listeners para búsqueda en modal de fusión
+            document.getElementById('fusionSearchInput').addEventListener('input', function() {
+                document.getElementById('fusionSearchClear').style.display = this.value ? 'block' : 'none';
+                filterFusionReports();
+            });
+
+            document.getElementById('fusionSearchClear').addEventListener('click', function() {
+                document.getElementById('fusionSearchInput').value = '';
+                this.style.display = 'none';
+                filterFusionReports();
+            });
+
             // Event listeners principales
             document.getElementById('newReportBtn').addEventListener('click', showNewReportForm);
             document.getElementById('cancelReportBtn').addEventListener('click', () => hideReturnForm(true));
@@ -2763,6 +3396,12 @@
             document.getElementById('searchInput').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') searchReports();
             });
+
+            // Event listener para el botón de fusión
+            document.getElementById('fusionBtn').addEventListener('click', openFusionModal);
+
+            // Event listener para el botón de confirmar fusión
+            document.getElementById('confirmFusionBtn').addEventListener('click', createFusion);
 
             // Convertir automáticamente a mayúsculas mientras se escribe
             document.addEventListener('input', function(e) {
