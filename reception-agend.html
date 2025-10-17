@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agenda</title>
+    <title>Agenda Proveedores</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -12,6 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
+        /* Tus estilos CSS permanecen iguales */
         :root {
             --primary: #4361ee;
             --primary-hover: #3a56d4;
@@ -650,7 +651,7 @@
     <header>
         <div class="header-title">
             <i class="fas fa-calendar-alt"></i>
-            <h1>Agenda de Recepción de Mercaderia</h1>
+            <h1>Agenda Proveedores</h1>
         </div>
         <div class="header-actions">
             <button class="btn btn-back" onclick="goBack()">
@@ -855,6 +856,7 @@
         let currentAppointmentId = null;
         let currentAmPm = 'AM';
         let editCurrentAmPm = 'AM';
+        let unsubscribeAppointments = null;
         
         // Elementos del DOM
         const calendarElement = document.getElementById('calendar');
@@ -937,7 +939,7 @@
         // Inicializar Firebase y cargar datos
         async function initializeFirebase() {
             try {
-                await loadAppointmentsFromFirebase();
+                await setupAppointmentsListener();
                 checkAutoAbsentStatus();
                 updateAppointmentsLists();
             } catch (error) {
@@ -950,27 +952,56 @@
             }
         }
 
-        // Cargar citas desde Firebase
-        async function loadAppointmentsFromFirebase() {
-            try {
-                const snapshot = await db.collection('appointments').get();
-                appointments = [];
-                snapshot.forEach(doc => {
-                    const appointment = doc.data();
-                    appointment.id = doc.id;
-                    appointments.push(appointment);
-                });
-                console.log('Citas cargadas desde Firebase:', appointments.length);
-            } catch (error) {
-                console.error('Error cargando citas:', error);
-                throw error;
-            }
+        // Configurar listener en tiempo real para las citas
+        function setupAppointmentsListener() {
+            return new Promise((resolve, reject) => {
+                try {
+                    unsubscribeAppointments = db.collection('appointments')
+                        .onSnapshot((snapshot) => {
+                            appointments = [];
+                            snapshot.forEach(doc => {
+                                const appointment = doc.data();
+                                appointment.id = doc.id;
+                                
+                                // Convertir Timestamp de Firebase a Date
+                                if (appointment.createdAt && appointment.createdAt.toDate) {
+                                    appointment.createdAt = appointment.createdAt.toDate();
+                                }
+                                if (appointment.updatedAt && appointment.updatedAt.toDate) {
+                                    appointment.updatedAt = appointment.updatedAt.toDate();
+                                }
+                                
+                                appointments.push(appointment);
+                            });
+                            
+                            console.log('Citas actualizadas desde Firebase:', appointments.length);
+                            
+                            // Actualizar la interfaz automáticamente
+                            updateAppointmentsLists();
+                            renderCalendar();
+                            
+                            resolve();
+                        }, (error) => {
+                            console.error('Error en listener de citas:', error);
+                            reject(error);
+                        });
+                } catch (error) {
+                    reject(error);
+                }
+            });
         }
 
         // Guardar cita en Firebase
         async function saveAppointmentToFirebase(appointment) {
             try {
-                const docRef = await db.collection('appointments').add(appointment);
+                // Asegurarnos de que la fecha esté en formato correcto para Firebase
+                const appointmentToSave = {
+                    ...appointment,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                const docRef = await db.collection('appointments').add(appointmentToSave);
                 appointment.id = docRef.id;
                 return appointment;
             } catch (error) {
@@ -982,7 +1013,11 @@
         // Actualizar cita en Firebase
         async function updateAppointmentInFirebase(id, updates) {
             try {
-                await db.collection('appointments').doc(id).update(updates);
+                const updateData = {
+                    ...updates,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                await db.collection('appointments').doc(id).update(updateData);
             } catch (error) {
                 console.error('Error actualizando cita:', error);
                 throw error;
@@ -1099,7 +1134,6 @@
                 if (appointmentDateTime < now && appointment.status === 'pendiente') {
                     try {
                         await updateAppointmentInFirebase(appointment.id, { status: 'ausente' });
-                        appointment.status = 'ausente';
                         updated = true;
                     } catch (error) {
                         console.error('Error actualizando estado de cita:', error);
@@ -1109,8 +1143,6 @@
             
             if (updated) {
                 console.log('Citas pasadas actualizadas automáticamente a "ausente"');
-                updateAppointmentsLists();
-                renderCalendar();
             }
         }
         
@@ -1232,11 +1264,14 @@
                 const appointmentTime = document.getElementById('appointmentTime').value;
                 const description = document.getElementById('description').value;
                 
-                // Validar que la hora no esté en el pasado si es hoy
+                // Validar que la fecha no esté en el pasado
                 const now = new Date();
-                const selectedDateTime = new Date(`${appointmentDate}T${appointmentTime}`);
+                const selectedDate = new Date(appointmentDate);
+                selectedDate.setHours(0, 0, 0, 0);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
                 
-                if (selectedDateTime < now) {
+                if (selectedDate < today) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
@@ -1265,19 +1300,11 @@
                     date: appointmentDate,
                     time: appointmentTime,
                     description,
-                    status: 'pendiente',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    status: 'pendiente'
                 };
                 
                 // Guardar en Firebase
-                const savedAppointment = await saveAppointmentToFirebase(appointment);
-                
-                // Agregar a la lista local
-                appointments.push(savedAppointment);
-                
-                // Actualizar interfaz
-                updateAppointmentsLists();
-                renderCalendar();
+                await saveAppointmentToFirebase(appointment);
                 
                 // Resetear formulario
                 appointmentForm.reset();
@@ -1341,25 +1368,8 @@
                     providerName,
                     date: appointmentDate,
                     time: appointmentTime,
-                    description,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    description
                 });
-                
-                // Actualizar localmente
-                const appointmentIndex = appointments.findIndex(a => a.id === id);
-                if (appointmentIndex !== -1) {
-                    appointments[appointmentIndex] = {
-                        ...appointments[appointmentIndex],
-                        providerName,
-                        date: appointmentDate,
-                        time: appointmentTime,
-                        description
-                    };
-                }
-                
-                // Actualizar interfaz
-                updateAppointmentsLists();
-                renderCalendar();
                 
                 // Cerrar modal
                 editAppointmentModal.style.display = 'none';
@@ -1411,26 +1421,8 @@
                     driverName,
                     driverPhone,
                     licensePlate,
-                    attendanceTime: new Date().toLocaleTimeString('es-ES'),
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    attendanceTime: new Date().toLocaleTimeString('es-ES')
                 });
-                
-                // Actualizar localmente
-                const appointmentIndex = appointments.findIndex(a => a.id === id);
-                if (appointmentIndex !== -1) {
-                    appointments[appointmentIndex] = {
-                        ...appointments[appointmentIndex],
-                        status: 'asistió',
-                        driverName,
-                        driverPhone,
-                        licensePlate,
-                        attendanceTime: new Date().toLocaleTimeString('es-ES')
-                    };
-                }
-                
-                // Actualizar interfaz
-                updateAppointmentsLists();
-                renderCalendar();
                 
                 // Cerrar modal de asistencia
                 attendanceModal.style.display = 'none';
@@ -1464,22 +1456,8 @@
             try {
                 // Actualizar en Firebase
                 await updateAppointmentInFirebase(id, {
-                    status: 'ausente',
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    status: 'ausente'
                 });
-                
-                // Actualizar localmente
-                const appointmentIndex = appointments.findIndex(a => a.id === id);
-                if (appointmentIndex !== -1) {
-                    appointments[appointmentIndex] = {
-                        ...appointments[appointmentIndex],
-                        status: 'ausente'
-                    };
-                }
-                
-                // Actualizar interfaz
-                updateAppointmentsLists();
-                renderCalendar();
                 
                 // Cerrar modal de detalles
                 appointmentDetailsModal.style.display = 'none';
@@ -1509,8 +1487,17 @@
         function updateAppointmentsLists() {
             // Próximas citas (máximo 5)
             const upcomingAppointments = appointments
-                .filter(appointment => new Date(appointment.date) >= new Date(new Date().toDateString()))
-                .sort((a, b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time))
+                .filter(appointment => {
+                    const appointmentDate = new Date(appointment.date);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    return appointmentDate >= today;
+                })
+                .sort((a, b) => {
+                    const dateA = new Date(a.date + 'T' + a.time);
+                    const dateB = new Date(b.date + 'T' + b.time);
+                    return dateA - dateB;
+                })
                 .slice(0, 5);
             
             upcomingAppointmentsElement.innerHTML = '';
@@ -1787,16 +1774,6 @@
                         // Eliminar de Firebase
                         await deleteAppointmentFromFirebase(id);
                         
-                        // Eliminar localmente
-                        appointments = appointments.filter(appointment => appointment.id != id);
-                        
-                        // Actualizar interfaz
-                        updateAppointmentsLists();
-                        renderCalendar();
-                        
-                        // Cerrar modales si están abiertos
-                        appointmentDetailsModal.style.display = 'none';
-                        
                         Swal.fire(
                             'Cancelada',
                             'La cita ha sido cancelada',
@@ -1861,6 +1838,13 @@
             
             return `${hour}${minuteStr} ${ampm}`;
         }
+
+        // Limpiar el listener cuando se cierre la página
+        window.addEventListener('beforeunload', function() {
+            if (unsubscribeAppointments) {
+                unsubscribeAppointments();
+            }
+        });
     </script>
 </body>
 </html>
