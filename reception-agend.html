@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agenda Proveedores</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -531,6 +533,38 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Estilos para la animación de carga */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(67, 97, 238, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        .loading-text {
+            font-size: 16px;
+            color: var(--dark);
+            font-weight: 500;
+        }
+
         @media (max-width: 992px) {
             .appointments-section {
                 grid-template-columns: 1fr;
@@ -648,6 +682,12 @@
     </style>
 </head>
 <body>
+    <!-- Overlay de carga -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Cargando agenda...</div>
+    </div>
+
     <header>
         <div class="header-title">
             <i class="fas fa-calendar-alt"></i>
@@ -892,6 +932,7 @@
         const submitAppointmentBtn = document.getElementById('submitAppointmentBtn');
         const updateAppointmentBtn = document.getElementById('updateAppointmentBtn');
         const submitAttendanceBtn = document.getElementById('submitAttendanceBtn');
+        const loadingOverlay = document.getElementById('loadingOverlay');
 
         // Inicialización
         document.addEventListener('DOMContentLoaded', function() {
@@ -936,14 +977,27 @@
             });
         });
 
+        // Mostrar animación de carga
+        function showLoading() {
+            loadingOverlay.style.display = 'flex';
+        }
+
+        // Ocultar animación de carga
+        function hideLoading() {
+            loadingOverlay.style.display = 'none';
+        }
+
         // Inicializar Firebase y cargar datos
         async function initializeFirebase() {
             try {
+                showLoading();
                 await setupAppointmentsListener();
                 checkAutoAbsentStatus();
                 updateAppointmentsLists();
+                hideLoading();
             } catch (error) {
                 console.error('Error inicializando Firebase:', error);
+                hideLoading();
                 Swal.fire({
                     icon: 'error',
                     title: 'Error de conexión',
