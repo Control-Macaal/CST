@@ -963,13 +963,9 @@
                                 const appointment = doc.data();
                                 appointment.id = doc.id;
                                 
-                                // Convertir Timestamp de Firebase a Date
-                                if (appointment.createdAt && appointment.createdAt.toDate) {
-                                    appointment.createdAt = appointment.createdAt.toDate();
-                                }
-                                if (appointment.updatedAt && appointment.updatedAt.toDate) {
-                                    appointment.updatedAt = appointment.updatedAt.toDate();
-                                }
+                                // Ya no necesitamos convertir Timestamp a Date porque usamos strings
+                                // Las fechas se almacenan como strings en formato "YYYY-MM-DD"
+                                // Los tiempos se almacenan como strings en formato "HH:MM"
                                 
                                 appointments.push(appointment);
                             });
@@ -994,9 +990,10 @@
         // Guardar cita en Firebase
         async function saveAppointmentToFirebase(appointment) {
             try {
-                // Asegurarnos de que la fecha esté en formato correcto para Firebase
+                // Las fechas ya están en formato string "YYYY-MM-DD" y "HH:MM"
                 const appointmentToSave = {
                     ...appointment,
+                    // Usamos serverTimestamp para los campos de auditoría
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
@@ -1127,16 +1124,23 @@
         // Verificar citas pasadas sin estado y marcarlas como ausentes
         async function checkAutoAbsentStatus() {
             const now = new Date();
+            // Formatear la fecha actual como string "YYYY-MM-DD" para comparar
+            const todayString = formatDateForInput(now);
+            const currentTimeString = formatTimeForInput(now);
+            
             let updated = false;
             
             for (let appointment of appointments) {
-                const appointmentDateTime = new Date(`${appointment.date}T${appointment.time}`);
-                if (appointmentDateTime < now && appointment.status === 'pendiente') {
-                    try {
-                        await updateAppointmentInFirebase(appointment.id, { status: 'ausente' });
-                        updated = true;
-                    } catch (error) {
-                        console.error('Error actualizando estado de cita:', error);
+                // Comparar fechas como strings
+                if (appointment.date < todayString || 
+                    (appointment.date === todayString && appointment.time < currentTimeString)) {
+                    if (appointment.status === 'pendiente') {
+                        try {
+                            await updateAppointmentInFirebase(appointment.id, { status: 'ausente' });
+                            updated = true;
+                        } catch (error) {
+                            console.error('Error actualizando estado de cita:', error);
+                        }
                     }
                 }
             }
@@ -1415,13 +1419,17 @@
                     driverPhone = driverPhone.replace('+502', '+502 ');
                 }
                 
+                // Obtener hora actual en formato string "HH:MM"
+                const now = new Date();
+                const attendanceTime = formatTimeForInput(now);
+                
                 // Actualizar en Firebase
                 await updateAppointmentInFirebase(id, {
                     status: 'asistió',
                     driverName,
                     driverPhone,
                     licensePlate,
-                    attendanceTime: new Date().toLocaleTimeString('es-ES')
+                    attendanceTime: attendanceTime
                 });
                 
                 // Cerrar modal de asistencia
@@ -1488,15 +1496,16 @@
             // Próximas citas (máximo 5)
             const upcomingAppointments = appointments
                 .filter(appointment => {
-                    const appointmentDate = new Date(appointment.date);
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    return appointmentDate >= today;
+                    // Comparar fechas como strings "YYYY-MM-DD"
+                    const todayString = formatDateForInput(new Date());
+                    return appointment.date >= todayString;
                 })
                 .sort((a, b) => {
-                    const dateA = new Date(a.date + 'T' + a.time);
-                    const dateB = new Date(b.date + 'T' + b.time);
-                    return dateA - dateB;
+                    // Ordenar por fecha y hora como strings
+                    if (a.date !== b.date) {
+                        return a.date.localeCompare(b.date);
+                    }
+                    return a.time.localeCompare(b.time);
                 })
                 .slice(0, 5);
             
@@ -1536,7 +1545,10 @@
             const appointmentElement = document.createElement('div');
             appointmentElement.className = 'appointment-item';
             
-            const date = new Date(appointment.date);
+            // Parsear la fecha desde string "YYYY-MM-DD"
+            const [year, month, day] = appointment.date.split('-');
+            const date = new Date(year, month - 1, day);
+            
             const formattedDate = date.toLocaleDateString('es-ES', { 
                 weekday: 'short', 
                 year: 'numeric', 
@@ -1582,7 +1594,10 @@
             
             if (!appointment) return;
             
-            const date = new Date(appointment.date);
+            // Parsear la fecha desde string "YYYY-MM-DD"
+            const [year, month, day] = appointment.date.split('-');
+            const date = new Date(year, month - 1, day);
+            
             const formattedDate = date.toLocaleDateString('es-ES', { 
                 weekday: 'long', 
                 year: 'numeric', 
@@ -1609,10 +1624,10 @@
             } else {
                 attendanceButtons = `
                     <div class="attendance-buttons">
-                        <button class="btn btn-attendance" onclick="openAttendanceModal(${appointment.id})">
+                        <button class="btn btn-attendance" onclick="openAttendanceModal('${appointment.id}')">
                             <i class="fas fa-user-check"></i> Asistencia
                         </button>
-                        <button class="btn btn-absent" onclick="markAsAbsent(${appointment.id})">
+                        <button class="btn btn-absent" onclick="markAsAbsent('${appointment.id}')">
                             <i class="fas fa-user-times"></i> Ausente
                         </button>
                     </div>
@@ -1624,10 +1639,10 @@
                                 <i class="fas fa-cog"></i> Acciones
                             </button>
                             <div id="actionsDropdown" class="dropdown-content">
-                                <button onclick="editAppointment(${appointment.id})">
+                                <button onclick="editAppointment('${appointment.id}')">
                                     <i class="fas fa-edit"></i> Editar Cita
                                 </button>
-                                <button onclick="cancelAppointment(${appointment.id})">
+                                <button onclick="cancelAppointment('${appointment.id}')">
                                     <i class="fas fa-ban"></i> Cancelar Cita
                                 </button>
                             </div>
@@ -1812,6 +1827,12 @@
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
+        }
+        
+        function formatTimeForInput(date) {
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${hours}:${minutes}`;
         }
         
         function setMinDate() {
