@@ -527,22 +527,26 @@
                 </div>
             </div>
 
-            <!-- Sección Bodega -->
-            <div id="bodegaSection" class="content-section">
+            <!-- Sección Gestiones -->
+            <div id="gestionesSection" class="content-section">
                 <h2 class="section-title">
-                    <i class="fas fa-warehouse"></i>
-                    Bodega
+                    <i class="fas fa-tasks"></i>
+                    Gestiones
                 </h2>
                 
                 <div class="cards-grid">
                     <div class="card">
                         <div class="card-header">
                             <div class="card-icon">
-                                <i class="fas fa-boxes"></i>
+                                <i class="fas fa-clipboard-list"></i>
                             </div>
-                            <h3 class="card-title">Operaciones de Bodega</h3>
+                            <h3 class="card-title">Operaciones de Gestión</h3>
                         </div>
                         <div class="card-body">
+                            <button class="action-btn" onclick="window.open('agend-mobile.html', '_self')">
+                                <i class="fas fa-calendar-check"></i>
+                                Agenda de Recepción
+                            </button>
                             <button class="action-btn" onclick="window.open('productos_faltantes.html', '_self')">
                                 <i class="fas fa-exclamation-triangle"></i>
                                 Productos Faltantes
@@ -596,9 +600,9 @@
                 <i class="fas fa-search"></i>
                 <span>Consultar</span>
             </a>
-            <a href="#" id="bodegaNavItem" class="nav-item" onclick="showSection('bodegaSection', this)" style="display: none;">
-                <i class="fas fa-warehouse"></i>
-                <span>Bodega</span>
+            <a href="#" id="gestionesNavItem" class="nav-item" onclick="showSection('gestionesSection', this)" style="display: none;">
+                <i class="fas fa-tasks"></i>
+                <span>Gestiones</span>
             </a>
             <a href="#" class="nav-item" onclick="showSection('herramientasSection', this)">
                 <i class="fas fa-tools"></i>
@@ -633,7 +637,9 @@
             'hogar': 'admin',
             'Hogar': 'admin',
             'bodega': 'viewer',
-            'Bodega': 'viewer'
+            'Bodega': 'viewer',
+            'macaal': 'viewer',
+            'Macaal': 'viewer'
         };
         
         const VIEW_PIN = '1901';
@@ -666,13 +672,13 @@
                     role: currentUserRole
                 }));
                 
-                // Control de visibilidad del módulo Bodega
-                const isBodegaUser = password.toLowerCase() === 'bodega';
-                document.getElementById('bodegaNavItem').style.display = isBodegaUser ? 'flex' : 'none';
+                // Control de visibilidad del módulo Gestiones
+                const isGestionesUser = password.toLowerCase() === 'bodega' || password.toLowerCase() === 'macaal';
+                document.getElementById('gestionesNavItem').style.display = isGestionesUser ? 'flex' : 'none';
                 
-                // Si es usuario bodega, mostrar directamente esa sección
-                if (isBodegaUser) {
-                    showSection('bodegaSection', document.getElementById('bodegaNavItem'));
+                // Si es usuario de gestiones, mostrar directamente esa sección
+                if (isGestionesUser) {
+                    showSection('gestionesSection', document.getElementById('gestionesNavItem'));
                 }
                 
                 document.getElementById('loginScreen').style.display = 'none';
@@ -789,13 +795,13 @@
                 if (USER_PERMISSIONS[auth]) {
                     currentUserRole = role;
                     
-                    // Control de visibilidad del módulo Bodega
-                    const isBodegaUser = auth.toLowerCase() === 'bodega';
-                    document.getElementById('bodegaNavItem').style.display = isBodegaUser ? 'flex' : 'none';
+                    // Control de visibilidad del módulo Gestiones
+                    const isGestionesUser = auth.toLowerCase() === 'bodega' || auth.toLowerCase() === 'macaal';
+                    document.getElementById('gestionesNavItem').style.display = isGestionesUser ? 'flex' : 'none';
                     
-                    // Si es usuario bodega, mostrar directamente esa sección
-                    if (isBodegaUser) {
-                        showSection('bodegaSection', document.getElementById('bodegaNavItem'));
+                    // Si es usuario de gestiones, mostrar directamente esa sección
+                    if (isGestionesUser) {
+                        showSection('gestionesSection', document.getElementById('gestionesNavItem'));
                     }
                     
                     document.getElementById('loginScreen').style.display = 'none';
