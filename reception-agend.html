@@ -1322,22 +1322,6 @@
                 const appointmentTime = document.getElementById('appointmentTime').value;
                 const description = document.getElementById('description').value;
                 
-                // Validar que la fecha no esté en el pasado
-                const now = new Date();
-                const selectedDate = new Date(appointmentDate);
-                selectedDate.setHours(0, 0, 0, 0);
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                
-                if (selectedDate < today) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'No puede agendar una cita en el pasado'
-                    });
-                    return;
-                }
-                
                 // Validar que no exista una cita a la misma hora
                 const existingAppointment = appointments.find(app => 
                     app.date === appointmentDate && app.time === appointmentTime
