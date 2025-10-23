@@ -800,6 +800,19 @@
         </div>
     </div>
 
+    <!-- Modal para detalles de citas del día -->
+    <div class="modal" id="dayAppointmentsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-calendar-day"></i> Citas del Día</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div id="dayAppointmentsList">
+                <!-- Las citas del día seleccionado se cargarán aquí -->
+            </div>
+        </div>
+    </div>
+
     <!-- Modal para editar cita -->
     <div class="modal" id="editAppointmentModal">
         <div class="modal-content">
@@ -901,6 +914,7 @@
         let currentAmPm = 'AM';
         let editCurrentAmPm = 'AM';
         let unsubscribeAppointments = null;
+        let selectedDateForDetails = null;
         
         // Elementos del DOM
         const calendarElement = document.getElementById('calendar');
@@ -916,6 +930,8 @@
         const todayAppointmentsElement = document.getElementById('todayAppointments');
         const appointmentModal = document.getElementById('appointmentModal');
         const appointmentDetailsModal = document.getElementById('appointmentDetailsModal');
+        const dayAppointmentsModal = document.getElementById('dayAppointmentsModal');
+        const dayAppointmentsList = document.getElementById('dayAppointmentsList');
         const editAppointmentModal = document.getElementById('editAppointmentModal');
         const attendanceModal = document.getElementById('attendanceModal');
         const closeModalButtons = document.querySelectorAll('.close-modal');
@@ -1013,6 +1029,7 @@
         function closeAllModals() {
             appointmentModal.style.display = 'none';
             appointmentDetailsModal.style.display = 'none';
+            dayAppointmentsModal.style.display = 'none';
             editAppointmentModal.style.display = 'none';
             attendanceModal.style.display = 'none';
         }
@@ -1281,9 +1298,9 @@
                     dayElement.appendChild(appointmentCount);
                 }
                 
-                // Hacer clic en el día para abrir modal de agendar cita
+                // Hacer clic en el día para mostrar detalles de las citas
                 dayElement.addEventListener('click', function() {
-                    selectDate(currentDay);
+                    showDayAppointments(currentDay);
                 });
                 
                 calendarElement.appendChild(dayElement);
@@ -1300,15 +1317,116 @@
             renderCalendar();
         }
         
-        function selectDate(date) {
+        // Función para mostrar citas del día seleccionado
+        function showDayAppointments(date) {
+            selectedDateForDetails = date;
             const formattedDate = formatDateForInput(date);
-            appointmentDateInput.value = formattedDate;
+            const dayAppointments = getAppointmentsForDate(date)
+                .sort((a, b) => a.time.localeCompare(b.time));
             
-            // Abrir modal de agendar cita
-            appointmentModal.style.display = 'flex';
+            // Formatear fecha para mostrar
+            const formattedDateDisplay = date.toLocaleDateString('es-ES', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
             
-            // Actualizar lista de citas del día
-            updateTodayAppointments(date);
+            dayAppointmentsList.innerHTML = '';
+            
+            if (dayAppointments.length === 0) {
+                dayAppointmentsList.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: var(--text-light);">
+                        <i class="fas fa-calendar-times" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
+                        <p>No hay citas para ${formattedDateDisplay}</p>
+                        <button class="btn" onclick="scheduleForSelectedDate()" style="margin-top: 15px;">
+                            <i class="fas fa-plus"></i> Agendar Cita
+                        </button>
+                    </div>
+                `;
+            } else {
+                dayAppointmentsList.innerHTML = `
+                    <div style="margin-bottom: 15px;">
+                        <h4 style="color: var(--primary);">${formattedDateDisplay}</h4>
+                        <p style="color: var(--text-light); font-size: 14px;">${dayAppointments.length} cita${dayAppointments.length > 1 ? 's' : ''} programada${dayAppointments.length > 1 ? 's' : ''}</p>
+                    </div>
+                `;
+                
+                dayAppointments.forEach(appointment => {
+                    const appointmentElement = createDayAppointmentElement(appointment);
+                    dayAppointmentsList.appendChild(appointmentElement);
+                });
+                
+                // Agregar botón para agendar nueva cita
+                const scheduleButton = document.createElement('button');
+                scheduleButton.className = 'btn';
+                scheduleButton.style.marginTop = '15px';
+                scheduleButton.innerHTML = '<i class="fas fa-plus"></i> Agendar Nueva Cita';
+                scheduleButton.onclick = scheduleForSelectedDate;
+                dayAppointmentsList.appendChild(scheduleButton);
+            }
+            
+            dayAppointmentsModal.style.display = 'flex';
+        }
+        
+        function createDayAppointmentElement(appointment) {
+            const appointmentElement = document.createElement('div');
+            appointmentElement.className = 'appointment-item';
+            
+            // Convertir formato de hora a AM/PM
+            const time12h = convertTo12HourFormat(appointment.time);
+            
+            // Determinar color según estado
+            let statusColor = '';
+            let statusIcon = '';
+            if (appointment.status === 'asistió') {
+                statusColor = 'var(--success)';
+                statusIcon = '<i class="fas fa-check-circle"></i>';
+            } else if (appointment.status === 'ausente') {
+                statusColor = 'var(--absent)';
+                statusIcon = '<i class="fas fa-times-circle"></i>';
+            } else {
+                statusColor = 'var(--primary)';
+                statusIcon = '<i class="fas fa-clock"></i>';
+            }
+            
+            appointmentElement.innerHTML = `
+                <div class="appointment-info">
+                    <h4>${appointment.providerName}</h4>
+                    <p><strong>Hora:</strong> ${time12h}</p>
+                    <p>${appointment.description || 'Sin descripción'}</p>
+                    <p style="color: ${statusColor};"><strong>Estado:</strong> ${statusIcon} ${appointment.status}</p>
+                </div>
+                <div class="appointment-actions">
+                    <button class="btn btn-view" data-id="${appointment.id}">
+                        <i class="fas fa-eye"></i> Ver
+                    </button>
+                    <button class="btn btn-danger" data-id="${appointment.id}">
+                        <i class="fas fa-trash"></i> Cancelar
+                    </button>
+                </div>
+            `;
+            
+            // Event listeners para los botones
+            appointmentElement.querySelector('.btn-view').addEventListener('click', function() {
+                showAppointmentDetails(this.getAttribute('data-id'));
+                dayAppointmentsModal.style.display = 'none';
+            });
+            
+            appointmentElement.querySelector('.btn-danger').addEventListener('click', function() {
+                cancelAppointment(this.getAttribute('data-id'));
+            });
+            
+            return appointmentElement;
+        }
+        
+        function scheduleForSelectedDate() {
+            if (selectedDateForDetails) {
+                const formattedDate = formatDateForInput(selectedDateForDetails);
+                appointmentDateInput.value = formattedDate;
+                dayAppointmentsModal.style.display = 'none';
+                appointmentModal.style.display = 'flex';
+            }
         }
         
         // Funciones de citas
@@ -1324,22 +1442,6 @@
                 const appointmentDate = document.getElementById('appointmentDate').value;
                 const appointmentTime = document.getElementById('appointmentTime').value;
                 const description = document.getElementById('description').value;
-                
-                // Validar que la fecha no esté en el pasado
-                const now = new Date();
-                const selectedDate = new Date(appointmentDate);
-                selectedDate.setHours(0, 0, 0, 0);
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                
-                if (selectedDate < today) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'No puede agendar una cita en el pasado'
-                    });
-                    return;
-                }
                 
                 // Validar que no exista una cita a la misma hora
                 const existingAppointment = appointments.find(app => 
