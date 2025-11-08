@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notas de Cambios y/o Devoluciones</title>
+    <title>Notas de Cambios Macaal</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -29,8 +29,8 @@
             --warning: #fc7703;
             --success: #03fc41;
             --attachment: #ffd700;
-            --border-radius: 8px;
-            --shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            --border-radius: 12px;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             --transition: all 0.2s ease;
         }
 
@@ -43,16 +43,19 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--light);
+            background: #f5f7fa;
             color: var(--text);
-            padding: 1rem;
+            padding: 0;
             min-height: 100vh;
+            font-size: 16px;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 100%;
             margin: 0 auto;
             width: 100%;
+            padding: 0;
+            min-height: 100vh;
         }
 
         /* Spinner de carga inicial */
@@ -62,7 +65,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.9);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -78,121 +81,110 @@
             animation: spin 1s linear infinite;
         }
 
+        /* Header */
         header {
+            background: white;
+            color: var(--dark);
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         }
 
         .header-title {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.8rem;
         }
 
         .header-title h1 {
-            font-size: 1.5rem;
-            color: var(--dark);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
         }
 
-        .header-actions {
+        .header-icons {
             display: flex;
             gap: 0.8rem;
-            align-items: center;
         }
 
-        .search-container {
-            margin-bottom: 1.5rem;
+        .icon-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
             display: flex;
-            gap: 0.5rem;
-            position: relative;
             align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .icon-btn.back {
+            background: var(--text-light);
+        }
+
+        /* Barra de búsqueda */
+        .search-container {
+            background: white;
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
         }
 
         .search-input-container {
-            flex: 1;
             position: relative;
+            width: 100%;
         }
 
         .search-input {
             width: 100%;
-            padding: 0.75rem 2.5rem 0.75rem 0.75rem;
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 1rem 1rem 1rem 3rem;
+            border: 1px solid #e9ecef;
             border-radius: var(--border-radius);
-            font-size: 0.95rem;
+            font-size: 1rem;
+            background: #f8f9fa;
         }
 
-        .search-clear {
+        .search-icon {
             position: absolute;
-            right: 10px;
+            left: 1rem;
             top: 50%;
             transform: translateY(-50%);
-            background: none;
-            border: none;
             color: var(--text-light);
-            cursor: pointer;
+        }
+
+        /* Pantallas */
+        .screen {
             display: none;
         }
 
-        .search-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0 1.5rem;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            transition: var(--transition);
-            height: 45px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .screen.active {
+            display: block;
         }
 
-        .search-btn:hover {
-            background: var(--primary-hover);
-        }
-
-        /* Filtros de estado - BOTÓN DESPLEGABLE AL LADO DEL BUSCADOR */
-        .filter-dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        .filter-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.8rem;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-            font-size: 0.9rem;
-            height: 45px;
-            width: 45px;
-        }
-
-        .filter-btn:hover {
-            background: var(--primary-hover);
-        }
-
+        /* Filtros */
         .filter-content {
             display: none;
             position: absolute;
+            top: 100%;
             right: 0;
-            background-color: white;
-            min-width: 200px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            background: white;
+            min-width: 220px;
+            box-shadow: var(--shadow);
             z-index: 100;
             border-radius: var(--border-radius);
             overflow: hidden;
-            top: 100%;
             margin-top: 0.5rem;
+            padding: 1rem;
         }
 
         .filter-content.show {
@@ -202,10 +194,9 @@
         .filter-checkbox {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.8rem;
             cursor: pointer;
-            padding: 0.8rem 1rem;
-            transition: var(--transition);
+            padding: 0.8rem 0;
             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         }
 
@@ -213,40 +204,36 @@
             border-bottom: none;
         }
 
-        .filter-checkbox:hover {
-            background-color: #f1f1f1;
-        }
-
         .filter-checkbox input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             cursor: pointer;
+            accent-color: var(--primary);
         }
 
         .filter-checkbox label {
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 1rem;
             font-weight: 500;
             flex: 1;
         }
 
+        /* Botones principales */
         .btn {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 0.8rem 1rem;
+            padding: 1rem 1.5rem;
             border-radius: var(--border-radius);
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            transition: var(--transition);
-            font-size: 0.9rem;
+            font-size: 1rem;
             text-decoration: none;
-        }
-
-        .btn:hover {
-            background: var(--primary-hover);
+            justify-content: center;
+            width: 100%;
+            font-weight: 600;
         }
 
         .btn-danger {
@@ -254,107 +241,59 @@
         }
 
         .btn-success {
-            background: var(--primary);
+            background: var(--success);
         }
 
-        .btn-pdf {
-            background: #e74c3c;
-        }
-
-        .btn-warning {
-            background: var(--warning);
-        }
-
-        .btn-secondary {
-            background: var(--primary);
-        }
-
-        .btn-attachment {
-            background: var(--attachment);
-            color: var(--dark);
-        }
-
-        .return-form {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
+        /* Formulario de nueva devolución */
+        .form-container {
+            background: white;
             padding: 1.5rem;
-            margin-bottom: 1rem;
-            display: none;
-            max-width: 1000px;
-            margin-left: auto;
-            margin-right: auto;
         }
 
         .form-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e9ecef;
         }
 
         .form-header h2 {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             color: var(--dark);
+            font-weight: 700;
         }
 
-        .form-header-actions {
-            display: flex;
-            gap: 0.8rem;
-            margin-top: 1rem;
-            justify-content: flex-end;
-            width: 100%;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .invoice-fields {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .invoice-fields .form-group label {
-            font-size: 0.85rem;
-            color: var(--text-light);
-        }
-        
-        .invoice-fields .form-control {
+        .report-id {
+            font-weight: 700;
+            color: var(--primary);
+            background: rgba(67, 97, 238, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
             font-size: 0.9rem;
-            padding: 0.6rem;
         }
 
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .form-group label {
             display: block;
             margin-bottom: 0.5rem;
-            font-weight: 500;
-            font-size: 0.9rem;
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--dark);
         }
 
         .form-control {
             width: 100%;
-            padding: 0.7rem;
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            border: 1px solid #e9ecef;
             border-radius: var(--border-radius);
-            font-size: 0.95rem;
+            font-size: 1rem;
             text-transform: uppercase;
-            /* ELIMINAR EL FONDO CELESTE AL LLENARSE */
             background-color: white;
-        }
-
-        /* ELIMINAR EL FONDO CELESTE EN INPUTS LLENOS */
-        .form-control:not(:placeholder-shown) {
-            background-color: white !important;
         }
 
         .form-control:focus {
@@ -363,101 +302,420 @@
             outline: none;
         }
 
-        .form-control:read-only {
-            background-color: #f8f9fa;
+        textarea.form-control {
+            min-height: 80px;
+            resize: none;
+            font-size: 1rem;
+            text-transform: none;
+        }
+
+        .products-section {
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .products-section h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e9ecef;
+        }
+
+        .product-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .product-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .product-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-field label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+            color: var(--text-light);
+        }
+
+        .product-field input,
+        .product-field textarea {
+            padding: 0.8rem;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 1rem;
+            background: white;
+        }
+
+        .product-field.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .product-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 0.5rem;
+        }
+
+        .delete-product {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 0.3rem;
+            border-radius: 6px;
+        }
+
+        .add-row-btn {
+            margin-top: 1rem;
+            background: var(--accent);
+            font-size: 1rem;
+            padding: 0.8rem;
+            border-radius: 8px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        /* Lista de reportes */
+        .reports-grid {
+            display: grid;
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .report-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.2rem;
+            border: 1px solid #e9ecef;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .report-info h3 {
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 0.3rem;
+            font-weight: 700;
+        }
+
+        .report-date {
+            color: var(--text-light);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .report-status {
+            background: var(--warning);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .report-status.completed {
+            background: var(--success);
+        }
+
+        .report-status.cancelled {
+            background: var(--danger);
+        }
+
+        .report-supplier {
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            font-size: 1rem;
+            color: var(--dark);
+        }
+
+        .report-notes {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .report-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            background: #f8f9fa;
+            padding: 0.8rem;
+            border-radius: 8px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .report-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.7rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+            border: none;
+        }
+
+        .action-btn.view {
+            background: var(--primary);
+        }
+
+        .action-btn.pdf {
+            background: #e74c3c;
+        }
+
+        /* Pantalla de detalle del reporte */
+        .detail-container {
+            background: white;
+            min-height: 100vh;
+        }
+
+        .detail-header {
+            background: white;
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .detail-header h2 {
+            font-size: 1.3rem;
+            color: var(--dark);
+            font-weight: 700;
+        }
+
+        .detail-content {
+            padding: 1.5rem;
+        }
+
+        .detail-section {
+            margin-bottom: 1.5rem;
+            padding: 1.2rem;
+            background: white;
+            border-radius: var(--border-radius);
+            border: 1px solid #e9ecef;
+        }
+
+        .detail-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-light);
+            margin-bottom: 0.2rem;
+        }
+
+        .info-value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .products-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .product-detail-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid #e9ecef;
+        }
+
+        .product-main-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.8rem;
+        }
+
+        .product-sku {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1rem;
+        }
+
+        .product-quantity {
+            background: var(--primary);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .product-description {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        .product-reason {
+            color: var(--text-light);
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .status-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.5rem;
+            margin-top: 0.8rem;
+        }
+
+        .status-option {
+            padding: 0.7rem;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+            background: white;
+            transition: var(--transition);
+        }
+
+        .status-option.pending {
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .status-option.pending.selected {
+            background: var(--warning);
+            color: white;
+        }
+
+        .status-option.received {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .status-option.received.selected {
+            background: var(--success);
+            color: white;
+        }
+
+        .status-option.credit-note {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .status-option.credit-note.selected {
+            background: var(--accent);
+            color: white;
+        }
+
+        .detail-actions {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            position: sticky;
+            bottom: 0;
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .save-btn:disabled {
+            background: #ccc;
             cursor: not-allowed;
         }
 
-        textarea.form-control {
-            min-height: 40px;
-            resize: none;
-            font-size: 0.9rem;
-            text-transform: none;
-            overflow: hidden;
-            /* ELIMINAR EL FONDO CELESTE AL LLENARSE */
-            background-color: white;
-        }
-
-        .products-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1rem 0;
-            background: var(--card-bg);
-            box-shadow: var(--shadow);
-            border-radius: var(--border-radius);
-            overflow: hidden;
-        }
-
-        .products-table th {
-            background-color: var(--primary);
-            color: white;
-            padding: 0.8rem;
-            text-align: left;
-            font-size: 0.9rem;
-        }
-
-        .products-table td {
-            padding: 0.6rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            font-size: 0.9rem;
-        }
-
-        .products-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .products-table input[type="text"] {
-            width: 100%;
-            padding: 0.6rem;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            border-radius: 4px;
-            font-size: 0.95rem;
-            text-transform: uppercase;
-            /* ELIMINAR EL FONDO CELESTE AL LLENARSE */
-            background-color: white;
-        }
-
-        .products-table input[type="number"] {
-            width: 100%;
-            padding: 0.6rem;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            border-radius: 4px;
-            font-size: 0.95rem;
-            /* ELIMINAR EL FONDO CELESTE AL LLENARSE */
-            background-color: white;
-        }
-
-        .products-table input.code-input {
-            width: 90px;
-            font-family: monospace;
-            letter-spacing: 1px;
-            padding: 0.6rem;
-            /* ELIMINAR EL FONDO CELESTE AL LLENARSE */
-            background-color: white;
-        }
-
-        .factory-code-input {
-            min-width: 60px;
-            width: auto;
-            max-width: 150px;
-            transition: width 0.2s ease;
-            /* ELIMINAR EL FONDO CELESTE AL LLENARSE */
-            background-color: white;
-        }
-
-        /* ELIMINAR EL FONDO CELESTE EN TODOS LOS INPUTS CUANDO TIENEN CONTENIDO */
-        input:not(:placeholder-shown), textarea:not(:placeholder-shown) {
-            background-color: white !important;
-        }
-
-        /* Nuevos estatus para productos */
+        /* Estados de productos */
         .product-status {
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
             display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
             margin-right: 5px;
-            cursor: pointer;
         }
 
         .status-pending {
@@ -469,290 +727,11 @@
         }
 
         .status-credit-note {
-            background-color: var(--primary);
+            background-color: var(--accent);
         }
 
         .status-cancelled {
             background-color: var(--danger);
-        }
-
-        .status-low {
-            background-color: #6c757d;
-        }
-
-        .status-date {
-            font-size: 0.8rem;
-            color: var(--text-light);
-            display: block;
-            margin-top: 2px;
-        }
-
-        .status-cell {
-            cursor: pointer;
-            position: relative;
-        }
-
-        .add-row-btn {
-            margin-top: 0.8rem;
-            background: var(--accent);
-            font-size: 0.85rem;
-            padding: 0.6rem 1rem;
-        }
-
-        .reports-list {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .report-card {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            padding: 1.2rem;
-            transition: var(--transition);
-        }
-
-        .report-card.selected {
-            border: 2px solid var(--primary);
-            background-color: rgba(67, 97, 238, 0.05);
-        }
-
-        .report-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 0.8rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
-        .report-id {
-            font-weight: 700;
-            color: var(--primary);
-            background: rgba(67, 97, 238, 0.1);
-            padding: 0.4rem 0.8rem;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-
-        .report-date {
-            color: var(--text-light);
-            font-size: 0.85rem;
-        }
-
-        .report-supplier {
-            font-weight: 600;
-            margin-bottom: 0.6rem;
-            font-size: 0.95rem;
-        }
-
-        .report-notes {
-            color: var(--text-light);
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            max-height: 60px;
-            overflow-y: auto;
-        }
-
-        .report-products {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 0.8rem;
-            font-size: 0.9rem;
-        }
-
-        .report-products th {
-            background-color: rgba(0, 0, 0, 0.05);
-            padding: 0.6rem;
-            text-align: left;
-            font-weight: 500;
-            font-size: 0.85rem;
-        }
-
-        .report-products td {
-            padding: 0.6rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            font-size: 0.85rem;
-        }
-
-        .report-products tr:last-child td {
-            border-bottom: none;
-        }
-
-        .report-actions {
-            display: flex;
-            gap: 0.8rem;
-            margin-top: 1rem;
-        }
-
-        .attachment-info {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-            color: var(--text-light);
-            font-size: 0.85rem;
-        }
-
-        .attachment-info i {
-            color: var(--attachment);
-        }
-
-        .attachment-link {
-            color: var(--primary);
-            text-decoration: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-
-        .attachment-link:hover {
-            text-decoration: underline;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 1.5rem;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            width: 100%;
-            max-width: 850px;
-            max-height: 90vh;
-            overflow-y: auto;
-            padding: 1.5rem;
-            position: relative;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .modal-header h2 {
-            font-size: 1.3rem;
-        }
-
-        .modal-body .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .modal-body .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-
-        .modal-body .form-control {
-            width: 100%;
-            padding: 0.6rem;
-            font-size: 0.9rem;
-            background-color: white;
-        }
-
-        /* Estilos para la información del archivo subido - MÁS SEPARADO */
-        .upload-info {
-            background: #f8f9fa;
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            margin: 2rem 0 1rem 0;
-            border-left: 4px solid var(--success);
-            border: 1px solid #e9ecef;
-        }
-
-        .upload-info h4 {
-            color: var(--success);
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .upload-info p {
-            margin-bottom: 0.8rem;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-        }
-
-        .upload-info strong {
-            min-width: 80px;
-            display: inline-block;
-        }
-
-        .file-type-badge {
-            display: inline-block;
-            padding: 0.3rem 0.8rem;
-            background: var(--primary);
-            color: white;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            margin-left: 0.8rem;
-            font-weight: 500;
-        }
-
-        /* Dropdown de acciones */
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        .dropdown-btn {
-            background: var(--primary);
-            color: white;
-            padding: 0.8rem 1rem;
-            border: none;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            right: 0;
-            background-color: white;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1;
-            border-radius: var(--border-radius);
-            overflow: hidden;
-        }
-
-        .dropdown-content a {
-            color: var(--text);
-            padding: 0.8rem 1rem;
-            text-decoration: none;
-            display: block;
-            font-size: 0.9rem;
-            transition: background-color 0.2s;
-        }
-
-        .dropdown-content a:hover {
-            background-color: #f1f1f1;
-        }
-
-        .dropdown:hover .dropdown-content {
-            display: block;
         }
 
         /* Spinner */
@@ -775,124 +754,80 @@
             display: none;
         }
 
-        /* Checkbox para selección de reportes */
-        .report-checkbox {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-
-        .fusion-info {
-            background: #f8f9fa;
-            border-radius: var(--border-radius);
-            padding: 1rem;
-            margin: 1rem 0;
-            border-left: 4px solid var(--primary);
-        }
-
-        .fusion-info h4 {
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
-        }
-
-        .fusion-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .fusion-stat {
-            background: white;
-            padding: 1rem;
-            border-radius: var(--border-radius);
-            border: 1px solid #e9ecef;
-        }
-
-        .fusion-stat h5 {
-            color: #6c757d;
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .fusion-stat .value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary);
-        }
-
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        @media (max-width: 768px) {
-            .form-row, .invoice-fields {
+        /* No reports message */
+        .no-reports {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: var(--text-light);
+        }
+
+        .no-reports i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .no-reports h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .no-reports p {
+            font-size: 1rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .container {
+                padding: 0;
+            }
+            
+            header {
+                padding: 0.8rem;
+            }
+            
+            .header-title h1 {
+                font-size: 1.1rem;
+            }
+            
+            .icon-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.1rem;
+            }
+            
+            .form-container, .detail-content {
+                padding: 1rem;
+            }
+            
+            .report-card {
+                padding: 1rem;
+            }
+            
+            .info-grid {
                 grid-template-columns: 1fr;
             }
             
-            .products-table {
-                display: block;
-                overflow-x: auto;
+            .status-selector {
+                grid-template-columns: 1fr;
             }
-            
-            .report-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.8rem;
-            }
-            
+        }
+
+        @media (max-width: 360px) {
             .report-actions {
-                flex-direction: column;
-                gap: 0.8rem;
+                grid-template-columns: 1fr;
             }
-
-            .form-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.8rem;
-            }
-
-            .form-header-actions {
-                width: 100%;
-                justify-content: flex-end;
-            }
-
-            .search-container {
+            
+            .form-actions {
                 flex-direction: column;
             }
-
-            .search-btn {
-                padding: 0.8rem;
-                height: auto;
-            }
-
-            .filter-dropdown {
-                align-self: flex-start;
-            }
-
-            .modal-body .form-group {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .modal-body .form-group label {
-                min-width: auto;
-                margin-bottom: 0.5rem;
-            }
-
-            .dropdown-content {
-                right: auto;
-                left: 0;
-            }
-
-            .filter-content {
-                right: auto;
-                left: 0;
-            }
-
-            .fusion-stats {
+            
+            .product-row {
                 grid-template-columns: 1fr;
             }
         }
@@ -905,242 +840,176 @@
     </div>
 
     <div class="container">
-        <header>
-            <div class="header-title">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h1>Notas de Cambios Macaal</h1>
-            </div>
-            <div class="header-actions">
-                <a href="index.html" class="btn" id="backButton">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </a>
-                <button class="btn" id="newReportBtn">
-                    <span class="spinner" style="display: none;"></span>
-                    <span class="btn-text"><i class="fas fa-plus"></i> Nueva Devolución</span>
-                </button>
+        <!-- Header Principal -->
+        <header id="mainHeader">
+            <div class="header-content">
+                <div class="header-title">
+                    <a href="index.html" class="icon-btn back" title="Volver">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <h1>Notas de Cambios</h1>
+                </div>
+                <div class="header-icons">
+                    <button class="icon-btn" id="newReportBtn" title="Nueva Devolución">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <div class="filter-dropdown">
+                        <button class="icon-btn" id="filterBtn" title="Filtros">
+                            <i class="fas fa-filter"></i>
+                        </button>
+                        <div class="filter-content" id="filterContent">
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="filterCompleted">
+                                <label for="filterCompleted">Completos</label>
+                            </div>
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="filterPending" checked>
+                                <label for="filterPending">Pendientes</label>
+                            </div>
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="filterCancelled">
+                                <label for="filterCancelled">Anulados</label>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="icon-btn" id="searchBtn" title="Buscar">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
             </div>
         </header>
 
-        <!-- Buscador con Filtros al lado -->
-        <div class="search-container" id="searchContainer">
+        <!-- Barra de búsqueda -->
+        <div class="search-container" id="searchContainer" style="display: none;">
             <div class="search-input-container">
-                <input type="text" class="search-input" id="searchInput" name="searchInput" placeholder="Buscar por número, fecha o proveedor...">
-                <button class="search-clear" id="searchClear">
-                    <i class="fas fa-times"></i>
-                </button>
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" id="searchInput" placeholder="Buscar por número, fecha o proveedor...">
             </div>
-            <button class="search-btn" id="searchBtn">
-                <i class="fas fa-search"></i>
-            </button>
-            <div class="filter-dropdown" id="filterDropdown">
-                <button class="filter-btn" id="filterBtn" title="Filtros">
-                    <i class="fas fa-filter"></i>
-                </button>
-                <div class="filter-content" id="filterContent">
-                    <div class="filter-checkbox">
-                        <input type="checkbox" id="filterCompleted" checked>
-                        <label for="filterCompleted">Reportes Completos</label>
-                    </div>
-                    <div class="filter-checkbox">
-                        <input type="checkbox" id="filterPending" checked>
-                        <label for="filterPending">Reportes Pendientes</label>
-                    </div>
-                    <div class="filter-checkbox">
-                        <input type="checkbox" id="filterCancelled" checked>
-                        <label for="filterCancelled">Reportes Anulados</label>
-                    </div>
-                </div>
-            </div>
-            <button class="btn" id="fusionBtn">
-                <i class="fas fa-object-group"></i> Fusión NC
-            </button>
         </div>
 
-        <!-- Formulario de nueva devolución -->
-        <div class="return-form" id="returnForm">
-            <div class="form-header">
-                <h2><i class="fas fa-file-alt"></i> Nueva Devolución</h2>
-                <div class="report-id">Registro <span id="reportNumber">--</span></div>
+        <!-- Header Detalle -->
+        <header id="detailHeader" style="display: none;">
+            <div class="header-content">
+                <div class="header-title">
+                    <button class="icon-btn back" id="detailBackButton" title="Volver">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h1>Detalle del Reporte</h1>
+                </div>
+                <div class="header-icons">
+                    <button class="icon-btn" id="detailPdfBtn" title="Generar PDF">
+                        <i class="fas fa-file-pdf"></i>
+                    </button>
+                </div>
             </div>
-            
-            <div class="form-row">
+        </header>
+
+        <!-- Pantalla Principal - Lista de Reportes -->
+        <div class="screen active" id="mainScreen">
+            <div class="reports-grid" id="reportsList">
+                <div class="no-reports">
+                    <i class="fas fa-box-open"></i>
+                    <h3>No hay reportes registrados</h3>
+                    <p>Haz clic en "+" para crear tu primer reporte</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantalla de Nueva Devolución -->
+        <div class="screen" id="newReportScreen">
+            <div class="form-container">
+                <div class="form-header">
+                    <h2><i class="fas fa-file-alt"></i> Nueva Devolución</h2>
+                    <div class="report-id">Registro <span id="reportNumber">--</span></div>
+                </div>
+                
                 <div class="form-group">
                     <label for="supplier">Proveedor</label>
-                    <input type="text" class="form-control" id="supplier" name="supplier" placeholder="proveedor" required>
+                    <input type="text" class="form-control" id="supplier" name="supplier" placeholder="Nombre del proveedor" required>
                 </div>
+                
                 <div class="form-group">
                     <label for="reportDate">Fecha</label>
                     <input type="date" class="form-control" id="reportDate" name="reportDate" required>
                 </div>
-            </div>
-            
-            <div class="invoice-fields">
+                
                 <div class="form-group">
                     <label for="invoiceNumber">Número de Factura (Opcional)</label>
                     <input type="text" class="form-control" id="invoiceNumber" name="invoiceNumber" placeholder="Ingrese número">
                 </div>
+                
                 <div class="form-group">
                     <label for="invoiceSeries">Serie de Factura (Opcional)</label>
                     <input type="text" class="form-control" id="invoiceSeries" name="invoiceSeries" placeholder="Ingrese serie">
                 </div>
-            </div>
-            
-            <div class="form-group">
-                <label for="notes">Observaciones (Opcional)</label>
-                <textarea class="form-control" id="notes" name="notes" placeholder="" style="min-height: 40px;"></textarea>
-            </div>
-            
-            <h3 style="margin: 1rem 0 0.5rem; font-size: 1.1rem;">Productos en mal estado</h3>
-            
-            <table class="products-table" id="productsTable">
-                <thead>
-                    <tr>
-                        <th style="width: 100px;">Sku</th>
-                        <th style="width: 80px;">Cód. Fábrica</th>
-                        <th>Descripción</th>
-                        <th style="width: 70px;">Cantidad</th>
-                        <th style="width: 180px;">Motivo</th>
-                        <th style="width: 50px;"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><input type="text" class="code-input" id="productSku1" name="productSku1" placeholder="Sku" maxlength="9" required></td>
-                        <td><input type="text" class="factory-code-input" id="factoryCode1" name="factoryCode1" placeholder="Cód. Fab"></td>
-                        <td><input type="text" id="productDescription1" name="productDescription1" placeholder="Descripción" required></td>
-                        <td><input type="number" id="productQuantity1" name="productQuantity1" placeholder="0" min="1" required></td>
-                        <td><textarea class="form-control" id="productReason1" name="productReason1" placeholder="Ej: Quebrado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;"></textarea></td>
-                        <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
-                    </tr>
-                </tbody>
-            </table>
-            
-            <button class="btn add-row-btn" id="addRowBtn">
-                <i class="fas fa-plus"></i>
-                Agregar Producto
-            </button>
-
-            <div class="form-header-actions">
-                <button class="btn btn-danger" id="cancelReportBtn">
-                    <i class="fas fa-times"></i>
-                    Cancelar
-                </button>
-                <button class="btn btn-success" id="saveReportBtn">
-                    <span class="spinner" style="display: none;"></span>
-                    <span class="btn-text"><i class="fas fa-save"></i> Guardar</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- Lista de reportes -->
-        <div class="reports-list" id="reportsList">
-            <div class="no-reports" style="text-align: center; padding: 2.5rem; color: var(--text-light);">
-                <i class="fas fa-box-open" style="font-size: 2.5rem; margin-bottom: 1.2rem; opacity: 0.5;"></i>
-                <h3>No hay reportes registrados</h3>
-                <p>Haz clic en "Nueva Devolución" para crear tu primer reporte</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal para ver reporte completo -->
-    <div class="modal" id="reportModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2><i class="fas fa-file-alt"></i> Detalle de Reporte</h2>
-                <button onclick="window.closeModal()" style="background: none; border: none; cursor: pointer; font-size: 1.5rem;">&times;</button>
-            </div>
-            <div class="modal-body" id="modalReportContent">
-                <!-- Contenido del reporte se cargará aquí -->
-            </div>
-            <div class="report-actions" id="modalReportActions">
-                <!-- Acciones del reporte se cargarán aquí -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal para adjuntar archivo -->
-    <div class="modal" id="attachmentModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2><i class="fas fa-paperclip"></i> Adjuntar Archivo</h2>
-                <button onclick="window.closeAttachmentModal()" style="background: none; border: none; cursor: pointer; font-size: 1.5rem;">&times;</button>
-            </div>
-            <div class="modal-body">
+                
                 <div class="form-group">
-                    <label>Seleccionar archivo PDF</label>
-                    <div id="uploadWidgetContainer" style="margin-top: 0.5rem;">
-                        <button class="btn btn-attachment" id="uploadWidgetBtn">
-                            <i class="fas fa-cloud-upload-alt"></i> Subir Archivo
-                        </button>
-                    </div>
-                    <div id="uploadStatus" style="margin-top: 1rem; display: none;">
-                        <div class="upload-info">
-                            <h4><i class="fas fa-check-circle"></i> Archivo subido correctamente</h4>
-                            <p><strong>Nombre:</strong> <span id="uploadFileName">archivo.pdf</span></p>
-                            <p><strong>Tamaño:</strong> <span id="uploadFileSize">0 KB</span></p>
-                            <p><strong>Tipo:</strong> <span id="uploadFileType">PDF</span> <span class="file-type-badge" id="fileTypeBadge">PDF</span></p>
-                        </div>
-                        <div style="margin-top: 1rem;">
-                            <button class="btn btn-success" id="saveAttachmentBtn" style="display: none;">
-                                <i class="fas fa-save"></i> Guardar Adjunto
-                            </button>
+                    <label for="notes">Observaciones (Opcional)</label>
+                    <textarea class="form-control" id="notes" name="notes" placeholder="Observaciones adicionales"></textarea>
+                </div>
+                
+                <div class="products-section">
+                    <h3>Productos en mal estado</h3>
+                    <div id="productsContainer">
+                        <div class="product-card">
+                            <div class="product-row">
+                                <div class="product-field">
+                                    <label for="productSku1">Sku</label>
+                                    <input type="text" id="productSku1" name="productSku1" placeholder="Sku" maxlength="9" required>
+                                </div>
+                                <div class="product-field">
+                                    <label for="factoryCode1">Cód. Fábrica</label>
+                                    <input type="text" id="factoryCode1" name="factoryCode1" placeholder="Cód. Fab">
+                                </div>
+                            </div>
+                            <div class="product-row">
+                                <div class="product-field full-width">
+                                    <label for="productDescription1">Descripción</label>
+                                    <input type="text" id="productDescription1" name="productDescription1" placeholder="Descripción del producto" required>
+                                </div>
+                            </div>
+                            <div class="product-row">
+                                <div class="product-field">
+                                    <label for="productQuantity1">Cantidad</label>
+                                    <input type="number" id="productQuantity1" name="productQuantity1" placeholder="0" min="1" required>
+                                </div>
+                                <div class="product-field full-width">
+                                    <label for="productReason1">Motivo</label>
+                                    <textarea id="productReason1" name="productReason1" placeholder="Ej: Quebrado, Dañado, etc." required></textarea>
+                                </div>
+                            </div>
+                            <div class="product-actions">
+                                <button class="delete-product" onclick="removeProduct(this)">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal para Fusión NC -->
-    <div class="modal" id="fusionModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2><i class="fas fa-object-group"></i> Fusión de Notas de Crédito</h2>
-                <button onclick="window.closeFusionModal()" style="background: none; border: none; cursor: pointer; font-size: 1.5rem;">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="fusion-info">
-                    <h4>Instrucciones</h4>
-                    <p>Selecciona los reportes que deseas fusionar. Los productos pendientes de los reportes seleccionados se transferirán a un nuevo reporte y se marcarán como "De baja" en los reportes originales.</p>
-                </div>
-
-                <div class="form-group">
-                    <label>Proveedor para el nuevo reporte fusionado</label>
-                    <input type="text" class="form-control" id="fusionSupplier" placeholder="Ingrese el proveedor">
-                </div>
-
-                <div class="form-group">
-                    <label>Observaciones (Opcional)</label>
-                    <textarea class="form-control" id="fusionNotes" placeholder="Observaciones para el reporte fusionado"></textarea>
-                </div>
-
-                <div id="fusionStats" class="fusion-stats" style="display: none;">
-                    <div class="fusion-stat">
-                        <h5>Reportes seleccionados</h5>
-                        <div class="value" id="selectedReportsCount">0</div>
-                    </div>
-                    <div class="fusion-stat">
-                        <h5>Productos pendientes</h5>
-                        <div class="value" id="pendingProductsCount">0</div>
-                    </div>
-                    <div class="fusion-stat">
-                        <h5>Total productos</h5>
-                        <div class="value" id="totalProductsCount">0</div>
-                    </div>
-                </div>
-
-                <div id="fusionReportsList" style="max-height: 400px; overflow-y: auto; margin-top: 1rem;">
-                    <!-- Lista de reportes para fusión se cargará aquí -->
-                </div>
-
-                <div class="form-header-actions" style="margin-top: 1.5rem;">
-                    <button class="btn btn-danger" onclick="window.closeFusionModal()">
-                        <i class="fas fa-times"></i> Cancelar
+                    
+                    <button class="btn add-row-btn" id="addRowBtn">
+                        <i class="fas fa-plus"></i>
+                        Agregar Producto
                     </button>
-                    <button class="btn btn-success" id="confirmFusionBtn" disabled>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-danger" id="cancelReportBtn">
+                        <i class="fas fa-times"></i>
+                        Cancelar
+                    </button>
+                    <button class="btn btn-success" id="saveReportBtn">
                         <span class="spinner" style="display: none;"></span>
-                        <span class="btn-text"><i class="fas fa-object-group"></i> Crear Fusión</span>
+                        <span class="btn-text"><i class="fas fa-save"></i> Guardar</span>
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantalla de Detalle del Reporte -->
+        <div class="screen" id="detailScreen">
+            <div class="detail-container">
+                <div class="detail-content" id="reportDetailContent">
+                    <!-- Contenido del reporte se cargará aquí -->
                 </div>
             </div>
         </div>
@@ -1158,13 +1027,6 @@
             measurementId: "G-VX2Z79123W"
         };
 
-        // Configuración de Cloudinary
-        const cloudinaryConfig = {
-            cloudName: 'dnho7qdz3',
-            apiKey: '128857923119499',
-            uploadPreset: 'notas_cambio_macaal'
-        };
-
         // Inicializa Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -1175,15 +1037,11 @@
         let currentReportId = null;
         let reportCounter = 0;
         let isCreatingNewReport = false;
-        let currentAttachmentUrl = null;
-        let currentAttachmentName = null;
-        let currentAttachmentSize = null;
-        let currentReportForAttachment = null;
         let isFilterOpen = false;
-        let selectedReportsForFusion = new Set();
-        const companyName = "MACAAL S.A";
-        const companyLogo = new Image();
-        companyLogo.src = 'images/logo/logo.png';
+        let isSearchOpen = false;
+        let currentReportInDetail = null;
+        let productStatusChanges = {};
+        const PASSWORD = "macaal"; // Contraseña para deshacer estados
 
         // Función para mostrar/ocultar spinner inicial
         function toggleInitialLoader(show) {
@@ -1193,33 +1051,33 @@
         // Al cargar la página, mostrar spinner inicial
         toggleInitialLoader(true);
 
-        // Función para cerrar modal (ahora está en el ámbito global)
-        window.closeModal = function() {
-            document.getElementById('reportModal').style.display = 'none';
-            document.body.style.overflow = '';
-        };
-
-        // Función para cerrar modal de adjuntos
-        window.closeAttachmentModal = function() {
-            document.getElementById('attachmentModal').style.display = 'none';
-            document.body.style.overflow = '';
-            currentAttachmentUrl = null;
-            currentAttachmentName = null;
-            currentAttachmentSize = null;
-            document.getElementById('uploadStatus').style.display = 'none';
-            document.getElementById('saveAttachmentBtn').style.display = 'none';
-        };
-
-        // Función para cerrar modal de fusión
-        window.closeFusionModal = function() {
-            document.getElementById('fusionModal').style.display = 'none';
-            document.body.style.overflow = '';
-            selectedReportsForFusion.clear();
-            document.getElementById('fusionSupplier').value = '';
-            document.getElementById('fusionNotes').value = '';
-            document.getElementById('confirmFusionBtn').disabled = true;
-            document.getElementById('fusionStats').style.display = 'none';
-        };
+        // Función para cambiar entre pantallas
+        function showScreen(screenId) {
+            // Ocultar todas las pantallas
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Mostrar la pantalla solicitada
+            document.getElementById(screenId).classList.add('active');
+            
+            // Mostrar el header correspondiente
+            if (screenId === 'detailScreen') {
+                document.getElementById('mainHeader').style.display = 'none';
+                document.getElementById('detailHeader').style.display = 'block';
+                document.getElementById('searchContainer').style.display = 'none';
+            } else {
+                document.getElementById('mainHeader').style.display = 'block';
+                document.getElementById('detailHeader').style.display = 'none';
+                
+                // Mostrar/ocultar barra de búsqueda
+                if (screenId === 'mainScreen' && isSearchOpen) {
+                    document.getElementById('searchContainer').style.display = 'block';
+                } else {
+                    document.getElementById('searchContainer').style.display = 'none';
+                }
+            }
+        }
 
         // Función para alternar el desplegable de filtros
         function toggleFilterDropdown() {
@@ -1230,6 +1088,21 @@
                 filterContent.classList.add('show');
             } else {
                 filterContent.classList.remove('show');
+            }
+        }
+
+        // Función para alternar la barra de búsqueda
+        function toggleSearch() {
+            const searchContainer = document.getElementById('searchContainer');
+            isSearchOpen = !isSearchOpen;
+            
+            if (isSearchOpen) {
+                searchContainer.style.display = 'block';
+                document.getElementById('searchInput').focus();
+            } else {
+                searchContainer.style.display = 'none';
+                document.getElementById('searchInput').value = '';
+                filterReports();
             }
         }
 
@@ -1250,297 +1123,35 @@
             return text ? text.toUpperCase() : '';
         }
 
-        // Formatear tamaño de archivo
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        // Obtener tipo de archivo
-        function getFileType(mimeType) {
-            if (mimeType.includes('pdf')) return 'PDF';
-            if (mimeType.includes('image')) return 'Imagen';
-            return 'Archivo';
-        }
-
-        // Función para verificar si hay productos recibidos o por nota de crédito en un reporte
-        function hasReceivedOrCreditNoteProducts(reportId) {
+        // Función para verificar si un reporte está completado
+        function isReportCompleted(reportId) {
             const report = reports.find(r => r.id === reportId);
             if (!report || !report.products) return false;
             
-            return report.products.some(product => 
+            return report.products.every(product => 
                 product.status === 'received' || 
-                (product.status === 'received' && product.receptionType === 'credit-note')
+                (product.status === 'received' && product.receptionType === 'credit-note') ||
+                product.status === 'low' || 
+                product.status === 'cancelled'
             );
         }
 
-        // Función para contar productos pendientes
-        function countPendingProducts(reportId) {
-            const report = reports.find(r => r.id === reportId);
-            if (!report || !report.products) return 0;
-            
-            return report.products.filter(product => 
-                product.status === 'pending'
-            ).length;
-        }
-
-        // Función para abrir modal de fusión
-        function openFusionModal() {
-            // Filtrar solo reportes activos que tengan productos pendientes
-            const reportsWithPending = reports.filter(report => 
-                report.status === 'active' && 
-                report.products && 
-                report.products.some(p => p.status === 'pending')
-            );
-
-            if (reportsWithPending.length === 0) {
-                Swal.fire({
-                    title: 'No hay reportes para fusionar',
-                    text: 'No se encontraron reportes activos con productos pendientes',
-                    icon: 'info',
-                    confirmButtonColor: '#3085d6'
-                });
-                return;
-            }
-
-            const fusionReportsList = document.getElementById('fusionReportsList');
-            fusionReportsList.innerHTML = '';
-
-            reportsWithPending.forEach(report => {
-                const pendingCount = countPendingProducts(report.id);
-                const reportCard = document.createElement('div');
-                reportCard.className = 'report-card';
-                reportCard.innerHTML = `
-                    <div class="report-header">
-                        <div style="display: flex; align-items: center;">
-                            <input type="checkbox" class="report-checkbox" data-report-id="${report.id}" onchange="toggleReportSelection('${report.id}')">
-                            <div>
-                                <span class="report-id">${report.id}</span>
-                                <span class="report-date">${formatDate(report.date)}</span>
-                                <div style="margin-top: 0.3rem; font-size: 0.95rem; color: var(--warning);">
-                                    ${pendingCount} producto(s) pendiente(s)
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="report-supplier">Proveedor: ${report.supplier}</div>
-                    ${report.notes ? `<div class="report-notes">Observaciones: ${report.notes}</div>` : ''}
-                `;
-                fusionReportsList.appendChild(reportCard);
-            });
-
-            document.getElementById('fusionModal').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
-
-        // Función para alternar selección de reportes para fusión
-        function toggleReportSelection(reportId) {
-            if (selectedReportsForFusion.has(reportId)) {
-                selectedReportsForFusion.delete(reportId);
-            } else {
-                selectedReportsForFusion.add(reportId);
-            }
-
-            updateFusionStats();
-        }
-
-        // Función para actualizar estadísticas de fusión
-        function updateFusionStats() {
-            const selectedCount = selectedReportsForFusion.size;
-            let pendingCount = 0;
-            let totalProducts = 0;
-
-            selectedReportsForFusion.forEach(reportId => {
-                const report = reports.find(r => r.id === reportId);
-                if (report && report.products) {
-                    const reportPending = report.products.filter(p => p.status === 'pending').length;
-                    pendingCount += reportPending;
-                    totalProducts += report.products.length;
-                }
-            });
-
-            document.getElementById('selectedReportsCount').textContent = selectedCount;
-            document.getElementById('pendingProductsCount').textContent = pendingCount;
-            document.getElementById('totalProductsCount').textContent = totalProducts;
-
-            const fusionStats = document.getElementById('fusionStats');
-            const confirmBtn = document.getElementById('confirmFusionBtn');
-
-            if (selectedCount > 0) {
-                fusionStats.style.display = 'grid';
-                confirmBtn.disabled = false;
-            } else {
-                fusionStats.style.display = 'none';
-                confirmBtn.disabled = true;
-            }
-        }
-
-        // Función para crear la fusión de reportes
-        async function createFusion() {
-            const supplier = document.getElementById('fusionSupplier').value.trim();
-            const notes = document.getElementById('fusionNotes').value.trim();
-
-            if (!supplier) {
-                Swal.fire({
-                    title: 'Proveedor requerido',
-                    text: 'Por favor ingresa el proveedor para el reporte fusionado',
-                    icon: 'warning',
-                    confirmButtonColor: '#3085d6'
-                });
-                return;
-            }
-
-            if (selectedReportsForFusion.size === 0) {
-                Swal.fire({
-                    title: 'No hay reportes seleccionados',
-                    text: 'Por favor selecciona al menos un reporte para fusionar',
-                    icon: 'warning',
-                    confirmButtonColor: '#3085d6'
-                });
-                return;
-            }
-
-            const confirmBtn = document.getElementById('confirmFusionBtn');
-            confirmBtn.classList.add('btn-loading');
-            confirmBtn.querySelector('.spinner').style.display = 'inline-block';
-            confirmBtn.querySelector('.btn-text').style.display = 'none';
-
-            try {
-                // Generar nuevo número de reporte
-                const newReportId = await generateReportNumber();
-                
-                // Recolectar productos pendientes de los reportes seleccionados
-                const fusionProducts = [];
-                const reportsToUpdate = [];
-
-                for (const reportId of selectedReportsForFusion) {
-                    const report = reports.find(r => r.id === reportId);
-                    if (report && report.products) {
-                        const pendingProducts = report.products.filter(p => p.status === 'pending');
-                        
-                        // Agregar productos pendientes al nuevo reporte
-                        pendingProducts.forEach(product => {
-                            fusionProducts.push({
-                                ...product,
-                                status: 'pending',
-                                receivedDate: null,
-                                receptionType: 'received'
-                            });
-                        });
-
-                        // Marcar productos como "De baja" en el reporte original
-                        const updatedProducts = report.products.map(product => {
-                            if (product.status === 'pending') {
-                                return {
-                                    ...product,
-                                    status: 'low',
-                                    lowDate: new Date().toISOString()
-                                };
-                            }
-                            return product;
-                        });
-
-                        reportsToUpdate.push({
-                            reportId: reportId,
-                            products: updatedProducts
-                        });
-                    }
-                }
-
-                if (fusionProducts.length === 0) {
-                    throw new Error('No se encontraron productos pendientes en los reportes seleccionados');
-                }
-
-                // Crear el nuevo reporte fusionado
-                const fusionReportData = {
-                    id: newReportId,
-                    supplier: toUpperCase(supplier),
-                    date: new Date().toISOString().split('T')[0],
-                    invoiceNumber: 'FUSIÓN',
-                    invoiceSeries: 'FUSIÓN',
-                    notes: notes ? `Fusión de reportes: ${Array.from(selectedReportsForFusion).join(', ')}. ${notes}` : `Fusión de reportes: ${Array.from(selectedReportsForFusion).join(', ')}`,
-                    products: fusionProducts,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    status: 'active',
-                    reportNumber: parseInt(newReportId.replace('#', '')),
-                    isFusion: true,
-                    sourceReports: Array.from(selectedReportsForFusion)
-                };
-
-                // Guardar el nuevo reporte fusionado
-                await db.collection("reportesMalEstado").doc(newReportId).set(fusionReportData);
-
-                // Actualizar los reportes originales
-                const updatePromises = reportsToUpdate.map(async ({ reportId, products }) => {
-                    await db.collection("reportesMalEstado").doc(reportId).update({
-                        products: products,
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                });
-
-                await Promise.all(updatePromises);
-
-                // Mostrar resumen de la fusión
-                await Swal.fire({
-                    title: 'Fusión completada',
-                    html: `
-                        <div style="text-align: left;">
-                            <p><strong>Nuevo reporte:</strong> ${newReportId}</p>
-                            <p><strong>Proveedor:</strong> ${toUpperCase(supplier)}</p>
-                            <p><strong>Reportes fusionados:</strong> ${selectedReportsForFusion.size}</p>
-                            <p><strong>Productos transferidos:</strong> ${fusionProducts.length}</p>
-                            <p><strong>Estado en reportes originales:</strong> Marcados como "De baja"</p>
-                        </div>
-                    `,
-                    icon: 'success',
-                    confirmButtonColor: '#3085d6'
-                });
-
-                // Cerrar modal y recargar reportes
-                window.closeFusionModal();
-                await loadReports();
-
-            } catch (error) {
-                console.error("Error al crear fusión:", error);
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Ocurrió un error al crear la fusión: ' + error.message,
-                    icon: 'error',
-                    confirmButtonColor: '#3085d6'
-                });
-            } finally {
-                // Restaurar botón
-                confirmBtn.classList.remove('btn-loading');
-                confirmBtn.querySelector('.spinner').style.display = 'none';
-                confirmBtn.querySelector('.btn-text').style.display = 'inline';
-            }
-        }
-
-        // Filtrar reportes por estado - CORREGIDO
+        // Filtrar reportes por estado y búsqueda
         function filterReports() {
             const showCompleted = document.getElementById('filterCompleted').checked;
             const showPending = document.getElementById('filterPending').checked;
             const showCancelled = document.getElementById('filterCancelled').checked;
-            
-            const searchInput = document.getElementById('searchInput');
-            const searchTerm = searchInput.value.trim().toLowerCase().replace('#', '');
+            const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
             
             let filteredReports = reports;
             
-            // Aplicar filtros de estado - CORREGIDO
+            // Aplicar filtros de estado
             filteredReports = filteredReports.filter(report => {
                 if (report.status === 'cancelled') {
                     return showCancelled;
                 }
                 
-                // Contar productos por estado
-                const receivedCount = report.products ? report.products.filter(p => p.status === 'received').length : 0;
-                const totalCount = report.products ? report.products.length : 0;
-                const isCompleted = receivedCount === totalCount && totalCount > 0;
+                const isCompleted = isReportCompleted(report.id);
                 
                 if (isCompleted) {
                     return showCompleted;
@@ -1552,7 +1163,7 @@
             // Aplicar búsqueda si hay término
             if (searchTerm) {
                 filteredReports = filteredReports.filter(report => {
-                    const reportId = report.id.replace('#', '').toLowerCase();
+                    const reportId = report.id.toLowerCase();
                     const reportDate = formatDate(report.date).toLowerCase();
                     const reportSupplier = report.supplier.toLowerCase();
                     
@@ -1565,7 +1176,7 @@
             renderReportsList(filteredReports);
         }
 
-        // Generar número de reporte consecutivo basado en el último existente (ahora con #)
+        // Generar número de reporte consecutivo
         async function generateReportNumber() {
             try {
                 const snapshot = await db.collection("reportesMalEstado")
@@ -1587,163 +1198,6 @@
             }
         }
 
-        // Función para manejar la subida de archivos con Cloudinary
-        function handleCloudinaryUpload() {
-            const uploadWidget = cloudinary.createUploadWidget({
-                cloudName: cloudinaryConfig.cloudName,
-                uploadPreset: cloudinaryConfig.uploadPreset,
-                sources: ['local'],
-                resourceType: 'raw',
-                clientAllowedFormats: ['pdf'],
-                maxFileSize: 5000000, // 5MB
-                multiple: false,
-                cropping: false,
-                showAdvancedOptions: false,
-                styles: {
-                    palette: {
-                        window: "#F5F5F5",
-                        sourceBg: "#FFFFFF",
-                        windowBorder: "#90a0b3",
-                        tabIcon: "#0094c7",
-                        inactiveTabIcon: "#69778A",
-                        menuIcons: "#0094C7",
-                        link: "#53ad9d",
-                        action: "#8F5DA5",
-                        inProgress: "#0194c7",
-                        complete: "#53ad9d",
-                        error: "#c43737",
-                        textDark: "#000000",
-                        textLight: "#FFFFFF"
-                    }
-                }
-            }, (error, result) => {
-                if (!error && result && result.event === "success") {
-                    currentAttachmentUrl = result.info.secure_url;
-                    currentAttachmentName = result.info.original_filename;
-                    currentAttachmentSize = result.info.bytes;
-                    
-                    // Mostrar información del archivo subido
-                    document.getElementById('uploadFileName').textContent = currentAttachmentName;
-                    document.getElementById('uploadFileSize').textContent = formatFileSize(currentAttachmentSize);
-                    document.getElementById('uploadFileType').textContent = getFileType(result.info.resource_type);
-                    document.getElementById('fileTypeBadge').textContent = getFileType(result.info.resource_type);
-                    
-                    document.getElementById('uploadStatus').style.display = 'block';
-                    document.getElementById('saveAttachmentBtn').style.display = 'block';
-                    
-                    Swal.fire({
-                        title: 'Archivo subido correctamente',
-                        text: 'El archivo se ha subido correctamente. Haz clic en "Guardar Adjunto" para asociarlo al reporte.',
-                        icon: 'success',
-                        confirmButtonColor: '#3085d6'
-                    });
-                } else if (error) {
-                    console.error("Error al subir archivo:", error);
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'Ocurrió un error al subir el archivo',
-                        icon: 'error',
-                        confirmButtonColor: '#3085d6'
-                    });
-                }
-            });
-            
-            // Abrir el widget de Cloudinary
-            uploadWidget.open();
-        }
-
-        // Guardar datos del formulario en localStorage
-        function saveFormToLocalStorage() {
-            if (!isCreatingNewReport) return;
-            
-            const formData = {
-                supplier: document.getElementById('supplier').value,
-                reportDate: document.getElementById('reportDate').value,
-                invoiceNumber: document.getElementById('invoiceNumber').value,
-                invoiceSeries: document.getElementById('invoiceSeries').value,
-                notes: document.getElementById('notes').value,
-                products: []
-            };
-            
-            const rows = document.getElementById('productsTable').querySelectorAll('tbody tr');
-            rows.forEach(row => {
-                const inputs = row.querySelectorAll('input, textarea');
-                formData.products.push({
-                    sku: inputs[0].value,
-                    factoryCode: inputs[1].value,
-                    description: inputs[2].value,
-                    quantity: inputs[3].value,
-                    reason: inputs[4].value
-                });
-            });
-            
-            localStorage.setItem('currentReportForm', JSON.stringify(formData));
-            localStorage.setItem('currentReportId', currentReportId);
-        }
-
-        // Cargar datos del formulario desde localStorage
-        function loadFormFromLocalStorage() {
-            const savedForm = localStorage.getItem('currentReportForm');
-            const savedReportId = localStorage.getItem('currentReportId');
-            
-            if (savedForm && savedReportId) {
-                const formData = JSON.parse(savedForm);
-                
-                currentReportId = savedReportId;
-                document.getElementById('reportNumber').textContent = currentReportId;
-                
-                // Llenar campos del formulario
-                document.getElementById('supplier').value = formData.supplier;
-                document.getElementById('reportDate').value = formData.reportDate;
-                document.getElementById('invoiceNumber').value = formData.invoiceNumber;
-                document.getElementById('invoiceSeries').value = formData.invoiceSeries;
-                document.getElementById('notes').value = formData.notes;
-                
-                // Llenar tabla de productos
-                const tbody = document.getElementById('productsTable').querySelector('tbody');
-                tbody.innerHTML = '';
-                
-                formData.products.forEach((product, index) => {
-                    const newRow = document.createElement('tr');
-                    newRow.innerHTML = `
-                        <td><input type="text" class="code-input" id="productSku${index+1}" name="productSku${index+1}" value="${product.sku || ''}" placeholder="Sku" maxlength="9" required></td>
-                        <td><input type="text" class="factory-code-input" id="factoryCode${index+1}" name="factoryCode${index+1}" value="${product.factoryCode || ''}" placeholder="Cód. Fab"></td>
-                        <td><input type="text" id="productDescription${index+1}" name="productDescription${index+1}" value="${product.description || ''}" placeholder="Descripción" required></td>
-                        <td><input type="number" id="productQuantity${index+1}" name="productQuantity${index+1}" value="${product.quantity || ''}" placeholder="0" min="1" required></td>
-                        <td><textarea class="form-control" id="productReason${index+1}" name="productReason${index+1}" placeholder="Ej: Quebrado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;">${product.reason || ''}</textarea></td>
-                        <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
-                    `;
-                    tbody.appendChild(newRow);
-                    
-                    // Ajustar tamaño del input de código de fábrica
-                    const factoryInput = newRow.querySelector('.factory-code-input');
-                    resizeInput(factoryInput);
-                });
-                
-                // Mostrar el formulario
-                document.getElementById('returnForm').style.display = 'block';
-                document.getElementById('reportsList').style.display = 'none';
-                document.getElementById('searchContainer').style.display = 'none';
-                document.querySelector('.header-actions').style.display = 'none';
-                document.getElementById('backButton').style.display = 'none';
-                
-                // Marcar que estamos creando/editando un reporte
-                isCreatingNewReport = true;
-                
-                // Agregar event listeners a los botones de eliminar
-                addDeleteRowListeners();
-                
-                // Agregar event listeners para ajustar tamaño de inputs
-                addInputResizeListeners();
-            }
-        }
-
-        // Limpiar datos del formulario en localStorage
-        function clearFormLocalStorage() {
-            localStorage.removeItem('currentReportForm');
-            localStorage.removeItem('currentReportId');
-        }
-
         // Mostrar formulario de nueva devolución
         async function showNewReportForm() {
             if (isCreatingNewReport) {
@@ -1756,20 +1210,14 @@
                 return;
             }
 
-            // Mostrar spinner en el botón
-            const newReportBtn = document.getElementById('newReportBtn');
-            newReportBtn.classList.add('btn-loading');
-            newReportBtn.querySelector('.spinner').style.display = 'inline-block';
-            newReportBtn.querySelector('.btn-text').style.display = 'none';
-
             try {
                 currentReportId = await generateReportNumber();
                 document.getElementById('reportNumber').textContent = currentReportId;
                 
-                // Limpiar campos (incluyendo fecha)
+                // Limpiar campos
                 document.getElementById('supplier').value = '';
                 
-                // Establecer fecha actual en el input
+                // Establecer fecha actual
                 const today = new Date();
                 const formattedDate = today.toISOString().split('T')[0];
                 document.getElementById('reportDate').value = formattedDate;
@@ -1778,42 +1226,49 @@
                 document.getElementById('invoiceSeries').value = '';
                 document.getElementById('notes').value = '';
                 
-                // Limpiar tabla de productos (dejar solo una fila vacía)
-                const tbody = document.getElementById('productsTable').querySelector('tbody');
-                tbody.innerHTML = `
-                    <tr>
-                        <td><input type="text" class="code-input" id="productSku1" name="productSku1" placeholder="Sku" maxlength="9" required></td>
-                        <td><input type="text" class="factory-code-input" id="factoryCode1" name="factoryCode1" placeholder="Cód. Fab"></td>
-                        <td><input type="text" id="productDescription1" name="productDescription1" placeholder="Descripción" required></td>
-                        <td><input type="number" id="productQuantity1" name="productQuantity1" placeholder="0" min="1" required></td>
-                        <td><textarea class="form-control" id="productReason1" name="productReason1" placeholder="Ej: Quebrado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;"></textarea></td>
-                        <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
-                    </tr>
+                // Limpiar productos (dejar solo uno)
+                document.getElementById('productsContainer').innerHTML = `
+                    <div class="product-card">
+                        <div class="product-row">
+                            <div class="product-field">
+                                <label for="productSku1">Sku</label>
+                                <input type="text" id="productSku1" name="productSku1" placeholder="Sku" maxlength="9" required>
+                            </div>
+                            <div class="product-field">
+                                <label for="factoryCode1">Cód. Fábrica</label>
+                                <input type="text" id="factoryCode1" name="factoryCode1" placeholder="Cód. Fab">
+                            </div>
+                        </div>
+                        <div class="product-row">
+                            <div class="product-field full-width">
+                                <label for="productDescription1">Descripción</label>
+                                <input type="text" id="productDescription1" name="productDescription1" placeholder="Descripción del producto" required>
+                            </div>
+                        </div>
+                        <div class="product-row">
+                            <div class="product-field">
+                                <label for="productQuantity1">Cantidad</label>
+                                <input type="number" id="productQuantity1" name="productQuantity1" placeholder="0" min="1" required>
+                            </div>
+                            <div class="product-field full-width">
+                                <label for="productReason1">Motivo</label>
+                                <textarea id="productReason1" name="productReason1" placeholder="Ej: Quebrado, Dañado, etc." required></textarea>
+                            </div>
+                        </div>
+                        <div class="product-actions">
+                            <button class="delete-product" onclick="removeProduct(this)">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
                 `;
                 
-                // Restaurar texto del botón de guardar
-                document.getElementById('saveReportBtn').innerHTML = '<span class="spinner" style="display: none;"></span><span class="btn-text"><i class="fas fa-save"></i> Guardar</span>';
-                
-                // Agregar event listeners a los botones de eliminar
-                addDeleteRowListeners();
-                
-                // Agregar event listeners para ajustar tamaño de inputs
-                addInputResizeListeners();
-                
-                // Ocultar elementos (INCLUYENDO EL FILTRO)
-                document.getElementById('reportsList').style.display = 'none';
-                document.getElementById('searchContainer').style.display = 'none';
-                document.querySelector('.header-actions').style.display = 'none';
-                document.getElementById('backButton').style.display = 'none';
-                
-                // Mostrar el formulario
-                document.getElementById('returnForm').style.display = 'block';
+                // Mostrar la pantalla de nuevo reporte
+                showScreen('newReportScreen');
                 
                 // Marcar que estamos creando un nuevo reporte
                 isCreatingNewReport = true;
                 
-                // Limpiar localStorage
-                clearFormLocalStorage();
             } catch (error) {
                 console.error("Error al crear nuevo reporte:", error);
                 Swal.fire({
@@ -1822,163 +1277,86 @@
                     icon: 'error',
                     confirmButtonColor: '#3085d6'
                 });
-            } finally {
-                // Ocultar spinner en el botón
-                newReportBtn.classList.remove('btn-loading');
-                newReportBtn.querySelector('.spinner').style.display = 'none';
-                newReportBtn.querySelector('.btn-text').style.display = 'inline';
             }
         }
 
-        // Función auxiliar para ocultar el formulario sin confirmación
-        function actuallyHideForm() {
-            document.getElementById('returnForm').style.display = 'none';
-            document.getElementById('reportsList').style.display = 'grid';
-            document.getElementById('searchContainer').style.display = 'flex';
-            document.querySelector('.header-actions').style.display = 'flex';
-            document.getElementById('backButton').style.display = 'flex';
-            isCreatingNewReport = false;
-            
-            // Limpiar localStorage al cancelar
-            clearFormLocalStorage();
-        }
-
-        // Ocultar formulario de devolución (modificado)
-        function hideReturnForm(showConfirmation = true) {
-            if (showConfirmation) {
-                Swal.fire({
-                    title: '¿Cancelar operación?',
-                    text: '¿Estás seguro que deseas cancelar esta operación? Los datos no guardados se perderán.',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Sí, cancelar',
-                    cancelButtonText: 'No, continuar'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        actuallyHideForm();
-                    }
-                });
-            } else {
-                actuallyHideForm();
-            }
-        }
-
-        // Agregar event listeners para ajustar tamaño de inputs
-        function addInputResizeListeners() {
-            const factoryCodeInputs = document.querySelectorAll('.factory-code-input');
-            
-            factoryCodeInputs.forEach(input => {
-                // Ajustar tamaño inicial
-                resizeInput(input);
-                
-                // Agregar event listener para cambios
-                input.addEventListener('input', function() {
-                    resizeInput(this);
-                });
-            });
-        }
-
-        // Función para ajustar el tamaño del input basado en su contenido
-        function resizeInput(input) {
-            const minWidth = 60;
-            const maxWidth = 150;
-            const tempSpan = document.createElement('span');
-            
-            tempSpan.style.visibility = 'hidden';
-            tempSpan.style.whiteSpace = 'nowrap';
-            tempSpan.style.fontSize = window.getComputedStyle(input).fontSize;
-            tempSpan.style.fontFamily = window.getComputedStyle(input).fontFamily;
-            tempSpan.style.padding = window.getComputedStyle(input).padding;
-            tempSpan.innerHTML = input.value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            
-            document.body.appendChild(tempSpan);
-            const width = Math.min(Math.max(tempSpan.offsetWidth + 20, minWidth), maxWidth);
-            document.body.removeChild(tempSpan);
-            
-            input.style.width = width + 'px';
-        }
-
-        // Agregar nueva fila a la tabla de productos
+        // Agregar nueva tarjeta de producto
         function addProductRow() {
-            const tbody = document.getElementById('productsTable').querySelector('tbody');
-            const rowCount = tbody.childElementCount + 1;
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = `
-                <td><input type="text" class="code-input" id="productSku${rowCount}" name="productSku${rowCount}" placeholder="Sku" maxlength="9" required></td>
-                <td><input type="text" class="factory-code-input" id="factoryCode${rowCount}" name="factoryCode${rowCount}" placeholder="Cód. Fab"></td>
-                <td><input type="text" id="productDescription${rowCount}" name="productDescription${rowCount}" placeholder="Descripción" required></td>
-                <td><input type="number" id="productQuantity${rowCount}" name="productQuantity${rowCount}" placeholder="0" min="1" required></td>
-                <td><textarea class="form-control" id="productReason${rowCount}" name="productReason${rowCount}" placeholder="Ej: Quebrado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;"></textarea></td>
-                <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
+            const productsContainer = document.getElementById('productsContainer');
+            const productCount = productsContainer.children.length + 1;
+            
+            const productCard = document.createElement('div');
+            productCard.className = 'product-card';
+            productCard.innerHTML = `
+                <div class="product-row">
+                    <div class="product-field">
+                        <label for="productSku${productCount}">Sku</label>
+                        <input type="text" id="productSku${productCount}" name="productSku${productCount}" placeholder="Sku" maxlength="9" required>
+                    </div>
+                    <div class="product-field">
+                        <label for="factoryCode${productCount}">Cód. Fábrica</label>
+                        <input type="text" id="factoryCode${productCount}" name="factoryCode${productCount}" placeholder="Cód. Fab">
+                    </div>
+                </div>
+                <div class="product-row">
+                    <div class="product-field full-width">
+                        <label for="productDescription${productCount}">Descripción</label>
+                        <input type="text" id="productDescription${productCount}" name="productDescription${productCount}" placeholder="Descripción del producto" required>
+                    </div>
+                </div>
+                <div class="product-row">
+                    <div class="product-field">
+                        <label for="productQuantity${productCount}">Cantidad</label>
+                        <input type="number" id="productQuantity${productCount}" name="productQuantity${productCount}" placeholder="0" min="1" required>
+                    </div>
+                    <div class="product-field full-width">
+                        <label for="productReason${productCount}">Motivo</label>
+                        <textarea id="productReason${productCount}" name="productReason${productCount}" placeholder="Ej: Quebrado, Dañado, etc." required></textarea>
+                    </div>
+                </div>
+                <div class="product-actions">
+                    <button class="delete-product" onclick="removeProduct(this)">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
             `;
-            tbody.appendChild(newRow);
             
-            // Agregar event listener al botón de eliminar
-            const deleteBtn = newRow.querySelector('.fa-trash-alt');
-            deleteBtn.addEventListener('click', () => {
-                if (tbody.childElementCount > 1) {
-                    tbody.removeChild(newRow);
-                } else {
-                    // Si es la última fila, limpiar los campos
-                    const inputs = newRow.querySelectorAll('input, textarea');
-                    inputs.forEach(input => input.value = '');
-                    // Ajustar tamaño del input de código de fábrica
-                    const factoryInput = newRow.querySelector('.factory-code-input');
-                    resizeInput(factoryInput);
-                }
-            });
-            
-            // Agregar event listener para ajustar tamaño del input de código de fábrica
-            const factoryInput = newRow.querySelector('.factory-code-input');
-            factoryInput.addEventListener('input', function() {
-                resizeInput(this);
-            });
+            productsContainer.appendChild(productCard);
         }
 
-        // Agregar event listeners a los botones de eliminar fila
-        function addDeleteRowListeners() {
-            const deleteBtns = document.getElementById('productsTable').querySelectorAll('.fa-trash-alt');
-            const tbody = document.getElementById('productsTable').querySelector('tbody');
+        // Eliminar tarjeta de producto
+        function removeProduct(button) {
+            const productCard = button.closest('.product-card');
+            const productsContainer = document.getElementById('productsContainer');
             
-            deleteBtns.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const row = e.target.closest('tr');
-                    if (tbody.childElementCount > 1) {
-                        tbody.removeChild(row);
-                    } else {
-                        // Si es la última fila, limpiar los campos
-                        const inputs = row.querySelectorAll('input, textarea');
-                        inputs.forEach(input => input.value = '');
-                        // Ajustar tamaño del input de código de fábrica
-                        const factoryInput = row.querySelector('.factory-code-input');
-                        resizeInput(factoryInput);
-                    }
-                });
-            });
+            if (productsContainer.children.length > 1) {
+                productCard.remove();
+            } else {
+                // Si es la última tarjeta, limpiar los campos
+                const inputs = productCard.querySelectorAll('input, textarea');
+                inputs.forEach(input => input.value = '');
+            }
         }
 
-        // Obtener productos de la tabla
-        function getProductsFromTable() {
+        // Obtener productos del formulario
+        function getProductsFromForm() {
             const products = [];
-            const rows = document.getElementById('productsTable').querySelectorAll('tbody tr');
+            const productCards = document.querySelectorAll('.product-card');
             
-            rows.forEach(row => {
-                const inputs = row.querySelectorAll('input, textarea');
-                const sku = toUpperCase(inputs[0].value.trim());
-                const factoryCode = toUpperCase(inputs[1].value.trim()) || '-';
-                const description = toUpperCase(inputs[2].value.trim());
-                const quantity = inputs[3].value.trim();
-                const reason = toUpperCase(inputs[4].value.trim());
+            productCards.forEach((card, index) => {
+                const sku = card.querySelector(`input[name="productSku${index + 1}"]`).value.trim();
+                const factoryCode = card.querySelector(`input[name="factoryCode${index + 1}"]`).value.trim() || '-';
+                const description = card.querySelector(`input[name="productDescription${index + 1}"]`).value.trim();
+                const quantity = card.querySelector(`input[name="productQuantity${index + 1}"]`).value.trim();
+                const reason = card.querySelector(`textarea[name="productReason${index + 1}"]`).value.trim();
                 
                 if (sku && description && quantity && reason) {
                     products.push({
-                        sku: sku,
-                        factoryCode: factoryCode,
-                        description: description,
+                        sku: toUpperCase(sku),
+                        factoryCode: toUpperCase(factoryCode),
+                        description: toUpperCase(description),
                         quantity: parseInt(quantity),
-                        reason: reason,
+                        reason: toUpperCase(reason),
                         status: 'pending',
                         receivedDate: null,
                         receptionType: 'received'
@@ -2015,7 +1393,7 @@
                 return false;
             }
             
-            const products = getProductsFromTable();
+            const products = getProductsFromForm();
             if (products.length === 0) {
                 Swal.fire({
                     title: 'Validación requerida',
@@ -2024,41 +1402,6 @@
                     confirmButtonColor: '#3085d6'
                 });
                 return false;
-            }
-            
-            // Validar que todos los productos tengan los campos obligatorios
-            const rows = document.getElementById('productsTable').querySelectorAll('tbody tr');
-            for (let i = 0; i < rows.length; i++) {
-                const inputs = rows[i].querySelectorAll('input, textarea');
-                const sku = inputs[0].value.trim();
-                const description = inputs[2].value.trim();
-                const quantity = inputs[3].value.trim();
-                const reason = inputs[4].value.trim();
-                
-                if (!sku || !description || !quantity || !reason) {
-                    Swal.fire({
-                        title: 'Validación requerida',
-                        text: `Por favor completa todos los campos obligatorios en la fila ${i + 1}`,
-                        icon: 'info',
-                        confirmButtonColor: '#3085d6'
-                    });
-                    
-                    // Resaltar campos vacíos
-                    if (!sku) inputs[0].style.borderColor = 'var(--danger)';
-                    if (!description) inputs[2].style.borderColor = 'var(--danger)';
-                    if (!quantity) inputs[3].style.borderColor = 'var(--danger)';
-                    if (!reason) inputs[4].style.borderColor = 'var(--danger)';
-                    
-                    // Quitar el resaltado después de 2 segundos
-                    setTimeout(() => {
-                        inputs[0].style.borderColor = '';
-                        inputs[2].style.borderColor = '';
-                        inputs[3].style.borderColor = '';
-                        inputs[4].style.borderColor = '';
-                    }, 2000);
-                    
-                    return false;
-                }
             }
             
             return true;
@@ -2075,26 +1418,17 @@
             const notesInput = document.getElementById('notes');
             const saveReportBtn = document.getElementById('saveReportBtn');
             
-            // Obtener la fecha del input y sumar un día para guardar
-            const inputDate = new Date(reportDateInput.value);
-            const tomorrow = new Date(inputDate);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            const isoDate = tomorrow.toISOString().split('T')[0];
-            
             const reportData = {
                 id: currentReportId,
                 supplier: toUpperCase(supplierInput.value.trim()),
-                date: isoDate,
+                date: reportDateInput.value,
                 invoiceNumber: invoiceNumberInput.value.trim() || 'XXXXX',
                 invoiceSeries: invoiceSeriesInput.value.trim() || 'XXXXX',
                 notes: notesInput.value.trim(),
-                products: getProductsFromTable(),
+                products: getProductsFromForm(),
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 reportNumber: parseInt(currentReportId.replace('#', ''))
             };
-            
-            // Verificar si estamos editando o creando nuevo
-            const isEditing = saveReportBtn.querySelector('.btn-text').innerHTML.includes('Actualizar');
             
             try {
                 // Mostrar spinner en el botón
@@ -2102,64 +1436,30 @@
                 saveReportBtn.querySelector('.spinner').style.display = 'inline-block';
                 saveReportBtn.querySelector('.btn-text').style.display = 'none';
                 
-                if (isEditing) {
-                    // Mantener los datos existentes que no se editan
-                    const originalReport = reports.find(r => r.id === currentReportId);
-                    if (originalReport) {
-                        reportData.status = originalReport.status;
-                        reportData.createdAt = originalReport.createdAt;
-                        reportData.reportNumber = originalReport.reportNumber;
-                        
-                        // Mantener el estado de los productos
-                        reportData.products.forEach((product, index) => {
-                            if (originalReport.products && originalReport.products[index]) {
-                                product.status = originalReport.products[index].status;
-                                product.receivedDate = originalReport.products[index].receivedDate;
-                                product.receptionType = originalReport.products[index].receptionType || 'received';
-                            } else {
-                                product.status = 'pending';
-                                product.receivedDate = null;
-                                product.receptionType = 'received';
-                            }
-                        });
-                    }
-                    
-                    await db.collection("reportesMalEstado").doc(currentReportId).update(reportData);
-                    await Swal.fire({
-                        title: 'Reporte actualizado',
-                        text: 'El reporte se ha actualizado correctamente',
-                        icon: 'success',
-                        confirmButtonColor: '#3085d6'
-                    });
-                    
-                    hideReturnForm(false);
-                } else {
-                    // Es un nuevo reporte
-                    reportData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-                    reportData.status = 'active';
-                    
-                    // Establecer estado inicial de los productos
-                    reportData.products.forEach(product => {
-                        product.status = 'pending';
-                        product.receivedDate = null;
-                        product.receptionType = 'received';
-                    });
-                    
-                    await db.collection("reportesMalEstado").doc(currentReportId).set(reportData);
-                    await Swal.fire({
-                        title: 'Reporte guardado',
-                        text: 'El reporte se ha guardado correctamente',
-                        icon: 'success',
-                        confirmButtonColor: '#3085d6'
-                    });
-                    
-                    hideReturnForm(false);
-                }
+                // Es un nuevo reporte
+                reportData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                reportData.status = 'active';
                 
+                // Establecer estado inicial de los productos
+                reportData.products.forEach(product => {
+                    product.status = 'pending';
+                    product.receivedDate = null;
+                    product.receptionType = 'received';
+                });
+                
+                await db.collection("reportesMalEstado").doc(currentReportId).set(reportData);
+                await Swal.fire({
+                    title: 'Reporte guardado',
+                    text: 'El reporte se ha guardado correctamente',
+                    icon: 'success',
+                    confirmButtonColor: '#3085d6'
+                });
+                
+                // Volver a la pantalla principal
+                showScreen('mainScreen');
+                isCreatingNewReport = false;
                 await loadReports();
                 
-                // Limpiar localStorage después de guardar
-                clearFormLocalStorage();
             } catch (error) {
                 console.error("Error al guardar el reporte:", error);
                 Swal.fire({
@@ -2173,13 +1473,7 @@
                 saveReportBtn.classList.remove('btn-loading');
                 saveReportBtn.querySelector('.spinner').style.display = 'none';
                 saveReportBtn.querySelector('.btn-text').style.display = 'inline';
-                saveReportBtn.querySelector('.btn-text').innerHTML = isEditing ? '<i class="fas fa-save"></i> Actualizar' : '<i class="fas fa-save"></i> Guardar';
             }
-        }
-
-        // Buscar reportes (compatible con #)
-        function searchReports() {
-            filterReports();
         }
 
         // Cargar reportes desde Firebase
@@ -2199,7 +1493,6 @@
                                 if (!product.status) {
                                     product.status = 'pending';
                                 }
-                                // Establecer tipo de recepción por defecto si no existe
                                 if (!product.receptionType) {
                                     product.receptionType = 'received';
                                 }
@@ -2223,14 +1516,20 @@
                 });
         }
 
-        // Mostrar lista de reportes con los nuevos estados
+        // Formatear fecha
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('es-ES', options);
+        }
+
+        // Mostrar lista de reportes
         function renderReportsList(reportsToRender = reports) {
             const reportsList = document.getElementById('reportsList');
             
             if (reportsToRender.length === 0) {
                 reportsList.innerHTML = `
-                    <div class="no-reports" style="text-align: center; padding: 2.5rem; color: var(--text-light);">
-                        <i class="fas fa-box-open" style="font-size: 2.5rem; margin-bottom: 1.2rem; opacity: 0.5;"></i>
+                    <div class="no-reports">
+                        <i class="fas fa-box-open"></i>
                         <h3>No se encontraron reportes</h3>
                         <p>No hay reportes que coincidan con tu búsqueda</p>
                     </div>
@@ -2244,529 +1543,301 @@
                 const reportCard = document.createElement('div');
                 reportCard.className = 'report-card';
                 
-                // Contar productos por estado (incluyendo el nuevo estado "low")
+                // Contar productos por estado
                 const receivedCount = report.products ? report.products.filter(p => p.status === 'received').length : 0;
                 const creditNoteCount = report.products ? report.products.filter(p => p.status === 'received' && p.receptionType === 'credit-note').length : 0;
                 const pendingCount = report.products ? report.products.filter(p => p.status === 'pending').length : 0;
-                const lowCount = report.products ? report.products.filter(p => p.status === 'low').length : 0;
-                const cancelledCount = report.products ? report.products.filter(p => p.status === 'cancelled').length : 0;
                 const totalCount = report.products ? report.products.length : 0;
-                const isCompleted = (receivedCount + creditNoteCount) === totalCount && totalCount > 0;
+                const isCompleted = isReportCompleted(report.id);
+                const statusClass = report.status === 'cancelled' ? 'cancelled' : (isCompleted ? 'completed' : '');
                 
                 reportCard.innerHTML = `
                     <div class="report-header">
-                        <div>
-                            <span class="report-id">${report.id}</span>
-                            <span class="report-date">${formatDate(report.date)}</span>
-                            <div style="margin-top: 0.3rem; font-size: 0.95rem; color: ${report.status === 'cancelled' ? 'var(--danger)' : isCompleted ? 'var(--success)' : 'var(--warning)'}">
-                                ${report.status === 'cancelled' ? 'ANULADO' : 
-                                 isCompleted ? 'COMPLETADO' : 'PENDIENTE'}
-                                ${isCompleted ? ` (${receivedCount + creditNoteCount}/${totalCount} productos recibidos)` : ` (${receivedCount + creditNoteCount}/${totalCount} productos recibidos)`}
-                                ${creditNoteCount > 0 ? ` (${creditNoteCount} por Nota de Crédito)` : ''}
-                                ${lowCount > 0 ? ` (${lowCount} de baja)` : ''}
-                            </div>
+                        <div class="report-info">
+                            <h3>${report.id}</h3>
+                            <div class="report-date">${formatDate(report.date)}</div>
                         </div>
-                        <div class="dropdown" style="display: flex; gap: 0.8rem;">
-                            <button class="dropdown-btn">
-                                <i class="fas fa-ellipsis-v"></i> Acciones
-                            </button>
-                            <div class="dropdown-content">
-                                <a href="#" onclick="viewReport('${report.id}'); return false;">
-                                    <i class="fas fa-eye"></i> Ver
-                                </a>
-                                <a href="#" onclick="generatePDF('${report.id}'); return false;">
-                                    <i class="fas fa-file-pdf"></i> Generar PDF
-                                </a>
-                                ${report.status === 'active' && hasReceivedOrCreditNoteProducts(report.id) && countPendingProducts(report.id) > 0 ? `
-                                <a href="#" onclick="generatePendingPDF('${report.id}'); return false;">
-                                    <i class="fas fa-hourglass-half"></i> Imprimir Pendientes
-                                </a>
-                                ` : ''}
-                                ${report.status === 'active' ? `
-                                <a href="#" onclick="confirmEditReport('${report.id}'); return false;">
-                                    <i class="fas fa-edit"></i> Editar
-                                </a>
-                                <a href="#" onclick="attachFile('${report.id}'); return false;">
-                                    <i class="fas fa-paperclip"></i> Adjuntar Archivo
-                                </a>
-                                <a href="#" onclick="cancelReport('${report.id}'); return false;" style="color: var(--danger);">
-                                    <i class="fas fa-ban"></i> Anular
-                                </a>
-                                ` : ''}
-                            </div>
+                        <div class="report-status ${statusClass}">
+                            ${report.status === 'cancelled' ? 'ANULADO' : 
+                             isCompleted ? 'COMPLETADO' : 'PENDIENTE'}
                         </div>
                     </div>
-                    <div class="report-supplier">Proveedor: ${report.supplier}</div>
-                    ${report.notes ? `<div class="report-notes">Observaciones: ${report.notes}</div>` : ''}
-                    ${report.attachmentUrl ? `
-                    <div class="attachment-info">
-                        <i class="fas fa-paperclip"></i>
-                        <span>Archivo adjunto:</span>
-                        <a href="${report.attachmentUrl}" target="_blank" class="attachment-link">
-                            <i class="fas fa-file-pdf"></i> ${report.attachmentName || 'Ver archivo'}
-                        </a>
+                    <div class="report-supplier">${report.supplier}</div>
+                    ${report.notes ? `<div class="report-notes">${report.notes}</div>` : ''}
+                    <div class="report-stats">
+                        <div class="stat-item">
+                            <span class="stat-value">${totalCount}</span>
+                            <span class="stat-label">Total</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">${receivedCount + creditNoteCount}</span>
+                            <span class="stat-label">Procesados</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">${pendingCount}</span>
+                            <span class="stat-label">Pendientes</span>
+                        </div>
                     </div>
-                    ` : ''}
-                    <table class="report-products">
-                        <thead>
-                            <tr>
-                                <th style="width: 100px;">Sku</th>
-                                <th style="width: 80px;">Cód. Fábrica</th>
-                                <th>Descripción</th>
-                                <th style="width: 70px;">Cantidad</th>
-                                <th style="width: 120px;">Motivo</th>
-                                <th style="width: 120px;">Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${report.products ? report.products.map(product => `
-                                <tr>
-                                    <td>${product.sku || ''}</td>
-                                    <td>${product.factoryCode || '-'}</td>
-                                    <td>${product.description}</td>
-                                    <td>${product.quantity}</td>
-                                    <td>${product.reason}</td>
-                                    <td>
-                                        <span class="product-status status-${product.status === 'received' ? product.receptionType === 'credit-note' ? 'credit-note' : 'received' : product.status === 'low' ? 'low' : product.status}"></span>
-                                        ${product.status === 'pending' ? 'Pendiente' : 
-                                          product.status === 'received' ? (product.receptionType === 'credit-note' ? 'Nota Crédito' : 'Recibido') : 
-                                          product.status === 'low' ? 'De baja' :
-                                          'Anulado'}
-                                    </td>
-                                </tr>
-                            `).join('') : ''}
-                        </tbody>
-                    </table>
+                    <div class="report-actions">
+                        <button class="action-btn view" onclick="viewReport('${report.id}')">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+                        <button class="action-btn pdf" onclick="generatePDF('${report.id}')">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </button>
+                    </div>
                 `;
                 
                 reportsList.appendChild(reportCard);
             });
         }
 
-        // Formatear fecha
-        function formatDate(dateString) {
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            return new Date(dateString).toLocaleDateString('es-ES', options);
-        }
-
-        // Formatear fecha y hora
-        function formatDateTime(dateString) {
-            if (!dateString) return 'No especificada';
-            const options = { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            };
-            return new Date(dateString).toLocaleDateString('es-ES', options);
-        }
-
-        // Confirmación para editar reporte
-        window.confirmEditReport = function(reportId) {
-            Swal.fire({
-                title: '¿Editar reporte?',
-                text: '¿Estás seguro que deseas editar este reporte?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, editar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    editReport(reportId);
-                }
-            });
-        };
-
-        // Editar reporte
-        function editReport(reportId) {
-            const report = reports.find(r => r.id === reportId);
-            if (!report) return;
-            
-            if (report.status !== 'active') {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Solo se pueden editar reportes activos',
-                    icon: 'error',
-                    confirmButtonColor: '#3085d6'
-                });
-                return;
-            }
-
-            currentReportId = report.id;
-            document.getElementById('reportNumber').textContent = report.id;
-            
-            // Cambiar el texto del botón de guardar
-            document.getElementById('saveReportBtn').innerHTML = '<span class="spinner" style="display: none;"></span><span class="btn-text"><i class="fas fa-save"></i> Actualizar</span>';
-            
-            // Llenar campos del formulario
-            document.getElementById('supplier').value = report.supplier;
-            document.getElementById('reportDate').value = report.date.split('T')[0];
-            document.getElementById('invoiceNumber').value = report.invoiceNumber === 'XXXXX' ? '' : report.invoiceNumber;
-            document.getElementById('invoiceSeries').value = report.invoiceSeries === 'XXXXX' ? '' : report.invoiceSeries;
-            document.getElementById('notes').value = report.notes || '';
-            
-            // Llenar tabla de productos
-            const tbody = document.getElementById('productsTable').querySelector('tbody');
-            tbody.innerHTML = '';
-            
-            report.products.forEach((product, index) => {
-                const newRow = document.createElement('tr');
-                newRow.innerHTML = `
-                    <td><input type="text" class="code-input" id="productSku${index+1}" name="productSku${index+1}" value="${product.sku || ''}" placeholder="Sku" maxlength="9" required></td>
-                    <td><input type="text" class="factory-code-input" id="factoryCode${index+1}" name="factoryCode${index+1}" value="${product.factoryCode || ''}" placeholder="Cód. Fab"></td>
-                    <td><input type="text" id="productDescription${index+1}" name="productDescription${index+1}" value="${product.description}" placeholder="Descripción" required></td>
-                    <td><input type="number" id="productQuantity${index+1}" name="productQuantity${index+1}" value="${product.quantity}" placeholder="0" min="1" required></td>
-                    <td><textarea class="form-control" id="productReason${index+1}" name="productReason${index+1}" placeholder="Ej: Quebrado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;">${product.reason}</textarea></td>
-                    <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
-                `;
-                tbody.appendChild(newRow);
-                
-                // Ajustar tamaño del input de código de fábrica
-                const factoryInput = newRow.querySelector('.factory-code-input');
-                resizeInput(factoryInput);
-            });
-            
-            // Agregar event listeners a los botones de eliminar
-            addDeleteRowListeners();
-            
-            // Agregar event listeners para ajustar tamaño de inputs
-            addInputResizeListeners();
-            
-            // Ocultar elementos (INCLUYENDO EL FILTRO)
-            document.getElementById('reportsList').style.display = 'none';
-            document.getElementById('searchContainer').style.display = 'none';
-            document.querySelector('.header-actions').style.display = 'none';
-            document.getElementById('backButton').style.display = 'none';
-            
-            // Mostrar el formulario
-            document.getElementById('returnForm').style.display = 'block';
-            
-            // Marcar que estamos editando un reporte
-            isCreatingNewReport = true;
-            
-            // Guardar datos en localStorage
-            saveFormToLocalStorage();
-            
-            // Cerrar el modal si está abierto
-            window.closeModal();
-            
-            // Desplazar hasta el formulario
-            document.getElementById('returnForm').scrollIntoView({ behavior: 'smooth' });
-        };
-
-        // Anular reporte
-        window.cancelReport = function(reportId) {
-            Swal.fire({
-                title: '¿Anular reporte?',
-                text: '¿Estás seguro que deseas anular este reporte? Esta acción no se puede deshacer.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, anular',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    db.collection("reportesMalEstado").doc(reportId)
-                        .update({
-                            status: 'cancelled',
-                            cancelledAt: firebase.firestore.FieldValue.serverTimestamp()
-                        })
-                        .then(() => {
-                            // Actualizar el estado de todos los productos a 'cancelled'
-                            const report = reports.find(r => r.id === reportId);
-                            if (report && report.products) {
-                                report.products.forEach(product => {
-                                    product.status = 'cancelled';
-                                });
-                                return db.collection("reportesMalEstado").doc(reportId)
-                                    .update({
-                                        products: report.products
-                                    });
-                            }
-                            return Promise.resolve();
-                        })
-                        .then(() => {
-                            Swal.fire({
-                                title: 'Reporte anulado',
-                                text: 'El reporte ha sido anulado correctamente',
-                                icon: 'success',
-                                confirmButtonColor: '#3085d6'
-                            }).then(() => {
-                                loadReports();
-                                window.closeModal();
-                            });
-                        })
-                        .catch(error => {
-                            console.error("Error al anular el reporte:", error);
-                            Swal.fire({
-                                title: 'Error',
-                                text: 'Ocurrió un error al anular el reporte',
-                                icon: 'error',
-                                confirmButtonColor: '#3085d6'
-                            });
-                        });
-                }
-            });
-        };
-
-        // Función para actualizar el estado del producto con tipo de recepción
-        function updateProductStatus(reportId, productIndex, newStatus, receptionType = 'received') {
-            const report = reports.find(r => r.id === reportId);
-            if (!report || !report.products || !report.products[productIndex]) return;
-            
-            const product = report.products[productIndex];
-            
-            // Actualizar estado del producto
-            product.status = newStatus;
-            if (newStatus === 'received') {
-                product.receivedDate = new Date().toISOString();
-                product.receptionType = receptionType;
-            } else {
-                product.receivedDate = null;
-                product.receptionType = null;
-            }
-            
-            // Actualizar en Firebase
-            db.collection("reportesMalEstado").doc(reportId)
-                .update({
-                    products: report.products
-                })
-                .then(() => {
-                    // Verificar si todos los productos están recibidos
-                    const allReceived = report.products.every(p => p.status === 'received');
-                    if (allReceived) {
-                        return db.collection("reportesMalEstado").doc(reportId)
-                            .update({
-                                status: 'completed',
-                                completedAt: firebase.firestore.FieldValue.serverTimestamp()
-                            });
-                    } else if (report.status === 'completed') {
-                        // Si ya estaba completado pero ahora no todos están recibidos
-                        return db.collection("reportesMalEstado").doc(reportId)
-                            .update({
-                                status: 'active',
-                                completedAt: firebase.firestore.FieldValue.delete()
-                            });
-                    }
-                    return Promise.resolve();
-                })
-                .then(() => {
-                    loadReports();
-                    // Volver a abrir el modal para ver los cambios
-                    const currentModalReport = reports.find(r => r.id === reportId);
-                    if (currentModalReport) {
-                        viewReport(reportId);
-                    }
-                })
-                .catch(error => {
-                    console.error("Error al actualizar el producto:", error);
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'Ocurrió un error al actualizar el producto',
-                        icon: 'error',
-                        confirmButtonColor: '#3085d6'
-                    });
-                });
-        }
-
-        // Ver reporte completo en modal con los nuevos estados
+        // Ver reporte en pantalla de detalle
         window.viewReport = function(reportId) {
             const report = reports.find(r => r.id === reportId);
             if (!report) return;
             
-            document.getElementById('modalReportContent').innerHTML = `
-                <div class="report-header">
-                    <div>
-                        <span class="report-id">${report.id}</span>
-                        <span class="report-date">${formatDate(report.date)}</span>
-                        <div style="margin-top: 0.3rem; font-size: 0.95rem; color: ${report.status === 'cancelled' ? 'var(--danger)' : report.status === 'completed' ? 'var(--success)' : 'var(--warning)'}">
-                            Estado: ${report.status === 'active' ? 'Activo' : report.status === 'cancelled' ? 'ANULADO' : 'Completado'}
-                            ${report.cancelledAt ? `<span class="status-date">Anulado el: ${formatDateTime(report.cancelledAt.toDate ? report.cancelledAt.toDate().toISOString() : report.cancelledAt)}</span>` : ''}
-                            ${report.completedAt ? `<span class="status-date">Completado el: ${formatDateTime(report.completedAt.toDate ? report.completedAt.toDate().toISOString() : report.completedAt)}</span>` : ''}
+            currentReportInDetail = report;
+            productStatusChanges = {};
+            
+            const isCompleted = isReportCompleted(report.id);
+            
+            let productsHTML = '';
+            if (report.products) {
+                report.products.forEach((product, index) => {
+                    const currentStatus = product.status === 'received' ? 
+                        (product.receptionType === 'credit-note' ? 'credit-note' : 'received') : 
+                        'pending';
+                    
+                    productsHTML += `
+                        <div class="product-detail-card">
+                            <div class="product-main-info">
+                                <div class="product-sku">${product.sku || ''}</div>
+                                <div class="product-quantity">${product.quantity} und</div>
+                            </div>
+                            <div class="product-description">${product.description}</div>
+                            <div class="product-reason">${product.reason}</div>
+                            <div class="status-selector">
+                                <div class="status-option pending ${currentStatus === 'pending' ? 'selected' : ''}" 
+                                     data-product-index="${index}" data-status="pending">
+                                    Pendiente
+                                </div>
+                                <div class="status-option received ${currentStatus === 'received' ? 'selected' : ''}" 
+                                     data-product-index="${index}" data-status="received">
+                                    Recibido
+                                </div>
+                                <div class="status-option credit-note ${currentStatus === 'credit-note' ? 'selected' : ''}" 
+                                     data-product-index="${index}" data-status="credit-note">
+                                    Nota Crédito
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            document.getElementById('reportDetailContent').innerHTML = `
+                <div class="detail-section">
+                    <h3>Información del Reporte</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Número de Reporte</span>
+                            <span class="info-value">${report.id}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Fecha</span>
+                            <span class="info-value">${formatDate(report.date)}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Proveedor</span>
+                            <span class="info-value">${report.supplier}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Estado</span>
+                            <span class="info-value">${report.status === 'cancelled' ? 'ANULADO' : (isCompleted ? 'COMPLETADO' : 'PENDIENTE')}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Número de Factura</span>
+                            <span class="info-value">${report.invoiceNumber}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Serie de Factura</span>
+                            <span class="info-value">${report.invoiceSeries}</span>
                         </div>
                     </div>
+                    ${report.notes ? `
+                    <div style="margin-top: 1rem;">
+                        <div class="info-label">Observaciones</div>
+                        <div class="info-value">${report.notes}</div>
+                    </div>
+                    ` : ''}
                 </div>
-                <div class="form-group">
-                    <label>Proveedor</label>
-                    <div class="form-control" style="background: #f8f9fa;">${report.supplier}</div>
-                </div>
-                <div class="form-group">
-                    <label>Fecha de Reporte</label>
-                    <div class="form-control" style="background: #f8f9fa;">${formatDate(report.date)}</div>
-                </div>
-                <div class="form-group">
-                    <label>Número de Factura</label>
-                    <div class="form-control" style="background: #f8f9fa;">${report.invoiceNumber}</div>
-                </div>
-                <div class="form-group">
-                    <label>Serie de Factura</label>
-                    <div class="form-control" style="background: #f8f9fa;">${report.invoiceSeries}</div>
-                </div>
-                ${report.notes ? `
-                <div class="form-group">
-                    <label>Observaciones</label>
-                    <div class="form-control" style="background: #f8f9fa; min-height: auto;">${report.notes}</div>
-                </div>
-                ` : ''}
-                ${report.attachmentUrl ? `
-                <div class="form-group">
-                    <label>Archivo Adjunto</label>
-                    <div class="attachment-info" style="margin-top: 0.5rem;">
-                        <i class="fas fa-paperclip"></i>
-                        <span>Archivo adjunto:</span>
-                        <a href="${report.attachmentUrl}" target="_blank" class="attachment-link">
-                            <i class="fas fa-file-pdf"></i> ${report.attachmentName || 'Ver archivo'}
-                        </a>
+                <div class="detail-section">
+                    <h3>Productos (${report.products ? report.products.length : 0})</h3>
+                    <div class="products-grid">
+                        ${productsHTML}
                     </div>
                 </div>
-                ` : ''}
-                <div class="form-group">
-                    <label>Productos en mal estado</label>
-                    <table class="report-products" style="width: 100%; margin-top: 0;">
-                        <thead>
-                            <tr>
-                                <th style="width: 100px;">Sku</th>
-                                <th style="width: 80px;">Cód. Fábrica</th>
-                                <th>Descripción</th>
-                                <th style="width: 70px;">Cantidad</th>
-                                <th style="width: 120px;">Motivo</th>
-                                <th style="width: 120px;">Estado</th>
-                                ${report.status === 'active' ? '<th style="width: 90px;">Acción</th>' : ''}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${report.products ? report.products.map((product, index) => `
-                                <tr>
-                                    <td>${product.sku || ''}</td>
-                                    <td>${product.factoryCode || '-'}</td>
-                                    <td>${product.description}</td>
-                                    <td>${product.quantity}</td>
-                                    <td>${product.reason}</td>
-                                    <td class="status-cell">
-                                        <span class="product-status status-${product.status === 'received' ? product.receptionType === 'credit-note' ? 'credit-note' : 'received' : product.status}"></span>
-                                        ${product.status === 'pending' ? 'Pendiente' : 
-                                          product.status === 'received' ? (product.receptionType === 'credit-note' ? 'Nota Crédito' : 'Recibido') : 
-                                          'Anulado'}
-                                        ${product.receivedDate ? `<span class="status-date">Recibido el: ${formatDateTime(product.receivedDate)}</span>` : ''}
-                                    </td>
-                                    ${report.status === 'active' ? `
-                                    <td>
-                                        <div class="dropdown">
-                                            <button class="btn ${product.status === 'pending' ? 'btn-success' : 'btn-secondary'}" style="padding: 0.3rem 0.6rem; font-size: 0.85rem;">
-                                                <i class="fas fa-check"></i> ${product.status === 'pending' ? 'Recibir' : ''}
-                                            </button>
-                                            <div class="dropdown-content" style="min-width: 120px;">
-                                                <a href="#" onclick="updateProductStatus('${report.id}', ${index}, 'received', 'received'); return false;">
-                                                    <i class="fas fa-check" style="color: var(--success);"></i> Recibido
-                                                </a>
-                                                <a href="#" onclick="updateProductStatus('${report.id}', ${index}, 'received', 'credit-note'); return false;">
-                                                    <i class="fas fa-file-invoice" style="color: var(--primary);"></i> Nota Crédito
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    ` : ''}
-                                </tr>
-                            `).join('') : ''}
-                        </tbody>
-                    </table>
+                <div class="detail-actions">
+                    <button class="save-btn" id="saveStatusBtn" disabled>
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
                 </div>
             `;
             
-            document.getElementById('modalReportActions').innerHTML = `
-                <button class="btn btn-pdf" onclick="generatePDF('${report.id}')">
-                    <i class="fas fa-file-pdf"></i>
-                    Generar PDF
-                </button>
-                ${report.status === 'active' && hasReceivedOrCreditNoteProducts(report.id) && countPendingProducts(report.id) > 0 ? `
-                <button class="btn btn-warning" onclick="generatePendingPDF('${report.id}')">
-                    <i class="fas fa-hourglass-half"></i> Imprimir Pendientes
-                </button>
-                ` : ''}
-                ${report.status === 'active' ? `
-                <button class="btn btn-secondary" onclick="confirmEditReport('${report.id}')">
-                    <i class="fas fa-edit"></i> Editar
-                </button>
-                <button class="btn btn-attachment" onclick="attachFile('${report.id}')">
-                    <i class="fas fa-paperclip"></i> Adjuntar Archivo
-                </button>
-                <button class="btn btn-danger" onclick="cancelReport('${report.id}')">
-                    <i class="fas fa-ban"></i> Anular
-                </button>
-                ` : ''}
-                <button class="btn" onclick="window.closeModal()">
-                    <i class="fas fa-times"></i>
-                    Cerrar
-                </button>
-            `;
+            // Agregar event listeners a los selectores de estado
+            document.querySelectorAll('.status-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const productIndex = parseInt(this.getAttribute('data-product-index'));
+                    const newStatus = this.getAttribute('data-status');
+                    const currentStatus = currentReportInDetail.products[productIndex].status;
+                    
+                    // Si se intenta cambiar de "received" a "pending", pedir contraseña
+                    if ((currentStatus === 'received' || currentReportInDetail.products[productIndex].receptionType === 'credit-note') && newStatus === 'pending') {
+                        askPasswordForRevert(productIndex, newStatus);
+                        return;
+                    }
+                    
+                    selectStatusOption(this, productIndex, newStatus);
+                });
+            });
             
-            document.getElementById('reportModal').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
+            // Mostrar la pantalla de detalle
+            showScreen('detailScreen');
         };
 
-        // Función para adjuntar archivo a un reporte
-        window.attachFile = function(reportId) {
-            currentReportForAttachment = reportId;
-            document.getElementById('attachmentModal').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
+        // Función para seleccionar una opción de estado
+        function selectStatusOption(optionElement, productIndex, newStatus) {
+            // Remover selección de otros botones en el mismo grupo
+            optionElement.parentNode.querySelectorAll('.status-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
             
-            // Resetear el estado del modal
-            document.getElementById('uploadStatus').style.display = 'none';
-            document.getElementById('saveAttachmentBtn').style.display = 'none';
-            currentAttachmentUrl = null;
-            currentAttachmentName = null;
-            currentAttachmentSize = null;
-        };
+            // Seleccionar el botón clickeado
+            optionElement.classList.add('selected');
+            
+            // Guardar el cambio
+            productStatusChanges[productIndex] = newStatus;
+            
+            // Habilitar el botón de guardar
+            document.getElementById('saveStatusBtn').disabled = false;
+        }
 
-        // Guardar adjunto en el reporte
-        document.getElementById('saveAttachmentBtn').addEventListener('click', function() {
-            if (!currentReportForAttachment || !currentAttachmentUrl) {
+        // Función para pedir contraseña al revertir estado
+        function askPasswordForRevert(productIndex, newStatus) {
+            Swal.fire({
+                title: 'Confirmar cambio de estado',
+                text: 'Para cambiar el estado de "Recibido" a "Pendiente" se requiere contraseña',
+                input: 'password',
+                inputAttributes: {
+                    autocapitalize: 'off',
+                    autocorrect: 'off'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Confirmar',
+                cancelButtonText: 'Cancelar',
+                showLoaderOnConfirm: true,
+                preConfirm: (password) => {
+                    if (password !== PASSWORD) {
+                        Swal.showValidationMessage('Contraseña incorrecta');
+                    }
+                    return password;
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (result.value === PASSWORD) {
+                        // Encontrar el elemento y seleccionarlo
+                        const optionElement = document.querySelector(`.status-option[data-product-index="${productIndex}"][data-status="${newStatus}"]`);
+                        selectStatusOption(optionElement, productIndex, newStatus);
+                        
+                        Swal.fire({
+                            title: 'Estado cambiado',
+                            text: 'El estado se ha cambiado correctamente a Pendiente',
+                            icon: 'success',
+                            confirmButtonColor: '#3085d6'
+                        });
+                    }
+                }
+            });
+        }
+
+        // Guardar cambios de estado
+        async function saveStatusChanges() {
+            if (!currentReportInDetail || Object.keys(productStatusChanges).length === 0) return;
+            
+            const saveBtn = document.getElementById('saveStatusBtn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+            
+            try {
+                // Actualizar los productos con los nuevos estados
+                const updatedProducts = [...currentReportInDetail.products];
+                
+                Object.keys(productStatusChanges).forEach(index => {
+                    const productIndex = parseInt(index);
+                    const newStatus = productStatusChanges[index];
+                    
+                    if (newStatus === 'pending') {
+                        updatedProducts[productIndex].status = 'pending';
+                        updatedProducts[productIndex].receivedDate = null;
+                        updatedProducts[productIndex].receptionType = 'received';
+                    } else if (newStatus === 'received' || newStatus === 'credit-note') {
+                        updatedProducts[productIndex].status = 'received';
+                        updatedProducts[productIndex].receivedDate = new Date().toISOString();
+                        updatedProducts[productIndex].receptionType = newStatus === 'credit-note' ? 'credit-note' : 'received';
+                    }
+                });
+                
+                // Actualizar en Firebase
+                await db.collection("reportesMalEstado").doc(currentReportInDetail.id)
+                    .update({
+                        products: updatedProducts,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                
+                // Verificar si el reporte está completado
+                const allFinal = updatedProducts.every(product => 
+                    product.status === 'received' || 
+                    (product.status === 'received' && product.receptionType === 'credit-note') ||
+                    product.status === 'low' || 
+                    product.status === 'cancelled'
+                );
+                
+                if (allFinal && currentReportInDetail.status !== 'completed') {
+                    await db.collection("reportesMalEstado").doc(currentReportInDetail.id)
+                        .update({
+                            status: 'completed',
+                            completedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                }
+                
+                await Swal.fire({
+                    title: 'Cambios guardados',
+                    text: 'Los estados de los productos se han actualizado correctamente',
+                    icon: 'success',
+                    confirmButtonColor: '#3085d6'
+                });
+                
+                // Recargar reportes y volver a la pantalla principal
+                await loadReports();
+                showScreen('mainScreen');
+                
+            } catch (error) {
+                console.error("Error al guardar cambios:", error);
                 Swal.fire({
                     title: 'Error',
-                    text: 'No hay archivo para adjuntar',
+                    text: 'Ocurrió un error al guardar los cambios',
                     icon: 'error',
                     confirmButtonColor: '#3085d6'
                 });
-                return;
+                
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> Guardar Cambios';
             }
-            
-            db.collection("reportesMalEstado").doc(currentReportForAttachment)
-                .update({
-                    attachmentUrl: currentAttachmentUrl,
-                    attachmentName: currentAttachmentName,
-                    attachmentSize: currentAttachmentSize,
-                    attachmentDate: firebase.firestore.FieldValue.serverTimestamp()
-                })
-                .then(() => {
-                    Swal.fire({
-                        title: 'Archivo adjuntado',
-                        text: 'El archivo se ha adjuntado correctamente al reporte',
-                        icon: 'success',
-                        confirmButtonColor: '#3085d6'
-                    }).then(() => {
-                        window.closeAttachmentModal();
-                        loadReports();
-                        if (document.getElementById('reportModal').style.display === 'flex') {
-                            viewReport(currentReportForAttachment);
-                        }
-                    });
-                })
-                .catch(error => {
-                    console.error("Error al adjuntar archivo:", error);
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'Ocurrió un error al adjuntar el archivo',
-                        icon: 'error',
-                        confirmButtonColor: '#3085d6'
-                    });
-                });
-        });
+        }
 
-        // Generar PDF del reporte con ajustes de texto
+        // Generar PDF del reporte
         window.generatePDF = function(reportId) {
             const report = reports.find(r => r.id === reportId);
             if (!report) return;
@@ -2774,26 +1845,24 @@
             try {
                 const doc = new jsPDF();
                 
-                // Configuración de márgenes
+                // Configuración
                 const marginLeft = 15;
                 const marginRight = 15;
                 const pageWidth = doc.internal.pageSize.getWidth();
                 const contentWidth = pageWidth - marginLeft - marginRight;
                 
-                // Agregar logo de la empresa
-                if (companyLogo.complete) {
-                    doc.addImage(companyLogo, 'PNG', marginLeft, 10, 35, 20);
-                }
+                // Logo de la empresa
+                const companyLogo = new Image();
+                companyLogo.src = 'images/logo/logo.png';
                 
-                // Título del documento
-                doc.setFontSize(14);
+                // Título
+                doc.setFontSize(16);
                 doc.setFont('helvetica', 'bold');
-                doc.text(companyName, pageWidth / 2, 20, { align: 'center' });
+                doc.text('MACAAL S.A', pageWidth / 2, 20, { align: 'center' });
                 
-                // Título del documento
                 doc.setFontSize(12);
                 doc.setFont('helvetica', 'normal');
-                doc.text('Nota de Cambios y/o devoluciones.', pageWidth / 2, 30, { align: 'center' });
+                doc.text('Nota de Cambios y/o devoluciones', pageWidth / 2, 30, { align: 'center' });
                 
                 // Línea separadora
                 doc.setDrawColor(200, 200, 200);
@@ -2801,38 +1870,16 @@
                 
                 // Información del reporte
                 doc.setFontSize(10);
-                let yPosition = companyLogo.complete ? 50 : 45;
+                let yPosition = 45;
                 
-                // Textos alineados a la izquierda
-                const leftTexts = [
-                    `Proveedor: ${report.supplier}`,
-                    `Número de Factura: ${report.invoiceNumber}`,
-                    `Serie de Factura: ${report.invoiceSeries}`
-                ];
+                doc.text(`Proveedor: ${report.supplier}`, marginLeft, yPosition);
+                doc.text(`Número de Reporte: ${report.id}`, pageWidth - marginRight, yPosition, { align: 'right' });
                 
-                // Textos alineados a la derecha
-                const rightTexts = [
-                    `Número de Reporte: ${report.id}`,
-                    `Fecha de Reporte: ${formatDate(report.date)}`
-                ];
+                yPosition += 7;
+                doc.text(`Fecha: ${formatDate(report.date)}`, marginLeft, yPosition);
+                doc.text(`Factura: ${report.invoiceNumber} / ${report.invoiceSeries}`, pageWidth - marginRight, yPosition, { align: 'right' });
                 
-                // Calcular posición vertical para alinear ambos lados
-                const lineHeight = 7;
-                const maxLines = Math.max(leftTexts.length, rightTexts.length);
-                
-                for (let i = 0; i < maxLines; i++) {
-                    if (i < leftTexts.length) {
-                        doc.text(leftTexts[i], marginLeft, yPosition + (i * lineHeight));
-                    }
-                    
-                    if (i < rightTexts.length) {
-                        const text = rightTexts[i];
-                        const textWidth = doc.getStringUnitWidth(text) * doc.internal.getFontSize() / doc.internal.scaleFactor;
-                        doc.text(text, pageWidth - marginRight - textWidth, yPosition + (i * lineHeight));
-                    }
-                }
-                
-                yPosition += (maxLines * lineHeight) + 10;
+                yPosition += 10;
                 
                 if (report.notes) {
                     const splitNotes = doc.splitTextToSize(`Observaciones: ${report.notes}`, contentWidth);
@@ -2842,72 +1889,43 @@
                     yPosition += 10;
                 }
                 
-                // Tabla de productos con bordes y ajuste de texto
+                // Tabla de productos
                 const tableData = report.products ? report.products.map(product => [
                     product.sku || '',
-                    product.factoryCode || '-',
-                    { content: product.description, styles: { cellWidth: 'auto', fontStyle: 'normal' } },
-                    { content: product.quantity.toString(), styles: { halign: 'center' } },
-                    { content: product.reason, styles: { cellWidth: 30, fontStyle: 'normal' } },
-                    { 
-                        content: product.status === 'pending' ? 'Pendiente' : 
-                                product.status === 'received' ? (product.receptionType === 'credit-note' ? 'Nota Crédito' : `Recibido\n${formatDateTime(product.receivedDate)}`) : 
-                                'Anulado',
-                        styles: { cellWidth: 30, fontStyle: 'normal' }
-                    }
+                    product.description,
+                    product.quantity.toString(),
+                    product.reason,
+                    product.status === 'pending' ? 'Pendiente' : 
+                    product.status === 'received' ? (product.receptionType === 'credit-note' ? 'Nota Crédito' : 'Recibido') : 
+                    'Anulado'
                 ]) : [];
                 
                 doc.autoTable({
                     startY: yPosition,
-                    head: [['Sku', 'Cód. Fábrica', 'Descripción', 'Cantidad', 'Motivo', 'Estado']],
+                    head: [['Sku', 'Descripción', 'Cantidad', 'Motivo', 'Estado']],
                     body: tableData,
                     margin: { left: marginLeft, right: marginRight },
                     styles: {
                         fontSize: 9,
-                        cellPadding: 3,
-                        valign: 'middle',
-                        lineWidth: 0.2,
-                        lineColor: 50,
-                        overflow: 'linebreak'
+                        cellPadding: 3
                     },
                     headStyles: {
                         fillColor: [67, 97, 238],
                         textColor: 255,
-                        fontStyle: 'bold',
-                        lineWidth: 0.2
-                    },
-                    bodyStyles: {
-                        lineWidth: 0.2
-                    },
-                    columnStyles: {
-                        0: { cellWidth: 20, halign: 'center' },
-                        1: { cellWidth: 20, halign: 'center' },
-                        2: { cellWidth: 'auto', halign: 'left' },
-                        3: { cellWidth: 20, halign: 'center' },
-                        4: { cellWidth: 30, halign: 'left' },
-                        5: { cellWidth: 30, halign: 'left' }
-                    },
-                    didDrawCell: (data) => {
-                        // Ajustar altura de celda si el contenido es muy largo
-                        if (data.section === 'body' && data.column.index === 2) {
-                            const lines = data.cell.text.length / 30;
-                            if (lines > 1) {
-                                data.row.height = lines * 7;
-                            }
-                        }
+                        fontStyle: 'bold'
                     }
                 });
                 
-                // Firmas más separadas y con letra más grande
-                const lastY = doc.lastAutoTable.finalY + 30;
+                // Firmas
+                const lastY = doc.lastAutoTable.finalY + 20;
                 
-                doc.setFontSize(14);
+                doc.setFontSize(12);
                 doc.text('Fecha de Entrega: ________________________', marginLeft, lastY);
-                doc.text('Recibe: _________________________________', marginLeft, lastY + 20);
-                doc.text('Entrega: ________________________________', marginLeft, lastY + 40);
+                doc.text('Recibe: _________________________________', marginLeft, lastY + 15);
+                doc.text('Entrega: ________________________________', marginLeft, lastY + 30);
                 
-                // Guardar PDF con el nuevo nombre
-                const fileName = `NotaDeCambio${report.id}_${report.supplier.replace(/\s+/g, '_')}.pdf`;
+                // Guardar PDF
+                const fileName = `NotaDeCambio${report.id}.pdf`;
                 doc.save(fileName);
             } catch (error) {
                 console.error("Error al generar PDF:", error);
@@ -2918,250 +1936,72 @@
                     confirmButtonColor: '#3085d6'
                 });
             }
-        };
-
-        // Generar PDF solo con productos pendientes
-        window.generatePendingPDF = function(reportId) {
-            const report = reports.find(r => r.id === reportId);
-            if (!report) return;
-            
-            // Filtrar solo productos pendientes
-            const pendingProducts = report.products ? report.products.filter(product => 
-                product.status === 'pending'
-            ) : [];
-            
-            if (pendingProducts.length === 0) {
-                Swal.fire({
-                    title: 'Sin productos pendientes',
-                    text: 'No hay productos pendientes en este reporte',
-                    icon: 'info',
-                    confirmButtonColor: '#3085d6'
-                });
-                return;
-            }
-            
-            try {
-                const doc = new jsPDF();
-                
-                // Configuración de márgenes
-                const marginLeft = 15;
-                const marginRight = 15;
-                const pageWidth = doc.internal.pageSize.getWidth();
-                const contentWidth = pageWidth - marginLeft - marginRight;
-                
-                // Agregar logo de la empresa
-                if (companyLogo.complete) {
-                    doc.addImage(companyLogo, 'PNG', marginLeft, 10, 35, 20);
-                }
-                
-                // Título del documento
-                doc.setFontSize(14);
-                doc.setFont('helvetica', 'bold');
-                doc.text(companyName, pageWidth / 2, 20, { align: 'center' });
-                
-                // Título del documento - NOTA DE PENDIENTES
-                doc.setFontSize(12);
-                doc.setFont('helvetica', 'normal');
-                doc.text('Nota de Cambios y/o devoluciones - Productos Pendientes', pageWidth / 2, 30, { align: 'center' });
-                
-                // Línea separadora
-                doc.setDrawColor(200, 200, 200);
-                doc.line(marginLeft, 35, pageWidth - marginRight, 35);
-                
-                // Información del reporte
-                doc.setFontSize(10);
-                let yPosition = companyLogo.complete ? 50 : 45;
-                
-                // Textos alineados a la izquierda
-                const leftTexts = [
-                    `Proveedor: ${report.supplier}`,
-                    `Número de Factura: ${report.invoiceNumber}`,
-                    `Serie de Factura: ${report.invoiceSeries}`
-                ];
-                
-                // Textos alineados a la derecha
-                const rightTexts = [
-                    `Número de Reporte: ${report.id}`,
-                    `Fecha de Reporte: ${formatDate(report.date)}`,
-                    `Productos pendientes: ${pendingProducts.length}`
-                ];
-                
-                // Calcular posición vertical para alinear ambos lados
-                const lineHeight = 7;
-                const maxLines = Math.max(leftTexts.length, rightTexts.length);
-                
-                for (let i = 0; i < maxLines; i++) {
-                    if (i < leftTexts.length) {
-                        doc.text(leftTexts[i], marginLeft, yPosition + (i * lineHeight));
-                    }
-                    
-                    if (i < rightTexts.length) {
-                        const text = rightTexts[i];
-                        const textWidth = doc.getStringUnitWidth(text) * doc.internal.getFontSize() / doc.internal.scaleFactor;
-                        doc.text(text, pageWidth - marginRight - textWidth, yPosition + (i * lineHeight));
-                    }
-                }
-                
-                yPosition += (maxLines * lineHeight) + 10;
-                
-                if (report.notes) {
-                    const splitNotes = doc.splitTextToSize(`Observaciones: ${report.notes}`, contentWidth);
-                    doc.text(splitNotes, marginLeft, yPosition);
-                    yPosition += splitNotes.length * 5 + 10;
-                } else {
-                    yPosition += 10;
-                }
-                
-                // Tabla de productos PENDIENTES con bordes y ajuste de texto
-                const tableData = pendingProducts.map(product => [
-                    product.sku || '',
-                    product.factoryCode || '-',
-                    { content: product.description, styles: { cellWidth: 'auto', fontStyle: 'normal' } },
-                    { content: product.quantity.toString(), styles: { halign: 'center' } },
-                    { content: product.reason, styles: { cellWidth: 30, fontStyle: 'normal' } },
-                    { 
-                        content: 'PENDIENTE',
-                        styles: { cellWidth: 30, fontStyle: 'normal' }
-                    }
-                ]);
-                
-                doc.autoTable({
-                    startY: yPosition,
-                    head: [['Sku', 'Cód. Fábrica', 'Descripción', 'Cantidad', 'Motivo', 'Estado']],
-                    body: tableData,
-                    margin: { left: marginLeft, right: marginRight },
-                    styles: {
-                        fontSize: 9,
-                        cellPadding: 3,
-                        valign: 'middle',
-                        lineWidth: 0.2,
-                        lineColor: 50,
-                        overflow: 'linebreak'
-                    },
-                    headStyles: {
-                        fillColor: [67, 97, 238], // Mismo color azul que el PDF normal
-                        textColor: 255,
-                        fontStyle: 'bold',
-                        lineWidth: 0.2
-                    },
-                    bodyStyles: {
-                        lineWidth: 0.2
-                    },
-                    columnStyles: {
-                        0: { cellWidth: 20, halign: 'center' },
-                        1: { cellWidth: 20, halign: 'center' },
-                        2: { cellWidth: 'auto', halign: 'left' },
-                        3: { cellWidth: 20, halign: 'center' },
-                        4: { cellWidth: 30, halign: 'left' },
-                        5: { cellWidth: 30, halign: 'center', fontStyle: 'normal' } // Texto normal, no en rojo
-                    },
-                    didDrawCell: (data) => {
-                        // Ajustar altura de celda si el contenido es muy largo
-                        if (data.section === 'body' && data.column.index === 2) {
-                            const lines = data.cell.text.length / 30;
-                            if (lines > 1) {
-                                data.row.height = lines * 7;
-                            }
-                        }
-                    }
-                });
-                
-                // Firmas
-                const lastY = doc.lastAutoTable.finalY + 30;
-                
-                doc.setFontSize(14);
-                doc.text('Fecha: ________________________', marginLeft, lastY);
-                doc.text('Recibe: _________________________________', marginLeft, lastY + 20);
-                doc.text('Entrega: ________________________________', marginLeft, lastY + 40);
-                
-                // Guardar PDF con nombre que indique que son pendientes
-                const fileName = `NotaPendientes${report.id}_${report.supplier.replace(/\s+/g, '_')}.pdf`;
-                doc.save(fileName);
-            } catch (error) {
-                console.error("Error al generar PDF de pendientes:", error);
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Ocurrió un error al generar el PDF de pendientes',
-                    icon: 'error',
-                    confirmButtonColor: '#3085d6'
-                });
-            }
-        };
+        }
 
         // Inicialización cuando el DOM está listo
         document.addEventListener('DOMContentLoaded', () => {
-            // Event listeners para el buscador
-            document.getElementById('searchInput').addEventListener('input', function() {
-                document.getElementById('searchClear').style.display = this.value ? 'block' : 'none';
-                if (!this.value) filterReports();
-            });
-
-            document.getElementById('searchClear').addEventListener('click', function() {
-                document.getElementById('searchInput').value = '';
-                this.style.display = 'none';
-                filterReports();
-            });
-
             // Event listeners para los filtros
             document.getElementById('filterCompleted').addEventListener('change', filterReports);
             document.getElementById('filterPending').addEventListener('change', filterReports);
             document.getElementById('filterCancelled').addEventListener('change', filterReports);
 
-            // Event listener para el botón de filtros (CLICK)
+            // Event listener para el botón de filtros
             document.getElementById('filterBtn').addEventListener('click', toggleFilterDropdown);
 
-            // Event listener para subir archivo con Cloudinary
-            document.getElementById('uploadWidgetBtn').addEventListener('click', handleCloudinaryUpload);
+            // Event listener para el botón de búsqueda
+            document.getElementById('searchBtn').addEventListener('click', toggleSearch);
+
+            // Event listener para búsqueda en tiempo real
+            document.getElementById('searchInput').addEventListener('input', filterReports);
 
             // Event listeners principales
             document.getElementById('newReportBtn').addEventListener('click', showNewReportForm);
-            document.getElementById('cancelReportBtn').addEventListener('click', () => hideReturnForm(true));
+            document.getElementById('cancelReportBtn').addEventListener('click', () => {
+                Swal.fire({
+                    title: '¿Cancelar operación?',
+                    text: '¿Estás seguro que deseas cancelar esta operación? Los datos no guardados se perderán.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Sí, cancelar',
+                    cancelButtonText: 'No, continuar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        showScreen('mainScreen');
+                        isCreatingNewReport = false;
+                    }
+                });
+            });
             document.getElementById('saveReportBtn').addEventListener('click', saveReport);
             document.getElementById('addRowBtn').addEventListener('click', addProductRow);
-            document.getElementById('reportModal').addEventListener('click', (e) => {
-                if (e.target === document.getElementById('reportModal')) window.closeModal();
-            });
-            document.getElementById('attachmentModal').addEventListener('click', (e) => {
-                if (e.target === document.getElementById('attachmentModal')) window.closeAttachmentModal();
-            });
-            document.getElementById('searchBtn').addEventListener('click', searchReports);
-            document.getElementById('searchInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') searchReports();
+            document.getElementById('detailBackButton').addEventListener('click', () => {
+                showScreen('mainScreen');
             });
 
-            // Event listener para el botón de fusión
-            document.getElementById('fusionBtn').addEventListener('click', openFusionModal);
+            // Event listener para guardar cambios
+            document.addEventListener('click', function(e) {
+                if (e.target && e.target.id === 'saveStatusBtn') {
+                    saveStatusChanges();
+                }
+            });
 
-            // Event listener para el botón de confirmar fusión
-            document.getElementById('confirmFusionBtn').addEventListener('click', createFusion);
+            // Event listener para PDF en pantalla de detalle
+            document.getElementById('detailPdfBtn').addEventListener('click', () => {
+                if (currentReportInDetail) {
+                    generatePDF(currentReportInDetail.id);
+                }
+            });
 
             // Convertir automáticamente a mayúsculas mientras se escribe
             document.addEventListener('input', function(e) {
-                if (e.target.matches('#supplier, #productsTable input[type="text"]:not(.code-input), #invoiceNumber, #invoiceSeries, #productsTable textarea')) {
+                if (e.target.matches('#supplier, #productsContainer input[type="text"], #invoiceNumber, #invoiceSeries, #productsContainer textarea')) {
                     e.target.value = e.target.value.toUpperCase();
                 }
             });
 
-            // Guardar datos del formulario periódicamente
-            setInterval(saveFormToLocalStorage, 3000);
-
             // Cargar reportes al iniciar
             loadReports();
-            
-            // Intentar cargar formulario guardado en localStorage
-            loadFormFromLocalStorage();
-            
-            // Guardar datos antes de recargar o cerrar la página
-            window.addEventListener('beforeunload', function(e) {
-                if (isCreatingNewReport) {
-                    saveFormToLocalStorage();
-                    const formData = localStorage.getItem('currentReportForm');
-                    if (formData) {
-                        e.preventDefault();
-                        e.returnValue = 'Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?';
-                    }
-                }
-            });
         });
     </script>
 </body>
