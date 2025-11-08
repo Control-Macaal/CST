@@ -27,7 +27,7 @@
             --text-light: #8d99ae;
             --danger: #fc0303;
             --warning: #fc7703;
-            --success: #03fc41;
+            --success: #008000; /* Cambiado a verde #008000 */
             --attachment: #ffd700;
             --border-radius: 12px;
             --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -127,6 +127,7 @@
             justify-content: center;
             cursor: pointer;
             font-size: 1.2rem;
+            text-decoration: none; /* Elimina subrayado */
         }
 
         .icon-btn.back {
@@ -844,12 +845,12 @@
         <header id="mainHeader">
             <div class="header-content">
                 <div class="header-title">
-                    <a href="index.html" class="icon-btn back" title="Volver">
-                        <i class="fas fa-arrow-left"></i>
-                    </a>
                     <h1>Notas de Cambios</h1>
                 </div>
                 <div class="header-icons">
+                    <a href="index.html" class="icon-btn" title="Volver">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
                     <button class="icon-btn" id="newReportBtn" title="Nueva Devolución">
                         <i class="fas fa-plus"></i>
                     </button>
@@ -1743,7 +1744,10 @@
                     }
                     return password;
                 },
-                allowOutsideClick: () => !Swal.isLoading()
+                allowOutsideClick: () => !Swal.isLoading(),
+                customClass: {
+                    popup: 'small-swal-popup'
+                }
             }).then((result) => {
                 if (result.isConfirmed) {
                     if (result.value === PASSWORD) {
@@ -1789,6 +1793,9 @@
                     }
                 });
                 
+                // Contar productos pendientes
+                const pendingCount = updatedProducts.filter(product => product.status === 'pending').length;
+                
                 // Actualizar en Firebase
                 await db.collection("reportesMalEstado").doc(currentReportInDetail.id)
                     .update({
@@ -1812,9 +1819,17 @@
                         });
                 }
                 
+                // Mostrar alerta con productos pendientes
+                let alertMessage = 'Los estados de los productos se han actualizado correctamente.';
+                if (pendingCount > 0) {
+                    alertMessage += ` Quedan ${pendingCount} producto(s) pendiente(s).`;
+                } else {
+                    alertMessage += ' Todos los productos han sido procesados.';
+                }
+                
                 await Swal.fire({
                     title: 'Cambios guardados',
-                    text: 'Los estados de los productos se han actualizado correctamente',
+                    text: alertMessage,
                     icon: 'success',
                     confirmButtonColor: '#3085d6'
                 });
@@ -2003,6 +2018,29 @@
             // Cargar reportes al iniciar
             loadReports();
         });
+
+        // Estilos para SweetAlert más pequeño
+        const style = document.createElement('style');
+        style.textContent = `
+            .small-swal-popup {
+                width: 300px !important;
+                font-size: 14px !important;
+            }
+            .small-swal-popup .swal2-title {
+                font-size: 18px !important;
+            }
+            .small-swal-popup .swal2-content {
+                font-size: 14px !important;
+            }
+            .small-swal-popup .swal2-input {
+                font-size: 14px !important;
+                padding: 8px 12px !important;
+            }
+            .small-swal-popup .swal2-actions {
+                margin-top: 15px !important;
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
