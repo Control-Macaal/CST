@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error 404 - Página no encontrada</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            padding: 40px;
+            background-color: rgba(30, 41, 59, 0.7);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+        }
+
+        .logo-container {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .logo {
+            max-width: 200px;
+            height: auto;
+            filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.5));
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .error-code {
+            font-size: 10rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1;
+            margin-bottom: 10px;
+            text-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .error-title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #f1f5f9;
+            font-weight: 700;
+        }
+
+        .error-message {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn-container {
+            margin-top: 30px;
+        }
+
+        .home-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 32px;
+            background: linear-gradient(90deg, #3b82f6, #6366f1);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .home-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.6);
+            background: linear-gradient(90deg, #2563eb, #4f46e5);
+        }
+
+        .home-btn:active {
+            transform: translateY(0);
+        }
+
+        .home-btn i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .home-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.7s ease;
+            z-index: -1;
+        }
+
+        .home-btn:hover::before {
+            left: 100%;
+        }
+
+        .illustration {
+            margin: 40px 0;
+            position: relative;
+        }
+
+        .planet {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            border-radius: 50%;
+            margin: 0 auto;
+            position: relative;
+            box-shadow: 0 0 40px rgba(59, 130, 246, 0.5);
+            overflow: hidden;
+        }
+
+        .planet::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 20%;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .planet::after {
+            content: '';
+            position: absolute;
+            bottom: 15%;
+            right: 25%;
+            width: 60px;
+            height: 30px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+        }
+
+        .astronaut {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3.5rem;
+            color: white;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0.7;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(-50%, -50%) translateY(0);
+            }
+            50% {
+                transform: translate(-50%, -50%) translateY(-15px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .logo {
+                max-width: 150px;
+            }
+            
+            .error-code {
+                font-size: 8rem;
+            }
+            
+            .error-title {
+                font-size: 2rem;
+            }
+            
+            .planet {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .astronaut {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .error-code {
+                font-size: 6rem;
+            }
+            
+            .logo {
+                max-width: 120px;
+            }
+            
+            .error-title {
+                font-size: 1.7rem;
+            }
+            
+            .planet {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .home-btn {
+                padding: 14px 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Logo de la empresa/organización -->
+        <div class="logo-container">
+            <img src="images/logo/logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+        </div>
+        
+        <div class="error-code">404</div>
+        <h1 class="error-title">¡Página no encontrada!</h1>
+        
+        <div class="illustration">
+            <div class="planet"></div>
+            <div class="astronaut">
+                <i class="fas fa-user-astronaut"></i>
+            </div>
+            <div class="stars" id="stars-container"></div>
+        </div>
+        
+        <p class="error-message">
+            Lo sentimos, la página que estás buscando no existe o ha sido movida a otra ubicación. 
+            Puedes volver a la página de inicio utilizando el botón a continuación.
+        </p>
+        
+        <div class="btn-container">
+            <a href="index.html" class="home-btn">
+                <i class="fas fa-home"></i> Volver al Inicio
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Crear estrellas dinámicas
+        function createStars() {
+            const starsContainer = document.getElementById('stars-container');
+            const starCount = 50;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                // Tamaño aleatorio entre 1 y 3px
+                const size = Math.random() * 2 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                
+                // Posición aleatoria
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                
+                // Opacidad aleatoria
+                star.style.opacity = Math.random() * 0.5 + 0.3;
+                
+                // Añadir animación de parpadeo
+                const duration = Math.random() * 3 + 2;
+                star.style.animation = `twinkle ${duration}s infinite alternate`;
+                
+                starsContainer.appendChild(star);
+            }
+            
+            // Añadir la animación de parpadeo
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes twinkle {
+                    0% { opacity: 0.3; }
+                    100% { opacity: 0.8; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Manejar error de carga del logo
+        function handleLogoError() {
+            const logoContainer = document.querySelector('.logo-container');
+            if (logoContainer) {
+                // Si el logo no se carga, mostrar un placeholder con el nombre del sitio
+                logoContainer.innerHTML = `
+                    <div class="logo-placeholder" style="
+                        width: 200px;
+                        height: 80px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+                        border-radius: 10px;
+                        font-size: 1.5rem;
+                        font-weight: bold;
+                        color: white;
+                        box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+                    ">
+                        MI SITIO
+                    </div>
+                `;
+            }
+        }
+        
+        // Inicializar las estrellas cuando la página cargue
+        document.addEventListener('DOMContentLoaded', createStars);
+        
+        // Verificar si el logo se cargó correctamente
+        window.addEventListener('load', function() {
+            const logo = document.querySelector('.logo');
+            if (logo && logo.naturalHeight === 0) {
+                handleLogoError();
+            }
+        });
+    </script>
+</body>
+</html>
