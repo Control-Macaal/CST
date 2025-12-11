@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos del Reporte - Notas de Cambios Macaal</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📋</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --dark: #1b263b;
+            --light: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #2b2d42;
+            --text-light: #8d99ae;
+            --danger: #fc0303;
+            --warning: #fc7703;
+            --success: #03fc41;
+            --attachment: #ffd700;
+            --border-radius: 8px;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light);
+            color: var(--text);
+            padding: 1rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: #3a56d4;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-pdf {
+            background: #e74c3c;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+        }
+
+        .btn-secondary {
+            background: var(--primary);
+        }
+
+        .btn-attachment {
+            background: var(--attachment);
+            color: var(--dark);
+        }
+
+        .btn-icon-only {
+            padding: 0.8rem;
+            width: 45px;
+            height: 45px;
+            justify-content: center;
+        }
+
+        .report-info {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .report-info h2 {
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--text-light);
+            display: block;
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .products-table th {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.8rem;
+            text-align: left;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .products-table td {
+            padding: 0.8rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 0.9rem;
+        }
+
+        .products-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .products-table tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .product-status {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .status-pending {
+            background-color: var(--warning);
+        }
+
+        .status-received {
+            background-color: var(--success);
+        }
+
+        .status-credit-note {
+            background-color: var(--primary);
+        }
+
+        .status-cancelled {
+            background-color: var(--danger);
+        }
+
+        .status-low {
+            background-color: #6c757d;
+        }
+
+        .status-date {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            display: block;
+            margin-top: 2px;
+        }
+
+        /* Acciones en tabla */
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn-received {
+            background: var(--success);
+            color: white;
+        }
+
+        .action-btn-received:hover {
+            background: #02d43a;
+        }
+
+        .action-btn-credit {
+            background: var(--primary);
+            color: white;
+        }
+
+        .action-btn-credit:hover {
+            background: #3a56d4;
+        }
+
+        .action-btn-pending {
+            background: var(--warning);
+            color: white;
+        }
+
+        .action-btn-pending:hover {
+            background: #e56c02;
+        }
+
+        .action-btn-low {
+            background: #6c757d;
+            color: white;
+        }
+
+        .action-btn-low:hover {
+            background: #5a6268;
+        }
+
+        /* Acciones del reporte */
+        .detail-actions {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        /* Spinner de carga */
+        .initial-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .initial-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4361ee;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Modal para adjuntar archivo */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 850px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.3rem;
+        }
+
+        .modal-body .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .modal-body .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .upload-info {
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin: 2rem 0 1rem 0;
+            border-left: 4px solid var(--success);
+            border: 1px solid #e9ecef;
+        }
+
+        .upload-info h4 {
+            color: var(--success);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .upload-info p {
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .upload-info strong {
+            min-width: 80px;
+            display: inline-block;
+        }
+
+        .file-type-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-left: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Información de archivo adjunto */
+        .attachment-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+
+        .attachment-info i {
+            color: var(--attachment);
+        }
+
+        .attachment-link {
+            color: var(--primary);
+            text-decoration: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .attachment-link:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .products-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .detail-actions {
+                flex-direction: column;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .header-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .header-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Spinner de carga inicial -->
+    <div class="initial-loader" id="initialLoader">
+        <div class="initial-spinner"></div>
+    </div>
+
+    <!-- Modal para adjuntar archivo -->
+    <div class="modal" id="attachmentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-paperclip"></i> Adjuntar Archivo</h2>
+                <button onclick="window.closeAttachmentModal()" style="background: none; border: none; cursor: pointer; font-size: 1.5rem;">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Seleccionar archivo PDF</label>
+                    <div id="uploadWidgetContainer" style="margin-top: 0.5rem;">
+                        <button class="btn btn-attachment" id="uploadWidgetBtn">
+                            <i class="fas fa-cloud-upload-alt"></i> Subir Archivo
+                        </button>
+                    </div>
+                    <div id="uploadStatus" style="margin-top: 1rem; display: none;">
+                        <div class="upload-info">
+                            <h4><i class="fas fa-check-circle"></i> Archivo subido correctamente</h4>
+                            <p><strong>Nombre:</strong> <span id="uploadFileName">archivo.pdf</span></p>
+                            <p><strong>Tamaño:</strong> <span id="uploadFileSize">0 KB</span></p>
+                            <p><strong>Tipo:</strong> <span id="uploadFileType">PDF</span> <span class="file-type-badge" id="fileTypeBadge">PDF</span></p>
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <button class="btn btn-success" id="saveAttachmentBtn" style="display: none;">
+                                <i class="fas fa-save"></i> Guardar Adjunto
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="header-title">
+                <i class="fas fa-boxes"></i>
+                <h1>Productos del Reporte</h1>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-attachment" id="attachFileBtn" style="display: none;">
+                    <i class="fas fa-paperclip"></i> Adjuntar Archivo
+                </button>
+                <a href="devoluciones.html" class="btn">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+            </div>
+        </header>
+
+        <div class="report-info" id="reportInfo">
+            <!-- La información se cargará con JavaScript -->
+        </div>
+
+        <div class="products-container">
+            <table class="products-table" id="productsTable">
+                <thead>
+                    <tr>
+                        <th style="width: 100px;">Sku</th>
+                        <th style="width: 80px;">Cód. Fábrica</th>
+                        <th>Descripción</th>
+                        <th style="width: 70px;">Cantidad</th>
+                        <th style="width: 120px;">Motivo</th>
+                        <th style="width: 120px;">Estado</th>
+                        <th style="width: 180px;" id="actionHeader">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="productsBody">
+                    <!-- Los productos se cargarán con JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Acciones del reporte -->
+        <div class="detail-actions" id="detailActions">
+            <!-- Las acciones se cargarán con JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_vGhJItABa8s62qyHsVTWmTGmWZWF6mY",
+            authDomain: "inventario-productos-faltantes.firebaseapp.com",
+            projectId: "inventario-productos-faltantes",
+            storageBucket: "inventario-productos-faltantes.firebasestorage.app",
+            messagingSenderId: "324827723523",
+            appId: "1:324827723523:web:09519c3cacff88759c9b36",
+            measurementId: "G-VX2Z79123W"
+        };
+
+        // Configuración de Cloudinary
+        const cloudinaryConfig = {
+            cloudName: 'dnho7qdz3',
+            apiKey: '128857923119499',
+            uploadPreset: 'notas_cambio_macaal'
+        };
+
+        // Inicializa Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const { jsPDF } = window.jspdf;
+
+        // Obtener el ID del reporte de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const reportId = urlParams.get('id');
+        const companyName = "MACAAL S.A";
+        const companyLogo = new Image();
+        companyLogo.src = 'images/logo/logo.png';
+
+        // Variables globales
+        let currentReport = null;
+        let currentAttachmentUrl = null;
+        let currentAttachmentName = null;
+        let currentAttachmentSize = null;
+
+        // Función para mostrar/ocultar spinner inicial
+        function toggleInitialLoader(show) {
+            document.getElementById('initialLoader').style.display = show ? 'flex' : 'none';
+        }
+
+        // Función para cerrar modal de adjuntos
+        window.closeAttachmentModal = function() {
+            document.getElementById('attachmentModal').style.display = 'none';
+            document.body.style.overflow = '';
+            currentAttachmentUrl = null;
+            currentAttachmentName = null;
+            currentAttachmentSize = null;
+            document.getElementById('uploadStatus').style.display = 'none';
+            document.getElementById('saveAttachmentBtn').style.display = 'none';
+        };
+
+        // Convertir texto a mayúsculas
+        function toUpperCase(text) {
+            return text ? text.toUpperCase() : '';
+        }
+
+        // Formatear tamaño de archivo
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Obtener tipo de archivo
+        function getFileType(mimeType) {
+            if (mimeType.includes('pdf')) return 'PDF';
+            if (mimeType.includes('image')) return 'Imagen';
+            return 'Archivo';
+        }
+
+        // Función para formatear fecha
+        function formatDate(dateString) {
+            if (!dateString) return 'No especificada';
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('es-ES', options);
+        }
+
+        // Función para formatear fecha y hora
+        function formatDateTime(dateString) {
+            if (!dateString) return '';
+            const options = { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            return new Date(dateString).toLocaleDateString('es-ES', options);
+        }
+
+        // Función para verificar si un reporte tiene productos con estado "low"
+        function hasLowProducts(report) {
+            if (!report || !report.products) return false;
+            return report.products.some(product => product.status === 'low');
+        }
+
+        // Función para verificar si un reporte está completado
+        function isReportCompleted(report) {
+            if (!report || !report.products) return false;
+            return report.products.every(product => 
+                product.status === 'received' || 
+                (product.status === 'received' && product.receptionType === 'credit-note') ||
+                product.status === 'low' || 
+                product.status === 'cancelled'
+            );
+        }
+
+        // Función para contar productos pendientes
+        function countPendingProducts(report) {
+            if (!report || !report.products) return 0;
+            return report.products.filter(product => product.status === 'pending').length;
+        }
+
+        // Función para verificar si hay productos recibidos o por nota de crédito
+        function hasReceivedOrCreditNoteProducts(report) {
+            if (!report || !report.products) return false;
+            return report.products.some(product => 
+                product.status === 'received' || 
+                (product.status === 'received' && product.receptionType === 'credit-note')
+            );
+        }
+
+        // Calcular estadísticas
+        function calculateStats(report) {
+            if (!report || !report.products) {
+                return { received: 0, pending: 0, creditNote: 0, low: 0, total: 0 };
+            }
+            
+            const received = report.products.filter(p => p.status === 'received' && p.receptionType !== 'credit-note').length;
+            const creditNote = report.products.filter(p => p.status === 'received' && p.receptionType === 'credit-note').length;
+            const pending = report.products.filter(p => p.status === 'pending').length;
+            const low = report.products.filter(p => p.status === 'low').length;
+            const total = report.products.length;
+            
+            return { received, creditNote, pending, low, total };
+        }
+
+        // Función para manejar la subida de archivos con Cloudinary
+        function handleCloudinaryUpload() {
+            const uploadWidget = cloudinary.createUploadWidget({
+                cloudName: cloudinaryConfig.cloudName,
+                uploadPreset: cloudinaryConfig.uploadPreset,
+                sources: ['local'],
+                resourceType: 'raw',
+                clientAllowedFormats: ['pdf'],
+                maxFileSize: 5000000, // 5MB
+                multiple: false,
+                cropping: false,
+                showAdvancedOptions: false,
+                styles: {
+                    palette: {
+                        window: "#F5F5F5",
+                        sourceBg: "#FFFFFF",
+                        windowBorder: "#90a0b3",
+                        tabIcon: "#0094c7",
+                        inactiveTabIcon: "#69778A",
+                        menuIcons: "#0094C7",
+                        link: "#53ad9d",
+                        action: "#8F5DA5",
+                        inProgress: "#0194c7",
+                        complete: "#53ad9d",
+                        error: "#c43737",
+                        textDark: "#000000",
+                        textLight: "#FFFFFF"
+                    }
+                }
+            }, (error, result) => {
+                if (!error && result && result.event === "success") {
+                    currentAttachmentUrl = result.info.secure_url;
+                    currentAttachmentName = result.info.original_filename;
+                    currentAttachmentSize = result.info.bytes;
+                    
+                    // Mostrar información del archivo subido
+                    document.getElementById('uploadFileName').textContent = currentAttachmentName;
+                    document.getElementById('uploadFileSize').textContent = formatFileSize(currentAttachmentSize);
+                    document.getElementById('uploadFileType').textContent = getFileType(result.info.resource_type);
+                    document.getElementById('fileTypeBadge').textContent = getFileType(result.info.resource_type);
+                    
+                    document.getElementById('uploadStatus').style.display = 'block';
+                    document.getElementById('saveAttachmentBtn').style.display = 'block';
+                    
+                    Swal.fire({
+                        title: 'Archivo subido correctamente',
+                        text: 'El archivo se ha subido correctamente. Haz clic en "Guardar Adjunto" para asociarlo al reporte.',
+                        icon: 'success',
+                        confirmButtonColor: '#3085d6'
+                    });
+                } else if (error) {
+                    console.error("Error al subir archivo:", error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Ocurrió un error al subir el archivo',
+                        icon: 'error',
+                        confirmButtonColor: '#3085d6'
+                    });
+                }
+            });
+            
+            // Abrir el widget de Cloudinary
+            uploadWidget.open();
+        }
+
+        // Guardar adjunto en el reporte
+        function saveAttachment() {
+            if (!reportId || !currentAttachmentUrl) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No hay archivo para adjuntar',
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+            
+            db.collection("reportesMalEstado").doc(reportId)
+                .update({
+                    attachmentUrl: currentAttachmentUrl,
+                    attachmentName: currentAttachmentName,
+                    attachmentSize: currentAttachmentSize,
+                    attachmentDate: firebase.firestore.FieldValue.serverTimestamp()
+                })
+                .then(() => {
+                    Swal.fire({
+                        title: 'Archivo adjuntado',
+                        text: 'El archivo se ha adjuntado correctamente al reporte',
+                        icon: 'success',
+                        confirmButtonColor: '#3085d6'
+                    }).then(() => {
+                        window.closeAttachmentModal();
+                        loadReport();
+                    });
+                })
+                .catch(error => {
+                    console.error("Error al adjuntar archivo:", error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Ocurrió un error al adjuntar el archivo',
+                        icon: 'error',
+                        confirmButtonColor: '#3085d6'
+                    });
+                });
+        }
+
+        // Función para cargar y mostrar el reporte
+        async function loadReport() {
+            toggleInitialLoader(true);
+            
+            if (!reportId) {
+                showError('No se especificó un ID de reporte');
+                return;
+            }
+
+            try {
+                const doc = await db.collection("reportesMalEstado").doc(reportId).get();
+                
+                if (!doc.exists) {
+                    showError('El reporte no existe');
+                    return;
+                }
+
+                currentReport = doc.data();
+                displayReport();
+            } catch (error) {
+                console.error("Error al cargar el reporte:", error);
+                showError('Error al cargar el reporte: ' + error.message);
+            } finally {
+                toggleInitialLoader(false);
+            }
+        }
+
+        // Función para mostrar error
+        function showError(message) {
+            const container = document.getElementById('reportInfo');
+            container.innerHTML = `
+                <h2><i class="fas fa-file-alt"></i> Error</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Error:</span>
+                        <span class="info-value" style="color: var(--danger);">${message}</span>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('productsBody').innerHTML = '';
+            document.getElementById('detailActions').innerHTML = '';
+        }
+
+        // Función para mostrar el reporte
+        function displayReport() {
+            loadReportInfo();
+            loadProductsTable();
+            loadDetailActions();
+            
+            // Actualizar título de la página
+            document.title = `Productos - Reporte ${currentReport.id}`;
+        }
+
+        // Cargar información del reporte
+        function loadReportInfo() {
+            const reportInfo = document.getElementById('reportInfo');
+            const stats = calculateStats(currentReport);
+            
+            // Determinar el estado del reporte
+            let statusText = '';
+            let statusColor = '';
+            if (currentReport.status === 'cancelled') {
+                statusText = 'ANULADO';
+                statusColor = 'var(--danger)';
+            } else if (isReportCompleted(currentReport)) {
+                statusText = 'COMPLETADO';
+                statusColor = 'var(--success)';
+            } else {
+                statusText = 'PENDIENTE';
+                statusColor = 'var(--warning)';
+            }
+
+            // Mostrar/ocultar botón de adjuntar archivo
+            const attachFileBtn = document.getElementById('attachFileBtn');
+            const hasLow = hasLowProducts(currentReport);
+            const isActive = currentReport.status === 'active' && !hasLow;
+            attachFileBtn.style.display = isActive ? 'flex' : 'none';
+
+            reportInfo.innerHTML = `
+                <h2><i class="fas fa-file-alt"></i> Reporte ${currentReport.id}</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Fecha:</span>
+                        <span class="info-value">${formatDate(currentReport.date)}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Proveedor:</span>
+                        <span class="info-value">${currentReport.supplier}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Factura:</span>
+                        <span class="info-value">${currentReport.invoiceNumber} - Serie ${currentReport.invoiceSeries}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Estado:</span>
+                        <span class="info-value" style="color: ${statusColor}; font-weight: 600;">
+                            ${statusText}
+                        </span>
+                    </div>
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Total Productos:</span>
+                        <span class="info-value">${stats.total}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Pendientes:</span>
+                        <span class="info-value" style="color: ${stats.pending > 0 ? 'var(--warning)' : 'inherit'};">${stats.pending}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Recibidos:</span>
+                        <span class="info-value" style="color: ${stats.received > 0 ? 'var(--success)' : 'inherit'};">${stats.received}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Nota Crédito:</span>
+                        <span class="info-value" style="color: ${stats.creditNote > 0 ? 'var(--primary)' : 'inherit'};">${stats.creditNote}</span>
+                    </div>
+                </div>
+                ${currentReport.notes ? `
+                <div class="info-item">
+                    <span class="info-label">Observaciones:</span>
+                    <span class="info-value">${currentReport.notes}</span>
+                </div>
+                ` : ''}
+                ${currentReport.attachmentUrl ? `
+                <div class="attachment-info">
+                    <i class="fas fa-paperclip"></i>
+                    <span>Archivo adjunto:</span>
+                    <a href="${currentReport.attachmentUrl}" target="_blank" class="attachment-link">
+                        <i class="fas fa-file-pdf"></i> ${currentReport.attachmentName || 'Ver archivo'}
+                    </a>
+                </div>
+                ` : ''}
+            `;
+        }
+
+        // Cargar tabla de productos
+        function loadProductsTable() {
+            const productsBody = document.getElementById('productsBody');
+            const actionHeader = document.getElementById('actionHeader');
+            const hasLow = hasLowProducts(currentReport);
+            const isActive = currentReport.status === 'active' && !hasLow;
+            
+            // Mostrar u ocultar columna de acción según el estado
+            actionHeader.style.display = isActive ? 'table-cell' : 'none';
+            
+            if (!currentReport.products || currentReport.products.length === 0) {
+                productsBody.innerHTML = `
+                    <tr>
+                        <td colspan="${isActive ? '7' : '6'}" style="text-align: center; padding: 2rem; color: var(--text-light);">
+                            <i class="fas fa-box-open" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                            <p>No hay productos en este reporte</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            productsBody.innerHTML = currentReport.products.map((product, index) => `
+                <tr>
+                    <td>${product.sku || ''}</td>
+                    <td>${product.factoryCode || '-'}</td>
+                    <td>${product.description}</td>
+                    <td>${product.quantity}</td>
+                    <td>${product.reason}</td>
+                    <td>
+                        <span class="product-status status-${product.status === 'received' ? 
+                            (product.receptionType === 'credit-note' ? 'credit-note' : 'received') : 
+                            product.status === 'low' ? 'low' : product.status}"></span>
+                        ${product.status === 'pending' ? 'Pendiente' : 
+                          product.status === 'received' ? (product.receptionType === 'credit-note' ? 'Nota Crédito' : 'Recibido') : 
+                          product.status === 'low' ? 'De baja' :
+                          'Anulado'}
+                        ${product.receivedDate ? `
+                        <span class="status-date">${formatDateTime(product.receivedDate)}</span>
+                        ` : ''}
+                        ${product.lowDate ? `
+                        <span class="status-date">De baja: ${formatDateTime(product.lowDate)}</span>
+                        ` : ''}
+                    </td>
+                    ${isActive ? `
+                    <td>
+                        <div class="action-buttons">
+                            ${product.status === 'pending' ? `
+                            <button class="action-btn action-btn-received" onclick="updateProductStatus(${index}, 'received', 'received')">
+                                <i class="fas fa-check"></i> Recibido
+                            </button>
+                            <button class="action-btn action-btn-credit" onclick="updateProductStatus(${index}, 'received', 'credit-note')">
+                                <i class="fas fa-file-invoice-dollar"></i> NC
+                            </button>
+                            ` : product.status === 'received' ? `
+                            <button class="action-btn action-btn-pending" onclick="undoProductStatus(${index})">
+                                <i class="fas fa-undo"></i> Deshacer
+                            </button>
+                            ` : ''}
+                        </div>
+                    </td>
+                    ` : ''}
+                </tr>
+            `).join('');
+        }
+
+        // Cargar acciones del detalle
+        function loadDetailActions() {
+            const detailActions = document.getElementById('detailActions');
+            const hasLow = hasLowProducts(currentReport);
+            const pendingCount = countPendingProducts(currentReport);
+            const hasReceived = hasReceivedOrCreditNoteProducts(currentReport);
+            
+            detailActions.innerHTML = `
+                <button class="btn btn-pdf" onclick="generatePDF()">
+                    <i class="fas fa-file-pdf"></i> Generar PDF Completo
+                </button>
+                
+                ${currentReport.status === 'active' && hasReceived && pendingCount > 0 ? `
+                <button class="btn btn-warning" onclick="generatePendingPDF()">
+                    <i class="fas fa-hourglass-half"></i> Imprimir Pendientes
+                </button>
+                ` : ''}
+                
+                ${currentReport.status === 'active' && !hasLow ? `
+                <a href="devoluciones.html?edit=${encodeURIComponent(currentReport.id)}" class="btn btn-secondary">
+                    <i class="fas fa-edit"></i> Editar Reporte
+                </a>
+                ` : ''}
+                
+                ${currentReport.status === 'active' && !hasLow ? `
+                <button class="btn btn-danger" onclick="cancelReport()">
+                    <i class="fas fa-ban"></i> Anular Reporte
+                </button>
+                ` : ''}
+            `;
+        }
+
+        // Función para actualizar estado del producto
+        async function updateProductStatus(productIndex, newStatus, receptionType = 'received') {
+            if (!currentReport || !currentReport.products || !currentReport.products[productIndex]) return;
+            
+            try {
+                const product = currentReport.products[productIndex];
+                
+                // Actualizar estado del producto
+                product.status = newStatus;
+                if (newStatus === 'received') {
+                    product.receivedDate = new Date().toISOString();
+                    product.receptionType = receptionType;
+                    product.lowDate = null;
+                } else if (newStatus === 'pending') {
+                    product.receivedDate = null;
+                    product.receptionType = null;
+                    product.lowDate = null;
+                }
+                
+                // Actualizar en Firebase
+                await db.collection("reportesMalEstado").doc(reportId)
+                    .update({
+                        products: currentReport.products,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                
+                // Verificar si todos los productos están en estado final (completado)
+                const allFinal = currentReport.products.every(p => 
+                    p.status === 'received' || 
+                    (p.status === 'received' && p.receptionType === 'credit-note') ||
+                    p.status === 'low' || 
+                    p.status === 'cancelled'
+                );
+                
+                if (allFinal && currentReport.status === 'active') {
+                    await db.collection("reportesMalEstado").doc(reportId)
+                        .update({
+                            status: 'completed',
+                            completedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    currentReport.status = 'completed';
+                } else if (!allFinal && currentReport.status === 'completed') {
+                    // Si ya estaba completado pero ahora no todos están en estado final
+                    await db.collection("reportesMalEstado").doc(reportId)
+                        .update({
+                            status: 'active',
+                            completedAt: firebase.firestore.FieldValue.delete()
+                        });
+                    currentReport.status = 'active';
+                }
+                
+                // Recargar el reporte
+                await loadReport();
+                
+                Swal.fire({
+                    title: 'Estado actualizado',
+                    text: 'El estado del producto se ha actualizado correctamente',
+                    icon: 'success',
+                    confirmButtonColor: '#3085d6'
+                });
+            } catch (error) {
+                console.error("Error al actualizar el producto:", error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Ocurrió un error al actualizar el producto: ' + error.message,
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6'
+                });
+            }
+        }
+
+        // Función para deshacer estado de producto (recibido o nota de crédito)
+        async function undoProductStatus(productIndex) {
+            if (!currentReport || !currentReport.products || !currentReport.products[productIndex]) return;
+            
+            const product = currentReport.products[productIndex];
+            const productType = product.receptionType === 'credit-note' ? 'Nota de Crédito' : 'Recibido';
+            
+            const result = await Swal.fire({
+                title: `¿Deshacer ${productType}?`,
+                text: `¿Estás seguro que deseas marcar este producto como pendiente nuevamente?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, deshacer',
+                cancelButtonText: 'Cancelar'
+            });
+            
+            if (!result.isConfirmed) {
+                return;
+            }
+            
+            try {
+                // Cambiar estado a pendiente
+                product.status = 'pending';
+                product.receivedDate = null;
+                product.receptionType = null;
+                product.lowDate = null;
+                
+                // Actualizar en Firebase
+                await db.collection("reportesMalEstado").doc(reportId)
+                    .update({
+                        products: currentReport.products,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                
+                // Si el reporte estaba completado, cambiarlo a activo
+                if (currentReport.status === 'completed') {
+                    await db.collection("reportesMalEstado").doc(reportId)
+                        .update({
+                            status: 'active',
+                            completedAt: firebase.firestore.FieldValue.delete()
+                        });
+                    currentReport.status = 'active';
+                }
+                
+                // Recargar el reporte
+                await loadReport();
+                
+                Swal.fire({
+                    title: 'Estado deshecho',
+                    text: `El producto se ha marcado como pendiente nuevamente`,
+                    icon: 'success',
+                    confirmButtonColor: '#3085d6'
+                });
+            } catch (error) {
+                console.error("Error al deshacer estado del producto:", error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Ocurrió un error al deshacer el estado: ' + error.message,
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6'
+                });
+            }
+        }
+
+        // Función para abrir modal de adjuntar archivo
+        function attachFile() {
+            document.getElementById('attachmentModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            
+            // Resetear el estado del modal
+            document.getElementById('uploadStatus').style.display = 'none';
+            document.getElementById('saveAttachmentBtn').style.display = 'none';
+            currentAttachmentUrl = null;
+            currentAttachmentName = null;
+            currentAttachmentSize = null;
+        }
+
+        // Función para anular reporte
+        async function cancelReport() {
+            const result = await Swal.fire({
+                title: '¿Anular Reporte?',
+                text: '¿Estás seguro que deseas anular este reporte? Esta acción no se puede deshacer.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, anular',
+                cancelButtonText: 'Cancelar'
+            });
+            
+            if (!result.isConfirmed) {
+                return;
+            }
+
+            try {
+                await db.collection("reportesMalEstado").doc(reportId)
+                    .update({
+                        status: 'cancelled',
+                        cancelledAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                
+                // Actualizar el estado de todos los productos a 'cancelled'
+                const updatedProducts = currentReport.products.map(product => ({
+                    ...product,
+                    status: 'cancelled'
+                }));
+                
+                await db.collection("reportesMalEstado").doc(reportId)
+                    .update({
+                        products: updatedProducts
+                    });
+
+                Swal.fire({
+                    title: 'Reporte anulado',
+                    text: 'El reporte ha sido anulado correctamente',
+                    icon: 'success',
+                    confirmButtonColor: '#3085d6'
+                }).then(() => {
+                    // Recargar la página
+                    location.reload();
+                });
+            } catch (error) {
+                console.error("Error al anular el reporte:", error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Error al anular el reporte: ' + error.message,
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6'
+                });
+            }
+        }
+
+        // Función para generar PDF del reporte
+        async function generatePDF() {
+            try {
+                if (!currentReport) {
+                    alert('No se encontró el reporte');
+                    return;
+                }
+
+                const doc = new jsPDF();
+                
+                // Configuración de márgenes
+                const marginLeft = 15;
+                const marginRight = 15;
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const contentWidth = pageWidth - marginLeft - marginRight;
+                
+                // Agregar logo de la empresa
+                if (companyLogo.complete) {
+                    doc.addImage(companyLogo, 'PNG', marginLeft, 10, 35, 20);
+                }
+                
+                // Título del documento
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.text(companyName, pageWidth / 2, 20, { align: 'center' });
+                
+                // Título del documento
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Nota de Cambios y/o devoluciones.', pageWidth / 2, 30, { align: 'center' });
+                
+                // Línea separadora
+                doc.setDrawColor(200, 200, 200);
+                doc.line(marginLeft, 35, pageWidth - marginRight, 35);
+                
+                // Información del reporte
+                doc.setFontSize(10);
+                let yPosition = companyLogo.complete ? 50 : 45;
+                
+                // Textos alineados a la izquierda
+                const leftTexts = [
+                    `Proveedor: ${currentReport.supplier}`,
+                    `Número de Factura: ${currentReport.invoiceNumber}`,
+                    `Serie de Factura: ${currentReport.invoiceSeries}`
+                ];
+                
+                // Textos alineados a la derecha
+                const rightTexts = [
+                    `Número de Reporte: ${currentReport.id}`,
+                    `Fecha de Reporte: ${formatDate(currentReport.date)}`
+                ];
+                
+                // Calcular posición vertical para alinear ambos lados
+                const lineHeight = 7;
+                const maxLines = Math.max(leftTexts.length, rightTexts.length);
+                
+                for (let i = 0; i < maxLines; i++) {
+                    if (i < leftTexts.length) {
+                        doc.text(leftTexts[i], marginLeft, yPosition + (i * lineHeight));
+                    }
+                    
+                    if (i < rightTexts.length) {
+                        const text = rightTexts[i];
+                        const textWidth = doc.getStringUnitWidth(text) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+                        doc.text(text, pageWidth - marginRight - textWidth, yPosition + (i * lineHeight));
+                    }
+                }
+                
+                yPosition += (maxLines * lineHeight) + 10;
+                
+                if (currentReport.notes) {
+                    const splitNotes = doc.splitTextToSize(`Observaciones: ${currentReport.notes}`, contentWidth);
+                    doc.text(splitNotes, marginLeft, yPosition);
+                    yPosition += splitNotes.length * 5 + 10;
+                } else {
+                    yPosition += 10;
+                }
+                
+                // Tabla de productos con bordes y ajuste de texto
+                const tableData = currentReport.products ? currentReport.products.map(product => [
+                    product.sku || '',
+                    product.factoryCode || '-',
+                    { content: product.description, styles: { cellWidth: 'auto', fontStyle: 'normal' } },
+                    { content: product.quantity.toString(), styles: { halign: 'center' } },
+                    { content: product.reason, styles: { cellWidth: 30, fontStyle: 'normal' } },
+                    { 
+                        content: product.status === 'pending' ? 'Pendiente' : 
+                                product.status === 'received' ? (product.receptionType === 'credit-note' ? 'Nota Crédito' : `Recibido\n${formatDateTime(product.receivedDate)}`) : 
+                                product.status === 'low' ? 'De baja' :
+                                'Anulado',
+                        styles: { cellWidth: 30, fontStyle: 'normal' }
+                    }
+                ]) : [];
+                
+                doc.autoTable({
+                    startY: yPosition,
+                    head: [['Sku', 'Cód. Fábrica', 'Descripción', 'Cantidad', 'Motivo', 'Estado']],
+                    body: tableData,
+                    margin: { left: marginLeft, right: marginRight },
+                    styles: {
+                        fontSize: 9,
+                        cellPadding: 3,
+                        valign: 'middle',
+                        lineWidth: 0.2,
+                        lineColor: 50,
+                        overflow: 'linebreak'
+                    },
+                    headStyles: {
+                        fillColor: [67, 97, 238],
+                        textColor: 255,
+                        fontStyle: 'bold',
+                        lineWidth: 0.2
+                    },
+                    bodyStyles: {
+                        lineWidth: 0.2
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 20, halign: 'center' },
+                        1: { cellWidth: 20, halign: 'center' },
+                        2: { cellWidth: 'auto', halign: 'left' },
+                        3: { cellWidth: 20, halign: 'center' },
+                        4: { cellWidth: 30, halign: 'left' },
+                        5: { cellWidth: 30, halign: 'left' }
+                    }
+                });
+                
+                // Firmas más separadas y con letra más grande
+                const lastY = doc.lastAutoTable.finalY + 30;
+                
+                doc.setFontSize(14);
+                doc.text('Fecha de Entrega: ________________________', marginLeft, lastY);
+                doc.text('Recibe: _________________________________', marginLeft, lastY + 20);
+                doc.text('Entrega: ________________________________', marginLeft, lastY + 40);
+                
+                // Guardar PDF con el nuevo nombre
+                const fileName = `NotaDeCambio${currentReport.id}_${currentReport.supplier.replace(/\s+/g, '_')}.pdf`;
+                doc.save(fileName);
+            } catch (error) {
+                console.error("Error al generar PDF:", error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Ocurrió un error al generar el PDF: ' + error.message,
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6'
+                });
+            }
+        }
+
+        // Función para generar PDF solo con productos pendientes
+        async function generatePendingPDF() {
+            try {
+                if (!currentReport) {
+                    alert('No se encontró el reporte');
+                    return;
+                }
+                
+                // Filtrar solo productos pendientes
+                const pendingProducts = currentReport.products ? currentReport.products.filter(product => 
+                    product.status === 'pending'
+                ) : [];
+                
+                if (pendingProducts.length === 0) {
+                    Swal.fire({
+                        title: 'Sin productos pendientes',
+                        text: 'No hay productos pendientes en este reporte',
+                        icon: 'info',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    return;
+                }
+                
+                const doc = new jsPDF();
+                
+                // Configuración de márgenes
+                const marginLeft = 15;
+                const marginRight = 15;
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const contentWidth = pageWidth - marginLeft - marginRight;
+                
+                // Agregar logo de la empresa
+                if (companyLogo.complete) {
+                    doc.addImage(companyLogo, 'PNG', marginLeft, 10, 35, 20);
+                }
+                
+                // Título del documento
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.text(companyName, pageWidth / 2, 20, { align: 'center' });
+                
+                // Título del documento - NOTA DE PENDIENTES
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Nota de Cambios y/o devoluciones', pageWidth / 2, 30, { align: 'center' });
+                
+                // Línea separadora
+                doc.setDrawColor(200, 200, 200);
+                doc.line(marginLeft, 35, pageWidth - marginRight, 35);
+                
+                // Información del reporte
+                doc.setFontSize(10);
+                let yPosition = companyLogo.complete ? 50 : 45;
+                
+                // Textos alineados a la izquierda
+                const leftTexts = [
+                    `Proveedor: ${currentReport.supplier}`,
+                    `Número de Factura: ${currentReport.invoiceNumber}`,
+                    `Serie de Factura: ${currentReport.invoiceSeries}`
+                ];
+                
+                // Textos alineados a la derecha
+                const rightTexts = [
+                    `Número de Reporte: ${currentReport.id}`,
+                    `Fecha de Reporte: ${formatDate(currentReport.date)}`,
+                ];
+                
+                // Calcular posición vertical para alinear ambos lados
+                const lineHeight = 7;
+                const maxLines = Math.max(leftTexts.length, rightTexts.length);
+                
+                for (let i = 0; i < maxLines; i++) {
+                    if (i < leftTexts.length) {
+                        doc.text(leftTexts[i], marginLeft, yPosition + (i * lineHeight));
+                    }
+                    
+                    if (i < rightTexts.length) {
+                        const text = rightTexts[i];
+                        const textWidth = doc.getStringUnitWidth(text) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+                        doc.text(text, pageWidth - marginRight - textWidth, yPosition + (i * lineHeight));
+                    }
+                }
+                
+                yPosition += (maxLines * lineHeight) + 10;
+                
+                if (currentReport.notes) {
+                    const splitNotes = doc.splitTextToSize(`Observaciones: ${currentReport.notes}`, contentWidth);
+                    doc.text(splitNotes, marginLeft, yPosition);
+                    yPosition += splitNotes.length * 5 + 10;
+                } else {
+                    yPosition += 10;
+                }
+                
+                // Tabla de productos PENDIENTES con bordes y ajuste de texto
+                const tableData = pendingProducts.map(product => [
+                    product.sku || '',
+                    product.factoryCode || '-',
+                    { content: product.description, styles: { cellWidth: 'auto', fontStyle: 'normal' } },
+                    { content: product.quantity.toString(), styles: { halign: 'center' } },
+                    { content: product.reason, styles: { cellWidth: 30, fontStyle: 'normal' } },
+                    { 
+                        content: 'PENDIENTE',
+                        styles: { cellWidth: 30, fontStyle: 'normal' }
+                    }
+                ]);
+                
+                doc.autoTable({
+                    startY: yPosition,
+                    head: [['Sku', 'Cód. Fábrica', 'Descripción', 'Cantidad', 'Motivo', 'Estado']],
+                    body: tableData,
+                    margin: { left: marginLeft, right: marginRight },
+                    styles: {
+                        fontSize: 9,
+                        cellPadding: 3,
+                        valign: 'middle',
+                        lineWidth: 0.2,
+                        lineColor: 50,
+                        overflow: 'linebreak'
+                    },
+                    headStyles: {
+                        fillColor: [67, 97, 238],
+                        textColor: 255,
+                        fontStyle: 'bold',
+                        lineWidth: 0.2
+                    },
+                    bodyStyles: {
+                        lineWidth: 0.2
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 20, halign: 'center' },
+                        1: { cellWidth: 20, halign: 'center' },
+                        2: { cellWidth: 'auto', halign: 'left' },
+                        3: { cellWidth: 20, halign: 'center' },
+                        4: { cellWidth: 30, halign: 'left' },
+                        5: { cellWidth: 30, halign: 'center', fontStyle: 'bold' }
+                    }
+                });
+                
+                // Firmas
+                const lastY = doc.lastAutoTable.finalY + 30;
+                
+                doc.setFontSize(14);
+                doc.text('Fecha: ________________________', marginLeft, lastY);
+                doc.text('Recibe: _________________________________', marginLeft, lastY + 20);
+                doc.text('Entrega: ________________________________', marginLeft, lastY + 40);
+                
+                // Guardar PDF con nombre que indique que son pendientes
+                const fileName = `NotaPendientes${currentReport.id}_${currentReport.supplier.replace(/\s+/g, '_')}.pdf`;
+                doc.save(fileName);
+            } catch (error) {
+                console.error("Error al generar PDF de pendientes:", error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Ocurrió un error al generar el PDF de pendientes: ' + error.message,
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6'
+                });
+            }
+        }
+
+        // Cargar el reporte cuando la página esté lista
+        document.addEventListener('DOMContentLoaded', () => {
+            // Event listener para el botón de adjuntar archivo
+            document.getElementById('attachFileBtn').addEventListener('click', attachFile);
+            
+            // Event listener para el botón de subir archivo
+            document.getElementById('uploadWidgetBtn').addEventListener('click', handleCloudinaryUpload);
+            
+            // Event listener para el botón de guardar adjunto
+            document.getElementById('saveAttachmentBtn').addEventListener('click', saveAttachment);
+            
+            // Event listener para cerrar modal al hacer clic fuera
+            document.getElementById('attachmentModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('attachmentModal')) {
+                    window.closeAttachmentModal();
+                }
+            });
+            
+            // Cargar el reporte
+            loadReport();
+        });
+    </script>
+</body>
+</html>
