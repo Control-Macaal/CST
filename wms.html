@@ -1,0 +1,1880 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Almacén Racks</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a5276">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        :root {
+            --primary-color: #1a5276;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-color: #f8f9fa;
+            --dark-color: #2c3e50;
+            --rack-a-color: #3498db;
+            --rack-b-color: #2ecc71;
+            --rack-c-color: #9b59b6;
+            --bottom-nav-height: 60px;
+            --header-height: 70px;
+            --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+            overflow-x: hidden;
+            padding-bottom: calc(var(--bottom-nav-height) + var(--safe-area-inset-bottom));
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Header Mobile */
+        .mobile-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 15px 20px;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: max(15px, env(safe-area-inset-top));
+        }
+
+        .header-title {
+            flex: 1;
+        }
+
+        .header-title h1 {
+            font-size: 1.4rem;
+            margin-bottom: 3px;
+            font-weight: 700;
+        }
+
+        .header-subtitle {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.9);
+            display: block;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.2rem;
+        }
+
+        .header-btn:hover, .header-btn:active {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.05);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: calc(var(--header-height) + 15px);
+            padding: 0 15px 20px;
+            min-height: calc(100vh - var(--header-height) - var(--bottom-nav-height) - 35px);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: calc(var(--bottom-nav-height) + var(--safe-area-inset-bottom));
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            padding: 10px 0 calc(10px + var(--safe-area-inset-bottom));
+            z-index: 1000;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            padding: 8px 5px;
+            border: none;
+            background: none;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            text-decoration: none;
+        }
+
+        .nav-item.active {
+            color: var(--secondary-color);
+        }
+
+        .nav-item:active {
+            transform: scale(0.95);
+        }
+
+        .nav-icon {
+            font-size: 1.3rem;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .nav-badge {
+            position: absolute;
+            top: 2px;
+            right: 20%;
+            background: var(--danger-color);
+            color: white;
+            font-size: 0.7rem;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:active {
+            transform: scale(0.98);
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* Rack Sections */
+        .rack-section {
+            background: white;
+            border-radius: 16px;
+            padding: 20px 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-badge {
+            background: #e9ecef;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .rack-spaces {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .space {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            padding: 10px 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .space:active {
+            transform: scale(0.95);
+        }
+
+        .space.selected {
+            border-color: var(--warning-color);
+            box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.2);
+        }
+
+        .space-id {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .space-status {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .space-occupied {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .space-empty {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .space-partial {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .space-count {
+            font-size: 0.75rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .space-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--danger-color);
+            color: white;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 85vh;
+            overflow: hidden;
+            animation: slideUp 0.4s ease;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .close-modal:active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 20px;
+            max-height: calc(85vh - 80px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-color);
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 16px;
+            padding-right: 50px;
+        }
+
+        .btn {
+            padding: 16px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+            color: white;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-primary:active {
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-color), #c0392b);
+            color: white;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #219653);
+            color: white;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        /* Current Space Info */
+        .current-space-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-left: 6px solid var(--secondary-color);
+        }
+
+        .space-card-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--dark-color);
+            margin-bottom: 10px;
+        }
+
+        .space-card-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .space-card-status {
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .space-card-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .space-card-actions .btn {
+            flex: 1;
+            padding: 12px;
+        }
+
+        /* Products List */
+        .products-list {
+            margin-top: 20px;
+        }
+
+        .product-item {
+            background: white;
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 12px;
+            border: 2px solid #f0f0f0;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .product-item:active {
+            background: #f8f9fa;
+            border-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .product-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            flex: 1;
+        }
+
+        .product-quantity {
+            background: var(--primary-color);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .product-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .product-category {
+            background: #e9ecef;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .product-actions .btn {
+            padding: 10px;
+            font-size: 0.9rem;
+        }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #e0e0e0;
+        }
+
+        .empty-state-title {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #666;
+            font-weight: 700;
+        }
+
+        .empty-state-text {
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        /* Search Bar */
+        .search-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 1.2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 16px 20px 16px 50px;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            font-size: 1rem;
+            background: #f8f9fa;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            background: white;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Swipe Indicator */
+        .swipe-indicator {
+            text-align: center;
+            padding: 15px;
+            color: #666;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .swipe-dots {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .swipe-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ddd;
+            transition: all 0.3s;
+        }
+
+        .swipe-dot.active {
+            background: var(--secondary-color);
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3000;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(52, 152, 219, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--secondary-color);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: calc(var(--bottom-nav-height) + 30px + var(--safe-area-inset-bottom));
+            left: 20px;
+            right: 20px;
+            background: var(--dark-color);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 1500;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast-message {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 480px) {
+            .rack-spaces {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .space-card-actions {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .rack-spaces {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .header-title h1 {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Pull to refresh */
+        .pull-to-refresh {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 0.9rem;
+            opacity: 0;
+            transform: translateY(-60px);
+            transition: all 0.3s;
+        }
+
+        .pull-to-refresh.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* Space colors */
+        .space[data-rack="A"] {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(52, 152, 219, 0.05));
+            border-color: rgba(52, 152, 219, 0.3);
+        }
+
+        .space[data-rack="B"] {
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.1), rgba(46, 204, 113, 0.05));
+            border-color: rgba(46, 204, 113, 0.3);
+        }
+
+        .space[data-rack="C"] {
+            background: linear-gradient(135deg, rgba(155, 89, 182, 0.1), rgba(155, 89, 182, 0.05));
+            border-color: rgba(155, 89, 182, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div class="header-title">
+            <h1><i class="fas fa-pallet"></i> Almacén Racks</h1>
+            <span class="header-subtitle" id="current-page-title">Inventario</span>
+        </div>
+        <div class="header-actions">
+            <button class="header-btn" id="header-add-btn" title="Agregar Producto">
+                <i class="fas fa-plus"></i>
+            </button>
+            <button class="header-btn" id="header-search-btn" title="Buscar">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Inventory Tab (Default) -->
+        <div id="inventory-tab" class="tab-content active">
+            <!-- Stats Cards -->
+            <div class="stats-container">
+                <div class="stat-card" onclick="showToast('36 espacios disponibles')">
+                    <div class="stat-value" id="total-spaces">36</div>
+                    <div class="stat-label">Espacios Totales</div>
+                </div>
+                <div class="stat-card" onclick="showToast('Espacios con productos')">
+                    <div class="stat-value" id="occupied-spaces">0</div>
+                    <div class="stat-label">Ocupados</div>
+                </div>
+                <div class="stat-card" onclick="showToast('Total de productos almacenados')">
+                    <div class="stat-value" id="total-products">0</div>
+                    <div class="stat-label">Productos</div>
+                </div>
+            </div>
+
+            <!-- Rack A -->
+            <div class="rack-section">
+                <div class="section-header">
+                    <div class="section-title" style="color: var(--rack-a-color);">
+                        <i class="fas fa-layer-group"></i> Estante A
+                    </div>
+                    <div class="section-badge" id="rack-a-status">0/12</div>
+                </div>
+                <div class="rack-spaces" id="rack-a-spaces">
+                    <!-- Los espacios A1-A12 se generarán con JS -->
+                </div>
+            </div>
+
+            <!-- Rack B -->
+            <div class="rack-section">
+                <div class="section-header">
+                    <div class="section-title" style="color: var(--rack-b-color);">
+                        <i class="fas fa-layer-group"></i> Estante B
+                    </div>
+                    <div class="section-badge" id="rack-b-status">0/12</div>
+                </div>
+                <div class="rack-spaces" id="rack-b-spaces">
+                    <!-- Los espacios B1-B12 se generarán con JS -->
+                </div>
+            </div>
+
+            <!-- Rack C -->
+            <div class="rack-section">
+                <div class="section-header">
+                    <div class="section-title" style="color: var(--rack-c-color);">
+                        <i class="fas fa-layer-group"></i> Estante C
+                    </div>
+                    <div class="section-badge" id="rack-c-status">0/12</div>
+                </div>
+                <div class="rack-spaces" id="rack-c-spaces">
+                    <!-- Los espacios C1-C12 se generarán con JS -->
+                </div>
+            </div>
+
+            <!-- Swipe Indicator -->
+            <div class="swipe-indicator">
+                <i class="fas fa-arrow-left"></i>
+                <span>Desliza para ver productos</span>
+                <i class="fas fa-arrow-right"></i>
+            </div>
+            <div class="swipe-dots">
+                <div class="swipe-dot active"></div>
+                <div class="swipe-dot"></div>
+                <div class="swipe-dot"></div>
+            </div>
+        </div>
+
+        <!-- Products Tab -->
+        <div id="products-tab" class="tab-content">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="products-search" class="search-input" placeholder="Buscar productos...">
+            </div>
+
+            <div class="current-space-card" id="products-space-card" style="display: none;">
+                <div class="space-card-title" id="products-space-title">A1</div>
+                <div class="space-card-details">
+                    <div>
+                        <div>Estado: <span class="space-card-status" id="products-space-status">Vacío</span></div>
+                        <div>Productos: <span id="products-space-count">0</span></div>
+                    </div>
+                    <button class="btn btn-danger" id="clear-space-btn" style="display: none; padding: 8px 16px;">
+                        <i class="fas fa-trash"></i> Vaciar
+                    </button>
+                </div>
+            </div>
+
+            <div class="products-list" id="products-list-container">
+                <div class="empty-state" id="no-products-message">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-box-open"></i>
+                    </div>
+                    <div class="empty-state-title">No hay productos</div>
+                    <div class="empty-state-text">Selecciona un espacio para ver sus productos o agrega nuevos productos.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Product Tab -->
+        <div id="add-tab" class="tab-content">
+            <div class="current-space-card" id="add-space-card" style="display: none;">
+                <div class="space-card-title" id="add-space-title">A1</div>
+                <div class="space-card-details">
+                    <div>
+                        <div>Estado: <span class="space-card-status" id="add-space-status">Vacío</span></div>
+                        <div>Productos: <span id="add-space-count">0</span></div>
+                    </div>
+                </div>
+                <div class="space-card-actions">
+                    <button class="btn btn-success" id="quick-add-btn">
+                        <i class="fas fa-bolt"></i> Agregar Rápido
+                    </button>
+                </div>
+            </div>
+
+            <div class="empty-state" id="no-space-selected">
+                <div class="empty-state-icon">
+                    <i class="fas fa-mouse-pointer"></i>
+                </div>
+                <div class="empty-state-title">Selecciona un espacio</div>
+                <div class="empty-state-text">Toca cualquier espacio en la pestaña de inventario para seleccionarlo y luego podrás agregar productos aquí.</div>
+                <button class="btn btn-primary" style="margin-top: 20px;" onclick="switchTab('inventory')">
+                    <i class="fas fa-warehouse"></i> Ver Inventario
+                </button>
+            </div>
+
+            <form id="product-form" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label" for="product-name">Nombre del Producto</label>
+                    <input type="text" id="product-name" class="form-control" placeholder="Ej: Caja de tornillos" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="product-quantity">Cantidad</label>
+                    <input type="number" id="product-quantity" class="form-control" min="1" value="1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="product-category">Categoría</label>
+                    <select id="product-category" class="form-control form-select" required>
+                        <option value="">Selecciona categoría</option>
+                        <option value="herramientas">Herramientas</option>
+                        <option value="materiales">Materiales</option>
+                        <option value="electricidad">Electricidad</option>
+                        <option value="fontaneria">Fontanería</option>
+                        <option value="pintura">Pintura</option>
+                        <option value="empaque">Empaque</option>
+                        <option value="otros">Otros</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="product-code">Código/SKU (opcional)</label>
+                    <input type="text" id="product-code" class="form-control" placeholder="Código interno">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="product-notes">Notas (opcional)</label>
+                    <textarea id="product-notes" class="form-control" rows="3" placeholder="Información adicional"></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Agregar Producto
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="switchTab('inventory')">
+            <i class="fas fa-warehouse nav-icon"></i>
+            <span class="nav-label">Inventario</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('products')">
+            <i class="fas fa-boxes nav-icon"></i>
+            <span class="nav-label">Productos</span>
+            <span class="nav-badge" id="products-badge">0</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('add')">
+            <i class="fas fa-plus-circle nav-icon"></i>
+            <span class="nav-label">Agregar</span>
+        </button>
+        <button class="nav-item" onclick="showSettingsModal()">
+            <i class="fas fa-cog nav-icon"></i>
+            <span class="nav-label">Ajustes</span>
+        </button>
+    </nav>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" id="loading-spinner">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <div class="toast-message" id="toast-message"></div>
+        <button class="toast-close" onclick="hideToast()">&times;</button>
+    </div>
+
+    <!-- Product Detail Modal -->
+    <div class="modal" id="product-detail-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="detail-product-name"></h3>
+                <button class="close-modal" onclick="closeModal('product-detail-modal')">&times;</button>
+            </div>
+            <div class="modal-body" id="detail-product-body">
+                <!-- Los detalles del producto se cargarán aquí -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Add Modal -->
+    <div class="modal" id="quick-add-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-bolt"></i> Agregar Rápido</h3>
+                <button class="close-modal" onclick="closeModal('quick-add-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Producto Predefinido</label>
+                    <div class="quick-options" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                        <button class="btn" onclick="quickAddProduct('Caja de tornillos', 'herramientas', 50)" style="background: #e3f2fd; color: #1976d2;">
+                            <i class="fas fa-screwdriver"></i> Tornillos
+                        </button>
+                        <button class="btn" onclick="quickAddProduct('Martillo', 'herramientas', 1)" style="background: #e8f5e9; color: #2e7d32;">
+                            <i class="fas fa-hammer"></i> Martillo
+                        </button>
+                        <button class="btn" onclick="quickAddProduct('Cemento 50kg', 'materiales', 1)" style="background: #fff3e0; color: #f57c00;">
+                            <i class="fas fa-weight"></i> Cemento
+                        </button>
+                        <button class="btn" onclick="quickAddProduct('Pintura 1L', 'pintura', 1)" style="background: #f3e5f5; color: #7b1fa2;">
+                            <i class="fas fa-fill-drip"></i> Pintura
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="quick-product-name">Nombre Personalizado</label>
+                    <input type="text" id="quick-product-name" class="form-control" placeholder="Nombre del producto">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="quick-product-quantity">Cantidad</label>
+                    <input type="number" id="quick-product-quantity" class="form-control" min="1" value="1">
+                </div>
+                <button class="btn btn-primary" onclick="submitQuickAdd()">
+                    <i class="fas fa-check"></i> Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settings-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-cog"></i> Ajustes</h3>
+                <button class="close-modal" onclick="closeModal('settings-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <h4 style="margin-bottom: 15px;">Gestión de Datos</h4>
+                    <button class="btn" onclick="exportData()" style="background: #e3f2fd; color: #1976d2; margin-bottom: 10px;">
+                        <i class="fas fa-download"></i> Exportar Datos
+                    </button>
+                    <button class="btn" onclick="importData()" style="background: #e8f5e9; color: #2e7d32; margin-bottom: 10px;">
+                        <i class="fas fa-upload"></i> Importar Datos
+                    </button>
+                    <button class="btn btn-danger" onclick="resetData()">
+                        <i class="fas fa-trash"></i> Restablecer Datos
+                    </button>
+                </div>
+                <div class="form-group">
+                    <h4 style="margin-bottom: 15px;">Información</h4>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 12px;">
+                        <p><strong>Versión:</strong> 2.0.0</p>
+                        <p><strong>Espacios:</strong> 36 (3 estantes × 12)</p>
+                        <p><strong>Productos:</strong> <span id="settings-total-products">0</span></p>
+                        <p><strong>Última actualización:</strong> <span id="last-update">Hoy</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Install Prompt -->
+    <div class="modal" id="install-prompt" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-mobile-alt"></i> Instalar App</h3>
+                <button class="close-modal" onclick="closeModal('install-prompt')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <i class="fas fa-download" style="font-size: 3rem; color: var(--secondary-color); margin-bottom: 15px;"></i>
+                    <p>¿Deseas instalar esta aplicación en tu dispositivo para acceder rápidamente?</p>
+                </div>
+                <button class="btn btn-primary" onclick="installApp()">
+                    <i class="fas fa-download"></i> Instalar App
+                </button>
+                <button class="btn" onclick="closeModal('install-prompt')" style="margin-top: 10px; background: #f8f9fa;">
+                    Ahora no
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos iniciales de ejemplo
+        const initialData = {
+            "A1": [
+                { id: 1, name: "Caja de tornillos 2\"", quantity: 50, category: "herramientas", code: "TOR-202", date: "2023-10-15", notes: "Tornillos galvanizados" }
+            ],
+            "A3": [
+                { id: 2, name: "Martillos de carpintero", quantity: 12, category: "herramientas", code: "MAR-305", date: "2023-10-12", notes: "Cabezas de acero" }
+            ],
+            "B2": [
+                { id: 3, name: "Cable eléctrico 12 AWG", quantity: 25, category: "electricidad", code: "CAB-127", date: "2023-10-08", notes: "Cable THHN 100ft" }
+            ],
+            "C4": [
+                { id: 4, name: "Tubería PVC 1/2\"", quantity: 30, category: "fontaneria", code: "TUB-512", date: "2023-09-28", notes: "Tubería para agua" }
+            ]
+        };
+
+        // Variables globales
+        let rackData = JSON.parse(localStorage.getItem('rackStorageData')) || initialData;
+        let nextProductId = 5;
+        let selectedSpace = null;
+        let deferredPrompt = null;
+
+        // Inicialización de la aplicación
+        document.addEventListener('DOMContentLoaded', function() {
+            initApp();
+            setupServiceWorker();
+            showInstallPrompt();
+        });
+
+        function initApp() {
+            createSpaces();
+            updateStats();
+            setupEventListeners();
+            updateProductsBadge();
+            
+            // Cargar último espacio seleccionado
+            const lastSpace = localStorage.getItem('lastSelectedSpace');
+            if (lastSpace && rackData[lastSpace] !== undefined) {
+                setTimeout(() => selectSpace(lastSpace), 300);
+            }
+        }
+
+        function createSpaces() {
+            createRackSpaces('A');
+            createRackSpaces('B');
+            createRackSpaces('C');
+        }
+
+        function createRackSpaces(rackLetter) {
+            const container = document.getElementById(`rack-${rackLetter.toLowerCase()}-spaces`);
+            container.innerHTML = '';
+            
+            for (let i = 1; i <= 12; i++) {
+                const spaceId = `${rackLetter}${i}`;
+                const space = createSpaceElement(spaceId);
+                container.appendChild(space);
+            }
+        }
+
+        function createSpaceElement(spaceId) {
+            const space = document.createElement('div');
+            space.className = 'space';
+            space.dataset.spaceId = spaceId;
+            space.dataset.rack = spaceId.charAt(0);
+            
+            const products = rackData[spaceId] || [];
+            const status = getSpaceStatus(spaceId);
+            
+            space.innerHTML = `
+                <div class="space-id">${spaceId}</div>
+                <div class="space-status ${status.class}">${status.text}</div>
+                <div class="space-count">${products.length} producto${products.length !== 1 ? 's' : ''}</div>
+                ${products.length > 3 ? `<div class="space-badge">${products.length}</div>` : ''}
+            `;
+            
+            space.addEventListener('click', () => selectSpace(spaceId));
+            space.addEventListener('touchstart', function(e) {
+                this.style.transform = 'scale(0.95)';
+            }, { passive: true });
+            
+            space.addEventListener('touchend', function() {
+                this.style.transform = '';
+            }, { passive: true });
+            
+            return space;
+        }
+
+        function getSpaceStatus(spaceId) {
+            const products = rackData[spaceId] || [];
+            if (products.length === 0) {
+                return { text: 'Vacío', class: 'space-empty' };
+            } else if (products.length >= 4) {
+                return { text: 'Lleno', class: 'space-occupied' };
+            } else {
+                return { text: 'Parcial', class: 'space-partial' };
+            }
+        }
+
+        function selectSpace(spaceId) {
+            // Deseleccionar espacio anterior
+            if (selectedSpace) {
+                const prevSpace = document.querySelector(`[data-space-id="${selectedSpace}"]`);
+                if (prevSpace) prevSpace.classList.remove('selected');
+            }
+            
+            // Seleccionar nuevo espacio
+            selectedSpace = spaceId;
+            localStorage.setItem('lastSelectedSpace', spaceId);
+            
+            const currentSpace = document.querySelector(`[data-space-id="${spaceId}"]`);
+            currentSpace.classList.add('selected');
+            
+            // Actualizar todas las vistas
+            updateCurrentSpaceInfo();
+            updateProductsList();
+            
+            // Mostrar notificación
+            showToast(`Espacio ${spaceId} seleccionado`);
+            
+            // Si estamos en la pestaña de agregar, mostrar formulario
+            if (document.getElementById('add-tab').classList.contains('active')) {
+                document.getElementById('no-space-selected').style.display = 'none';
+                document.getElementById('add-space-card').style.display = 'block';
+                document.getElementById('product-form').style.display = 'block';
+            }
+        }
+
+        function updateCurrentSpaceInfo() {
+            if (!selectedSpace) return;
+            
+            const products = rackData[selectedSpace] || [];
+            const status = getSpaceStatus(selectedSpace);
+            
+            // Actualizar tarjeta de productos
+            document.getElementById('products-space-card').style.display = 'block';
+            document.getElementById('products-space-title').textContent = selectedSpace;
+            document.getElementById('products-space-status').textContent = status.text;
+            document.getElementById('products-space-status').className = `space-card-status ${status.class}`;
+            document.getElementById('products-space-count').textContent = products.length;
+            document.getElementById('clear-space-btn').style.display = products.length > 0 ? 'block' : 'none';
+            
+            // Actualizar tarjeta de agregar
+            document.getElementById('add-space-card').style.display = 'block';
+            document.getElementById('add-space-title').textContent = selectedSpace;
+            document.getElementById('add-space-status').textContent = status.text;
+            document.getElementById('add-space-status').className = `space-card-status ${status.class}`;
+            document.getElementById('add-space-count').textContent = products.length;
+        }
+
+        function updateStats() {
+            // Calcular estadísticas
+            const totalSpaces = 36;
+            const occupiedSpaces = Object.keys(rackData).length;
+            let totalProducts = 0;
+            
+            for (const space in rackData) {
+                totalProducts += rackData[space].length;
+            }
+            
+            // Actualizar UI
+            document.getElementById('total-spaces').textContent = totalSpaces;
+            document.getElementById('occupied-spaces').textContent = occupiedSpaces;
+            document.getElementById('total-products').textContent = totalProducts;
+            document.getElementById('settings-total-products').textContent = totalProducts;
+            
+            // Actualizar status de racks
+            updateRackStatus('A');
+            updateRackStatus('B');
+            updateRackStatus('C');
+            
+            // Actualizar badge
+            updateProductsBadge();
+            
+            // Guardar última actualización
+            localStorage.setItem('lastUpdate', new Date().toLocaleString());
+            document.getElementById('last-update').textContent = new Date().toLocaleString();
+        }
+
+        function updateRackStatus(rackLetter) {
+            let occupiedCount = 0;
+            
+            for (let i = 1; i <= 12; i++) {
+                const spaceId = `${rackLetter}${i}`;
+                if (rackData[spaceId] && rackData[spaceId].length > 0) {
+                    occupiedCount++;
+                }
+            }
+            
+            document.getElementById(`rack-${rackLetter.toLowerCase()}-status`).textContent = `${occupiedCount}/12`;
+        }
+
+        function updateProductsBadge() {
+            let totalProducts = 0;
+            for (const space in rackData) {
+                totalProducts += rackData[space].length;
+            }
+            
+            const badge = document.getElementById('products-badge');
+            badge.textContent = totalProducts;
+            badge.style.display = totalProducts > 0 ? 'flex' : 'none';
+        }
+
+        function updateProductsList(searchQuery = '') {
+            const container = document.getElementById('products-list-container');
+            
+            if (!selectedSpace) {
+                document.getElementById('no-products-message').style.display = 'block';
+                return;
+            }
+            
+            const products = rackData[selectedSpace] || [];
+            
+            if (products.length === 0) {
+                document.getElementById('no-products-message').style.display = 'block';
+                container.innerHTML = '';
+                container.appendChild(document.getElementById('no-products-message'));
+                return;
+            }
+            
+            document.getElementById('no-products-message').style.display = 'none';
+            container.innerHTML = '';
+            
+            // Filtrar productos si hay búsqueda
+            let filteredProducts = products;
+            if (searchQuery) {
+                const query = searchQuery.toLowerCase();
+                filteredProducts = products.filter(p => 
+                    p.name.toLowerCase().includes(query) ||
+                    (p.code && p.code.toLowerCase().includes(query)) ||
+                    getCategoryName(p.category).toLowerCase().includes(query)
+                );
+            }
+            
+            if (filteredProducts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="empty-state-title">No se encontraron productos</div>
+                        <div class="empty-state-text">No hay productos que coincidan con "${searchQuery}"</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            filteredProducts.forEach(product => {
+                const productElement = document.createElement('div');
+                productElement.className = 'product-item';
+                productElement.innerHTML = `
+                    <div class="product-header">
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-quantity">${product.quantity}</div>
+                    </div>
+                    <div class="product-details">
+                        <div>
+                            <div>Categoría: <span class="product-category">${getCategoryName(product.category)}</span></div>
+                            ${product.code ? `<div style="margin-top: 5px;">Código: ${product.code}</div>` : ''}
+                        </div>
+                        <div style="text-align: right;">
+                            <div>${product.date}</div>
+                            ${product.notes ? `<div style="margin-top: 5px; font-size: 0.8rem; color: #999;">${product.notes.substring(0, 30)}${product.notes.length > 30 ? '...' : ''}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="product-actions">
+                        <button class="btn" onclick="showProductDetail(${product.id})" style="flex: 2; background: #e3f2fd; color: #1976d2;">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+                        <button class="btn btn-danger" onclick="removeProduct(${product.id})" style="flex: 1;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(productElement);
+            });
+        }
+
+        function getCategoryName(categoryCode) {
+            const categories = {
+                'herramientas': 'Herramientas',
+                'materiales': 'Materiales',
+                'electricidad': 'Electricidad',
+                'fontaneria': 'Fontanería',
+                'pintura': 'Pintura',
+                'empaque': 'Empaque',
+                'otros': 'Otros'
+            };
+            return categories[categoryCode] || categoryCode;
+        }
+
+        function addProduct(productData) {
+            if (!selectedSpace) {
+                showToast('Selecciona un espacio primero');
+                return false;
+            }
+            
+            if (!rackData[selectedSpace]) {
+                rackData[selectedSpace] = [];
+            }
+            
+            const product = {
+                id: nextProductId++,
+                name: productData.name,
+                quantity: parseInt(productData.quantity),
+                category: productData.category,
+                code: productData.code || '',
+                notes: productData.notes || '',
+                date: new Date().toISOString().split('T')[0]
+            };
+            
+            rackData[selectedSpace].push(product);
+            saveData();
+            updateSpaceElement(selectedSpace);
+            updateCurrentSpaceInfo();
+            updateProductsList();
+            showToast(`Producto agregado a ${selectedSpace}`);
+            
+            // Limpiar formulario
+            document.getElementById('product-form').reset();
+            document.getElementById('product-quantity').value = 1;
+            
+            return true;
+        }
+
+        function quickAddProduct(name, category, quantity) {
+            if (!selectedSpace) {
+                showToast('Selecciona un espacio primero');
+                return;
+            }
+            
+            const productData = {
+                name: name,
+                quantity: quantity,
+                category: category,
+                code: '',
+                notes: ''
+            };
+            
+            if (addProduct(productData)) {
+                closeModal('quick-add-modal');
+            }
+        }
+
+        function submitQuickAdd() {
+            const name = document.getElementById('quick-product-name').value || 'Producto rápido';
+            const quantity = parseInt(document.getElementById('quick-product-quantity').value) || 1;
+            
+            quickAddProduct(name, 'otros', quantity);
+        }
+
+        function removeProduct(productId) {
+            if (!confirm('¿Eliminar este producto?')) return;
+            
+            if (!selectedSpace || !rackData[selectedSpace]) return;
+            
+            rackData[selectedSpace] = rackData[selectedSpace].filter(p => p.id !== productId);
+            
+            if (rackData[selectedSpace].length === 0) {
+                delete rackData[selectedSpace];
+            }
+            
+            saveData();
+            updateSpaceElement(selectedSpace);
+            updateCurrentSpaceInfo();
+            updateProductsList();
+            showToast('Producto eliminado');
+        }
+
+        function clearSelectedSpace() {
+            if (!selectedSpace || !confirm(`¿Vaciar el espacio ${selectedSpace}?`)) return;
+            
+            delete rackData[selectedSpace];
+            saveData();
+            updateSpaceElement(selectedSpace);
+            updateCurrentSpaceInfo();
+            updateProductsList();
+            showToast(`Espacio ${selectedSpace} vaciado`);
+        }
+
+        function showProductDetail(productId) {
+            if (!selectedSpace || !rackData[selectedSpace]) return;
+            
+            const product = rackData[selectedSpace].find(p => p.id === productId);
+            if (!product) return;
+            
+            document.getElementById('detail-product-name').textContent = product.name;
+            document.getElementById('detail-product-name').innerHTML = `<i class="fas fa-box"></i> ${product.name}`;
+            
+            document.getElementById('detail-product-body').innerHTML = `
+                <div style="margin-bottom: 25px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 12px;">
+                            <div style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">Cantidad</div>
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">${product.quantity}</div>
+                        </div>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 12px;">
+                            <div style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">Categoría</div>
+                            <div style="font-size: 1.1rem; font-weight: 700; color: var(--dark-color);">${getCategoryName(product.category)}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+                        <div style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">Ubicación</div>
+                        <div style="font-size: 1.2rem; font-weight: 700; color: var(--dark-color);">${selectedSpace}</div>
+                    </div>
+                    
+                    ${product.code ? `
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+                            <div style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">Código/SKU</div>
+                            <div style="font-size: 1.1rem; font-weight: 700; color: var(--dark-color);">${product.code}</div>
+                        </div>
+                    ` : ''}
+                    
+                    ${product.notes ? `
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+                            <div style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">Notas</div>
+                            <div style="font-size: 1rem; color: var(--dark-color); line-height: 1.5;">${product.notes}</div>
+                        </div>
+                    ` : ''}
+                    
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 12px;">
+                        <div style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">Fecha de ingreso</div>
+                        <div style="font-size: 1rem; color: var(--dark-color);">${product.date}</div>
+                    </div>
+                </div>
+                
+                <button class="btn btn-danger" onclick="removeProduct(${productId}); closeModal('product-detail-modal');">
+                    <i class="fas fa-trash"></i> Eliminar Producto
+                </button>
+            `;
+            
+            openModal('product-detail-modal');
+        }
+
+        function saveData() {
+            localStorage.setItem('rackStorageData', JSON.stringify(rackData));
+            updateStats();
+        }
+
+        function switchTab(tabName) {
+            // Actualizar navegación
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`.nav-item[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            
+            // Actualizar título
+            const titles = {
+                'inventory': 'Inventario',
+                'products': 'Productos',
+                'add': 'Agregar Producto'
+            };
+            document.getElementById('current-page-title').textContent = titles[tabName];
+            
+            // Mostrar contenido
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // Si es la pestaña de productos, actualizar lista
+            if (tabName === 'products') {
+                updateProductsList();
+            }
+            
+            // Si es la pestaña de agregar, verificar espacio seleccionado
+            if (tabName === 'add') {
+                if (!selectedSpace) {
+                    document.getElementById('no-space-selected').style.display = 'block';
+                    document.getElementById('add-space-card').style.display = 'none';
+                    document.getElementById('product-form').style.display = 'none';
+                } else {
+                    document.getElementById('no-space-selected').style.display = 'none';
+                    document.getElementById('add-space-card').style.display = 'block';
+                    document.getElementById('product-form').style.display = 'block';
+                }
+            }
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function showToast(message, duration = 3000) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = message;
+            
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        function hideToast() {
+            document.getElementById('toast').classList.remove('show');
+        }
+
+        function setupEventListeners() {
+            // Formulario de producto
+            document.getElementById('product-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const productData = {
+                    name: document.getElementById('product-name').value,
+                    quantity: document.getElementById('product-quantity').value,
+                    category: document.getElementById('product-category').value,
+                    code: document.getElementById('product-code').value,
+                    notes: document.getElementById('product-notes').value
+                };
+                
+                addProduct(productData);
+            });
+            
+            // Botón vaciar espacio
+            document.getElementById('clear-space-btn').addEventListener('click', clearSelectedSpace);
+            
+            // Búsqueda de productos
+            document.getElementById('products-search').addEventListener('input', function(e) {
+                updateProductsList(e.target.value);
+            });
+            
+            // Botón agregar rápido
+            document.getElementById('quick-add-btn').addEventListener('click', function() {
+                openModal('quick-add-modal');
+            });
+            
+            // Botones del header
+            document.getElementById('header-add-btn').addEventListener('click', function() {
+                switchTab('add');
+            });
+            
+            document.getElementById('header-search-btn').addEventListener('click', function() {
+                switchTab('products');
+                document.getElementById('products-search').focus();
+            });
+            
+            // Gestos táctiles
+            let startX = 0;
+            let startY = 0;
+            
+            document.addEventListener('touchstart', function(e) {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            }, { passive: true });
+            
+            document.addEventListener('touchend', function(e) {
+                if (!startX || !startY) return;
+                
+                const endX = e.changedTouches[0].clientX;
+                const endY = e.changedTouches[0].clientY;
+                
+                const diffX = endX - startX;
+                const diffY = endY - startY;
+                
+                // Deslizamiento horizontal (cambio de pestañas)
+                if (Math.abs(diffX) > 50 && Math.abs(diffY) < 50) {
+                    const currentTab = document.querySelector('.tab-content.active').id.replace('-tab', '');
+                    const tabs = ['inventory', 'products', 'add'];
+                    const currentIndex = tabs.indexOf(currentTab);
+                    
+                    if (diffX > 0 && currentIndex > 0) {
+                        // Deslizar derecha -> pestaña anterior
+                        switchTab(tabs[currentIndex - 1]);
+                    } else if (diffX < 0 && currentIndex < tabs.length - 1) {
+                        // Deslizar izquierda -> pestaña siguiente
+                        switchTab(tabs[currentIndex + 1]);
+                    }
+                }
+                
+                startX = 0;
+                startY = 0;
+            }, { passive: true });
+            
+            // Prevenir zoom con doble toque
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(event) {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, { passive: false });
+        }
+
+        function showSettingsModal() {
+            document.getElementById('last-update').textContent = localStorage.getItem('lastUpdate') || 'Hoy';
+            openModal('settings-modal');
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(rackData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `almacen-racks-${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showToast('Datos exportados correctamente');
+            closeModal('settings-modal');
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(event) {
+                    try {
+                        const importedData = JSON.parse(event.target.result);
+                        rackData = importedData;
+                        saveData();
+                        createSpaces();
+                        updateStats();
+                        showToast('Datos importados correctamente');
+                    } catch (error) {
+                        showToast('Error al importar datos', 5000);
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
+            closeModal('settings-modal');
+        }
+
+        function resetData() {
+            if (confirm('¿Estás seguro de que quieres restablecer todos los datos? Esta acción no se puede deshacer.')) {
+                rackData = {};
+                nextProductId = 1;
+                selectedSpace = null;
+                saveData();
+                createSpaces();
+                updateStats();
+                updateProductsList();
+                showToast('Datos restablecidos');
+                closeModal('settings-modal');
+            }
+        }
+
+        function setupServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').catch(error => {
+                    console.log('Error al registrar Service Worker:', error);
+                });
+            }
+        }
+
+        function showInstallPrompt() {
+            // Mostrar prompt de instalación después de un tiempo
+            setTimeout(() => {
+                if (!localStorage.getItem('installPromptShown')) {
+                    openModal('install-prompt');
+                    localStorage.setItem('installPromptShown', 'true');
+                }
+            }, 10000);
+        }
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(choiceResult => {
+                    if (choiceResult.outcome === 'accepted') {
+                        showToast('¡App instalada!');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+            closeModal('install-prompt');
+        }
+
+        // Evento para instalación PWA
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        // Mostrar spinner de carga
+        function showLoading() {
+            document.getElementById('loading-spinner').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-spinner').style.display = 'none';
+        }
+
+        // Actualizar espacio cuando cambian los datos
+        function updateSpaceElement(spaceId) {
+            const element = document.querySelector(`[data-space-id="${spaceId}"]`);
+            if (!element) return;
+            
+            const products = rackData[spaceId] || [];
+            const status = getSpaceStatus(spaceId);
+            
+            element.innerHTML = `
+                <div class="space-id">${spaceId}</div>
+                <div class="space-status ${status.class}">${status.text}</div>
+                <div class="space-count">${products.length} producto${products.length !== 1 ? 's' : ''}</div>
+                ${products.length > 3 ? `<div class="space-badge">${products.length}</div>` : ''}
+            `;
+            
+            // Restaurar eventos
+            element.addEventListener('click', () => selectSpace(spaceId));
+            
+            // Restaurar selección si es el espacio actual
+            if (selectedSpace === spaceId) {
+                element.classList.add('selected');
+            }
+        }
+    </script>
+</body>
+</html>
