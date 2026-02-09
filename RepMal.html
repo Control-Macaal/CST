@@ -1,0 +1,2568 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes Mal Estado</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-hover: #3a56d4;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --dark: #1b263b;
+            --light: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #2b2d42;
+            --text-light: #8d99ae;
+            --danger: #fc0303;
+            --warning: #fc7703;
+            --success: #03fc41;
+            --attachment: #ffd700;
+            --border-radius: 8px;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            --transition: all 0.2s ease;
+            --border-light: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light);
+            color: var(--text);
+            padding: 1rem;
+            min-height: 100vh;
+        }
+
+        /* CONTENEDOR PRINCIPAL CON MARCO */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            border: var(--border-light);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            background-color: white;
+            box-shadow: var(--shadow);
+        }
+
+        /* Spinner de carga inicial */
+        .initial-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .initial-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4361ee;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: var(--border-light);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+        }
+
+        .search-container {
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 0.5rem;
+            position: relative;
+            align-items: center;
+            border: var(--border-light);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            background-color: #f8f9fa;
+        }
+
+        .search-input-container {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 2.5rem 0.75rem 0.75rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            font-size: 0.95rem;
+            background-color: white;
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            display: none;
+        }
+
+        .search-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Filtros de estado - BOTÓN DESPLEGABLE AL LADO DEL BUSCADOR */
+        .filter-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .filter-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            font-size: 0.9rem;
+            height: 45px;
+            width: 45px;
+        }
+
+        .filter-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .filter-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 100;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            top: 100%;
+            margin-top: 0.5rem;
+            border: var(--border-light);
+        }
+
+        .filter-content.show {
+            display: block;
+        }
+
+        .filter-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.8rem 1rem;
+            transition: var(--transition);
+            border-bottom: var(--border-light);
+        }
+
+        .filter-checkbox:last-child {
+            border-bottom: none;
+        }
+
+        .filter-checkbox:hover {
+            background-color: #f1f1f1;
+        }
+
+        .filter-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .filter-checkbox label {
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-success {
+            background: var(--primary);
+        }
+
+        .btn-log {
+            background: #6c757d;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+        }
+
+        .btn-secondary {
+            background: var(--primary);
+        }
+
+        .btn-received {
+            background: var(--success);
+        }
+
+        /* Botones solo con icono */
+        .btn-icon-only {
+            padding: 0.8rem;
+            width: 45px;
+            height: 45px;
+            justify-content: center;
+        }
+
+        .btn-icon-only .btn-text {
+            display: none;
+        }
+
+        .return-form {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            display: none;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+            border: var(--border-light);
+        }
+
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: var(--border-light);
+        }
+
+        .form-header h2 {
+            font-size: 1.2rem;
+            color: var(--dark);
+        }
+
+        .form-header-actions {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1rem;
+            justify-content: flex-end;
+            width: 100%;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .invoice-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .invoice-fields .form-group label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+        
+        .invoice-fields .form-control {
+            font-size: 0.9rem;
+            padding: 0.6rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.7rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            background-color: white;
+        }
+
+        /* ELIMINAR EL FONDO CELESTE EN INPUTS LLENOS */
+        .form-control:not(:placeholder-shown) {
+            background-color: white !important;
+        }
+
+        .form-control:focus {
+            background-color: white;
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .form-control:read-only {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+        }
+
+        textarea.form-control {
+            min-height: 40px;
+            resize: none;
+            font-size: 0.9rem;
+            text-transform: none;
+            overflow: hidden;
+            background-color: white;
+        }
+
+        /* Input de número de salida - tamaño normal */
+        .output-input {
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            border: var(--border-light);
+        }
+
+        .products-table th {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.8rem;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .products-table td {
+            padding: 0.6rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 0.9rem;
+        }
+
+        .products-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .products-table input[type="text"] {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            background-color: white;
+        }
+
+        .products-table input[type="number"] {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            font-size: 0.95rem;
+            background-color: white;
+        }
+
+        .products-table input.code-input {
+            width: 90px;
+            font-family: monospace;
+            letter-spacing: 1px;
+            padding: 0.6rem;
+            background-color: white;
+        }
+
+        .factory-code-input {
+            min-width: 60px;
+            width: auto;
+            max-width: 150px;
+            transition: width 0.2s ease;
+            background-color: white;
+        }
+
+        /* ELIMINAR EL FONDO CELESTE EN TODOS LOS INPUTS CUANDO TIENEN CONTENIDO */
+        input:not(:placeholder-shown), textarea:not(:placeholder-shown) {
+            background-color: white !important;
+        }
+
+        .add-row-btn {
+            margin-top: 0.8rem;
+            background: var(--accent);
+            font-size: 0.85rem;
+            padding: 0.6rem 1rem;
+        }
+
+        .reports-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        /* CARD DE REPORTE CON MARCO */
+        .report-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.2rem;
+            transition: var(--transition);
+            border: var(--border-light); /* MARCO AGREGADO */
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.8rem;
+            border-bottom: var(--border-light);
+        }
+
+        .report-id {
+            font-weight: 700;
+            color: var(--primary);
+            background: rgba(67, 97, 238, 0.1);
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .report-date {
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+
+        .report-store {
+            font-weight: 600;
+            margin-bottom: 0.6rem;
+            font-size: 0.95rem;
+        }
+
+        .report-notes {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            max-height: 60px;
+            overflow-y: auto;
+        }
+
+        .report-products {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.8rem;
+            font-size: 0.9rem;
+            border: var(--border-light);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .report-products th {
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 0.6rem;
+            text-align: left;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        .report-products td {
+            padding: 0.6rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 0.85rem;
+        }
+
+        .report-products tr:last-child td {
+            border-bottom: none;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 850px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 1.5rem;
+            position: relative;
+            border: var(--border-light);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: var(--border-light);
+        }
+
+        .modal-header h2 {
+            font-size: 1.3rem;
+        }
+
+        .modal-body .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .modal-body .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .modal-body .form-control {
+            width: 100%;
+            padding: 0.6rem;
+            font-size: 0.9rem;
+            background-color: white;
+            border: var(--border-light);
+        }
+
+        /* Dropdown de acciones */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-btn {
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 1rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            border: var(--border-light);
+        }
+
+        .dropdown-content a {
+            color: var(--text);
+            padding: 0.8rem 1rem;
+            text-decoration: none;
+            display: block;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+            border-bottom: var(--border-light);
+        }
+
+        .dropdown-content a:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+
+        .btn-loading .spinner {
+            display: inline-block;
+        }
+
+        .btn-loading .btn-text {
+            display: none;
+        }
+
+        /* Badge de estado recibido */
+        .received-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: rgba(3, 252, 65, 0.1);
+            color: var(--success);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+            font-weight: 500;
+        }
+
+        .received-badge i {
+            font-size: 0.9rem;
+        }
+
+        /* Intentos de edición */
+        .edit-attempts {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: rgba(252, 119, 3, 0.1);
+            color: var(--warning);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+            font-weight: 500;
+        }
+
+        /* Log de ediciones */
+        .edit-log {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            border: var(--border-light);
+        }
+
+        .edit-log h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .edit-log-list {
+            list-style-type: none;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .edit-log-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 0.85rem;
+        }
+
+        .edit-log-item:last-child {
+            border-bottom: none;
+        }
+
+        .edit-log-time {
+            color: var(--text-light);
+            font-size: 0.8rem;
+            margin-top: 0.2rem;
+        }
+
+        .edit-log-fingerprint {
+            color: var(--primary);
+            font-size: 0.75rem;
+            margin-top: 0.2rem;
+            font-style: italic;
+        }
+
+        .product-change {
+            background-color: rgba(67, 97, 238, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            margin: 0.2rem 0;
+            font-family: monospace;
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .form-row, .invoice-fields {
+                grid-template-columns: 1fr;
+            }
+            
+            .products-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .report-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.8rem;
+            }
+            
+            .report-actions {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+
+            .form-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.8rem;
+            }
+
+            .form-header-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .search-container {
+                flex-direction: column;
+            }
+
+            .search-btn {
+                padding: 0.8rem;
+                height: auto;
+            }
+
+            .filter-dropdown {
+                align-self: flex-start;
+            }
+
+            .modal-body .form-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .modal-body .form-group label {
+                min-width: auto;
+                margin-bottom: 0.5rem;
+            }
+
+            .dropdown-content {
+                right: auto;
+                left: 0;
+            }
+
+            .filter-content {
+                right: auto;
+                left: 0;
+            }
+            
+            .header-actions {
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Spinner de carga inicial -->
+    <div class="initial-loader" id="initialLoader">
+        <div class="initial-spinner"></div>
+    </div>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div id="appContent" class="container">
+        <header>
+            <div class="header-title">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h1>Reportes Mal Estado</h1>
+            </div>
+            <div class="header-actions">
+                <a href="pc.htm" class="btn" id="backButton">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+                <button class="btn" id="newReportBtn">
+                    <span class="spinner" style="display: none;"></span>
+                    <span class="btn-text"><i class="fas fa-plus"></i> Nuevo Reporte</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Buscador con Filtros al lado -->
+        <div class="search-container" id="searchContainer">
+            <div class="search-input-container">
+                <input type="text" class="search-input" id="searchInput" name="searchInput" placeholder="Buscar por número, fecha o tienda...">
+                <button class="search-clear" id="searchClear">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <button class="search-btn" id="searchBtn">
+                <i class="fas fa-search"></i>
+            </button>
+            <div class="filter-dropdown" id="filterDropdown">
+                <button class="filter-btn" id="filterBtn" title="Filtros">
+                    <i class="fas fa-filter"></i>
+                </button>
+                <div class="filter-content" id="filterContent">
+                    <div class="filter-checkbox">
+                        <input type="checkbox" id="filterActive" checked>
+                        <label for="filterActive">Reportes Activos</label>
+                    </div>
+                    <div class="filter-checkbox">
+                        <input type="checkbox" id="filterReceived">
+                        <label for="filterReceived">Recibidos en Bodega</label>
+                    </div>
+                    <div class="filter-checkbox">
+                        <input type="checkbox" id="filterCancelled">
+                        <label for="filterCancelled">Reportes Anulados</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario de nuevo reporte -->
+        <div class="return-form" id="returnForm">
+            <div class="form-header">
+                <h2><i class="fas fa-file-alt"></i> Nuevo Reporte de Mal Estado</h2>
+                <div class="report-id">Registro <span id="reportNumber">--</span></div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="store">Tienda</label>
+                    <select class="form-control" id="store" name="store" required>
+                        <option value="">Seleccionar tienda</option>
+                        <option value="TODO HOGAR 1">TODO HOGAR 1</option>
+                        <option value="TODO HOGAR 2">TODO HOGAR 2</option>
+                        <option value="E-PLASTIK ZACAPA">E-PLASTIK ZACAPA</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="reportDate">Fecha</label>
+                    <input type="date" class="form-control" id="reportDate" name="reportDate" required>
+                </div>
+            </div>
+            
+            <div class="invoice-fields">
+                <div class="form-group">
+                    <label for="outputNumber">Número de Salida</label>
+                    <input type="text" class="form-control output-input" id="outputNumber" name="outputNumber" placeholder="#" maxlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="entryDate">Fecha de Ingreso a Tienda</label>
+                    <input type="date" class="form-control" id="entryDate" name="entryDate">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="notes">Observaciones</label>
+                <textarea class="form-control" id="notes" name="notes" placeholder="Ingrese observaciones" style="min-height: 40px;"></textarea>
+            </div>
+            
+            <h3 style="margin: 1rem 0 0.5rem; font-size: 1.1rem;">Productos en mal estado</h3>
+            
+            <table class="products-table" id="productsTable">
+                <thead>
+                    <tr>
+                        <th style="width: 100px;">Sku</th>
+                        <th style="width: 80px;">Cód. Fábrica</th>
+                        <th>Descripción</th>
+                        <th style="width: 70px;">Cantidad</th>
+                        <th style="width: 180px;">Motivo</th>
+                        <th style="width: 50px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" class="code-input" id="productSku1" name="productSku1" placeholder="Sku" maxlength="9" required></td>
+                        <td><input type="text" class="factory-code-input" id="factoryCode1" name="factoryCode1" placeholder="Cód. Fab"></td>
+                        <td><input type="text" id="productDescription1" name="productDescription1" placeholder="Descripción" required></td>
+                        <td><input type="number" id="productQuantity1" name="productQuantity1" placeholder="0" min="1" required></td>
+                        <td><textarea class="form-control" id="productReason1" name="productReason1" placeholder="motivo." required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;"></textarea></td>
+                        <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <button class="btn add-row-btn" id="addRowBtn">
+                <i class="fas fa-plus"></i>
+                Agregar Producto
+            </button>
+
+            <div class="form-header-actions">
+                <button class="btn btn-danger" id="cancelReportBtn">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                </button>
+                <button class="btn btn-success" id="saveReportBtn">
+                    <span class="spinner" style="display: none;"></span>
+                    <span class="btn-text"><i class="fas fa-save"></i> Guardar</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Lista de reportes -->
+        <div class="reports-list" id="reportsList">
+            <div class="no-reports" style="text-align: center; padding: 2.5rem; color: var(--text-light);">
+                <i class="fas fa-box-open" style="font-size: 2.5rem; margin-bottom: 1.2rem; opacity: 0.5;"></i>
+                <h3>No hay reportes registrados</h3>
+                <p>Haz clic en "Nuevo Reporte" para crear tu primer reporte</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para ver reporte completo -->
+    <div class="modal" id="reportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-alt"></i> Detalle de Reporte</h2>
+                <button onclick="window.closeModal()" style="background: none; border: none; cursor: pointer; font-size: 1.5rem;">&times;</button>
+            </div>
+            <div class="modal-body" id="modalReportContent">
+                <!-- Contenido del reporte se cargará aquí -->
+            </div>
+            <div class="report-actions" id="modalReportActions">
+                <!-- Acciones del reporte se cargarán aquí -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==============================
+        // CONFIGURACIÓN DE FIREBASE
+        // ==============================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBAZUuJ9BDe3vnAEPwcoQSGiziZT6Qy5Jc",
+            authDomain: "repmalestado.firebaseapp.com",
+            projectId: "repmalestado",
+            storageBucket: "repmalestado.firebasestorage.app",
+            messagingSenderId: "1001049349850",
+            appId: "1:1001049349850:web:094f0f6d432567b8830fe3"
+        };
+
+        // Inicializa Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Datos de la aplicación
+        let reports = [];
+        let currentReportId = null;
+        let reportCounter = 0;
+        let isCreatingNewReport = false;
+        let isFilterOpen = false;
+        const companyName = "MACAAL S.A";
+
+        // Variables para comparación de productos
+        let originalProducts = [];
+
+        // ==============================
+        // FUNCIONES DE HUELLA DEL NAVEGADOR
+        // ==============================
+        
+        // Función para obtener información del navegador (huella digital)
+        function getBrowserFingerprint() {
+            const fingerprint = {
+                userAgent: navigator.userAgent,
+                language: navigator.language,
+                platform: navigator.platform,
+                hardwareConcurrency: navigator.hardwareConcurrency || 'desconocido',
+                screenWidth: window.screen.width,
+                screenHeight: window.screen.height,
+                colorDepth: window.screen.colorDepth,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                localStorage: !!window.localStorage,
+                sessionStorage: !!window.sessionStorage,
+                cookies: !!navigator.cookieEnabled,
+                doNotTrack: navigator.doNotTrack || 'desconocido',
+                touchSupport: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
+                deviceMemory: navigator.deviceMemory || 'desconocido'
+            };
+            
+            // Crear un hash simple de la huella digital
+            const fingerprintString = JSON.stringify(fingerprint);
+            let hash = 0;
+            for (let i = 0; i < fingerprintString.length; i++) {
+                const char = fingerprintString.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convertir a 32-bit integer
+            }
+            
+            return {
+                id: Math.abs(hash).toString(16).substring(0, 8), // Número de huella digital
+                details: fingerprint,
+                timestamp: new Date().toISOString()
+            };
+        }
+
+        // Obtener la huella digital del navegador
+        const browserFingerprint = getBrowserFingerprint();
+
+        // ==============================
+        // FUNCIONES DE COMPARACIÓN DE PRODUCTOS
+        // ==============================
+        
+        // Función para comparar productos antiguos vs nuevos
+        function compareProducts(oldProducts, newProducts) {
+            const changes = [];
+            
+            // Crear mapas para comparación
+            const oldMap = new Map();
+            const newMap = new Map();
+            
+            oldProducts.forEach((product, index) => {
+                oldMap.set(product.sku, { ...product, index });
+            });
+            
+            newProducts.forEach((product, index) => {
+                newMap.set(product.sku, { ...product, index });
+            });
+            
+            // Buscar productos eliminados
+            for (const [sku, oldProduct] of oldMap.entries()) {
+                if (!newMap.has(sku)) {
+                    changes.push(`❌ Eliminado SKU: <span class="product-change">${sku}</span> - ${oldProduct.description}`);
+                }
+            }
+            
+            // Buscar productos nuevos
+            for (const [sku, newProduct] of newMap.entries()) {
+                if (!oldMap.has(sku)) {
+                    changes.push(`✅ Agregado SKU: <span class="product-change">${sku}</span> - ${newProduct.description} (Cant: ${newProduct.quantity})`);
+                }
+            }
+            
+            // Comparar productos existentes
+            for (const [sku, newProduct] of newMap.entries()) {
+                if (oldMap.has(sku)) {
+                    const oldProduct = oldMap.get(sku);
+                    const productChanges = [];
+                    
+                    // Comparar cantidad
+                    if (oldProduct.quantity !== newProduct.quantity) {
+                        productChanges.push(`Cantidad: ${oldProduct.quantity} → ${newProduct.quantity}`);
+                    }
+                    
+                    // Comparar código de fábrica
+                    if (oldProduct.factoryCode !== newProduct.factoryCode) {
+                        productChanges.push(`Cód. Fab: ${oldProduct.factoryCode || '-'} → ${newProduct.factoryCode || '-'}`);
+                    }
+                    
+                    // Comparar descripción
+                    if (oldProduct.description !== newProduct.description) {
+                        productChanges.push(`Descripción: "${oldProduct.description}" → "${newProduct.description}"`);
+                    }
+                    
+                    // Comparar motivo
+                    if (oldProduct.reason !== newProduct.reason) {
+                        productChanges.push(`Motivo: "${oldProduct.reason}" → "${newProduct.reason}"`);
+                    }
+                    
+                    if (productChanges.length > 0) {
+                        changes.push(`✏️ Modificado SKU: <span class="product-change">${sku}</span> - ${productChanges.join(', ')}`);
+                    }
+                }
+            }
+            
+            return changes;
+        }
+
+        // ==============================
+        // FUNCIONES DE GESTIÓN DE REPORTES
+        // ==============================
+        
+        // Función para mostrar/ocultar spinner inicial
+        function toggleInitialLoader(show) {
+            document.getElementById('initialLoader').style.display = show ? 'flex' : 'none';
+        }
+
+        // Al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            toggleInitialLoader(false);
+            
+            // Cargar reportes
+            loadReports();
+            
+            // Configurar event listeners
+            setupEventListeners();
+            
+            // Intentar cargar formulario guardado en localStorage
+            loadFormFromLocalStorage();
+        });
+
+        // Configurar todos los event listeners
+        function setupEventListeners() {
+            // Event listeners para el buscador
+            document.getElementById('searchInput').addEventListener('input', function() {
+                document.getElementById('searchClear').style.display = this.value ? 'block' : 'none';
+                if (!this.value) filterReports();
+            });
+
+            document.getElementById('searchClear').addEventListener('click', function() {
+                document.getElementById('searchInput').value = '';
+                this.style.display = 'none';
+                filterReports();
+            });
+
+            // Event listeners para los filtros
+            document.getElementById('filterActive').addEventListener('change', filterReports);
+            document.getElementById('filterReceived').addEventListener('change', filterReports);
+            document.getElementById('filterCancelled').addEventListener('change', filterReports);
+
+            // Event listener para el botón de filtros (CLICK)
+            document.getElementById('filterBtn').addEventListener('click', toggleFilterDropdown);
+
+            // Event listeners principales
+            document.getElementById('newReportBtn').addEventListener('click', showNewReportForm);
+            document.getElementById('cancelReportBtn').addEventListener('click', () => hideReturnForm(true));
+            document.getElementById('saveReportBtn').addEventListener('click', saveReport);
+            document.getElementById('addRowBtn').addEventListener('click', addProductRow);
+            document.getElementById('reportModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('reportModal')) window.closeModal();
+            });
+            document.getElementById('searchBtn').addEventListener('click', searchReports);
+            document.getElementById('searchInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') searchReports();
+            });
+
+            // Solo permitir números en el input de salida (4-6 dígitos)
+            document.getElementById('outputNumber').addEventListener('input', function() {
+                this.value = this.value.replace(/\D/g, '');
+                if (this.value.length > 6) {
+                    this.value = this.value.slice(0, 6);
+                }
+            });
+
+            // Convertir automáticamente a mayúsculas mientras se escribe
+            document.addEventListener('input', function(e) {
+                if (e.target.matches('#productsTable input[type="text"]:not(.code-input), #productsTable textarea')) {
+                    e.target.value = e.target.value.toUpperCase();
+                }
+            });
+
+            // Guardar datos del formulario periódicamente
+            setInterval(saveFormToLocalStorage, 3000);
+        }
+
+        // ==============================
+        // FUNCIONES DE GESTIÓN DE REPORTES
+        // ==============================
+        
+        // Función para alternar el desplegable de filtros
+        function toggleFilterDropdown() {
+            const filterContent = document.getElementById('filterContent');
+            isFilterOpen = !isFilterOpen;
+            
+            if (isFilterOpen) {
+                filterContent.classList.add('show');
+            } else {
+                filterContent.classList.remove('show');
+            }
+        }
+
+        // Cerrar el desplegable de filtros al hacer clic fuera
+        document.addEventListener('click', function(event) {
+            const filterDropdown = document.getElementById('filterDropdown');
+            const filterBtn = document.getElementById('filterBtn');
+            const filterContent = document.getElementById('filterContent');
+            
+            if (isFilterOpen && !filterDropdown.contains(event.target) && event.target !== filterBtn) {
+                filterContent.classList.remove('show');
+                isFilterOpen = false;
+            }
+        });
+
+        // Convertir texto a mayúsculas
+        function toUpperCase(text) {
+            return text ? text.toUpperCase() : '';
+        }
+
+        // Filtrar reportes por estado
+        function filterReports() {
+            const showActive = document.getElementById('filterActive').checked;
+            const showReceived = document.getElementById('filterReceived').checked;
+            const showCancelled = document.getElementById('filterCancelled').checked;
+            
+            const searchInput = document.getElementById('searchInput');
+            const searchTerm = searchInput.value.trim().toLowerCase().replace('#', '');
+            
+            let filteredReports = reports;
+            
+            // Aplicar filtros de estado
+            filteredReports = filteredReports.filter(report => {
+                if (report.status === 'cancelled') {
+                    return showCancelled;
+                }
+                
+                if (report.receivedInWarehouse) {
+                    return showReceived;
+                } else {
+                    return showActive;
+                }
+            });
+            
+            // Aplicar búsqueda si hay término
+            if (searchTerm) {
+                filteredReports = filteredReports.filter(report => {
+                    const reportId = report.id.replace('#', '').toLowerCase();
+                    const reportDate = formatDate(report.date).toLowerCase();
+                    const reportStore = report.store.toLowerCase();
+                    const outputNumber = report.outputNumber ? report.outputNumber.toLowerCase() : '';
+                    
+                    return reportId.includes(searchTerm) || 
+                           reportDate.includes(searchTerm) ||
+                           reportStore.includes(searchTerm) ||
+                           outputNumber.includes(searchTerm);
+                });
+            }
+            
+            renderReportsList(filteredReports);
+        }
+
+        // Generar número de reporte consecutivo
+        async function generateReportNumber() {
+            try {
+                const snapshot = await db.collection("reportesMalEstado")
+                    .orderBy("reportNumber", "desc")
+                    .limit(1)
+                    .get();
+                
+                if (!snapshot.empty) {
+                    const lastReport = snapshot.docs[0].data();
+                    reportCounter = lastReport.reportNumber;
+                }
+                
+                reportCounter++;
+                return `#${reportCounter}`;
+            } catch (error) {
+                console.error("Error al obtener último reporte:", error);
+                reportCounter++;
+                return `#${reportCounter}`;
+            }
+        }
+
+        // Guardar datos del formulario en localStorage
+        function saveFormToLocalStorage() {
+            if (!isCreatingNewReport) return;
+            
+            const formData = {
+                store: document.getElementById('store').value,
+                reportDate: document.getElementById('reportDate').value,
+                outputNumber: document.getElementById('outputNumber').value,
+                entryDate: document.getElementById('entryDate').value,
+                notes: document.getElementById('notes').value,
+                products: []
+            };
+            
+            const rows = document.getElementById('productsTable').querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input, textarea');
+                formData.products.push({
+                    sku: inputs[0].value,
+                    factoryCode: inputs[1].value,
+                    description: inputs[2].value,
+                    quantity: inputs[3].value,
+                    reason: inputs[4].value
+                });
+            });
+            
+            localStorage.setItem('currentReportForm', JSON.stringify(formData));
+            localStorage.setItem('currentReportId', currentReportId);
+        }
+
+        // Cargar datos del formulario desde localStorage
+        function loadFormFromLocalStorage() {
+            const savedForm = localStorage.getItem('currentReportForm');
+            const savedReportId = localStorage.getItem('currentReportId');
+            
+            if (savedForm && savedReportId) {
+                const formData = JSON.parse(savedForm);
+                
+                currentReportId = savedReportId;
+                document.getElementById('reportNumber').textContent = currentReportId;
+                
+                // Llenar campos del formulario
+                document.getElementById('store').value = formData.store;
+                document.getElementById('reportDate').value = formData.reportDate;
+                document.getElementById('outputNumber').value = formData.outputNumber;
+                document.getElementById('entryDate').value = formData.entryDate;
+                document.getElementById('notes').value = formData.notes;
+                
+                // Llenar tabla de productos
+                const tbody = document.getElementById('productsTable').querySelector('tbody');
+                tbody.innerHTML = '';
+                
+                formData.products.forEach((product, index) => {
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td><input type="text" class="code-input" id="productSku${index+1}" name="productSku${index+1}" value="${product.sku || ''}" placeholder="Sku" maxlength="9" required></td>
+                        <td><input type="text" class="factory-code-input" id="factoryCode${index+1}" name="factoryCode${index+1}" value="${product.factoryCode || ''}" placeholder="Cód. Fab"></td>
+                        <td><input type="text" id="productDescription${index+1}" name="productDescription${index+1}" value="${product.description || ''}" placeholder="Descripción" required></td>
+                        <td><input type="number" id="productQuantity${index+1}" name="productQuantity${index+1}" value="${product.quantity || ''}" placeholder="0" min="1" required></td>
+                        <td><textarea class="form-control" id="productReason${index+1}" name="productReason${index+1}" placeholder="Ej: Dañado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;">${product.reason || ''}</textarea></td>
+                        <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
+                    `;
+                    tbody.appendChild(newRow);
+                    
+                    // Ajustar tamaño del input de código de fábrica
+                    const factoryInput = newRow.querySelector('.factory-code-input');
+                    resizeInput(factoryInput);
+                });
+                
+                // Mostrar el formulario
+                document.getElementById('returnForm').style.display = 'block';
+                document.getElementById('reportsList').style.display = 'none';
+                document.getElementById('searchContainer').style.display = 'none';
+                document.querySelector('.header-actions').style.display = 'none';
+                document.getElementById('backButton').style.display = 'none';
+                
+                // Marcar que estamos creando/editando un reporte
+                isCreatingNewReport = true;
+                
+                // Agregar event listeners a los botones de eliminar
+                addDeleteRowListeners();
+                
+                // Agregar event listeners para ajustar tamaño de inputs
+                addInputResizeListeners();
+            }
+        }
+
+        // Limpiar datos del formulario en localStorage
+        function clearFormLocalStorage() {
+            localStorage.removeItem('currentReportForm');
+            localStorage.removeItem('currentReportId');
+        }
+
+        // Mostrar formulario de nuevo reporte
+        async function showNewReportForm() {
+            if (isCreatingNewReport) {
+                Swal.fire({
+                    title: 'Operación en curso',
+                    text: 'Ya tienes un reporte en proceso. Termina o cancela la actual antes de crear uno nuevo.',
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+
+            // Mostrar spinner en el botón
+            const newReportBtn = document.getElementById('newReportBtn');
+            newReportBtn.classList.add('btn-loading');
+            newReportBtn.querySelector('.spinner').style.display = 'inline-block';
+            newReportBtn.querySelector('.btn-text').style.display = 'none';
+
+            try {
+                currentReportId = await generateReportNumber();
+                document.getElementById('reportNumber').textContent = currentReportId;
+                
+                // Limpiar campos
+                document.getElementById('store').value = '';
+                
+                // Establecer fecha actual en el input
+                const today = new Date();
+                const formattedDate = today.toISOString().split('T')[0];
+                document.getElementById('reportDate').value = formattedDate;
+                document.getElementById('entryDate').value = ''; // Fecha de ingreso vacía
+                
+                document.getElementById('outputNumber').value = '';
+                document.getElementById('notes').value = '';
+                
+                // Limpiar tabla de productos (dejar solo una fila vacía)
+                const tbody = document.getElementById('productsTable').querySelector('tbody');
+                tbody.innerHTML = `
+                    <tr>
+                        <td><input type="text" class="code-input" id="productSku1" name="productSku1" placeholder="Sku" maxlength="9" required></td>
+                        <td><input type="text" class="factory-code-input" id="factoryCode1" name="factoryCode1" placeholder="Cód. Fab"></td>
+                        <td><input type="text" id="productDescription1" name="productDescription1" placeholder="Descripción" required></td>
+                        <td><input type="number" id="productQuantity1" name="productQuantity1" placeholder="0" min="1" required></td>
+                        <td><textarea class="form-control" id="productReason1" name="productReason1" placeholder="Ej: Dañado, Roto, etc." required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;"></textarea></td>
+                        <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
+                    </tr>
+                `;
+                
+                // Restaurar texto del botón de guardar
+                document.getElementById('saveReportBtn').innerHTML = '<span class="spinner" style="display: none;"></span><span class="btn-text"><i class="fas fa-save"></i> Guardar</span>';
+                
+                // Agregar event listeners a los botones de eliminar
+                addDeleteRowListeners();
+                
+                // Agregar event listeners para ajustar tamaño de inputs
+                addInputResizeListeners();
+                
+                // Limpiar productos originales
+                originalProducts = [];
+                
+                // Ocultar elementos
+                document.getElementById('reportsList').style.display = 'none';
+                document.getElementById('searchContainer').style.display = 'none';
+                document.querySelector('.header-actions').style.display = 'none';
+                document.getElementById('backButton').style.display = 'none';
+                
+                // Mostrar el formulario
+                document.getElementById('returnForm').style.display = 'block';
+                
+                // Marcar que estamos creando un nuevo reporte
+                isCreatingNewReport = true;
+                
+                // Limpiar localStorage
+                clearFormLocalStorage();
+            } catch (error) {
+                console.error("Error al crear nuevo reporte:", error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Ocurrió un error al crear el nuevo reporte',
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6'
+                });
+            } finally {
+                // Ocultar spinner en el botón
+                newReportBtn.classList.remove('btn-loading');
+                newReportBtn.querySelector('.spinner').style.display = 'none';
+                newReportBtn.querySelector('.btn-text').style.display = 'inline';
+            }
+        }
+
+        // Función auxiliar para ocultar el formulario sin confirmación
+        function actuallyHideForm() {
+            document.getElementById('returnForm').style.display = 'none';
+            document.getElementById('reportsList').style.display = 'grid';
+            document.getElementById('searchContainer').style.display = 'flex';
+            document.querySelector('.header-actions').style.display = 'flex';
+            document.getElementById('backButton').style.display = 'flex';
+            isCreatingNewReport = false;
+            
+            // Limpiar localStorage al cancelar
+            clearFormLocalStorage();
+        }
+
+        // Ocultar formulario de reporte
+        function hideReturnForm(showConfirmation = true) {
+            if (showConfirmation) {
+                Swal.fire({
+                    title: '¿Cancelar operación?',
+                    text: '¿Estás seguro que deseas cancelar esta operación? Los datos no guardados se perderán.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Sí, cancelar',
+                    cancelButtonText: 'No, continuar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        actuallyHideForm();
+                    }
+                });
+            } else {
+                actuallyHideForm();
+            }
+        }
+
+        // Agregar event listeners para ajustar tamaño de inputs
+        function addInputResizeListeners() {
+            const factoryCodeInputs = document.querySelectorAll('.factory-code-input');
+            
+            factoryCodeInputs.forEach(input => {
+                // Ajustar tamaño inicial
+                resizeInput(input);
+                
+                // Agregar event listener para cambios
+                input.addEventListener('input', function() {
+                    resizeInput(this);
+                });
+            });
+        }
+
+        // Función para ajustar el tamaño del input basado en su contenido
+        function resizeInput(input) {
+            const minWidth = 60;
+            const maxWidth = 150;
+            const tempSpan = document.createElement('span');
+            
+            tempSpan.style.visibility = 'hidden';
+            tempSpan.style.whiteSpace = 'nowrap';
+            tempSpan.style.fontSize = window.getComputedStyle(input).fontSize;
+            tempSpan.style.fontFamily = window.getComputedStyle(input).fontFamily;
+            tempSpan.style.padding = window.getComputedStyle(input).padding;
+            tempSpan.innerHTML = input.value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            document.body.appendChild(tempSpan);
+            const width = Math.min(Math.max(tempSpan.offsetWidth + 20, minWidth), maxWidth);
+            document.body.removeChild(tempSpan);
+            
+            input.style.width = width + 'px';
+        }
+
+        // Agregar nueva fila a la tabla de productos
+        function addProductRow() {
+            const tbody = document.getElementById('productsTable').querySelector('tbody');
+            const rowCount = tbody.childElementCount + 1;
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><input type="text" class="code-input" id="productSku${rowCount}" name="productSku${rowCount}" placeholder="Sku" maxlength="9" required></td>
+                <td><input type="text" class="factory-code-input" id="factoryCode${rowCount}" name="factoryCode${rowCount}" placeholder="Cód. Fab"></td>
+                <td><input type="text" id="productDescription${rowCount}" name="productDescription${rowCount}" placeholder="Descripción" required></td>
+                <td><input type="number" id="productQuantity${rowCount}" name="productQuantity${rowCount}" placeholder="0" min="1" required></td>
+                <td><textarea class="form-control" id="productReason${rowCount}" name="productReason${rowCount}" placeholder="Ej: Dañado, Roto, etc." required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;"></textarea></td>
+                <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
+            `;
+            tbody.appendChild(newRow);
+            
+            // Agregar event listener al botón de eliminar
+            const deleteBtn = newRow.querySelector('.fa-trash-alt');
+            deleteBtn.addEventListener('click', () => {
+                if (tbody.childElementCount > 1) {
+                    tbody.removeChild(newRow);
+                } else {
+                    // Si es la última fila, limpiar los campos
+                    const inputs = newRow.querySelectorAll('input, textarea');
+                    inputs.forEach(input => input.value = '');
+                    // Ajustar tamaño del input de código de fábrica
+                    const factoryInput = newRow.querySelector('.factory-code-input');
+                    resizeInput(factoryInput);
+                }
+            });
+            
+            // Agregar event listener para ajustar tamaño del input de código de fábrica
+            const factoryInput = newRow.querySelector('.factory-code-input');
+            factoryInput.addEventListener('input', function() {
+                resizeInput(this);
+            });
+        }
+
+        // Agregar event listeners a los botones de eliminar fila
+        function addDeleteRowListeners() {
+            const deleteBtns = document.getElementById('productsTable').querySelectorAll('.fa-trash-alt');
+            const tbody = document.getElementById('productsTable').querySelector('tbody');
+            
+            deleteBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const row = e.target.closest('tr');
+                    if (tbody.childElementCount > 1) {
+                        tbody.removeChild(row);
+                    } else {
+                        // Si es la última fila, limpiar los campos
+                        const inputs = row.querySelectorAll('input, textarea');
+                        inputs.forEach(input => input.value = '');
+                        // Ajustar tamaño del input de código de fábrica
+                        const factoryInput = row.querySelector('.factory-code-input');
+                        resizeInput(factoryInput);
+                    }
+                });
+            });
+        }
+
+        // Obtener productos de la tabla
+        function getProductsFromTable() {
+            const products = [];
+            const rows = document.getElementById('productsTable').querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input, textarea');
+                const sku = toUpperCase(inputs[0].value.trim());
+                const factoryCode = toUpperCase(inputs[1].value.trim()) || '-';
+                const description = toUpperCase(inputs[2].value.trim());
+                const quantity = inputs[3].value.trim();
+                const reason = toUpperCase(inputs[4].value.trim());
+                
+                if (sku && description && quantity && reason) {
+                    products.push({
+                        sku: sku,
+                        factoryCode: factoryCode,
+                        description: description,
+                        quantity: parseInt(quantity),
+                        reason: reason
+                    });
+                }
+            });
+            
+            return products;
+        }
+
+        // Validar formulario
+        function validateForm() {
+            const storeInput = document.getElementById('store');
+            if (!storeInput.value.trim()) {
+                Swal.fire({
+                    title: 'Validación requerida',
+                    text: 'Por favor selecciona una tienda',
+                    icon: 'info',
+                    confirmButtonColor: '#3085d6'
+                });
+                storeInput.focus();
+                return false;
+            }
+            
+            const reportDateInput = document.getElementById('reportDate');
+            if (!reportDateInput.value) {
+                Swal.fire({
+                    title: 'Validación requerida',
+                    text: 'Por favor selecciona una fecha',
+                    icon: 'info',
+                    confirmButtonColor: '#3085d6'
+                });
+                reportDateInput.focus();
+                return false;
+            }
+            
+            const outputNumberInput = document.getElementById('outputNumber');
+            const outputNumber = outputNumberInput.value.trim();
+            
+            // Validar número de salida si se llena
+            if (outputNumber) {
+                // Verificar que solo contenga números
+                if (!/^\d+$/.test(outputNumber)) {
+                    Swal.fire({
+                        title: 'Validación requerida',
+                        text: 'El número de salida solo puede contener dígitos numéricos',
+                        icon: 'info',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    outputNumberInput.focus();
+                    return false;
+                }
+                
+                // Verificar que tenga entre 4 y 6 dígitos
+                if (outputNumber.length < 4 || outputNumber.length > 6) {
+                    Swal.fire({
+                        title: 'Validación requerida',
+                        text: 'El número de salida debe tener entre 4 y 6 dígitos',
+                        icon: 'info',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    outputNumberInput.focus();
+                    return false;
+                }
+            }
+            
+            const products = getProductsFromTable();
+            if (products.length === 0) {
+                Swal.fire({
+                    title: 'Validación requerida',
+                    text: 'Debes agregar al menos un producto',
+                    icon: 'info',
+                    confirmButtonColor: '#3085d6'
+                });
+                return false;
+            }
+            
+            // Validar que todos los productos tengan los campos obligatorios
+            const rows = document.getElementById('productsTable').querySelectorAll('tbody tr');
+            for (let i = 0; i < rows.length; i++) {
+                const inputs = rows[i].querySelectorAll('input, textarea');
+                const sku = inputs[0].value.trim();
+                const description = inputs[2].value.trim();
+                const quantity = inputs[3].value.trim();
+                const reason = inputs[4].value.trim();
+                
+                if (!sku || !description || !quantity || !reason) {
+                    Swal.fire({
+                        title: 'Validación requerida',
+                        text: `Por favor completa todos los campos obligatorios en la fila ${i + 1}`,
+                        icon: 'info',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    
+                    // Resaltar campos vacíos
+                    if (!sku) inputs[0].style.borderColor = 'var(--danger)';
+                    if (!description) inputs[2].style.borderColor = 'var(--danger)';
+                    if (!quantity) inputs[3].style.borderColor = 'var(--danger)';
+                    if (!reason) inputs[4].style.borderColor = 'var(--danger)';
+                    
+                    // Quitar el resaltado después de 2 segundos
+                    setTimeout(() => {
+                        inputs[0].style.borderColor = '';
+                        inputs[2].style.borderColor = '';
+                        inputs[3].style.borderColor = '';
+                        inputs[4].style.borderColor = '';
+                    }, 2000);
+                    
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        // Guardar reporte en Firebase
+        async function saveReport() {
+            if (!validateForm()) return;
+            
+            const storeInput = document.getElementById('store');
+            const reportDateInput = document.getElementById('reportDate');
+            const outputNumberInput = document.getElementById('outputNumber');
+            const entryDateInput = document.getElementById('entryDate');
+            const notesInput = document.getElementById('notes');
+            const saveReportBtn = document.getElementById('saveReportBtn');
+            
+            // Obtener la fecha del input y sumar un día para guardar
+            const inputDate = new Date(reportDateInput.value);
+            const tomorrow = new Date(inputDate);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const isoDate = tomorrow.toISOString().split('T')[0];
+            
+            const reportData = {
+                id: currentReportId,
+                store: storeInput.value,
+                date: isoDate,
+                outputNumber: outputNumberInput.value.trim() || '',
+                entryDate: entryDateInput.value || '',
+                notes: notesInput.value.trim(),
+                products: getProductsFromTable(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                reportNumber: parseInt(currentReportId.replace('#', '')),
+                createdBy: 'Sistema',
+                createdByName: 'Usuario'
+            };
+            
+            // Verificar si estamos editando o creando nuevo
+            const isEditing = saveReportBtn.querySelector('.btn-text').innerHTML.includes('Actualizar');
+            
+            try {
+                // Mostrar spinner en el botón
+                saveReportBtn.classList.add('btn-loading');
+                saveReportBtn.querySelector('.spinner').style.display = 'inline-block';
+                saveReportBtn.querySelector('.btn-text').style.display = 'none';
+                
+                if (isEditing) {
+                    // Mantener los datos existentes que no se editan
+                    const originalReport = reports.find(r => r.id === currentReportId);
+                    if (originalReport) {
+                        // Preparar los datos para actualizar
+                        const updateData = {
+                            ...reportData,
+                            status: originalReport.status || 'active',
+                            createdAt: originalReport.createdAt || firebase.firestore.FieldValue.serverTimestamp(),
+                            reportNumber: originalReport.reportNumber || parseInt(currentReportId.replace('#', '')),
+                            receivedInWarehouse: originalReport.receivedInWarehouse || false,
+                            createdBy: originalReport.createdBy || 'Sistema',
+                            createdByName: originalReport.createdByName || 'Usuario',
+                            editCount: (originalReport.editCount || 0) + 1
+                        };
+                        
+                        // Solo incluir receivedDate si existe
+                        if (originalReport.receivedDate) {
+                            updateData.receivedDate = originalReport.receivedDate;
+                        }
+                        
+                        // Comparar productos antiguos vs nuevos para detalles específicos
+                        const productChanges = compareProducts(originalProducts, reportData.products);
+                        let detailsText = 'Reporte modificado';
+                        
+                        if (productChanges.length > 0) {
+                            detailsText = `Cambios en productos:<br>${productChanges.join('<br>')}`;
+                        } else {
+                            detailsText = 'Modificación general del reporte';
+                        }
+                        
+                        // Preparar la nueva entrada del log SIN FieldValue.serverTimestamp()
+                        const newLogEntry = {
+                            timestamp: new Date().toISOString(), // Usar fecha ISO en lugar de FieldValue
+                            action: 'editado',
+                            details: detailsText,
+                            browserFingerprint: browserFingerprint.id
+                        };
+                        
+                        // Obtener el log existente o crear uno nuevo
+                        const existingLog = originalReport.editLog || [];
+                        const updatedLog = [newLogEntry, ...existingLog];
+                        
+                        // Actualizar el log en los datos
+                        updateData.editLog = updatedLog;
+                        
+                        // Hacer la actualización
+                        await db.collection("reportesMalEstado").doc(currentReportId).update(updateData);
+                    } else {
+                        throw new Error('Reporte original no encontrado');
+                    }
+                    
+                    await Swal.fire({
+                        title: 'Reporte actualizado',
+                        text: 'El reporte se ha actualizado correctamente',
+                        icon: 'success',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    
+                    hideReturnForm(false);
+                } else {
+                    // Es un nuevo reporte - usar set() en lugar de update()
+                    reportData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                    reportData.status = 'active';
+                    reportData.receivedInWarehouse = false;
+                    reportData.editCount = 0;
+                    
+                    // Crear la entrada del log inicial
+                    reportData.editLog = [{
+                        timestamp: new Date().toISOString(), // Usar fecha ISO
+                        action: 'creado',
+                        details: 'Reporte creado inicialmente',
+                        browserFingerprint: browserFingerprint.id
+                    }];
+                    
+                    await db.collection("reportesMalEstado").doc(currentReportId).set(reportData);
+                    await Swal.fire({
+                        title: 'Reporte guardado',
+                        text: 'El reporte se ha guardado correctamente',
+                        icon: 'success',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    
+                    hideReturnForm(false);
+                }
+                
+                await loadReports();
+                
+                // Limpiar localStorage después de guardar
+                clearFormLocalStorage();
+            } catch (error) {
+                console.error("Error al guardar el reporte:", error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Ocurrió un error al guardar el reporte: ' + error.message,
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6'
+                });
+            } finally {
+                // Restaurar texto del botón
+                saveReportBtn.classList.remove('btn-loading');
+                saveReportBtn.querySelector('.spinner').style.display = 'none';
+                saveReportBtn.querySelector('.btn-text').style.display = 'inline';
+                saveReportBtn.querySelector('.btn-text').innerHTML = isEditing ? '<i class="fas fa-save"></i> Actualizar' : '<i class="fas fa-save"></i> Guardar';
+            }
+        }
+
+        // Buscar reportes (compatible con #)
+        function searchReports() {
+            filterReports();
+        }
+
+        // Cargar reportes desde Firebase
+        function loadReports() {
+            toggleInitialLoader(true);
+            
+            db.collection("reportesMalEstado")
+                .orderBy("createdAt", "desc")
+                .get()
+                .then(querySnapshot => {
+                    reports = [];
+                    querySnapshot.forEach(doc => {
+                        const data = doc.data();
+                        reports.push(data);
+                    });
+                    
+                    filterReports();
+                    toggleInitialLoader(false);
+                })
+                .catch(error => {
+                    console.error("Error al cargar reportes:", error);
+                    toggleInitialLoader(false);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Ocurrió un error al cargar los reportes',
+                        icon: 'error',
+                        confirmButtonColor: '#3085d6'
+                    });
+                });
+        }
+
+        // Mostrar lista de reportes
+        function renderReportsList(reportsToRender = reports) {
+            const reportsList = document.getElementById('reportsList');
+            
+            if (reportsToRender.length === 0) {
+                reportsList.innerHTML = `
+                    <div class="no-reports" style="text-align: center; padding: 2.5rem; color: var(--text-light);">
+                        <i class="fas fa-box-open" style="font-size: 2.5rem; margin-bottom: 1.2rem; opacity: 0.5;"></i>
+                        <h3>No se encontraron reportes</h3>
+                        <p>No hay reportes que coincidan con tu búsqueda</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            reportsList.innerHTML = '';
+            
+            reportsToRender.forEach(report => {
+                const reportCard = document.createElement('div');
+                reportCard.className = 'report-card'; // CLASE CON MARCO
+                const isReportReceived = report.receivedInWarehouse;
+                const isReportCancelled = report.status === 'cancelled';
+                const editCount = report.editCount || 0;
+                
+                reportCard.innerHTML = `
+                    <div class="report-header">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span class="report-id">${report.id}</span>
+                                ${isReportReceived ? `
+                                <span class="received-badge" title="Recibido en bodega el ${formatDateTime(report.receivedDate)}">
+                                    <i class="fas fa-check-circle"></i> Recibido en Bodega
+                                </span>
+                                ` : ''}
+                                ${editCount > 0 ? `
+                                <span class="edit-attempts" title="Editado ${editCount} vez(es)">
+                                    <i class="fas fa-edit"></i> ${editCount} edición(es)
+                                </span>
+                                ` : ''}
+                            </div>
+                            <span class="report-date">${formatDate(report.date)}</span>
+                            <div style="margin-top: 0.3rem; font-size: 0.95rem; color: ${isReportCancelled ? 'var(--danger)' : isReportReceived ? 'var(--success)' : 'var(--warning)'}">
+                                ${isReportCancelled ? 'ANULADO' : 
+                                 isReportReceived ? 'RECIBIDO EN BODEGA' : 'PENDIENTE'}
+                                ${report.outputNumber ? ` | N° Salida: ${report.outputNumber}` : ''}
+                            </div>
+                            ${report.createdByName ? `
+                            <div style="margin-top: 0.3rem; font-size: 0.85rem; color: var(--text-light);">
+                                Creado por: ${report.createdByName}
+                            </div>
+                            ` : ''}
+                        </div>
+                        <div class="dropdown" style="display: flex; gap: 0.8rem;">
+                            <button class="dropdown-btn">
+                                <i class="fas fa-ellipsis-v"></i> Acciones
+                            </button>
+                            <div class="dropdown-content">
+                                <a href="#" onclick="viewReport('${report.id}'); return false;">
+                                    <i class="fas fa-eye"></i> Ver
+                                </a>
+                                <a href="#" onclick="showEditLog('${report.id}'); return false;" class="btn-log-action">
+                                    <i class="fas fa-history"></i> Ver Log
+                                </a>
+                                ${!isReportCancelled && !isReportReceived ? `
+                                <a href="#" onclick="confirmEditReport('${report.id}'); return false;">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                ` : ''}
+                                ${!isReportCancelled && !isReportReceived ? `
+                                <a href="#" onclick="markAsReceived('${report.id}'); return false;">
+                                    <i class="fas fa-check-circle"></i> Marcar como Recibido
+                                </a>
+                                ` : ''}
+                                ${!isReportCancelled && !isReportReceived ? `
+                                <a href="#" onclick="cancelReport('${report.id}'); return false;" style="color: var(--danger);">
+                                    <i class="fas fa-ban"></i> Anular
+                                </a>
+                                ` : ''}
+                                ${isReportReceived ? `
+                                <a href="#" style="color: var(--text-light); cursor: not-allowed;">
+                                    <i class="fas fa-lock"></i> No editable (recibido en bodega)
+                                </a>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="report-store">Tienda: ${report.store}</div>
+                    ${report.notes ? `<div class="report-notes">Observaciones: ${report.notes}</div>` : ''}
+                    <table class="report-products">
+                        <thead>
+                            <tr>
+                                <th style="width: 100px;">Sku</th>
+                                <th style="width: 80px;">Cód. Fábrica</th>
+                                <th>Descripción</th>
+                                <th style="width: 70px;">Cantidad</th>
+                                <th style="width: 120px;">Motivo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${report.products ? report.products.map(product => `
+                                <tr>
+                                    <td>${product.sku || ''}</td>
+                                    <td>${product.factoryCode || '-'}</td>
+                                    <td>${product.description}</td>
+                                    <td>${product.quantity}</td>
+                                    <td>${product.reason}</td>
+                                </tr>
+                            `).join('') : ''}
+                        </tbody>
+                    </table>
+                `;
+                
+                reportsList.appendChild(reportCard);
+            });
+        }
+
+        // Formatear fecha
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('es-ES', options);
+        }
+
+        // Formatear fecha y hora
+        function formatDateTime(dateString) {
+            if (!dateString) return 'No especificada';
+            
+            try {
+                let date;
+                if (dateString.toDate) {
+                    // Es un timestamp de Firebase
+                    date = dateString.toDate();
+                } else if (typeof dateString === 'string') {
+                    // Es una cadena ISO
+                    date = new Date(dateString);
+                } else if (dateString.seconds) {
+                    // Es un objeto con seconds y nanoseconds
+                    date = new Date(dateString.seconds * 1000);
+                } else {
+                    date = new Date(dateString);
+                }
+                
+                const options = { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                };
+                return date.toLocaleDateString('es-ES', options);
+            } catch (error) {
+                console.error("Error al formatear fecha:", error, dateString);
+                return 'Fecha inválida';
+            }
+        }
+
+        // Confirmación para editar reporte
+        window.confirmEditReport = function(reportId) {
+            const report = reports.find(r => r.id === reportId);
+            if (!report) return;
+            
+            // Verificar si el reporte fue recibido en bodega
+            if (report.receivedInWarehouse) {
+                Swal.fire({
+                    title: 'No se puede editar',
+                    text: 'Este reporte no se puede editar porque ya fue recibido en bodega.',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+            
+            Swal.fire({
+                title: '¿Editar reporte?',
+                text: '¿Estás seguro que deseas editar este reporte?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, editar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    editReport(reportId);
+                }
+            });
+        };
+
+        // Editar reporte
+        function editReport(reportId) {
+            const report = reports.find(r => r.id === reportId);
+            if (!report) return;
+            
+            if (report.status !== 'active') {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Solo se pueden editar reportes activos',
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+
+            // Verificar si el reporte fue recibido en bodega
+            if (report.receivedInWarehouse) {
+                Swal.fire({
+                    title: 'No se puede editar',
+                    text: 'Este reporte no se puede editar porque ya fue recibido en bodega.',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+
+            currentReportId = report.id;
+            document.getElementById('reportNumber').textContent = report.id;
+            
+            // Cambiar el texto del botón de guardar
+            document.getElementById('saveReportBtn').innerHTML = '<span class="spinner" style="display: none;"></span><span class="btn-text"><i class="fas fa-save"></i> Actualizar</span>';
+            
+            // Llenar campos del formulario
+            document.getElementById('store').value = report.store;
+            document.getElementById('reportDate').value = report.date.split('T')[0];
+            document.getElementById('outputNumber').value = report.outputNumber || '';
+            document.getElementById('entryDate').value = report.entryDate || '';
+            document.getElementById('notes').value = report.notes || '';
+            
+            // Guardar productos originales para comparación
+            originalProducts = [...report.products];
+            
+            // Llenar tabla de productos
+            const tbody = document.getElementById('productsTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            report.products.forEach((product, index) => {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td><input type="text" class="code-input" id="productSku${index+1}" name="productSku${index+1}" value="${product.sku || ''}" placeholder="Sku" maxlength="9" required></td>
+                    <td><input type="text" class="factory-code-input" id="factoryCode${index+1}" name="factoryCode${index+1}" value="${product.factoryCode || ''}" placeholder="Cód. Fab"></td>
+                    <td><input type="text" id="productDescription${index+1}" name="productDescription${index+1}" value="${product.description}" placeholder="Descripción" required></td>
+                    <td><input type="number" id="productQuantity${index+1}" name="productQuantity${index+1}" value="${product.quantity}" placeholder="0" min="1" required></td>
+                    <td><textarea class="form-control" id="productReason${index+1}" name="productReason${index+1}" placeholder="Ej: Dañado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;">${product.reason}</textarea></td>
+                    <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
+                `;
+                tbody.appendChild(newRow);
+                
+                // Ajustar tamaño del input de código de fábrica
+                const factoryInput = newRow.querySelector('.factory-code-input');
+                resizeInput(factoryInput);
+            });
+            
+            // Agregar event listeners a los botones de eliminar
+            addDeleteRowListeners();
+            
+            // Agregar event listeners para ajustar tamaño de inputs
+            addInputResizeListeners();
+            
+            // Ocultar elementos
+            document.getElementById('reportsList').style.display = 'none';
+            document.getElementById('searchContainer').style.display = 'none';
+            document.querySelector('.header-actions').style.display = 'none';
+            document.getElementById('backButton').style.display = 'none';
+            
+            // Mostrar el formulario
+            document.getElementById('returnForm').style.display = 'block';
+            
+            // Marcar que estamos editando un reporte
+            isCreatingNewReport = true;
+            
+            // Guardar datos en localStorage
+            saveFormToLocalStorage();
+            
+            // Cerrar el modal si está abierto
+            window.closeModal();
+            
+            // Desplazar hasta el formulario
+            document.getElementById('returnForm').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        // Marcar reporte como recibido en bodega
+        window.markAsReceived = function(reportId) {
+            const report = reports.find(r => r.id === reportId);
+            
+            Swal.fire({
+                title: '¿Marcar como recibido en bodega?',
+                text: '¿Estás seguro que deseas marcar este reporte como recibido en bodega? Esta acción no se puede deshacer.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, marcar como recibido',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    db.collection("reportesMalEstado").doc(reportId)
+                        .update({
+                            receivedInWarehouse: true,
+                            receivedDate: firebase.firestore.FieldValue.serverTimestamp(),
+                            receivedBy: 'Sistema',
+                            receivedByName: 'Usuario',
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        })
+                        .then(() => {
+                            Swal.fire({
+                                title: 'Reporte marcado como recibido',
+                                text: 'El reporte ha sido marcado como recibido en bodega',
+                                icon: 'success',
+                                confirmButtonColor: '#3085d6'
+                            }).then(() => {
+                                loadReports();
+                                window.closeModal();
+                            });
+                        })
+                        .catch(error => {
+                            console.error("Error al marcar como recibido:", error);
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'Ocurrió un error al marcar el reporte como recibido',
+                                icon: 'error',
+                                confirmButtonColor: '#3085d6'
+                            });
+                        });
+                }
+            });
+        };
+
+        // Anular reporte
+        window.cancelReport = function(reportId) {
+            const report = reports.find(r => r.id === reportId);
+            
+            // Verificar si el reporte fue recibido en bodega
+            if (report.receivedInWarehouse) {
+                Swal.fire({
+                    title: 'No se puede anular',
+                    text: 'Este reporte no se puede anular porque ya fue recibido en bodega.',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+            
+            Swal.fire({
+                title: '¿Anular reporte?',
+                text: '¿Estás seguro que deseas anular este reporte? Esta acción no se puede deshacer.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, anular',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    db.collection("reportesMalEstado").doc(reportId)
+                        .update({
+                            status: 'cancelled',
+                            cancelledAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            cancelledBy: 'Sistema',
+                            cancelledByName: 'Usuario',
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        })
+                        .then(() => {
+                            Swal.fire({
+                                title: 'Reporte anulado',
+                                text: 'El reporte ha sido anulado correctamente',
+                                icon: 'success',
+                                confirmButtonColor: '#3085d6'
+                            }).then(() => {
+                                loadReports();
+                                window.closeModal();
+                            });
+                        })
+                        .catch(error => {
+                            console.error("Error al anular el reporte:", error);
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'Ocurrió un error al anular el reporte',
+                                icon: 'error',
+                                confirmButtonColor: '#3085d6'
+                            });
+                        });
+                }
+            });
+        };
+
+        // Ver reporte completo en modal
+        window.viewReport = function(reportId) {
+            const report = reports.find(r => r.id === reportId);
+            if (!report) return;
+            
+            const isReportReceived = report.receivedInWarehouse;
+            const isReportCancelled = report.status === 'cancelled';
+            
+            document.getElementById('modalReportContent').innerHTML = `
+                <div class="report-header">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="report-id">${report.id}</span>
+                            ${isReportReceived ? `
+                            <span class="received-badge" title="Recibido en bodega el ${formatDateTime(report.receivedDate)}">
+                                <i class="fas fa-check-circle"></i> Recibido en Bodega
+                            </span>
+                            ` : ''}
+                        </div>
+                        <span class="report-date">${formatDate(report.date)}</span>
+                        <div style="margin-top: 0.3rem; font-size: 0.95rem; color: ${isReportCancelled ? 'var(--danger)' : isReportReceived ? 'var(--success)' : 'var(--warning)'}">
+                            Estado: ${isReportCancelled ? 'ANULADO' : isReportReceived ? 'Recibido en Bodega' : 'Activo'}
+                            ${report.cancelledAt ? `<span class="status-date">Anulado el: ${formatDateTime(report.cancelledAt)}</span>` : ''}
+                            ${report.receivedDate ? `<span class="status-date">Recibido en bodega el: ${formatDateTime(report.receivedDate)}</span>` : ''}
+                            ${isReportReceived ? `<div style="color: var(--success); margin-top: 0.5rem;"><i class="fas fa-exclamation-triangle"></i> Este reporte fue recibido en bodega y no es editable</div>` : ''}
+                        </div>
+                        ${report.createdByName ? `
+                        <div style="margin-top: 0.3rem; font-size: 0.85rem; color: var(--text-light);">
+                            Creado por: ${report.createdByName}
+                        </div>
+                        ` : ''}
+                        ${report.receivedByName ? `
+                        <div style="margin-top: 0.3rem; font-size: 0.85rem; color: var(--text-light);">
+                            Recibido por: ${report.receivedByName}
+                        </div>
+                        ` : ''}
+                        ${report.editCount > 0 ? `
+                        <div style="margin-top: 0.3rem; font-size: 0.85rem; color: var(--text-light);">
+                            Editado ${report.editCount} vez(es)
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Tienda</label>
+                    <div class="form-control" style="background: #f8f9fa;">${report.store}</div>
+                </div>
+                <div class="form-group">
+                    <label>Fecha de Reporte</label>
+                    <div class="form-control" style="background: #f8f9fa;">${formatDate(report.date)}</div>
+                </div>
+                <div class="form-group">
+                    <label>Número de Salida</label>
+                    <div class="form-control" style="background: #f8f9fa;">${report.outputNumber || 'No especificado'}</div>
+                </div>
+                <div class="form-group">
+                    <label>Fecha de Ingreso a Tienda</label>
+                    <div class="form-control" style="background: #f8f9fa;">${report.entryDate ? formatDate(report.entryDate) : 'No especificada'}</div>
+                </div>
+                ${report.notes ? `
+                <div class="form-group">
+                    <label>Observaciones</label>
+                    <div class="form-control" style="background: #f8f9fa; min-height: auto;">${report.notes}</div>
+                </div>
+                ` : ''}
+                <div class="form-group">
+                    <label>Productos en mal estado</label>
+                    <table class="report-products" style="width: 100%; margin-top: 0;">
+                        <thead>
+                            <tr>
+                                <th style="width: 100px;">Sku</th>
+                                <th style="width: 80px;">Cód. Fábrica</th>
+                                <th>Descripción</th>
+                                <th style="width: 70px;">Cantidad</th>
+                                <th style="width: 120px;">Motivo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${report.products ? report.products.map(product => `
+                                <tr>
+                                    <td>${product.sku || ''}</td>
+                                    <td>${product.factoryCode || '-'}</td>
+                                    <td>${product.description}</td>
+                                    <td>${product.quantity}</td>
+                                    <td>${product.reason}</td>
+                                </tr>
+                            `).join('') : ''}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            // Botones solo con icono en el modal
+            let actionButtons = `
+                <button class="btn btn-log btn-icon-only" onclick="showEditLog('${report.id}')" title="Ver Log Completo">
+                    <i class="fas fa-history"></i>
+                    <span class="btn-text">Ver Log</span>
+                </button>
+            `;
+            
+            if (!isReportCancelled && !isReportReceived) {
+                actionButtons += `
+                    <button class="btn btn-secondary btn-icon-only" onclick="confirmEditReport('${report.id}')" title="Editar">
+                        <i class="fas fa-edit"></i>
+                        <span class="btn-text">Editar</span>
+                    </button>
+                `;
+            }
+            
+            if (!isReportCancelled && !isReportReceived) {
+                actionButtons += `
+                    <button class="btn btn-received btn-icon-only" onclick="markAsReceived('${report.id}')" title="Marcar como Recibido">
+                        <i class="fas fa-check-circle"></i>
+                        <span class="btn-text">Marcar como Recibido</span>
+                    </button>
+                `;
+            }
+            
+            if (!isReportCancelled && !isReportReceived) {
+                actionButtons += `
+                    <button class="btn btn-danger btn-icon-only" onclick="cancelReport('${report.id}')" title="Anular">
+                        <i class="fas fa-ban"></i>
+                        <span class="btn-text">Anular</span>
+                    </button>
+                `;
+            }
+            
+            actionButtons += `
+                <button class="btn btn-icon-only" onclick="window.closeModal()" title="Cerrar">
+                    <i class="fas fa-times"></i>
+                    <span class="btn-text">Cerrar</span>
+                </button>
+            `;
+            
+            document.getElementById('modalReportActions').innerHTML = actionButtons;
+            
+            document.getElementById('reportModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        };
+
+        // Mostrar log completo de ediciones
+        window.showEditLog = function(reportId) {
+            const report = reports.find(r => r.id === reportId);
+            if (!report) return;
+            
+            let logHtml = '<div style="max-height: 70vh; overflow-y: auto; padding: 1rem;">';
+            logHtml += '<h3 style="margin-bottom: 1rem; color: var(--dark);"><i class="fas fa-history"></i> Historial Completo de Ediciones</h3>';
+            logHtml += `<p style="margin-bottom: 1rem; color: var(--text-light);">Reporte: ${report.id} - ${report.store}</p>`;
+            logHtml += `<p style="margin-bottom: 1rem; color: var(--primary); font-size: 0.9rem;">
+                <strong>Creado por:</strong> Huella digital del navegador: ${browserFingerprint.id}</p>`;
+            
+            if (report.editLog && report.editLog.length > 0) {
+                logHtml += '<ul class="edit-log-list" style="max-height: 60vh; overflow-y: auto;">';
+                
+                report.editLog.forEach((log, index) => {
+                    const time = formatDateTime(log.timestamp);
+                    
+                    logHtml += `
+                        <li class="edit-log-item" style="background: ${index % 2 === 0 ? '#f8f9fa' : 'white'}; padding: 0.8rem; border-radius: 4px; margin-bottom: 0.5rem; border: 1px solid rgba(0,0,0,0.05);">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div>
+                                    <strong style="color: var(--primary);">${log.action.toUpperCase()}</strong>
+                                    <div style="margin-top: 0.3rem;">${log.details || 'Sin detalles'}</div>
+                                </div>
+                                <div style="text-align: right; font-size: 0.85rem; color: var(--text-light);">
+                                    ${time}
+                                </div>
+                            </div>
+                            <div style="font-size: 0.75rem; color: var(--primary); margin-top: 0.5rem; font-style: italic;">
+                                Huella digital del navegador: ${log.browserFingerprint || 'No disponible'}
+                            </div>
+                        </li>
+                    `;
+                });
+                
+                logHtml += '</ul>';
+            } else {
+                logHtml += '<p style="text-align: center; padding: 2rem; color: var(--text-light);">No hay registro de ediciones para este reporte.</p>';
+            }
+            
+            logHtml += '</div>';
+            
+            Swal.fire({
+                title: 'Log de Ediciones',
+                html: logHtml,
+                width: '800px',
+                showCloseButton: true,
+                showConfirmButton: false,
+                customClass: {
+                    popup: 'log-modal'
+                }
+            });
+        };
+
+        // Función para cerrar modal
+        window.closeModal = function() {
+            document.getElementById('reportModal').style.display = 'none';
+            document.body.style.overflow = '';
+        };
+
+        // Guardar datos antes de recargar o cerrar la página
+        window.addEventListener('beforeunload', function(e) {
+            if (isCreatingNewReport) {
+                saveFormToLocalStorage();
+                const formData = localStorage.getItem('currentReportForm');
+                if (formData) {
+                    e.preventDefault();
+                    e.returnValue = 'Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
