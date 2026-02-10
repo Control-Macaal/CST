@@ -25,6 +25,7 @@
             --text-light: #8d99ae;
             --success: #4cc9f0;
             --danger: #f72585;
+            --warning: #f8961e;
             --border-radius: 16px;
             --shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
             --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -312,6 +313,16 @@
 
         .btn-secondary:active {
             background-color: #3d82d6;
+            transform: scale(0.98);
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .btn-warning:active {
+            background-color: #e68a19;
             transform: scale(0.98);
         }
 
@@ -667,7 +678,7 @@
         </header>
 
         <main id="appGrid" class="app-grid">
-            <!-- Card para Gestiones (oculta inicialmente) -->
+            <!-- Card para Gestiones (visible solo para macaal) -->
             <div id="bodegaCard" class="card" style="display: none;">
                 <div class="card-header">
                     <i class="fas fa-tasks"></i>
@@ -687,6 +698,23 @@
                             <i class="fas fa-boxes"></i>
                             Productos Faltantes
                         </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NUEVA CARD: Reportes (visible para macaal y hogar) -->
+            <div id="reportesCard" class="card" style="display: none;">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar"></i>
+                    <h2>Reportes</h2>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group">
+                        <button onclick="window.open('RepMal.html', '_self')" class="btn btn-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Reportes Mal Estado
+                        </button>
+                        <!-- Puedes agregar más botones de reportes aquí en el futuro -->
                     </div>
                 </div>
             </div>
@@ -788,7 +816,7 @@
                 Información de Versión
             </h2>
             <div class="version-info">
-                <strong>Versión 1.2.3 Stable</strong>
+                <strong>Versión 1.3.0 Stable</strong>
                 <small>Lanzamiento: 23/04/2025</small>
                 <div class="developer">Desarrollado por <strong>Luis El Crack</strong> 💻</div>
             </div>
@@ -821,18 +849,38 @@
     </div>
 
     <script>
-        // Configuración
-        const USER_PERMISSIONS = {
-            'hogar': 'admin',
-            'Hogar': 'admin',
-            'macaal': 'viewer',
-            'Macaal': 'viewer'
+        // ============================================
+        // SISTEMA ESCALABLE DE CREDENCIALES
+        // ============================================
+        const CREDENTIALS = {
+            // Estructura: 'contraseña': { role: 'rol', access: ['feature1', 'feature2'] }
+            'hogar': { 
+                role: 'admin', 
+                access: ['gestiones', 'reportes', 'crear_registros', 'visualizar_registros', 'catalogos'] 
+            },
+            'Hogar': { 
+                role: 'admin', 
+                access: ['gestiones', 'reportes', 'crear_registros', 'visualizar_registros', 'catalogos'] 
+            },
+            'macaal': { 
+                role: 'viewer', 
+                access: ['gestiones', 'reportes', 'crear_registros', 'visualizar_registros', 'catalogos'] 
+            },
+            'Macaal': { 
+                role: 'viewer', 
+                access: ['gestiones', 'reportes', 'crear_registros', 'visualizar_registros', 'catalogos'] 
+            }
+            // Para agregar más usuarios en el futuro:
+            // 'nueva_credencial': { role: 'rol', access: ['features permitidas'] }
         };
         
+        // Constantes del sistema
         const VIEW_PIN = '1901';
         const MAX_ATTEMPTS = 3;
         const STORAGE_KEY = 'traslados_auth';
-        let currentUserRole = '';
+        
+        // Variables de estado
+        let currentUser = null;
         let failedAttempts = 0;
         let blockedUntil = 0;
         let currentAction = '';
@@ -851,9 +899,16 @@
             view_eplastik: 'https://drive.google.com/drive/folders/15t0p44lnSNqXb0jKIkenNkKFPqFe9i_g?usp=sharing'
         };
 
+        // Función para verificar permisos de usuario
+        function hasAccess(feature) {
+            if (!currentUser) return false;
+            return currentUser.access.includes(feature);
+        }
+
         // Función para cerrar sesión
         function logout() {
             localStorage.removeItem(STORAGE_KEY);
+            currentUser = null;
             document.getElementById('appContent').style.display = 'none';
             document.getElementById('loginScreen').style.display = 'flex';
             document.getElementById('loginInput').value = '';
@@ -871,18 +926,14 @@
 
         // Función para crear efecto ripple en los botones (solo desktop)
         function createRipple(event) {
-            // Verificar si es dispositivo táctil
             if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-                return; // No aplicar efecto en móviles
+                return;
             }
             
             const button = event.currentTarget;
-            
-            // Crear elemento ripple
             const ripple = document.createElement('span');
             ripple.classList.add('ripple');
             
-            // Posicionar ripple
             const diameter = Math.max(button.clientWidth, button.clientHeight);
             const radius = diameter / 2;
             
@@ -890,42 +941,61 @@
             ripple.style.left = `${event.clientX - button.getBoundingClientRect().left - radius}px`;
             ripple.style.top = `${event.clientY - button.getBoundingClientRect().top - radius}px`;
             
-            // Añadir ripple al botón
             button.appendChild(ripple);
             
-            // Eliminar ripple después de la animación
             setTimeout(() => {
                 ripple.remove();
             }, 600);
+        }
+
+        // Función para configurar la interfaz según el usuario
+        function setupUIForUser() {
+            const appGrid = document.getElementById('appGrid');
+            const bodegaCard = document.getElementById('bodegaCard');
+            const reportesCard = document.getElementById('reportesCard');
+            
+            // Mostrar/ocultar y reordenar cards según permisos
+            if (hasAccess('gestiones')) {
+                bodegaCard.style.display = 'block';
+                appGrid.insertBefore(bodegaCard, appGrid.firstChild);
+            } else {
+                bodegaCard.style.display = 'none';
+            }
+            
+            if (hasAccess('reportes')) {
+                reportesCard.style.display = 'block';
+                // Colocar después de gestiones o al inicio si no hay gestiones
+                if (hasAccess('gestiones')) {
+                    appGrid.insertBefore(reportesCard, bodegaCard.nextSibling);
+                } else {
+                    appGrid.insertBefore(reportesCard, appGrid.firstChild);
+                }
+            } else {
+                reportesCard.style.display = 'none';
+            }
         }
 
         // Verificar autenticación al cargar
         document.addEventListener('DOMContentLoaded', function() {
             const savedAuth = localStorage.getItem(STORAGE_KEY);
             if (savedAuth) {
-                const { auth, role } = JSON.parse(savedAuth);
-                if (USER_PERMISSIONS[auth]) {
-                    currentUserRole = role;
+                const authData = JSON.parse(savedAuth);
+                if (CREDENTIALS[authData.auth]) {
+                    currentUser = {
+                        ...CREDENTIALS[authData.auth],
+                        auth: authData.auth
+                    };
                     
-                    // Mostrar/ocultar y reordenar la card de bodega
-                    const appGrid = document.getElementById('appGrid');
-                    const bodegaCard = document.getElementById('bodegaCard');
-                    
-                    if (auth.toLowerCase() === 'macaal') {
-                        bodegaCard.style.display = 'block';
-                        appGrid.insertBefore(bodegaCard, appGrid.firstChild);
-                    } else {
-                        bodegaCard.style.display = 'none';
-                    }
+                    setupUIForUser();
                     
                     document.getElementById('loginScreen').style.display = 'none';
                     document.getElementById('appContent').style.display = 'block';
                 }
             }
             
-            // Configurar evento para el botón de logout
+            // Configurar eventos
             document.getElementById('logoutBtn').addEventListener('click', logout);
-
+            
             // Aplicar efecto ripple a todos los botones (solo desktop)
             document.querySelectorAll('.btn').forEach(button => {
                 button.addEventListener('click', createRipple);
@@ -949,24 +1019,18 @@
                 return;
             }
             
-            if (USER_PERMISSIONS[password]) {
-                currentUserRole = USER_PERMISSIONS[password];
+            if (CREDENTIALS[password]) {
+                currentUser = {
+                    ...CREDENTIALS[password],
+                    auth: password
+                };
+                
                 localStorage.setItem(STORAGE_KEY, JSON.stringify({
                     auth: password,
-                    role: currentUserRole
+                    role: currentUser.role
                 }));
                 
-                // Obtener elementos del DOM
-                const appGrid = document.getElementById('appGrid');
-                const bodegaCard = document.getElementById('bodegaCard');
-                
-                // Mostrar/ocultar y reordenar la card de bodega
-                if (password.toLowerCase() === 'macaal') {
-                    bodegaCard.style.display = 'block';
-                    appGrid.insertBefore(bodegaCard, appGrid.firstChild);
-                } else {
-                    bodegaCard.style.display = 'none';
-                }
+                setupUIForUser();
                 
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('appContent').style.display = 'block';
@@ -1032,7 +1096,7 @@
         // Funciones para el PIN de visualización
         function requestPin(action) {
             // Permitir acceso directo si el usuario es macaal
-            if (document.getElementById('loginInput').value.toLowerCase() === 'macaal') {
+            if (currentUser && currentUser.auth.toLowerCase() === 'macaal') {
                 window.open(VIEW_URLS[action], '_blank');
                 return;
             }
@@ -1097,7 +1161,7 @@
 
         // Funciones para formularios en modal fullscreen
         function openFormModal(formType) {
-            if (currentUserRole === 'viewer') {
+            if (!hasAccess('crear_registros')) {
                 showPermissionError();
                 return;
             }
