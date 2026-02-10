@@ -1052,7 +1052,7 @@
                     <span id="currentUser"></span>
                 </div>
                 <a href="index.html" class="btn" id="backButton">
-                    <i class="fas fa-arrow-left"></i> Volver a Control de Traslados
+                    <i class="fas fa-arrow-left"></i> Volver
                 </a>
                 <button class="btn" id="newReportBtn">
                     <span class="spinner" style="display: none;"></span>
@@ -1119,7 +1119,7 @@
             <div class="invoice-fields">
                 <div class="form-group">
                     <label for="outputNumber">Número de Salida</label>
-                    <input type="text" class="form-control output-input" id="outputNumber" name="outputNumber" placeholder="Ej: 123456" maxlength="6">
+                    <input type="text" class="form-control output-input" id="outputNumber" name="outputNumber" placeholder="#" maxlength="6">
                 </div>
                 <div class="form-group">
                     <label for="entryDate">Fecha de Ingreso a Tienda</label>
@@ -1151,7 +1151,7 @@
                         <td><input type="text" class="factory-code-input" id="factoryCode1" name="factoryCode1" placeholder="Cód. Fab"></td>
                         <td><input type="text" id="productDescription1" name="productDescription1" placeholder="Descripción" required></td>
                         <td><input type="number" id="productQuantity1" name="productQuantity1" placeholder="0" min="1" required></td>
-                        <td><textarea class="form-control" id="productReason1" name="productReason1" placeholder="Ej: Dañado, Roto, etc." required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;"></textarea></td>
+                        <td><textarea class="form-control" id="productReason1" name="productReason1" placeholder="quebrado o dañado." required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;"></textarea></td>
                         <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                     </tr>
                 </tbody>
@@ -2186,7 +2186,7 @@
                                 ` : ''}
                                 ${!isMacaalUser && !isReportReceived && !isReportCancelled ? `
                                 <a href="#" style="color: var(--text-light); cursor: not-allowed; font-style: italic;">
-                                    <i class="fas fa-lock"></i> Solo Macaal puede marcar como recibido
+                                    <i class="fas fa-lock"></i> Solo Bodega puede marcar como recibido
                                 </a>
                                 ` : ''}
                             </div>
