@@ -317,12 +317,12 @@
         }
 
         .btn-warning {
-            background-color: var(--warning);
+            background-color: var(--accent);
             color: white;
         }
 
         .btn-warning:active {
-            background-color: #e68a19;
+            background-color: #3d82d6;
             transform: scale(0.98);
         }
 
@@ -954,8 +954,10 @@
             const bodegaCard = document.getElementById('bodegaCard');
             const reportesCard = document.getElementById('reportesCard');
             
-            // Mostrar/ocultar y reordenar cards según permisos
-            if (hasAccess('gestiones')) {
+            // Ocultar card "Gestiones" específicamente para usuarios con contraseña "hogar"
+            if (currentUser.auth.toLowerCase() === 'hogar') {
+                bodegaCard.style.display = 'none';
+            } else if (hasAccess('gestiones')) {
                 bodegaCard.style.display = 'block';
                 appGrid.insertBefore(bodegaCard, appGrid.firstChild);
             } else {
@@ -965,7 +967,7 @@
             if (hasAccess('reportes')) {
                 reportesCard.style.display = 'block';
                 // Colocar después de gestiones o al inicio si no hay gestiones
-                if (hasAccess('gestiones')) {
+                if (hasAccess('gestiones') && currentUser.auth.toLowerCase() !== 'hogar') {
                     appGrid.insertBefore(reportesCard, bodegaCard.nextSibling);
                 } else {
                     appGrid.insertBefore(reportesCard, appGrid.firstChild);
