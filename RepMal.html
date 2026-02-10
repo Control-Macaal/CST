@@ -47,6 +47,117 @@
             min-height: 100vh;
         }
 
+        /* Pantalla de redirección - SIN LOGIN PROPIO */
+        .redirect-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .redirect-box {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid rgba(0, 0, 0, 0.03);
+        }
+        
+        .redirect-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .redirect-message {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        .redirect-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+        
+        .redirect-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        /* Botón de cerrar sesión - Mismo estilo que Control de Traslados */
+        .logout-btn {
+            position: fixed;
+            top: 1.25rem;
+            right: 1.25rem;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            color: var(--text-light);
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .logout-btn:hover {
+            color: var(--danger);
+            background: rgba(247, 37, 133, 0.9);
+            transform: scale(1.1);
+        }
+
+        /* Mensaje de logout */
+        .logout-message {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logout-message.show {
+            opacity: 1;
+        }
+
         /* CONTENEDOR PRINCIPAL CON MARCO */
         .container {
             max-width: 1200px;
@@ -57,6 +168,7 @@
             padding: 1.5rem;
             background-color: white;
             box-shadow: var(--shadow);
+            display: none; /* Oculto inicialmente */
         }
 
         /* Spinner de carga inicial */
@@ -106,6 +218,17 @@
             display: flex;
             gap: 0.8rem;
             align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(67, 97, 238, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            color: var(--primary);
         }
 
         .search-container {
@@ -793,6 +916,11 @@
             to { transform: rotate(360deg); }
         }
 
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
@@ -871,6 +999,41 @@
     </style>
 </head>
 <body>
+    <!-- Pantalla de Redirección - SIN LOGIN PROPIO -->
+    <div id="redirectScreen" class="redirect-container" style="display: none;">
+        <div class="redirect-box">
+            <h1 class="redirect-title">
+                <i class="fas fa-exclamation-triangle"></i>
+                Reportes Mal Estado
+            </h1>
+            <div class="redirect-message">
+                <p>Para acceder a Reportes Mal Estado, primero debes iniciar sesión en el sistema de Control de Traslados.</p>
+                <p>Este módulo utiliza la misma sesión que el sistema principal.</p>
+            </div>
+            <a href="index.html" class="redirect-btn">
+                <i class="fas fa-sign-in-alt"></i>
+                Ir a Control de Traslados para Iniciar Sesión
+            </a>
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px dashed #eee;">
+                <p style="font-size: 0.9rem; color: var(--text-light);">
+                    <i class="fas fa-info-circle"></i>
+                    Usa las credenciales: <strong>hogar</strong> o <strong>macaal</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botón de cerrar sesión -->
+    <button id="logoutBtn" class="logout-btn" aria-label="Cerrar sesión" title="Cerrar sesión" style="display: none;">
+        <i class="fas fa-sign-out-alt"></i>
+    </button>
+
+    <!-- Mensaje de logout -->
+    <div id="logoutMessage" class="logout-message">
+        <i class="fas fa-check-circle"></i>
+        Sesión cerrada correctamente
+    </div>
+
     <!-- Spinner de carga inicial -->
     <div class="initial-loader" id="initialLoader">
         <div class="initial-spinner"></div>
@@ -884,8 +1047,12 @@
                 <h1>Reportes Mal Estado</h1>
             </div>
             <div class="header-actions">
-                <a href="pc.htm" class="btn" id="backButton">
-                    <i class="fas fa-arrow-left"></i> Volver
+                <div class="user-info" id="userInfo">
+                    <i class="fas fa-user"></i>
+                    <span id="currentUser"></span>
+                </div>
+                <a href="index.html" class="btn" id="backButton">
+                    <i class="fas fa-arrow-left"></i> Volver a Control de Traslados
                 </a>
                 <button class="btn" id="newReportBtn">
                     <span class="spinner" style="display: none;"></span>
@@ -952,7 +1119,7 @@
             <div class="invoice-fields">
                 <div class="form-group">
                     <label for="outputNumber">Número de Salida</label>
-                    <input type="text" class="form-control output-input" id="outputNumber" name="outputNumber" placeholder="#" maxlength="6">
+                    <input type="text" class="form-control output-input" id="outputNumber" name="outputNumber" placeholder="Ej: 123456" maxlength="6">
                 </div>
                 <div class="form-group">
                     <label for="entryDate">Fecha de Ingreso a Tienda</label>
@@ -984,7 +1151,7 @@
                         <td><input type="text" class="factory-code-input" id="factoryCode1" name="factoryCode1" placeholder="Cód. Fab"></td>
                         <td><input type="text" id="productDescription1" name="productDescription1" placeholder="Descripción" required></td>
                         <td><input type="number" id="productQuantity1" name="productQuantity1" placeholder="0" min="1" required></td>
-                        <td><textarea class="form-control" id="productReason1" name="productReason1" placeholder="motivo." required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;"></textarea></td>
+                        <td><textarea class="form-control" id="productReason1" name="productReason1" placeholder="Ej: Dañado, Roto, etc." required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;"></textarea></td>
                         <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                     </tr>
                 </tbody>
@@ -1035,6 +1202,23 @@
 
     <script>
         // ==============================
+        // CONFIGURACIÓN COMPARTIDA CON CONTROL DE TRASLADOS
+        // ==============================
+        
+        // MISMA CONFIGURACIÓN QUE CONTROL DE TRASLADOS
+        const USER_PERMISSIONS = {
+            'hogar': 'admin',
+            'Hogar': 'admin',
+            'macaal': 'viewer',
+            'Macaal': 'viewer'
+        };
+        
+        const STORAGE_KEY = 'traslados_auth'; // MISMA LLAVE QUE CONTROL DE TRASLADOS
+        
+        let currentUserRole = '';
+        let currentUserName = '';
+
+        // ==============================
         // CONFIGURACIÓN DE FIREBASE
         // ==============================
         const firebaseConfig = {
@@ -1056,7 +1240,6 @@
         let reportCounter = 0;
         let isCreatingNewReport = false;
         let isFilterOpen = false;
-        const companyName = "MACAAL S.A";
 
         // Variables para comparación de productos
         let originalProducts = [];
@@ -1065,7 +1248,6 @@
         // FUNCIONES DE HUELLA DEL NAVEGADOR
         // ==============================
         
-        // Función para obtener información del navegador (huella digital)
         function getBrowserFingerprint() {
             const fingerprint = {
                 userAgent: navigator.userAgent,
@@ -1084,17 +1266,16 @@
                 deviceMemory: navigator.deviceMemory || 'desconocido'
             };
             
-            // Crear un hash simple de la huella digital
             const fingerprintString = JSON.stringify(fingerprint);
             let hash = 0;
             for (let i = 0; i < fingerprintString.length; i++) {
                 const char = fingerprintString.charCodeAt(i);
                 hash = ((hash << 5) - hash) + char;
-                hash = hash & hash; // Convertir a 32-bit integer
+                hash = hash & hash;
             }
             
             return {
-                id: Math.abs(hash).toString(16).substring(0, 8), // Número de huella digital
+                id: Math.abs(hash).toString(16).substring(0, 8),
                 details: fingerprint,
                 timestamp: new Date().toISOString()
             };
@@ -1104,14 +1285,67 @@
         const browserFingerprint = getBrowserFingerprint();
 
         // ==============================
+        // VERIFICACIÓN DE SESIÓN AUTOMÁTICA
+        // ==============================
+        
+        // Al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            // Verificar si hay sesión guardada (COMPARTIDA CON CONTROL DE TRASLADOS)
+            const savedAuth = localStorage.getItem(STORAGE_KEY);
+            
+            if (savedAuth) {
+                const authData = JSON.parse(savedAuth);
+                if (USER_PERMISSIONS[authData.auth]) {
+                    // Sesión válida encontrada
+                    currentUserRole = authData.role;
+                    currentUserName = authData.name || 
+                        (authData.auth.toLowerCase() === 'macaal' ? 'Usuario Macaal' : 
+                         authData.auth.toLowerCase() === 'hogar' ? 'Usuario Hogar' : 
+                         'Usuario');
+                    
+                    // Mostrar aplicación directamente
+                    document.getElementById('redirectScreen').style.display = 'none';
+                    document.getElementById('appContent').style.display = 'block';
+                    document.getElementById('logoutBtn').style.display = 'flex';
+                    document.getElementById('currentUser').textContent = currentUserName;
+                    
+                    // Inicializar la aplicación
+                    initializeApp();
+                } else {
+                    // Sesión inválida - mostrar pantalla de redirección
+                    showRedirectScreen();
+                }
+            } else {
+                // No hay sesión - mostrar pantalla de redirección
+                showRedirectScreen();
+            }
+            
+            // Configurar evento para el botón de logout
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+        });
+
+        // Mostrar pantalla de redirección
+        function showRedirectScreen() {
+            document.getElementById('redirectScreen').style.display = 'flex';
+            document.getElementById('appContent').style.display = 'none';
+            document.getElementById('logoutBtn').style.display = 'none';
+        }
+
+        function logout() {
+            // Eliminar solo la sesión y mantener otros datos
+            localStorage.removeItem(STORAGE_KEY);
+            
+            // Redirigir al Control de Traslados
+            window.location.href = 'index.html';
+        }
+
+        // ==============================
         // FUNCIONES DE COMPARACIÓN DE PRODUCTOS
         // ==============================
         
-        // Función para comparar productos antiguos vs nuevos
         function compareProducts(oldProducts, newProducts) {
             const changes = [];
             
-            // Crear mapas para comparación
             const oldMap = new Map();
             const newMap = new Map();
             
@@ -1123,42 +1357,35 @@
                 newMap.set(product.sku, { ...product, index });
             });
             
-            // Buscar productos eliminados
             for (const [sku, oldProduct] of oldMap.entries()) {
                 if (!newMap.has(sku)) {
                     changes.push(`❌ Eliminado SKU: <span class="product-change">${sku}</span> - ${oldProduct.description}`);
                 }
             }
             
-            // Buscar productos nuevos
             for (const [sku, newProduct] of newMap.entries()) {
                 if (!oldMap.has(sku)) {
                     changes.push(`✅ Agregado SKU: <span class="product-change">${sku}</span> - ${newProduct.description} (Cant: ${newProduct.quantity})`);
                 }
             }
             
-            // Comparar productos existentes
             for (const [sku, newProduct] of newMap.entries()) {
                 if (oldMap.has(sku)) {
                     const oldProduct = oldMap.get(sku);
                     const productChanges = [];
                     
-                    // Comparar cantidad
                     if (oldProduct.quantity !== newProduct.quantity) {
                         productChanges.push(`Cantidad: ${oldProduct.quantity} → ${newProduct.quantity}`);
                     }
                     
-                    // Comparar código de fábrica
                     if (oldProduct.factoryCode !== newProduct.factoryCode) {
                         productChanges.push(`Cód. Fab: ${oldProduct.factoryCode || '-'} → ${newProduct.factoryCode || '-'}`);
                     }
                     
-                    // Comparar descripción
                     if (oldProduct.description !== newProduct.description) {
                         productChanges.push(`Descripción: "${oldProduct.description}" → "${newProduct.description}"`);
                     }
                     
-                    // Comparar motivo
                     if (oldProduct.reason !== newProduct.reason) {
                         productChanges.push(`Motivo: "${oldProduct.reason}" → "${newProduct.reason}"`);
                     }
@@ -1173,31 +1400,23 @@
         }
 
         // ==============================
-        // FUNCIONES DE GESTIÓN DE REPORTES
+        // INICIALIZACIÓN DE LA APLICACIÓN
         // ==============================
         
+        function initializeApp() {
+            toggleInitialLoader(false);
+            loadReports();
+            setupEventListeners();
+            loadFormFromLocalStorage();
+        }
+
         // Función para mostrar/ocultar spinner inicial
         function toggleInitialLoader(show) {
             document.getElementById('initialLoader').style.display = show ? 'flex' : 'none';
         }
 
-        // Al cargar la página
-        document.addEventListener('DOMContentLoaded', () => {
-            toggleInitialLoader(false);
-            
-            // Cargar reportes
-            loadReports();
-            
-            // Configurar event listeners
-            setupEventListeners();
-            
-            // Intentar cargar formulario guardado en localStorage
-            loadFormFromLocalStorage();
-        });
-
         // Configurar todos los event listeners
         function setupEventListeners() {
-            // Event listeners para el buscador
             document.getElementById('searchInput').addEventListener('input', function() {
                 document.getElementById('searchClear').style.display = this.value ? 'block' : 'none';
                 if (!this.value) filterReports();
@@ -1209,15 +1428,12 @@
                 filterReports();
             });
 
-            // Event listeners para los filtros
             document.getElementById('filterActive').addEventListener('change', filterReports);
             document.getElementById('filterReceived').addEventListener('change', filterReports);
             document.getElementById('filterCancelled').addEventListener('change', filterReports);
 
-            // Event listener para el botón de filtros (CLICK)
             document.getElementById('filterBtn').addEventListener('click', toggleFilterDropdown);
 
-            // Event listeners principales
             document.getElementById('newReportBtn').addEventListener('click', showNewReportForm);
             document.getElementById('cancelReportBtn').addEventListener('click', () => hideReturnForm(true));
             document.getElementById('saveReportBtn').addEventListener('click', saveReport);
@@ -1230,7 +1446,6 @@
                 if (e.key === 'Enter') searchReports();
             });
 
-            // Solo permitir números en el input de salida (4-6 dígitos)
             document.getElementById('outputNumber').addEventListener('input', function() {
                 this.value = this.value.replace(/\D/g, '');
                 if (this.value.length > 6) {
@@ -1238,14 +1453,12 @@
                 }
             });
 
-            // Convertir automáticamente a mayúsculas mientras se escribe
             document.addEventListener('input', function(e) {
                 if (e.target.matches('#productsTable input[type="text"]:not(.code-input), #productsTable textarea')) {
                     e.target.value = e.target.value.toUpperCase();
                 }
             });
 
-            // Guardar datos del formulario periódicamente
             setInterval(saveFormToLocalStorage, 3000);
         }
 
@@ -1253,7 +1466,6 @@
         // FUNCIONES DE GESTIÓN DE REPORTES
         // ==============================
         
-        // Función para alternar el desplegable de filtros
         function toggleFilterDropdown() {
             const filterContent = document.getElementById('filterContent');
             isFilterOpen = !isFilterOpen;
@@ -1265,7 +1477,6 @@
             }
         }
 
-        // Cerrar el desplegable de filtros al hacer clic fuera
         document.addEventListener('click', function(event) {
             const filterDropdown = document.getElementById('filterDropdown');
             const filterBtn = document.getElementById('filterBtn');
@@ -1277,12 +1488,10 @@
             }
         });
 
-        // Convertir texto a mayúsculas
         function toUpperCase(text) {
             return text ? text.toUpperCase() : '';
         }
 
-        // Filtrar reportes por estado
         function filterReports() {
             const showActive = document.getElementById('filterActive').checked;
             const showReceived = document.getElementById('filterReceived').checked;
@@ -1293,7 +1502,6 @@
             
             let filteredReports = reports;
             
-            // Aplicar filtros de estado
             filteredReports = filteredReports.filter(report => {
                 if (report.status === 'cancelled') {
                     return showCancelled;
@@ -1306,7 +1514,6 @@
                 }
             });
             
-            // Aplicar búsqueda si hay término
             if (searchTerm) {
                 filteredReports = filteredReports.filter(report => {
                     const reportId = report.id.replace('#', '').toLowerCase();
@@ -1324,7 +1531,6 @@
             renderReportsList(filteredReports);
         }
 
-        // Generar número de reporte consecutivo
         async function generateReportNumber() {
             try {
                 const snapshot = await db.collection("reportesMalEstado")
@@ -1346,7 +1552,6 @@
             }
         }
 
-        // Guardar datos del formulario en localStorage
         function saveFormToLocalStorage() {
             if (!isCreatingNewReport) return;
             
@@ -1375,7 +1580,6 @@
             localStorage.setItem('currentReportId', currentReportId);
         }
 
-        // Cargar datos del formulario desde localStorage
         function loadFormFromLocalStorage() {
             const savedForm = localStorage.getItem('currentReportForm');
             const savedReportId = localStorage.getItem('currentReportId');
@@ -1386,14 +1590,12 @@
                 currentReportId = savedReportId;
                 document.getElementById('reportNumber').textContent = currentReportId;
                 
-                // Llenar campos del formulario
                 document.getElementById('store').value = formData.store;
                 document.getElementById('reportDate').value = formData.reportDate;
                 document.getElementById('outputNumber').value = formData.outputNumber;
                 document.getElementById('entryDate').value = formData.entryDate;
                 document.getElementById('notes').value = formData.notes;
                 
-                // Llenar tabla de productos
                 const tbody = document.getElementById('productsTable').querySelector('tbody');
                 tbody.innerHTML = '';
                 
@@ -1409,36 +1611,28 @@
                     `;
                     tbody.appendChild(newRow);
                     
-                    // Ajustar tamaño del input de código de fábrica
                     const factoryInput = newRow.querySelector('.factory-code-input');
                     resizeInput(factoryInput);
                 });
                 
-                // Mostrar el formulario
                 document.getElementById('returnForm').style.display = 'block';
                 document.getElementById('reportsList').style.display = 'none';
                 document.getElementById('searchContainer').style.display = 'none';
                 document.querySelector('.header-actions').style.display = 'none';
                 document.getElementById('backButton').style.display = 'none';
                 
-                // Marcar que estamos creando/editando un reporte
                 isCreatingNewReport = true;
                 
-                // Agregar event listeners a los botones de eliminar
                 addDeleteRowListeners();
-                
-                // Agregar event listeners para ajustar tamaño de inputs
                 addInputResizeListeners();
             }
         }
 
-        // Limpiar datos del formulario en localStorage
         function clearFormLocalStorage() {
             localStorage.removeItem('currentReportForm');
             localStorage.removeItem('currentReportId');
         }
 
-        // Mostrar formulario de nuevo reporte
         async function showNewReportForm() {
             if (isCreatingNewReport) {
                 Swal.fire({
@@ -1450,7 +1644,6 @@
                 return;
             }
 
-            // Mostrar spinner en el botón
             const newReportBtn = document.getElementById('newReportBtn');
             newReportBtn.classList.add('btn-loading');
             newReportBtn.querySelector('.spinner').style.display = 'inline-block';
@@ -1460,19 +1653,16 @@
                 currentReportId = await generateReportNumber();
                 document.getElementById('reportNumber').textContent = currentReportId;
                 
-                // Limpiar campos
                 document.getElementById('store').value = '';
                 
-                // Establecer fecha actual en el input
                 const today = new Date();
                 const formattedDate = today.toISOString().split('T')[0];
                 document.getElementById('reportDate').value = formattedDate;
-                document.getElementById('entryDate').value = ''; // Fecha de ingreso vacía
+                document.getElementById('entryDate').value = '';
                 
                 document.getElementById('outputNumber').value = '';
                 document.getElementById('notes').value = '';
                 
-                // Limpiar tabla de productos (dejar solo una fila vacía)
                 const tbody = document.getElementById('productsTable').querySelector('tbody');
                 tbody.innerHTML = `
                     <tr>
@@ -1485,31 +1675,19 @@
                     </tr>
                 `;
                 
-                // Restaurar texto del botón de guardar
                 document.getElementById('saveReportBtn').innerHTML = '<span class="spinner" style="display: none;"></span><span class="btn-text"><i class="fas fa-save"></i> Guardar</span>';
                 
-                // Agregar event listeners a los botones de eliminar
                 addDeleteRowListeners();
-                
-                // Agregar event listeners para ajustar tamaño de inputs
                 addInputResizeListeners();
-                
-                // Limpiar productos originales
                 originalProducts = [];
                 
-                // Ocultar elementos
                 document.getElementById('reportsList').style.display = 'none';
                 document.getElementById('searchContainer').style.display = 'none';
                 document.querySelector('.header-actions').style.display = 'none';
                 document.getElementById('backButton').style.display = 'none';
                 
-                // Mostrar el formulario
                 document.getElementById('returnForm').style.display = 'block';
-                
-                // Marcar que estamos creando un nuevo reporte
                 isCreatingNewReport = true;
-                
-                // Limpiar localStorage
                 clearFormLocalStorage();
             } catch (error) {
                 console.error("Error al crear nuevo reporte:", error);
@@ -1520,14 +1698,12 @@
                     confirmButtonColor: '#3085d6'
                 });
             } finally {
-                // Ocultar spinner en el botón
                 newReportBtn.classList.remove('btn-loading');
                 newReportBtn.querySelector('.spinner').style.display = 'none';
                 newReportBtn.querySelector('.btn-text').style.display = 'inline';
             }
         }
 
-        // Función auxiliar para ocultar el formulario sin confirmación
         function actuallyHideForm() {
             document.getElementById('returnForm').style.display = 'none';
             document.getElementById('reportsList').style.display = 'grid';
@@ -1535,12 +1711,9 @@
             document.querySelector('.header-actions').style.display = 'flex';
             document.getElementById('backButton').style.display = 'flex';
             isCreatingNewReport = false;
-            
-            // Limpiar localStorage al cancelar
             clearFormLocalStorage();
         }
 
-        // Ocultar formulario de reporte
         function hideReturnForm(showConfirmation = true) {
             if (showConfirmation) {
                 Swal.fire({
@@ -1562,22 +1735,17 @@
             }
         }
 
-        // Agregar event listeners para ajustar tamaño de inputs
         function addInputResizeListeners() {
             const factoryCodeInputs = document.querySelectorAll('.factory-code-input');
             
             factoryCodeInputs.forEach(input => {
-                // Ajustar tamaño inicial
                 resizeInput(input);
-                
-                // Agregar event listener para cambios
                 input.addEventListener('input', function() {
                     resizeInput(this);
                 });
             });
         }
 
-        // Función para ajustar el tamaño del input basado en su contenido
         function resizeInput(input) {
             const minWidth = 60;
             const maxWidth = 150;
@@ -1597,7 +1765,6 @@
             input.style.width = width + 'px';
         }
 
-        // Agregar nueva fila a la tabla de productos
         function addProductRow() {
             const tbody = document.getElementById('productsTable').querySelector('tbody');
             const rowCount = tbody.childElementCount + 1;
@@ -1612,29 +1779,24 @@
             `;
             tbody.appendChild(newRow);
             
-            // Agregar event listener al botón de eliminar
             const deleteBtn = newRow.querySelector('.fa-trash-alt');
             deleteBtn.addEventListener('click', () => {
                 if (tbody.childElementCount > 1) {
                     tbody.removeChild(newRow);
                 } else {
-                    // Si es la última fila, limpiar los campos
                     const inputs = newRow.querySelectorAll('input, textarea');
                     inputs.forEach(input => input.value = '');
-                    // Ajustar tamaño del input de código de fábrica
                     const factoryInput = newRow.querySelector('.factory-code-input');
                     resizeInput(factoryInput);
                 }
             });
             
-            // Agregar event listener para ajustar tamaño del input de código de fábrica
             const factoryInput = newRow.querySelector('.factory-code-input');
             factoryInput.addEventListener('input', function() {
                 resizeInput(this);
             });
         }
 
-        // Agregar event listeners a los botones de eliminar fila
         function addDeleteRowListeners() {
             const deleteBtns = document.getElementById('productsTable').querySelectorAll('.fa-trash-alt');
             const tbody = document.getElementById('productsTable').querySelector('tbody');
@@ -1645,10 +1807,8 @@
                     if (tbody.childElementCount > 1) {
                         tbody.removeChild(row);
                     } else {
-                        // Si es la última fila, limpiar los campos
                         const inputs = row.querySelectorAll('input, textarea');
                         inputs.forEach(input => input.value = '');
-                        // Ajustar tamaño del input de código de fábrica
                         const factoryInput = row.querySelector('.factory-code-input');
                         resizeInput(factoryInput);
                     }
@@ -1656,7 +1816,6 @@
             });
         }
 
-        // Obtener productos de la tabla
         function getProductsFromTable() {
             const products = [];
             const rows = document.getElementById('productsTable').querySelectorAll('tbody tr');
@@ -1683,7 +1842,6 @@
             return products;
         }
 
-        // Validar formulario
         function validateForm() {
             const storeInput = document.getElementById('store');
             if (!storeInput.value.trim()) {
@@ -1712,9 +1870,7 @@
             const outputNumberInput = document.getElementById('outputNumber');
             const outputNumber = outputNumberInput.value.trim();
             
-            // Validar número de salida si se llena
             if (outputNumber) {
-                // Verificar que solo contenga números
                 if (!/^\d+$/.test(outputNumber)) {
                     Swal.fire({
                         title: 'Validación requerida',
@@ -1726,7 +1882,6 @@
                     return false;
                 }
                 
-                // Verificar que tenga entre 4 y 6 dígitos
                 if (outputNumber.length < 4 || outputNumber.length > 6) {
                     Swal.fire({
                         title: 'Validación requerida',
@@ -1750,7 +1905,6 @@
                 return false;
             }
             
-            // Validar que todos los productos tengan los campos obligatorios
             const rows = document.getElementById('productsTable').querySelectorAll('tbody tr');
             for (let i = 0; i < rows.length; i++) {
                 const inputs = rows[i].querySelectorAll('input, textarea');
@@ -1767,13 +1921,11 @@
                         confirmButtonColor: '#3085d6'
                     });
                     
-                    // Resaltar campos vacíos
                     if (!sku) inputs[0].style.borderColor = 'var(--danger)';
                     if (!description) inputs[2].style.borderColor = 'var(--danger)';
                     if (!quantity) inputs[3].style.borderColor = 'var(--danger)';
                     if (!reason) inputs[4].style.borderColor = 'var(--danger)';
                     
-                    // Quitar el resaltado después de 2 segundos
                     setTimeout(() => {
                         inputs[0].style.borderColor = '';
                         inputs[2].style.borderColor = '';
@@ -1788,7 +1940,6 @@
             return true;
         }
 
-        // Guardar reporte en Firebase
         async function saveReport() {
             if (!validateForm()) return;
             
@@ -1799,7 +1950,6 @@
             const notesInput = document.getElementById('notes');
             const saveReportBtn = document.getElementById('saveReportBtn');
             
-            // Obtener la fecha del input y sumar un día para guardar
             const inputDate = new Date(reportDateInput.value);
             const tomorrow = new Date(inputDate);
             tomorrow.setDate(tomorrow.getDate() + 1);
@@ -1815,66 +1965,54 @@
                 products: getProductsFromTable(),
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 reportNumber: parseInt(currentReportId.replace('#', '')),
-                createdBy: 'Sistema',
-                createdByName: 'Usuario'
+                createdBy: currentUserName || 'Sistema',
+                createdByName: currentUserName || 'Usuario'
             };
             
-            // Verificar si estamos editando o creando nuevo
             const isEditing = saveReportBtn.querySelector('.btn-text').innerHTML.includes('Actualizar');
             
             try {
-                // Mostrar spinner en el botón
                 saveReportBtn.classList.add('btn-loading');
                 saveReportBtn.querySelector('.spinner').style.display = 'inline-block';
                 saveReportBtn.querySelector('.btn-text').style.display = 'none';
                 
                 if (isEditing) {
-                    // Mantener los datos existentes que no se editan
                     const originalReport = reports.find(r => r.id === currentReportId);
                     if (originalReport) {
-                        // Preparar los datos para actualizar
                         const updateData = {
                             ...reportData,
                             status: originalReport.status || 'active',
                             createdAt: originalReport.createdAt || firebase.firestore.FieldValue.serverTimestamp(),
                             reportNumber: originalReport.reportNumber || parseInt(currentReportId.replace('#', '')),
                             receivedInWarehouse: originalReport.receivedInWarehouse || false,
-                            createdBy: originalReport.createdBy || 'Sistema',
-                            createdByName: originalReport.createdByName || 'Usuario',
+                            createdBy: originalReport.createdBy || currentUserName || 'Sistema',
+                            createdByName: originalReport.createdByName || currentUserName || 'Usuario',
                             editCount: (originalReport.editCount || 0) + 1
                         };
                         
-                        // Solo incluir receivedDate si existe
                         if (originalReport.receivedDate) {
                             updateData.receivedDate = originalReport.receivedDate;
                         }
                         
-                        // Comparar productos antiguos vs nuevos para detalles específicos
                         const productChanges = compareProducts(originalProducts, reportData.products);
                         let detailsText = 'Reporte modificado';
                         
                         if (productChanges.length > 0) {
                             detailsText = `Cambios en productos:<br>${productChanges.join('<br>')}`;
-                        } else {
-                            detailsText = 'Modificación general del reporte';
                         }
                         
-                        // Preparar la nueva entrada del log SIN FieldValue.serverTimestamp()
                         const newLogEntry = {
-                            timestamp: new Date().toISOString(), // Usar fecha ISO en lugar de FieldValue
+                            timestamp: new Date().toISOString(),
                             action: 'editado',
                             details: detailsText,
-                            browserFingerprint: browserFingerprint.id
+                            browserFingerprint: browserFingerprint.id,
+                            user: currentUserName || 'Desconocido'
                         };
                         
-                        // Obtener el log existente o crear uno nuevo
                         const existingLog = originalReport.editLog || [];
                         const updatedLog = [newLogEntry, ...existingLog];
-                        
-                        // Actualizar el log en los datos
                         updateData.editLog = updatedLog;
                         
-                        // Hacer la actualización
                         await db.collection("reportesMalEstado").doc(currentReportId).update(updateData);
                     } else {
                         throw new Error('Reporte original no encontrado');
@@ -1889,18 +2027,17 @@
                     
                     hideReturnForm(false);
                 } else {
-                    // Es un nuevo reporte - usar set() en lugar de update()
                     reportData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
                     reportData.status = 'active';
                     reportData.receivedInWarehouse = false;
                     reportData.editCount = 0;
                     
-                    // Crear la entrada del log inicial
                     reportData.editLog = [{
-                        timestamp: new Date().toISOString(), // Usar fecha ISO
+                        timestamp: new Date().toISOString(),
                         action: 'creado',
                         details: 'Reporte creado inicialmente',
-                        browserFingerprint: browserFingerprint.id
+                        browserFingerprint: browserFingerprint.id,
+                        user: currentUserName || 'Desconocido'
                     }];
                     
                     await db.collection("reportesMalEstado").doc(currentReportId).set(reportData);
@@ -1915,8 +2052,6 @@
                 }
                 
                 await loadReports();
-                
-                // Limpiar localStorage después de guardar
                 clearFormLocalStorage();
             } catch (error) {
                 console.error("Error al guardar el reporte:", error);
@@ -1927,7 +2062,6 @@
                     confirmButtonColor: '#3085d6'
                 });
             } finally {
-                // Restaurar texto del botón
                 saveReportBtn.classList.remove('btn-loading');
                 saveReportBtn.querySelector('.spinner').style.display = 'none';
                 saveReportBtn.querySelector('.btn-text').style.display = 'inline';
@@ -1935,12 +2069,10 @@
             }
         }
 
-        // Buscar reportes (compatible con #)
         function searchReports() {
             filterReports();
         }
 
-        // Cargar reportes desde Firebase
         function loadReports() {
             toggleInitialLoader(true);
             
@@ -1969,7 +2101,6 @@
                 });
         }
 
-        // Mostrar lista de reportes
         function renderReportsList(reportsToRender = reports) {
             const reportsList = document.getElementById('reportsList');
             
@@ -1988,10 +2119,11 @@
             
             reportsToRender.forEach(report => {
                 const reportCard = document.createElement('div');
-                reportCard.className = 'report-card'; // CLASE CON MARCO
+                reportCard.className = 'report-card';
                 const isReportReceived = report.receivedInWarehouse;
                 const isReportCancelled = report.status === 'cancelled';
                 const editCount = report.editCount || 0;
+                const isMacaalUser = currentUserName && currentUserName.toLowerCase().includes('macaal');
                 
                 reportCard.innerHTML = `
                     <div class="report-header">
@@ -2037,7 +2169,7 @@
                                     <i class="fas fa-edit"></i> Editar
                                 </a>
                                 ` : ''}
-                                ${!isReportCancelled && !isReportReceived ? `
+                                ${!isReportCancelled && !isReportReceived && isMacaalUser ? `
                                 <a href="#" onclick="markAsReceived('${report.id}'); return false;">
                                     <i class="fas fa-check-circle"></i> Marcar como Recibido
                                 </a>
@@ -2050,6 +2182,11 @@
                                 ${isReportReceived ? `
                                 <a href="#" style="color: var(--text-light); cursor: not-allowed;">
                                     <i class="fas fa-lock"></i> No editable (recibido en bodega)
+                                </a>
+                                ` : ''}
+                                ${!isMacaalUser && !isReportReceived && !isReportCancelled ? `
+                                <a href="#" style="color: var(--text-light); cursor: not-allowed; font-style: italic;">
+                                    <i class="fas fa-lock"></i> Solo Macaal puede marcar como recibido
                                 </a>
                                 ` : ''}
                             </div>
@@ -2085,26 +2222,21 @@
             });
         }
 
-        // Formatear fecha
         function formatDate(dateString) {
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             return new Date(dateString).toLocaleDateString('es-ES', options);
         }
 
-        // Formatear fecha y hora
         function formatDateTime(dateString) {
             if (!dateString) return 'No especificada';
             
             try {
                 let date;
                 if (dateString.toDate) {
-                    // Es un timestamp de Firebase
                     date = dateString.toDate();
                 } else if (typeof dateString === 'string') {
-                    // Es una cadena ISO
                     date = new Date(dateString);
                 } else if (dateString.seconds) {
-                    // Es un objeto con seconds y nanoseconds
                     date = new Date(dateString.seconds * 1000);
                 } else {
                     date = new Date(dateString);
@@ -2124,12 +2256,10 @@
             }
         }
 
-        // Confirmación para editar reporte
         window.confirmEditReport = function(reportId) {
             const report = reports.find(r => r.id === reportId);
             if (!report) return;
             
-            // Verificar si el reporte fue recibido en bodega
             if (report.receivedInWarehouse) {
                 Swal.fire({
                     title: 'No se puede editar',
@@ -2156,7 +2286,6 @@
             });
         };
 
-        // Editar reporte
         function editReport(reportId) {
             const report = reports.find(r => r.id === reportId);
             if (!report) return;
@@ -2171,7 +2300,6 @@
                 return;
             }
 
-            // Verificar si el reporte fue recibido en bodega
             if (report.receivedInWarehouse) {
                 Swal.fire({
                     title: 'No se puede editar',
@@ -2185,20 +2313,16 @@
             currentReportId = report.id;
             document.getElementById('reportNumber').textContent = report.id;
             
-            // Cambiar el texto del botón de guardar
             document.getElementById('saveReportBtn').innerHTML = '<span class="spinner" style="display: none;"></span><span class="btn-text"><i class="fas fa-save"></i> Actualizar</span>';
             
-            // Llenar campos del formulario
             document.getElementById('store').value = report.store;
             document.getElementById('reportDate').value = report.date.split('T')[0];
             document.getElementById('outputNumber').value = report.outputNumber || '';
             document.getElementById('entryDate').value = report.entryDate || '';
             document.getElementById('notes').value = report.notes || '';
             
-            // Guardar productos originales para comparación
             originalProducts = [...report.products];
             
-            // Llenar tabla de productos
             const tbody = document.getElementById('productsTable').querySelector('tbody');
             tbody.innerHTML = '';
             
@@ -2214,41 +2338,38 @@
                 `;
                 tbody.appendChild(newRow);
                 
-                // Ajustar tamaño del input de código de fábrica
                 const factoryInput = newRow.querySelector('.factory-code-input');
                 resizeInput(factoryInput);
             });
             
-            // Agregar event listeners a los botones de eliminar
             addDeleteRowListeners();
-            
-            // Agregar event listeners para ajustar tamaño de inputs
             addInputResizeListeners();
             
-            // Ocultar elementos
             document.getElementById('reportsList').style.display = 'none';
             document.getElementById('searchContainer').style.display = 'none';
             document.querySelector('.header-actions').style.display = 'none';
             document.getElementById('backButton').style.display = 'none';
             
-            // Mostrar el formulario
             document.getElementById('returnForm').style.display = 'block';
-            
-            // Marcar que estamos editando un reporte
             isCreatingNewReport = true;
-            
-            // Guardar datos en localStorage
             saveFormToLocalStorage();
-            
-            // Cerrar el modal si está abierto
             window.closeModal();
-            
-            // Desplazar hasta el formulario
             document.getElementById('returnForm').scrollIntoView({ behavior: 'smooth' });
         };
 
-        // Marcar reporte como recibido en bodega
         window.markAsReceived = function(reportId) {
+            const isMacaalUser = currentUserName && currentUserName.toLowerCase().includes('macaal');
+            
+            if (!isMacaalUser) {
+                Swal.fire({
+                    title: 'Permiso denegado',
+                    text: 'Solo el usuario Macaal puede marcar reportes como recibidos en bodega.',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+            
             const report = reports.find(r => r.id === reportId);
             
             Swal.fire({
@@ -2266,8 +2387,8 @@
                         .update({
                             receivedInWarehouse: true,
                             receivedDate: firebase.firestore.FieldValue.serverTimestamp(),
-                            receivedBy: 'Sistema',
-                            receivedByName: 'Usuario',
+                            receivedBy: currentUserName || 'Sistema',
+                            receivedByName: currentUserName || 'Usuario',
                             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                         })
                         .then(() => {
@@ -2294,11 +2415,9 @@
             });
         };
 
-        // Anular reporte
         window.cancelReport = function(reportId) {
             const report = reports.find(r => r.id === reportId);
             
-            // Verificar si el reporte fue recibido en bodega
             if (report.receivedInWarehouse) {
                 Swal.fire({
                     title: 'No se puede anular',
@@ -2324,8 +2443,8 @@
                         .update({
                             status: 'cancelled',
                             cancelledAt: firebase.firestore.FieldValue.serverTimestamp(),
-                            cancelledBy: 'Sistema',
-                            cancelledByName: 'Usuario',
+                            cancelledBy: currentUserName || 'Sistema',
+                            cancelledByName: currentUserName || 'Usuario',
                             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                         })
                         .then(() => {
@@ -2352,13 +2471,13 @@
             });
         };
 
-        // Ver reporte completo en modal
         window.viewReport = function(reportId) {
             const report = reports.find(r => r.id === reportId);
             if (!report) return;
             
             const isReportReceived = report.receivedInWarehouse;
             const isReportCancelled = report.status === 'cancelled';
+            const isMacaalUser = currentUserName && currentUserName.toLowerCase().includes('macaal');
             
             document.getElementById('modalReportContent').innerHTML = `
                 <div class="report-header">
@@ -2444,7 +2563,6 @@
                 </div>
             `;
             
-            // Botones solo con icono en el modal
             let actionButtons = `
                 <button class="btn btn-log btn-icon-only" onclick="showEditLog('${report.id}')" title="Ver Log Completo">
                     <i class="fas fa-history"></i>
@@ -2461,7 +2579,7 @@
                 `;
             }
             
-            if (!isReportCancelled && !isReportReceived) {
+            if (!isReportCancelled && !isReportReceived && isMacaalUser) {
                 actionButtons += `
                     <button class="btn btn-received btn-icon-only" onclick="markAsReceived('${report.id}')" title="Marcar como Recibido">
                         <i class="fas fa-check-circle"></i>
@@ -2487,12 +2605,10 @@
             `;
             
             document.getElementById('modalReportActions').innerHTML = actionButtons;
-            
             document.getElementById('reportModal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
         };
 
-        // Mostrar log completo de ediciones
         window.showEditLog = function(reportId) {
             const report = reports.find(r => r.id === reportId);
             if (!report) return;
@@ -2518,6 +2634,7 @@
                                 </div>
                                 <div style="text-align: right; font-size: 0.85rem; color: var(--text-light);">
                                     ${time}
+                                    ${log.user ? `<div style="color: var(--primary); margin-top: 0.3rem;">Usuario: ${log.user}</div>` : ''}
                                 </div>
                             </div>
                             <div style="font-size: 0.75rem; color: var(--primary); margin-top: 0.5rem; font-style: italic;">
@@ -2546,13 +2663,11 @@
             });
         };
 
-        // Función para cerrar modal
         window.closeModal = function() {
             document.getElementById('reportModal').style.display = 'none';
             document.body.style.overflow = '';
         };
 
-        // Guardar datos antes de recargar o cerrar la página
         window.addEventListener('beforeunload', function(e) {
             if (isCreatingNewReport) {
                 saveFormToLocalStorage();
