@@ -178,26 +178,652 @@
             position: fixed;
             top: 1.25rem;
             right: 1.25rem;
-            background: rgba(255, 255, 255, 0.9);
-            border: none;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: var(--text-light);
             font-size: 1.25rem;
             cursor: pointer;
             transition: var(--transition);
-            width: 42px;
-            height: 42px;
+            width: 46px;
+            height: 46px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             z-index: 100;
         }
 
         .logout-btn:hover {
             color: var(--danger);
             background: rgba(247, 37, 133, 0.9);
-            transform: scale(1.1);
+            transform: scale(1.05) rotate(5deg);
+            border-color: rgba(247, 37, 133, 0.3);
+        }
+
+        /* Widgets Superiores */
+        .top-widgets-container {
+            position: fixed;
+            top: 1.25rem;
+            display: flex;
+            gap: 0.75rem;
+            z-index: 99;
+        }
+
+        .widget-left {
+            left: 1.25rem;
+            align-items: flex-start;
+        }
+
+        .widget-right {
+            right: 5.5rem;
+            align-items: flex-end;
+        }
+
+        /* Widget del Clima - Diseño Moderno */
+        .weather-widget {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.65rem 1.25rem;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+            backdrop-filter: blur(15px);
+            border-radius: 18px;
+            box-shadow: 0 6px 25px rgba(67, 97, 238, 0.15),
+                        0 2px 8px rgba(67, 97, 238, 0.05),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            max-width: 340px;
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .weather-widget::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(67, 97, 238, 0.2), transparent);
+        }
+
+        .weather-widget:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(67, 97, 238, 0.2),
+                        0 4px 12px rgba(67, 97, 238, 0.1),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.9));
+        }
+
+        .weather-widget:active {
+            transform: translateY(-1px);
+        }
+
+        .weather-icon {
+            font-size: 1.8rem;
+            color: var(--accent);
+            min-width: 36px;
+            text-align: center;
+            filter: drop-shadow(0 2px 4px rgba(67, 97, 238, 0.2));
+            transition: transform 0.3s ease;
+        }
+
+        .weather-widget:hover .weather-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .weather-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+
+        .weather-temp {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--dark);
+            line-height: 1;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .weather-location {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-weight: 500;
+        }
+
+        .weather-location i {
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+
+        .weather-details-btn {
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-left: auto;
+            flex-shrink: 0;
+            box-shadow: 0 3px 10px rgba(67, 97, 238, 0.25);
+        }
+
+        .weather-details-btn:hover {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            transform: rotate(90deg) scale(1.1);
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.35);
+        }
+
+        /* Widget de Cumpleaños - Diseño Moderno */
+        .birthday-widget {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.65rem 1.25rem;
+            background: linear-gradient(135deg, rgba(247, 37, 133, 0.95), rgba(255, 77, 166, 0.85));
+            backdrop-filter: blur(15px);
+            border-radius: 18px;
+            box-shadow: 0 6px 25px rgba(247, 37, 133, 0.15),
+                        0 2px 8px rgba(247, 37, 133, 0.05),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            max-width: 340px;
+            transition: var(--transition);
+            cursor: pointer;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .birthday-widget::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        }
+
+        .birthday-widget::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .birthday-widget:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(247, 37, 133, 0.2),
+                        0 4px 12px rgba(247, 37, 133, 0.1),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            background: linear-gradient(135deg, rgba(247, 37, 133, 0.98), rgba(255, 77, 166, 0.9));
+        }
+
+        .birthday-widget:hover::after {
+            opacity: 1;
+        }
+
+        .birthday-widget:active {
+            transform: translateY(-1px);
+        }
+
+        .birthday-icon {
+            font-size: 1.8rem;
+            color: white;
+            min-width: 36px;
+            text-align: center;
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
+            position: relative;
+            z-index: 1;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-5px) rotate(5deg); }
+        }
+
+        .birthday-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        .birthday-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            opacity: 0.9;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .birthday-person {
+            font-size: 1rem;
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.3px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .birthday-date {
+            font-size: 0.78rem;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-weight: 500;
+        }
+
+        .birthday-date i {
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+
+        .birthday-countdown {
+            font-size: 0.75rem;
+            font-weight: 600;
+            opacity: 0.95;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.15rem 0.6rem;
+            border-radius: 20px;
+            margin-top: 0.3rem;
+            display: inline-block;
+            width: fit-content;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Modal de Detalles del Clima */
+        .weather-details-modal {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.75rem;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            width: 320px;
+            padding: 1.5rem;
+            z-index: 101;
+            animation: slideDown 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            overflow: hidden;
+        }
+
+        .weather-details-modal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-15px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .weather-details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .weather-details-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .weather-details-title i {
+            color: var(--accent);
+            font-size: 1.2rem;
+        }
+
+        .weather-details-close {
+            background: rgba(0, 0, 0, 0.05);
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 1.2rem;
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+
+        .weather-details-close:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: var(--danger);
+            transform: rotate(90deg);
+        }
+
+        .weather-details-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .weather-main-details {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+        }
+
+        .weather-main-temp {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            letter-spacing: -1px;
+        }
+
+        .weather-main-icon {
+            font-size: 3.5rem;
+            color: var(--accent);
+            filter: drop-shadow(0 4px 8px rgba(67, 97, 238, 0.2));
+        }
+
+        .weather-main-desc {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            text-align: center;
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+
+        .weather-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .weather-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(248, 249, 250, 0.7);
+            border-radius: 14px;
+            text-align: center;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .weather-stat:hover {
+            background: rgba(248, 249, 250, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .weather-stat i {
+            font-size: 1.5rem;
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+            filter: drop-shadow(0 2px 4px rgba(67, 97, 238, 0.2));
+        }
+
+        .weather-stat-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .weather-stat-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 0.35rem;
+            font-weight: 500;
+        }
+
+        .weather-update-time {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            text-align: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        /* Modal de Próximos Cumpleaños */
+        .birthday-details-modal {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 0.75rem;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(247, 37, 133, 0.15),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            width: 340px;
+            padding: 1.5rem;
+            z-index: 101;
+            animation: slideDown 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            overflow: hidden;
+        }
+
+        .birthday-details-modal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #f72585, #ff4da6);
+        }
+
+        .birthday-details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .birthday-details-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .birthday-details-title i {
+            color: #f72585;
+            font-size: 1.2rem;
+        }
+
+        .birthday-details-close {
+            background: rgba(0, 0, 0, 0.05);
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 1.2rem;
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+
+        .birthday-details-close:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: #f72585;
+            transform: rotate(90deg);
+        }
+
+        .birthday-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            max-height: 320px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .birthday-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .birthday-list::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+
+        .birthday-list::-webkit-scrollbar-thumb {
+            background: rgba(247, 37, 133, 0.3);
+            border-radius: 10px;
+        }
+
+        .birthday-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(247, 37, 133, 0.5);
+        }
+
+        .birthday-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.85rem;
+            background: rgba(248, 249, 250, 0.7);
+            border-radius: 14px;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .birthday-item:hover {
+            background: rgba(248, 249, 250, 0.9);
+            transform: translateX(3px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .birthday-item.today {
+            background: linear-gradient(135deg, rgba(247, 37, 133, 0.15), rgba(255, 77, 166, 0.1));
+            border: 1px solid rgba(247, 37, 133, 0.2);
+        }
+
+        .birthday-item-icon {
+            font-size: 1.4rem;
+            color: #f72585;
+            min-width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(247, 37, 133, 0.1);
+            border-radius: 10px;
+        }
+
+        .birthday-item.today .birthday-item-icon {
+            color: white;
+            background: linear-gradient(135deg, #f72585, #ff4da6);
+        }
+
+        .birthday-item-info {
+            flex: 1;
+        }
+
+        .birthday-item-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--dark);
+        }
+
+        .birthday-item.today .birthday-item-name {
+            color: #f72585;
+        }
+
+        .birthday-item-date {
+            font-size: 0.82rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .birthday-item.today .birthday-item-date {
+            color: rgba(247, 37, 133, 0.8);
+        }
+
+        .birthday-item-days {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #f72585;
+            background: rgba(247, 37, 133, 0.1);
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+            white-space: nowrap;
+            border: 1px solid rgba(247, 37, 133, 0.2);
+        }
+
+        .birthday-item.today .birthday-item-days {
+            color: white;
+            background: linear-gradient(135deg, #f72585, #ff4da6);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         /* Mensaje de logout */
@@ -206,17 +832,20 @@
             bottom: 1rem;
             left: 50%;
             transform: translateX(-50%);
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
+            padding: 0.85rem 1.75rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(67, 97, 238, 0.3);
             z-index: 100;
             opacity: 0;
             transition: opacity 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .logout-message.show {
@@ -593,13 +1222,60 @@
             .logout-btn {
                 top: 0.75rem;
                 right: 0.75rem;
-                width: 38px;
-                height: 38px;
-                background: rgba(255, 255, 255, 0.95);
+                width: 42px;
+                height: 42px;
+                font-size: 1.1rem;
             }
             
             .app-header {
                 padding-top: 2.5rem;
+            }
+            
+            .widget-left,
+            .widget-right {
+                top: 0.75rem;
+                gap: 0.5rem;
+            }
+            
+            .widget-left {
+                left: 0.75rem;
+            }
+            
+            .widget-right {
+                right: 4.5rem;
+            }
+            
+            .weather-widget,
+            .birthday-widget {
+                padding: 0.5rem 1rem;
+                max-width: 280px;
+                border-radius: 16px;
+            }
+            
+            .weather-temp {
+                font-size: 1.2rem;
+            }
+            
+            .weather-icon,
+            .birthday-icon {
+                font-size: 1.5rem;
+                min-width: 32px;
+            }
+            
+            .birthday-person {
+                font-size: 0.9rem;
+            }
+            
+            .weather-details-modal {
+                width: 280px;
+                right: -40px;
+                padding: 1.25rem;
+            }
+            
+            .birthday-details-modal {
+                width: 280px;
+                left: -40px;
+                padding: 1.25rem;
             }
         }
 
@@ -628,9 +1304,55 @@
             .logout-btn {
                 top: 0.5rem;
                 right: 0.5rem;
-                width: 36px;
-                height: 36px;
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+            
+            .widget-left,
+            .widget-right {
+                top: 0.5rem;
+            }
+            
+            .widget-left {
+                left: 0.5rem;
+            }
+            
+            .widget-right {
+                right: 4rem;
+            }
+            
+            .weather-widget,
+            .birthday-widget {
+                padding: 0.45rem 0.9rem;
+                max-width: 240px;
+                border-radius: 14px;
+            }
+            
+            .weather-temp {
                 font-size: 1.1rem;
+            }
+            
+            .weather-location,
+            .birthday-title,
+            .birthday-date {
+                font-size: 0.75rem;
+            }
+            
+            .birthday-person {
+                font-size: 0.85rem;
+            }
+            
+            .weather-details-modal {
+                width: 260px;
+                right: -60px;
+                padding: 1rem;
+            }
+            
+            .birthday-details-modal {
+                width: 260px;
+                left: -60px;
+                padding: 1rem;
             }
         }
 
@@ -675,6 +1397,62 @@
             <button id="logoutBtn" class="logout-btn" aria-label="Cerrar sesión" title="Cerrar sesión">
                 <i class="fas fa-sign-out-alt"></i>
             </button>
+            
+            <!-- Widgets Superiores Izquierda (Cumpleaños) - Solo se muestra si hay cumpleaños -->
+            <div class="top-widgets-container widget-left" id="birthdayContainer" style="display: none;">
+                <!-- Widget de Cumpleaños -->
+                <div class="birthday-widget" id="birthdayWidget">
+                    <div class="birthday-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Cargando...</span>
+                    </div>
+                </div>
+                
+                <!-- Modal de Próximos Cumpleaños -->
+                <div class="birthday-details-modal" id="birthdayDetailsModal">
+                    <div class="birthday-details-header">
+                        <div class="birthday-details-title">
+                            <i class="fas fa-birthday-cake"></i>
+                            Próximos Cumpleaños (30 días)
+                        </div>
+                        <button class="birthday-details-close" id="closeBirthdayDetails">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="birthday-list" id="birthdayList">
+                        Cargando cumpleaños...
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Widgets Superiores Derecha (Clima) -->
+            <div class="top-widgets-container widget-right">
+                <!-- Widget del Clima -->
+                <div class="weather-widget" id="weatherWidget">
+                    <div class="weather-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Cargando clima...</span>
+                    </div>
+                </div>
+                
+                <!-- Modal de Detalles del Clima -->
+                <div class="weather-details-modal" id="weatherDetailsModal">
+                    <div class="weather-details-header">
+                        <div class="weather-details-title">
+                            <i class="fas fa-cloud-sun"></i>
+                            Detalles del Clima
+                        </div>
+                        <button class="weather-details-close" id="closeWeatherDetails">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="weather-details-content">
+                        <div id="weatherDetailsContent">
+                            Cargando detalles...
+                        </div>
+                    </div>
+                </div>
+            </div>
         </header>
 
         <main id="appGrid" class="app-grid">
@@ -816,7 +1594,7 @@
                 Información de Versión
             </h2>
             <div class="version-info">
-                <strong>Versión 1.3.0 Stable</strong>
+                <strong>Versión 1.3.5 Stable</strong>
                 <small>Lanzamiento: 23/04/2025</small>
                 <div class="developer">Desarrollado por <strong>Luis El Crack</strong> 💻</div>
             </div>
@@ -853,7 +1631,6 @@
         // SISTEMA ESCALABLE DE CREDENCIALES
         // ============================================
         const CREDENTIALS = {
-            // Estructura: 'contraseña': { role: 'rol', access: ['feature1', 'feature2'] }
             'hogar': { 
                 role: 'admin', 
                 access: ['gestiones', 'reportes', 'crear_registros', 'visualizar_registros', 'catalogos'] 
@@ -870,8 +1647,6 @@
                 role: 'viewer', 
                 access: ['gestiones', 'reportes', 'crear_registros', 'visualizar_registros', 'catalogos'] 
             }
-            // Para agregar más usuarios en el futuro:
-            // 'nueva_credencial': { role: 'rol', access: ['features permitidas'] }
         };
         
         // Constantes del sistema
@@ -898,6 +1673,38 @@
             view_th2: 'https://drive.google.com/drive/folders/1uZew6baLcXot5RxytNAjilkzDeoySVJK?usp=sharing',
             view_eplastik: 'https://drive.google.com/drive/folders/15t0p44lnSNqXb0jKIkenNkKFPqFe9i_g?usp=sharing'
         };
+
+        // Configuración del Clima - USA TU API KEY COMPLETA (32 caracteres)
+        const WEATHER_CONFIG = {
+            apiKey: '55310ddcf36bad2a25f71487aaac7b48', // REEMPLAZA CON TU API KEY COMPLETA DE 32 CARACTERES
+            city: 'Chiquimula', // Ciudad fija - Chiquimula, Guatemala
+            country: 'GT', // Código de país para Guatemala
+            units: 'metric', // metric para Celsius
+            lang: 'es',
+            updateInterval: 30 * 60 * 1000 // Actualizar cada 30 minutos
+        };
+
+        // Base de datos de Cumpleaños (personalizable)
+        const BIRTHDAY_DATA = [
+            { name: "Juan Pérez", date: "04-15", department: "Logística" },
+            { name: "María González", date: "04-20", department: "Administración" },
+            { name: "Carlos Rodríguez", date: "04-22", department: "Bodega" },
+            { name: "Ana Martínez", date: "04-25", department: "Contabilidad" },
+            { name: "Luis Fernández", date: "04-28", department: "Transporte" },
+            { name: "Sofía López", date: "05-05", department: "Compras" },
+            { name: "Pedro Ramírez", date: "05-10", department: "Ventas" },
+            { name: "Laura Sánchez", date: "05-15", department: "Calidad" },
+            { name: "Diego Torres", date: "05-20", department: "Recursos Humanos" },
+            { name: "Carmen Ruiz", date: "05-25", department: "Finanzas" },
+            { name: "Javier Díaz", date: "06-01", department: "TI" },
+            { name: "Isabel Castro", date: "06-10", department: "Marketing" },
+            { name: "Roberto Morales", date: "06-15", department: "Operaciones" },
+            { name: "Patricia Ortega", date: "06-20", department: "Calidad" },
+            { name: "Fernando Silva", date: "06-25", department: "Logística" }
+        ];
+
+        // Días para mostrar cumpleaños próximos (30 días)
+        const UPCOMING_DAYS = 30;
 
         // Función para verificar permisos de usuario
         function hasAccess(feature) {
@@ -975,7 +1782,467 @@
             } else {
                 reportesCard.style.display = 'none';
             }
+            
+            // Iniciar widgets
+            initWeatherWidget();
+            initBirthdayWidget();
         }
+
+        // ============================================
+        // WIDGET DEL CLIMA (DERECHA) - DISEÑO MODERNO
+        // ============================================
+        let weatherData = null;
+        let weatherUpdateTime = null;
+
+        async function initWeatherWidget() {
+            const weatherWidget = document.getElementById('weatherWidget');
+            
+            try {
+                // Siempre usar Chiquimula, Guatemala como ubicación fija
+                await fetchWeatherByCity('Chiquimula', 'GT');
+                
+                // Programar actualización periódica
+                setInterval(() => {
+                    fetchWeatherByCity('Chiquimula', 'GT');
+                }, WEATHER_CONFIG.updateInterval);
+                
+            } catch (error) {
+                console.log('Error obteniendo clima de Chiquimula:', error);
+                showWeatherError('No se pudo cargar el clima');
+            }
+            
+            // Configurar eventos para el widget del clima
+            weatherWidget.addEventListener('click', toggleWeatherDetails);
+            document.getElementById('closeWeatherDetails').addEventListener('click', closeWeatherDetails);
+            
+            // Cerrar detalles al hacer clic fuera
+            document.addEventListener('click', (event) => {
+                const weatherDetailsModal = document.getElementById('weatherDetailsModal');
+                const weatherWidget = document.getElementById('weatherWidget');
+                
+                if (!weatherWidget.contains(event.target) && 
+                    !weatherDetailsModal.contains(event.target) &&
+                    weatherDetailsModal.style.display === 'block') {
+                    closeWeatherDetails();
+                }
+            });
+        }
+
+        async function fetchWeatherByCity(city, country) {
+            try {
+                const response = await fetch(
+                    `https://api.openweathermap.org/data/2.5/weather?q=${city},${country}&units=${WEATHER_CONFIG.units}&lang=${WEATHER_CONFIG.lang}&appid=${WEATHER_CONFIG.apiKey}`
+                );
+                
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta del clima');
+                }
+                
+                const data = await response.json();
+                weatherData = data;
+                weatherUpdateTime = new Date();
+                updateWeatherWidgetDisplay(data);
+                
+            } catch (error) {
+                console.error('Error obteniendo clima:', error);
+                showWeatherError('No se pudo cargar el clima');
+            }
+        }
+
+        function updateWeatherWidgetDisplay(data) {
+            const weatherWidget = document.getElementById('weatherWidget');
+            
+            // Mapear iconos de OpenWeather a FontAwesome
+            const iconMap = {
+                '01d': 'fas fa-sun',
+                '01n': 'fas fa-moon',
+                '02d': 'fas fa-cloud-sun',
+                '02n': 'fas fa-cloud-moon',
+                '03d': 'fas fa-cloud',
+                '03n': 'fas fa-cloud',
+                '04d': 'fas fa-cloud',
+                '04n': 'fas fa-cloud',
+                '09d': 'fas fa-cloud-rain',
+                '09n': 'fas fa-cloud-rain',
+                '10d': 'fas fa-cloud-sun-rain',
+                '10n': 'fas fa-cloud-moon-rain',
+                '11d': 'fas fa-bolt',
+                '11n': 'fas fa-bolt',
+                '13d': 'fas fa-snowflake',
+                '13n': 'fas fa-snowflake',
+                '50d': 'fas fa-smog',
+                '50n': 'fas fa-smog'
+            };
+            
+            const iconCode = data.weather[0].icon;
+            const weatherIcon = iconMap[iconCode] || 'fas fa-cloud';
+            const temp = Math.round(data.main.temp);
+            
+            weatherWidget.innerHTML = `
+                <div class="weather-icon">
+                    <i class="${weatherIcon}"></i>
+                </div>
+                <div class="weather-info">
+                    <div class="weather-temp">${temp}°C</div>
+                    <div class="weather-location">
+                        <i class="fas fa-map-marker-alt"></i> ${data.name}, ${data.sys.country}
+                    </div>
+                </div>
+                <button class="weather-details-btn">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            `;
+            
+            // Actualizar detalles si el modal está abierto
+            if (document.getElementById('weatherDetailsModal').style.display === 'block') {
+                updateWeatherDetails(data);
+            }
+        }
+
+        function showWeatherError(message) {
+            const weatherWidget = document.getElementById('weatherWidget');
+            weatherWidget.innerHTML = `
+                <div class="weather-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="weather-info">
+                    <div class="weather-temp">--°C</div>
+                    <div class="weather-location">${message}</div>
+                </div>
+                <button class="weather-details-btn" onclick="initWeatherWidget()">
+                    <i class="fas fa-redo"></i>
+                </button>
+            `;
+        }
+
+        function toggleWeatherDetails() {
+            const modal = document.getElementById('weatherDetailsModal');
+            if (modal.style.display === 'block') {
+                closeWeatherDetails();
+            } else {
+                openWeatherDetails();
+            }
+        }
+
+        function openWeatherDetails() {
+            const modal = document.getElementById('weatherDetailsModal');
+            modal.style.display = 'block';
+            
+            if (weatherData) {
+                updateWeatherDetails(weatherData);
+            }
+        }
+
+        function closeWeatherDetails() {
+            const modal = document.getElementById('weatherDetailsModal');
+            modal.style.display = 'none';
+        }
+
+        function updateWeatherDetails(data) {
+            const detailsContent = document.getElementById('weatherDetailsContent');
+            
+            // Mapear iconos
+            const iconMap = {
+                '01d': 'fas fa-sun',
+                '01n': 'fas fa-moon',
+                '02d': 'fas fa-cloud-sun',
+                '02n': 'fas fa-cloud-moon',
+                '03d': 'fas fa-cloud',
+                '03n': 'fas fa-cloud',
+                '04d': 'fas fa-cloud',
+                '04n': 'fas fa-cloud',
+                '09d': 'fas fa-cloud-rain',
+                '09n': 'fas fa-cloud-rain',
+                '10d': 'fas fa-cloud-sun-rain',
+                '10n': 'fas fa-cloud-moon-rain',
+                '11d': 'fas fa-bolt',
+                '11n': 'fas fa-bolt',
+                '13d': 'fas fa-snowflake',
+                '13n': 'fas fa-snowflake',
+                '50d': 'fas fa-smog',
+                '50n': 'fas fa-smog'
+            };
+            
+            const iconCode = data.weather[0].icon;
+            const weatherIcon = iconMap[iconCode] || 'fas fa-cloud';
+            const temp = Math.round(data.main.temp);
+            const feelsLike = Math.round(data.main.feels_like);
+            const humidity = data.main.humidity;
+            const windSpeed = Math.round(data.wind.speed * 3.6);
+            const pressure = data.main.pressure;
+            const visibility = Math.round(data.visibility / 1000);
+            
+            const description = data.weather[0].description.charAt(0).toUpperCase() + 
+                              data.weather[0].description.slice(1);
+            
+            // Formatear hora de actualización
+            let updateTimeText = '';
+            if (weatherUpdateTime) {
+                const now = new Date();
+                const diff = Math.floor((now - weatherUpdateTime) / 1000 / 60);
+                
+                if (diff === 0) {
+                    updateTimeText = 'Actualizado ahora';
+                } else if (diff === 1) {
+                    updateTimeText = 'Actualizado hace 1 minuto';
+                } else {
+                    updateTimeText = `Actualizado hace ${diff} minutos`;
+                }
+            }
+            
+            detailsContent.innerHTML = `
+                <div class="weather-main-details">
+                    <div>
+                        <div class="weather-main-temp">${temp}°C</div>
+                        <div class="weather-main-desc">${description}</div>
+                    </div>
+                    <div class="weather-main-icon">
+                        <i class="${weatherIcon}"></i>
+                    </div>
+                </div>
+                
+                <div class="weather-stats">
+                    <div class="weather-stat">
+                        <i class="fas fa-temperature-low"></i>
+                        <div class="weather-stat-value">${feelsLike}°C</div>
+                        <div class="weather-stat-label">Sensación</div>
+                    </div>
+                    <div class="weather-stat">
+                        <i class="fas fa-tint"></i>
+                        <div class="weather-stat-value">${humidity}%</div>
+                        <div class="weather-stat-label">Humedad</div>
+                    </div>
+                    <div class="weather-stat">
+                        <i class="fas fa-wind"></i>
+                        <div class="weather-stat-value">${windSpeed} km/h</div>
+                        <div class="weather-stat-label">Viento</div>
+                    </div>
+                    <div class="weather-stat">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <div class="weather-stat-value">${pressure} hPa</div>
+                        <div class="weather-stat-label">Presión</div>
+                    </div>
+                </div>
+                
+                <div class="weather-update-time">
+                    <i class="fas fa-clock"></i> ${updateTimeText}
+                </div>
+            `;
+        }
+
+        // ============================================
+        // WIDGET DE CUMPLEAÑOS (IZQUIERDA) - DISEÑO MODERNO
+        // ============================================
+        function initBirthdayWidget() {
+            const today = new Date();
+            const upcomingBirthdays = getUpcomingBirthdays(today, UPCOMING_DAYS);
+            
+            const birthdayContainer = document.getElementById('birthdayContainer');
+            
+            if (upcomingBirthdays.length > 0) {
+                // Mostrar el contenedor de cumpleaños
+                birthdayContainer.style.display = 'flex';
+                
+                // Mostrar el cumpleaños más cercano en el widget
+                const nextBirthday = upcomingBirthdays[0];
+                updateBirthdayWidget(nextBirthday);
+                
+                // Configurar eventos para mostrar la lista completa
+                const birthdayWidget = document.getElementById('birthdayWidget');
+                birthdayWidget.addEventListener('click', toggleBirthdayDetails);
+                document.getElementById('closeBirthdayDetails').addEventListener('click', closeBirthdayDetails);
+                
+                // Cerrar detalles al hacer clic fuera
+                document.addEventListener('click', (event) => {
+                    const birthdayDetailsModal = document.getElementById('birthdayDetailsModal');
+                    const birthdayWidget = document.getElementById('birthdayWidget');
+                    
+                    if (!birthdayWidget.contains(event.target) && 
+                        !birthdayDetailsModal.contains(event.target) &&
+                        birthdayDetailsModal.style.display === 'block') {
+                        closeBirthdayDetails();
+                    }
+                });
+                
+                // Actualizar lista de cumpleaños en el modal
+                updateBirthdayList(upcomingBirthdays);
+            } else {
+                // Ocultar el contenedor de cumpleaños si no hay próximos
+                birthdayContainer.style.display = 'none';
+            }
+            
+            // Actualizar a la medianoche
+            const now = new Date();
+            const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+            const timeUntilMidnight = tomorrow - now;
+            
+            setTimeout(() => {
+                initBirthdayWidget();
+            }, timeUntilMidnight + 1000);
+        }
+
+        function getUpcomingBirthdays(startDate, daysToCheck) {
+            const upcoming = [];
+            const startMonth = startDate.getMonth() + 1;
+            const startDay = startDate.getDate();
+            const startYear = startDate.getFullYear();
+            
+            for (const person of BIRTHDAY_DATA) {
+                const [birthMonth, birthDay] = person.date.split('-').map(Number);
+                
+                // Crear fecha de cumpleaños para este año
+                const birthdayThisYear = new Date(startYear, birthMonth - 1, birthDay);
+                
+                // Calcular días hasta el cumpleaños
+                let daysUntil;
+                
+                if (birthdayThisYear >= startDate) {
+                    // Cumpleaños este año (después de hoy)
+                    daysUntil = Math.ceil((birthdayThisYear - startDate) / (1000 * 60 * 60 * 24));
+                } else {
+                    // Cumpleaños el próximo año
+                    const birthdayNextYear = new Date(startYear + 1, birthMonth - 1, birthDay);
+                    daysUntil = Math.ceil((birthdayNextYear - startDate) / (1000 * 60 * 60 * 24));
+                }
+                
+                // Solo incluir si está dentro del rango de días
+                if (daysUntil <= daysToCheck) {
+                    upcoming.push({
+                        ...person,
+                        daysUntil: daysUntil,
+                        isToday: daysUntil === 0
+                    });
+                }
+            }
+            
+            // Ordenar por días hasta el cumpleaños
+            return upcoming.sort((a, b) => a.daysUntil - b.daysUntil);
+        }
+
+        function updateBirthdayWidget(birthdayData) {
+            const birthdayWidget = document.getElementById('birthdayWidget');
+            
+            if (!birthdayData) {
+                birthdayWidget.innerHTML = `
+                    <div class="birthday-icon">
+                        <i class="fas fa-birthday-cake"></i>
+                    </div>
+                    <div class="birthday-info">
+                        <div class="birthday-title">Próximos cumpleaños</div>
+                        <div class="birthday-person">No hay cumpleaños próximos</div>
+                        <div class="birthday-date">
+                            <i class="fas fa-calendar-alt"></i> En los próximos 30 días
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            const [month, day] = birthdayData.date.split('-');
+            const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            const formattedDate = `${day} ${monthNames[parseInt(month) - 1]}`;
+            
+            let title, personText;
+            
+            if (birthdayData.isToday) {
+                title = "¡HOY CUMPLE!";
+                personText = birthdayData.name;
+            } else if (birthdayData.daysUntil === 1) {
+                title = "MAÑANA CUMPLE";
+                personText = birthdayData.name;
+            } else {
+                title = "PRÓXIMO CUMPLEAÑOS";
+                personText = birthdayData.name;
+            }
+            
+            birthdayWidget.innerHTML = `
+                <div class="birthday-icon">
+                    <i class="fas fa-birthday-cake"></i>
+                </div>
+                <div class="birthday-info">
+                    <div class="birthday-title">${title}</div>
+                    <div class="birthday-person">${personText}</div>
+                    <div class="birthday-date">
+                        <i class="fas fa-calendar-alt"></i> ${formattedDate}
+                    </div>
+                    ${birthdayData.isToday ? 
+                        `<div class="birthday-countdown">¡CELEBREMOS! 🎉</div>` : 
+                        `<div class="birthday-countdown">Faltan ${birthdayData.daysUntil} días</div>`
+                    }
+                </div>
+            `;
+        }
+
+        function toggleBirthdayDetails() {
+            const modal = document.getElementById('birthdayDetailsModal');
+            if (modal.style.display === 'block') {
+                closeBirthdayDetails();
+            } else {
+                openBirthdayDetails();
+            }
+        }
+
+        function openBirthdayDetails() {
+            const modal = document.getElementById('birthdayDetailsModal');
+            modal.style.display = 'block';
+        }
+
+        function closeBirthdayDetails() {
+            const modal = document.getElementById('birthdayDetailsModal');
+            modal.style.display = 'none';
+        }
+
+        function updateBirthdayList(birthdays) {
+            const birthdayList = document.getElementById('birthdayList');
+            
+            if (birthdays.length === 0) {
+                birthdayList.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--text-light);">
+                        <i class="fas fa-birthday-cake" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p>No hay cumpleaños en los próximos 30 días</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                               'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            
+            let html = '';
+            
+            for (const birthday of birthdays) {
+                const [month, day] = birthday.date.split('-').map(Number);
+                const formattedDate = `${day} de ${monthNames[month - 1]}`;
+                
+                let daysText;
+                if (birthday.isToday) {
+                    daysText = '¡HOY!';
+                } else if (birthday.daysUntil === 1) {
+                    daysText = 'Mañana';
+                } else {
+                    daysText = `En ${birthday.daysUntil} días`;
+                }
+                
+                html += `
+                    <div class="birthday-item ${birthday.isToday ? 'today' : ''}">
+                        <div class="birthday-item-icon">
+                            <i class="fas fa-birthday-cake"></i>
+                        </div>
+                        <div class="birthday-item-info">
+                            <div class="birthday-item-name">${birthday.name}</div>
+                            <div class="birthday-item-date">${formattedDate} • ${birthday.department}</div>
+                        </div>
+                        <div class="birthday-item-days">${daysText}</div>
+                    </div>
+                `;
+            }
+            
+            birthdayList.innerHTML = html;
+        }
+
+        // ============================================
+        // SISTEMA PRINCIPAL
+        // ============================================
 
         // Verificar autenticación al cargar
         document.addEventListener('DOMContentLoaded', function() {
