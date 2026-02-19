@@ -28,7 +28,10 @@
             --danger: #ef233c;
             --warning: #fc7703;
             --success: #03fc41;
+            --info: #17a2b8;
             --finalized: #6c757d;
+            --en-cola: #ffc107;
+            --cerrado: #28a745;
             --border-radius: 8px;
             --shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             --transition: all 0.2s ease;
@@ -234,6 +237,15 @@
             color: var(--primary);
         }
 
+        .data-base-btn {
+            background: var(--success);
+            color: white;
+        }
+
+        .data-base-btn:hover {
+            background: #218838;
+        }
+
         .search-container {
             margin-bottom: 1.5rem;
             display: flex;
@@ -415,6 +427,21 @@
 
         .btn-finalized {
             background: var(--finalized);
+        }
+
+        .btn-en-cola {
+            background: var(--en-cola);
+            color: #212529;
+        }
+
+        .btn-cerrado {
+            background: var(--cerrado);
+            color: white;
+        }
+
+        .btn-info {
+            background: var(--info);
+            color: white;
         }
 
         /* Botones solo con icono */
@@ -910,6 +937,11 @@
             color: var(--warning);
         }
 
+        .status-badge.en-cola {
+            background: rgba(255, 193, 7, 0.1);
+            color: #856404;
+        }
+
         .status-badge.finalized {
             background: rgba(108, 117, 125, 0.1);
             color: var(--finalized);
@@ -918,6 +950,11 @@
         .status-badge.cancelled {
             background: rgba(239, 35, 60, 0.1);
             color: var(--danger);
+        }
+
+        .status-badge.cerrado {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--cerrado);
         }
 
         .edit-attempts {
@@ -1148,6 +1185,10 @@
                     <i class="fas fa-user"></i>
                     <span id="currentUser"></span>
                 </div>
+                <!-- Botón a Base de Datos - Solo visible para macaal -->
+                <a href="data_macaal.html" class="btn data-base-btn" id="dataBaseBtn" style="display: none;">
+                    <i class="fas fa-database"></i> Base Datos
+                </a>
                 <a href="index.html" class="btn" id="backButton">
                     <i class="fas fa-arrow-left"></i> Volver
                 </a>
@@ -1176,7 +1217,11 @@
                 <div class="filter-content" id="filterContent">
                     <div class="filter-checkbox">
                         <input type="checkbox" id="filterActive" checked>
-                        <label for="filterActive">Pedidos Activos</label>
+                        <label for="filterActive">Pendientes</label>
+                    </div>
+                    <div class="filter-checkbox">
+                        <input type="checkbox" id="filterEnCola">
+                        <label for="filterEnCola">En Cola</label>
                     </div>
                     <div class="filter-checkbox">
                         <input type="checkbox" id="filterFinalized">
@@ -1184,7 +1229,7 @@
                     </div>
                     <div class="filter-checkbox">
                         <input type="checkbox" id="filterCancelled">
-                        <label for="filterCancelled">Pedidos Anulados</label>
+                        <label for="filterCancelled">Anulados</label>
                     </div>
                 </div>
             </div>
@@ -1403,6 +1448,11 @@
                     document.getElementById('appContent').style.display = 'block';
                     document.getElementById('logoutBtn').style.display = 'flex';
                     document.getElementById('currentUser').textContent = currentUserName;
+                    
+                    // Mostrar botón de Base de Datos solo para macaal
+                    if (authData.auth.toLowerCase() === 'macaal') {
+                        document.getElementById('dataBaseBtn').style.display = 'flex';
+                    }
                     
                     initializeApp();
                 } else {
@@ -1702,6 +1752,7 @@
             });
 
             document.getElementById('filterActive').addEventListener('change', filterOrders);
+            document.getElementById('filterEnCola').addEventListener('change', filterOrders);
             document.getElementById('filterFinalized').addEventListener('change', filterOrders);
             document.getElementById('filterCancelled').addEventListener('change', filterOrders);
 
@@ -1767,6 +1818,7 @@
 
         function filterOrders() {
             const showActive = document.getElementById('filterActive').checked;
+            const showEnCola = document.getElementById('filterEnCola').checked;
             const showFinalized = document.getElementById('filterFinalized').checked;
             const showCancelled = document.getElementById('filterCancelled').checked;
             
@@ -1782,9 +1834,19 @@
                 
                 if (order.finalized) {
                     return showFinalized;
-                } else {
-                    return showActive;
                 }
+                
+                // Los pedidos cerrados se muestran en el filtro de pendientes
+                if (order.estadoSecundario === 'cerrado') {
+                    return showActive; // Se muestran junto con los pendientes
+                }
+                
+                if (order.estadoSecundario === 'en-cola') {
+                    return showEnCola;
+                }
+                
+                // Pendientes (sin estado secundario o con estado pendiente)
+                return showActive;
             });
             
             if (searchTerm) {
@@ -2173,7 +2235,8 @@
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 orderNumber: parseInt(currentOrderId.replace('#', '')),
                 createdBy: currentUserName || 'Sistema',
-                createdByName: currentUserName || 'Usuario'
+                createdByName: currentUserName || 'Usuario',
+                estadoSecundario: 'pendiente' // Estado por defecto al crear
             };
             
             const isEditing = saveOrderBtn.querySelector('.btn-text').innerHTML.includes('Actualizar');
@@ -2194,7 +2257,8 @@
                             finalized: originalOrder.finalized || false,
                             createdBy: originalOrder.createdBy || currentUserName || 'Sistema',
                             createdByName: originalOrder.createdByName || currentUserName || 'Usuario',
-                            editCount: (originalOrder.editCount || 0) + 1
+                            editCount: (originalOrder.editCount || 0) + 1,
+                            estadoSecundario: originalOrder.estadoSecundario || 'pendiente'
                         };
                         
                         if (originalOrder.finalizedDate) {
@@ -2238,6 +2302,7 @@
                     orderData.status = 'active';
                     orderData.finalized = false;
                     orderData.editCount = 0;
+                    orderData.estadoSecundario = 'pendiente';
                     
                     orderData.editLog = [{
                         timestamp: new Date().toISOString(),
@@ -2340,6 +2405,7 @@
                 const isOrderCancelled = order.status === 'cancelled';
                 const editCount = order.editCount || 0;
                 const productCount = order.products ? order.products.length : 0;
+                const estadoSecundario = order.estadoSecundario || 'pendiente';
                 
                 let statusClass = 'status-badge pending';
                 let statusText = 'PENDIENTE';
@@ -2350,6 +2416,12 @@
                 } else if (isOrderFinalized) {
                     statusClass = 'status-badge finalized';
                     statusText = 'FINALIZADO';
+                } else if (estadoSecundario === 'en-cola') {
+                    statusClass = 'status-badge en-cola';
+                    statusText = 'EN COLA';
+                } else if (estadoSecundario === 'cerrado') {
+                    statusClass = 'status-badge cerrado';
+                    statusText = 'CERRADO';
                 }
                 
                 orderCard.innerHTML = `
@@ -2385,17 +2457,32 @@
                                 <a href="#" onclick="showEditLog('${order.id}'); return false;" class="btn-log-action">
                                     <i class="fas fa-history"></i> Ver Log
                                 </a>
-                                ${!isOrderCancelled && !isOrderFinalized ? `
+                                ${!isOrderCancelled && !isOrderFinalized && estadoSecundario !== 'cerrado' ? `
+                                <a href="#" onclick="cambiarEstadoSecundario('${order.id}', 'en-cola'); return false;">
+                                    <i class="fas fa-clock"></i> Mover a En Cola
+                                </a>
+                                ` : ''}
+                                ${!isOrderCancelled && !isOrderFinalized && estadoSecundario === 'en-cola' ? `
+                                <a href="#" onclick="cambiarEstadoSecundario('${order.id}', 'pendiente'); return false;">
+                                    <i class="fas fa-undo"></i> Mover a Pendiente
+                                </a>
+                                ` : ''}
+                                ${!isOrderCancelled && !isOrderFinalized && estadoSecundario !== 'cerrado' ? `
+                                <a href="#" onclick="cambiarEstadoSecundario('${order.id}', 'cerrado'); return false;" style="color: var(--cerrado);">
+                                    <i class="fas fa-check-double"></i> Cerrar Pedido
+                                </a>
+                                ` : ''}
+                                ${!isOrderCancelled && !isOrderFinalized && estadoSecundario !== 'cerrado' ? `
                                 <a href="#" onclick="confirmEditOrder('${order.id}'); return false;">
                                     <i class="fas fa-edit"></i> Editar
                                 </a>
                                 ` : ''}
-                                ${!isOrderCancelled && !isOrderFinalized ? `
+                                ${!isOrderCancelled && !isOrderFinalized && estadoSecundario !== 'cerrado' ? `
                                 <a href="#" onclick="finalizeOrder('${order.id}'); return false;" style="color: var(--finalized);">
                                     <i class="fas fa-check-circle"></i> Finalizar
                                 </a>
                                 ` : ''}
-                                ${!isOrderCancelled && !isOrderFinalized ? `
+                                ${!isOrderCancelled && !isOrderFinalized && estadoSecundario !== 'cerrado' ? `
                                 <a href="#" onclick="cancelOrder('${order.id}'); return false;" style="color: var(--danger);">
                                     <i class="fas fa-ban"></i> Anular
                                 </a>
@@ -2403,6 +2490,11 @@
                                 ${isOrderFinalized ? `
                                 <a href="#" style="color: var(--text-light); cursor: not-allowed;">
                                     <i class="fas fa-lock"></i> Finalizado
+                                </a>
+                                ` : ''}
+                                ${estadoSecundario === 'cerrado' ? `
+                                <a href="#" style="color: var(--text-light); cursor: not-allowed;">
+                                    <i class="fas fa-lock"></i> Cerrado
                                 </a>
                                 ` : ''}
                             </div>
@@ -2420,6 +2512,72 @@
                 ordersList.appendChild(orderCard);
             });
         }
+
+        // Función para cambiar estado secundario
+        window.cambiarEstadoSecundario = async function(orderId, nuevoEstado) {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            const estadoAnterior = order.estadoSecundario || 'pendiente';
+            let mensaje = '';
+            let titulo = '';
+
+            if (nuevoEstado === 'cerrado') {
+                titulo = '¿Cerrar pedido?';
+                mensaje = 'Un pedido cerrado no se podrá editar. ¿Estás seguro?';
+            } else if (nuevoEstado === 'en-cola') {
+                titulo = '¿Mover a En Cola?';
+                mensaje = 'El pedido se marcará como "En Cola" pero aún podrá editarse.';
+            } else {
+                titulo = '¿Mover a Pendiente?';
+                mensaje = 'El pedido volverá al estado Pendiente.';
+            }
+
+            const result = await Swal.fire({
+                title: titulo,
+                text: mensaje,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, cambiar',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    await db.collection("pedidosBodega").doc(orderId).update({
+                        estadoSecundario: nuevoEstado,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        [`estadoLog.${new Date().toISOString()}`]: {
+                            anterior: estadoAnterior,
+                            nuevo: nuevoEstado,
+                            usuario: currentUserName,
+                            fingerprint: browserFingerprint.id
+                        }
+                    });
+
+                    Swal.fire({
+                        title: 'Estado actualizado',
+                        text: `El pedido ahora está ${nuevoEstado === 'cerrado' ? 'Cerrado' : nuevoEstado === 'en-cola' ? 'En Cola' : 'Pendiente'}`,
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+
+                    await loadOrders();
+                    window.closeModal();
+                } catch (error) {
+                    console.error("Error al cambiar estado:", error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se pudo cambiar el estado del pedido',
+                        icon: 'error',
+                        confirmButtonColor: '#3085d6'
+                    });
+                }
+            }
+        };
 
         function formatDate(dateString) {
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -2468,6 +2626,16 @@
                 });
                 return;
             }
+
+            if (order.estadoSecundario === 'cerrado') {
+                Swal.fire({
+                    title: 'No se puede editar',
+                    text: 'Este pedido está cerrado y no se puede editar.',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
             
             Swal.fire({
                 title: '¿Editar pedido?',
@@ -2503,6 +2671,16 @@
                 Swal.fire({
                     title: 'No se puede editar',
                     text: 'Este pedido no se puede editar porque ya está finalizado.',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+
+            if (order.estadoSecundario === 'cerrado') {
+                Swal.fire({
+                    title: 'No se puede editar',
+                    text: 'Este pedido está cerrado y no se puede editar.',
                     icon: 'warning',
                     confirmButtonColor: '#3085d6'
                 });
@@ -2562,6 +2740,16 @@
                     title: 'Ya finalizado',
                     text: 'Este pedido ya está marcado como finalizado.',
                     icon: 'info',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+
+            if (order.estadoSecundario === 'cerrado') {
+                Swal.fire({
+                    title: 'No se puede finalizar',
+                    text: 'Este pedido está cerrado. Debe estar en Pendiente o En Cola para finalizar.',
+                    icon: 'warning',
                     confirmButtonColor: '#3085d6'
                 });
                 return;
@@ -2637,6 +2825,16 @@
                 });
                 return;
             }
+
+            if (order.estadoSecundario === 'cerrado') {
+                Swal.fire({
+                    title: 'No se puede anular',
+                    text: 'Este pedido está cerrado y no se puede anular.',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
             
             Swal.fire({
                 title: '¿Anular pedido?',
@@ -2687,12 +2885,17 @@
             
             const isOrderFinalized = order.finalized;
             const isOrderCancelled = order.status === 'cancelled';
+            const estadoSecundario = order.estadoSecundario || 'pendiente';
             
             let statusBadge = '';
             if (isOrderCancelled) {
                 statusBadge = '<span class="status-badge cancelled">ANULADO</span>';
             } else if (isOrderFinalized) {
                 statusBadge = '<span class="status-badge finalized">FINALIZADO</span>';
+            } else if (estadoSecundario === 'en-cola') {
+                statusBadge = '<span class="status-badge en-cola">EN COLA</span>';
+            } else if (estadoSecundario === 'cerrado') {
+                statusBadge = '<span class="status-badge cerrado">CERRADO</span>';
             } else {
                 statusBadge = '<span class="status-badge pending">PENDIENTE</span>';
             }
@@ -2774,12 +2977,37 @@
                 </button>
             `;
             
-            if (!isOrderCancelled && !isOrderFinalized) {
+            if (!isOrderCancelled && !isOrderFinalized && estadoSecundario !== 'cerrado') {
                 actionButtons += `
                     <button class="btn btn-secondary" onclick="confirmEditOrder('${order.id}')" title="Editar">
                         <i class="fas fa-edit"></i> Editar
                     </button>
                 `;
+                
+                // Botones de estado secundario
+                if (estadoSecundario !== 'en-cola') {
+                    actionButtons += `
+                        <button class="btn btn-en-cola" onclick="cambiarEstadoSecundario('${order.id}', 'en-cola')" title="Mover a En Cola">
+                            <i class="fas fa-clock"></i> En Cola
+                        </button>
+                    `;
+                }
+                
+                if (estadoSecundario === 'en-cola') {
+                    actionButtons += `
+                        <button class="btn btn-info" onclick="cambiarEstadoSecundario('${order.id}', 'pendiente')" title="Mover a Pendiente">
+                            <i class="fas fa-undo"></i> Pendiente
+                        </button>
+                    `;
+                }
+                
+                if (estadoSecundario !== 'cerrado') {
+                    actionButtons += `
+                        <button class="btn btn-cerrado" onclick="cambiarEstadoSecundario('${order.id}', 'cerrado')" title="Cerrar Pedido">
+                            <i class="fas fa-check-double"></i> Cerrar
+                        </button>
+                    `;
+                }
                 
                 // Verificar si el usuario es macaal para mostrar botón de finalizar
                 const currentAuth = localStorage.getItem(STORAGE_KEY);
