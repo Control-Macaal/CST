@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <!-- Librerías para PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -25,6 +28,7 @@
             --danger: #ef233c;
             --warning: #fc7703;
             --success: #03fc41;
+            --finalized: #6c757d;
             --border-radius: 8px;
             --shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             --transition: all 0.2s ease;
@@ -46,7 +50,7 @@
             min-height: 100vh;
         }
 
-        /* Pantalla de redirección - SIN LOGIN PROPIO */
+        /* Pantalla de redirección */
         .redirect-container {
             display: flex;
             flex-direction: column;
@@ -157,7 +161,7 @@
             opacity: 1;
         }
 
-        /* CONTENEDOR PRINCIPAL CON MARCO */
+        /* CONTENEDOR PRINCIPAL */
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -401,8 +405,16 @@
             background: var(--primary);
         }
 
-        .btn-received {
-            background: var(--success);
+        .btn-pdf {
+            background: #e74c3c;
+        }
+        
+        .btn-pdf:hover {
+            background: #c0392b;
+        }
+
+        .btn-finalized {
+            background: var(--finalized);
         }
 
         /* Botones solo con icono */
@@ -576,7 +588,7 @@
             gap: 1rem;
         }
 
-        /* CARD DE PEDIDO CON MARCO */
+        /* CARD DE PEDIDO */
         .order-card {
             background: var(--card-bg);
             border-radius: var(--border-radius);
@@ -795,8 +807,6 @@
             display: inline-flex;
             align-items: center;
             gap: 0.3rem;
-            background: rgba(252, 119, 3, 0.1);
-            color: var(--warning);
             padding: 0.3rem 0.6rem;
             border-radius: 4px;
             font-size: 0.8rem;
@@ -804,9 +814,14 @@
             font-weight: 500;
         }
 
-        .status-badge.sent {
-            background: rgba(3, 252, 65, 0.1);
-            color: var(--success);
+        .status-badge.pending {
+            background: rgba(252, 119, 3, 0.1);
+            color: var(--warning);
+        }
+
+        .status-badge.finalized {
+            background: rgba(108, 117, 125, 0.1);
+            color: var(--finalized);
         }
 
         .status-badge.cancelled {
@@ -1028,7 +1043,7 @@
             </div>
         </header>
 
-        <!-- Buscador con Filtros al lado -->
+        <!-- Buscador con Filtros -->
         <div class="search-container" id="searchContainer">
             <div class="search-input-container">
                 <input type="text" class="search-input" id="searchInput" name="searchInput" placeholder="Buscar por número, tienda o responsable...">
@@ -1049,8 +1064,8 @@
                         <label for="filterActive">Pedidos Activos</label>
                     </div>
                     <div class="filter-checkbox">
-                        <input type="checkbox" id="filterSent">
-                        <label for="filterSent">Enviados a Bodega</label>
+                        <input type="checkbox" id="filterFinalized">
+                        <label for="filterFinalized">Finalizados</label>
                     </div>
                     <div class="filter-checkbox">
                         <input type="checkbox" id="filterCancelled">
@@ -1174,13 +1189,13 @@
         let currentUserName = '';
 
         // ==============================
-        // CONFIGURACIÓN DE FIREBASE
+        // CONFIGURACIÓN DE FIREBASE CORREGIDA
         // ==============================
         const firebaseConfig = {
             apiKey: "AIzaSyDQe0HfkrnRJAH8Dtzh-gesTsq_UdHnOHE",
             authDomain: "pos-tda.firebaseapp.com",
             projectId: "pos-tda",
-            storageBucket: "pos-tda.firebasestorage.app",
+            storageBucket: "pos-tda.appspot.com", // Corregido: .firebasestorage.app → .appspot.com
             messagingSenderId: "732089248607",
             appId: "1:732089248607:web:895d8588d384b05a26a4ea",
             measurementId: "G-QTRZV9X9ML"
@@ -1189,6 +1204,16 @@
         // Inicializa Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        
+        // Habilitar persistencia offline para evitar errores de conexión
+        db.enablePersistence()
+            .catch((err) => {
+                if (err.code == 'failed-precondition') {
+                    console.log('Persistencia falló - múltiples pestañas abiertas');
+                } else if (err.code == 'unimplemented') {
+                    console.log('Persistencia no disponible en este navegador');
+                }
+            });
 
         // Datos de la aplicación
         let orders = [];
@@ -1283,6 +1308,75 @@
         }
 
         // ==============================
+        // FUNCIÓN PARA GENERAR PDF DE PICKING
+        // ==============================
+        
+        function generatePickingPDF(order) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Título
+            doc.setFontSize(18);
+            doc.setTextColor(67, 97, 238);
+            doc.text('LISTA DE PICKING', 14, 20);
+            
+            // Información del pedido
+            doc.setFontSize(11);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Pedido: ${order.id}`, 14, 30);
+            doc.text(`Tienda: ${order.store}`, 14, 37);
+            doc.text(`Fecha: ${new Date(order.date).toLocaleDateString('es-ES')}`, 14, 44);
+            doc.text(`Responsable: ${order.responsible || 'No especificado'}`, 14, 51);
+            
+            // Línea separadora
+            doc.setDrawColor(200, 200, 200);
+            doc.line(14, 58, 196, 58);
+            
+            // Tabla de productos
+            const tableColumn = ["SKU", "Cód. Fábrica", "Descripción", "Cantidad"];
+            const tableRows = [];
+            
+            order.products.forEach(product => {
+                const productData = [
+                    product.sku,
+                    product.factoryCode || '-',
+                    product.description,
+                    product.quantity.toString()
+                ];
+                tableRows.push(productData);
+            });
+            
+            doc.autoTable({
+                head: [tableColumn],
+                body: tableRows,
+                startY: 65,
+                theme: 'grid',
+                styles: { fontSize: 9, cellPadding: 3 },
+                headStyles: { fillColor: [67, 97, 238], textColor: 255 },
+                alternateRowStyles: { fillColor: [240, 240, 240] }
+            });
+            
+            // Espacio para firmas
+            const finalY = doc.lastAutoTable.finalY + 15;
+            
+            doc.setFontSize(10);
+            doc.text('__________________________', 14, finalY);
+            doc.text('Firma de quien prepara', 14, finalY + 5);
+            
+            doc.text('__________________________', 120, finalY);
+            doc.text('Firma de quien recibe', 120, finalY + 5);
+            
+            // Nota
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            doc.text('Este documento es generado automáticamente por el sistema de Pedidos a Bodega', 14, finalY + 20);
+            doc.text(`Fecha de generación: ${new Date().toLocaleString('es-ES')}`, 14, finalY + 25);
+            
+            // Guardar PDF
+            doc.save(`Picking_${order.id.replace('#', '')}.pdf`);
+        }
+
+        // ==============================
         // FUNCIONES DE COMPARACIÓN DE PRODUCTOS
         // ==============================
         
@@ -1373,7 +1467,7 @@
             });
 
             document.getElementById('filterActive').addEventListener('change', filterOrders);
-            document.getElementById('filterSent').addEventListener('change', filterOrders);
+            document.getElementById('filterFinalized').addEventListener('change', filterOrders);
             document.getElementById('filterCancelled').addEventListener('change', filterOrders);
 
             document.getElementById('filterBtn').addEventListener('click', toggleFilterDropdown);
@@ -1431,7 +1525,7 @@
 
         function filterOrders() {
             const showActive = document.getElementById('filterActive').checked;
-            const showSent = document.getElementById('filterSent').checked;
+            const showFinalized = document.getElementById('filterFinalized').checked;
             const showCancelled = document.getElementById('filterCancelled').checked;
             
             const searchInput = document.getElementById('searchInput');
@@ -1444,8 +1538,8 @@
                     return showCancelled;
                 }
                 
-                if (order.sentToWarehouse) {
-                    return showSent;
+                if (order.finalized) {
+                    return showFinalized;
                 } else {
                     return showActive;
                 }
@@ -1874,14 +1968,14 @@
                             status: originalOrder.status || 'active',
                             createdAt: originalOrder.createdAt || firebase.firestore.FieldValue.serverTimestamp(),
                             orderNumber: originalOrder.orderNumber || parseInt(currentOrderId.replace('#', '')),
-                            sentToWarehouse: originalOrder.sentToWarehouse || false,
+                            finalized: originalOrder.finalized || false,
                             createdBy: originalOrder.createdBy || currentUserName || 'Sistema',
                             createdByName: originalOrder.createdByName || currentUserName || 'Usuario',
                             editCount: (originalOrder.editCount || 0) + 1
                         };
                         
-                        if (originalOrder.sentDate) {
-                            updateData.sentDate = originalOrder.sentDate;
+                        if (originalOrder.finalizedDate) {
+                            updateData.finalizedDate = originalOrder.finalizedDate;
                         }
                         
                         const productChanges = compareProducts(originalProducts, orderData.products);
@@ -1919,7 +2013,7 @@
                 } else {
                     orderData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
                     orderData.status = 'active';
-                    orderData.sentToWarehouse = false;
+                    orderData.finalized = false;
                     orderData.editCount = 0;
                     
                     orderData.editLog = [{
@@ -1966,32 +2060,41 @@
         async function loadOrders() {
             toggleInitialLoader(true);
             
-            db.collection("pedidosBodega")
-                .orderBy("createdAt", "desc")
-                .get()
-                .then(querySnapshot => {
-                    orders = [];
-                    querySnapshot.forEach(doc => {
-                        const data = doc.data();
-                        orders.push(data);
-                    });
-                    
-                    filterOrders();
-                    toggleInitialLoader(false);
-                })
-                .catch(error => {
-                    console.error("Error al cargar pedidos:", error);
-                    toggleInitialLoader(false);
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'Ocurrió un error al cargar los pedidos',
-                        icon: 'error',
-                        confirmButtonColor: '#3085d6'
-                    });
+            try {
+                const querySnapshot = await db.collection("pedidosBodega")
+                    .orderBy("createdAt", "desc")
+                    .get();
+                
+                orders = [];
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    orders.push(data);
                 });
+                
+                filterOrders();
+            } catch (error) {
+                console.error("Error al cargar pedidos:", error);
+                // Intentar cargar desde caché local
+                const cachedOrders = localStorage.getItem('cachedOrders');
+                if (cachedOrders) {
+                    orders = JSON.parse(cachedOrders);
+                    filterOrders();
+                }
+                Swal.fire({
+                    title: 'Modo offline',
+                    text: 'No se pudo conectar a la base de datos. Mostrando datos locales.',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6'
+                });
+            } finally {
+                toggleInitialLoader(false);
+            }
         }
 
         function renderOrdersList(ordersToRender = orders) {
+            // Guardar en caché local
+            localStorage.setItem('cachedOrders', JSON.stringify(ordersToRender));
+            
             const ordersList = document.getElementById('ordersList');
             
             if (ordersToRender.length === 0) {
@@ -2010,37 +2113,27 @@
             ordersToRender.forEach(order => {
                 const orderCard = document.createElement('div');
                 orderCard.className = 'order-card';
-                const isOrderSent = order.sentToWarehouse;
+                const isOrderFinalized = order.finalized;
                 const isOrderCancelled = order.status === 'cancelled';
                 const editCount = order.editCount || 0;
                 
-                let statusClass = 'status-badge';
+                let statusClass = 'status-badge pending';
                 let statusText = 'PENDIENTE';
                 
                 if (isOrderCancelled) {
-                    statusClass += ' cancelled';
+                    statusClass = 'status-badge cancelled';
                     statusText = 'ANULADO';
-                } else if (isOrderSent) {
-                    statusClass += ' sent';
-                    statusText = 'ENVIADO A BODEGA';
+                } else if (isOrderFinalized) {
+                    statusClass = 'status-badge finalized';
+                    statusText = 'FINALIZADO';
                 }
                 
                 orderCard.innerHTML = `
                     <div class="order-header">
                         <div>
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                                 <span class="order-id">${order.id}</span>
-                                ${isOrderSent ? `
-                                <span class="status-badge sent" title="Enviado a bodega el ${formatDateTime(order.sentDate)}">
-                                    <i class="fas fa-check-circle"></i> Enviado a Bodega
-                                </span>
-                                ` : ''}
-                                ${!isOrderSent && !isOrderCancelled ? `
-                                <span class="status-badge">PENDIENTE</span>
-                                ` : ''}
-                                ${isOrderCancelled ? `
-                                <span class="status-badge cancelled">ANULADO</span>
-                                ` : ''}
+                                <span class="${statusClass}">${statusText}</span>
                                 ${editCount > 0 ? `
                                 <span class="edit-attempts" title="Editado ${editCount} vez(es)">
                                     <i class="fas fa-edit"></i> ${editCount}
@@ -2062,27 +2155,30 @@
                                 <a href="#" onclick="viewOrder('${order.id}'); return false;">
                                     <i class="fas fa-eye"></i> Ver
                                 </a>
+                                <a href="#" onclick="generatePickingPDF(${JSON.stringify(order).replace(/"/g, '&quot;')}); return false;" class="btn-pdf-action">
+                                    <i class="fas fa-file-pdf"></i> PDF Picking
+                                </a>
                                 <a href="#" onclick="showEditLog('${order.id}'); return false;" class="btn-log-action">
                                     <i class="fas fa-history"></i> Ver Log
                                 </a>
-                                ${!isOrderCancelled && !isOrderSent ? `
+                                ${!isOrderCancelled && !isOrderFinalized ? `
                                 <a href="#" onclick="confirmEditOrder('${order.id}'); return false;">
                                     <i class="fas fa-edit"></i> Editar
                                 </a>
                                 ` : ''}
-                                ${!isOrderCancelled && !isOrderSent ? `
-                                <a href="#" onclick="sendToWarehouse('${order.id}'); return false;" style="color: var(--success);">
-                                    <i class="fas fa-paper-plane"></i> Enviar a Bodega
+                                ${!isOrderCancelled && !isOrderFinalized ? `
+                                <a href="#" onclick="finalizeOrder('${order.id}'); return false;" style="color: var(--finalized);">
+                                    <i class="fas fa-check-circle"></i> Finalizar
                                 </a>
                                 ` : ''}
-                                ${!isOrderCancelled && !isOrderSent ? `
+                                ${!isOrderCancelled && !isOrderFinalized ? `
                                 <a href="#" onclick="cancelOrder('${order.id}'); return false;" style="color: var(--danger);">
                                     <i class="fas fa-ban"></i> Anular
                                 </a>
                                 ` : ''}
-                                ${isOrderSent ? `
+                                ${isOrderFinalized ? `
                                 <a href="#" style="color: var(--text-light); cursor: not-allowed;">
-                                    <i class="fas fa-lock"></i> No editable (enviado)
+                                    <i class="fas fa-lock"></i> Finalizado
                                 </a>
                                 ` : ''}
                             </div>
@@ -2156,10 +2252,10 @@
             const order = orders.find(o => o.id === orderId);
             if (!order) return;
             
-            if (order.sentToWarehouse) {
+            if (order.finalized) {
                 Swal.fire({
                     title: 'No se puede editar',
-                    text: 'Este pedido no se puede editar porque ya fue enviado a bodega.',
+                    text: 'Este pedido no se puede editar porque ya está finalizado.',
                     icon: 'warning',
                     confirmButtonColor: '#3085d6'
                 });
@@ -2196,10 +2292,10 @@
                 return;
             }
 
-            if (order.sentToWarehouse) {
+            if (order.finalized) {
                 Swal.fire({
                     title: 'No se puede editar',
-                    text: 'Este pedido no se puede editar porque ya fue enviado a bodega.',
+                    text: 'Este pedido no se puede editar porque ya está finalizado.',
                     icon: 'warning',
                     confirmButtonColor: '#3085d6'
                 });
@@ -2254,32 +2350,42 @@
             document.getElementById('orderForm').scrollIntoView({ behavior: 'smooth' });
         };
 
-        window.sendToWarehouse = function(orderId) {
+        window.finalizeOrder = function(orderId) {
             const order = orders.find(o => o.id === orderId);
             
+            if (order.finalized) {
+                Swal.fire({
+                    title: 'Ya finalizado',
+                    text: 'Este pedido ya está marcado como finalizado.',
+                    icon: 'info',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+            
             Swal.fire({
-                title: '¿Enviar a Bodega?',
-                text: '¿Estás seguro que deseas marcar este pedido como enviado a bodega? Esta acción no se puede deshacer.',
+                title: '¿Finalizar pedido?',
+                text: '¿Estás seguro que deseas marcar este pedido como finalizado? Esta acción no se puede deshacer.',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, enviar',
+                confirmButtonText: 'Sí, finalizar',
                 cancelButtonText: 'Cancelar'
             }).then((result) => {
                 if (result.isConfirmed) {
                     db.collection("pedidosBodega").doc(orderId)
                         .update({
-                            sentToWarehouse: true,
-                            sentDate: firebase.firestore.FieldValue.serverTimestamp(),
-                            sentBy: currentUserName || 'Sistema',
-                            sentByName: currentUserName || 'Usuario',
+                            finalized: true,
+                            finalizedDate: firebase.firestore.FieldValue.serverTimestamp(),
+                            finalizedBy: currentUserName || 'Sistema',
+                            finalizedByName: currentUserName || 'Usuario',
                             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                         })
                         .then(() => {
                             Swal.fire({
-                                title: 'Pedido enviado',
-                                text: 'El pedido ha sido marcado como enviado a bodega',
+                                title: 'Pedido finalizado',
+                                text: 'El pedido ha sido marcado como finalizado',
                                 icon: 'success',
                                 confirmButtonColor: '#3085d6'
                             }).then(() => {
@@ -2288,10 +2394,10 @@
                             });
                         })
                         .catch(error => {
-                            console.error("Error al enviar pedido:", error);
+                            console.error("Error al finalizar pedido:", error);
                             Swal.fire({
                                 title: 'Error',
-                                text: 'Ocurrió un error al enviar el pedido',
+                                text: 'Ocurrió un error al finalizar el pedido',
                                 icon: 'error',
                                 confirmButtonColor: '#3085d6'
                             });
@@ -2303,10 +2409,10 @@
         window.cancelOrder = function(orderId) {
             const order = orders.find(o => o.id === orderId);
             
-            if (order.sentToWarehouse) {
+            if (order.finalized) {
                 Swal.fire({
                     title: 'No se puede anular',
-                    text: 'Este pedido no se puede anular porque ya fue enviado a bodega.',
+                    text: 'Este pedido no se puede anular porque ya está finalizado.',
                     icon: 'warning',
                     confirmButtonColor: '#3085d6'
                 });
@@ -2360,41 +2466,39 @@
             const order = orders.find(o => o.id === orderId);
             if (!order) return;
             
-            const isOrderSent = order.sentToWarehouse;
+            const isOrderFinalized = order.finalized;
             const isOrderCancelled = order.status === 'cancelled';
+            
+            let statusBadge = '';
+            if (isOrderCancelled) {
+                statusBadge = '<span class="status-badge cancelled">ANULADO</span>';
+            } else if (isOrderFinalized) {
+                statusBadge = '<span class="status-badge finalized">FINALIZADO</span>';
+            } else {
+                statusBadge = '<span class="status-badge pending">PENDIENTE</span>';
+            }
             
             document.getElementById('modalOrderContent').innerHTML = `
                 <div class="order-header">
                     <div>
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                             <span class="order-id">${order.id}</span>
-                            ${isOrderSent ? `
-                            <span class="status-badge sent" title="Enviado a bodega el ${formatDateTime(order.sentDate)}">
-                                <i class="fas fa-check-circle"></i> Enviado a Bodega
-                            </span>
-                            ` : ''}
-                            ${!isOrderSent && !isOrderCancelled ? `
-                            <span class="status-badge">PENDIENTE</span>
-                            ` : ''}
-                            ${isOrderCancelled ? `
-                            <span class="status-badge cancelled">ANULADO</span>
-                            ` : ''}
+                            ${statusBadge}
                         </div>
                         <span class="order-date">${formatDate(order.date)}</span>
                         <div style="margin-top: 0.3rem; font-size: 0.95rem;">
-                            Estado: ${isOrderCancelled ? 'ANULADO' : isOrderSent ? 'Enviado a Bodega' : 'Activo'}
-                            ${order.cancelledAt ? `<span class="status-date">Anulado el: ${formatDateTime(order.cancelledAt)}</span>` : ''}
-                            ${order.sentDate ? `<span class="status-date">Enviado el: ${formatDateTime(order.sentDate)}</span>` : ''}
-                            ${isOrderSent ? `<div style="color: var(--success); margin-top: 0.5rem;"><i class="fas fa-exclamation-triangle"></i> Este pedido fue enviado a bodega y no es editable</div>` : ''}
+                            ${order.cancelledAt ? `<span>Anulado el: ${formatDateTime(order.cancelledAt)}</span>` : ''}
+                            ${order.finalizedDate ? `<span>Finalizado el: ${formatDateTime(order.finalizedDate)}</span>` : ''}
+                            ${isOrderFinalized ? `<div style="color: var(--finalized); margin-top: 0.5rem;"><i class="fas fa-check-circle"></i> Este pedido está finalizado</div>` : ''}
                         </div>
                         ${order.createdByName ? `
                         <div style="margin-top: 0.3rem; font-size: 0.85rem; color: var(--text-light);">
                             Creado por: ${order.createdByName}
                         </div>
                         ` : ''}
-                        ${order.sentByName ? `
+                        ${order.finalizedByName ? `
                         <div style="margin-top: 0.3rem; font-size: 0.85rem; color: var(--text-light);">
-                            Enviado por: ${order.sentByName}
+                            Finalizado por: ${order.finalizedByName}
                         </div>
                         ` : ''}
                         ${order.editCount > 0 ? `
@@ -2442,21 +2546,25 @@
             `;
             
             let actionButtons = `
+                <button class="btn btn-pdf btn-icon-only" onclick="generatePickingPDF(${JSON.stringify(order).replace(/"/g, '&quot;')})" title="PDF Picking">
+                    <i class="fas fa-file-pdf"></i>
+                    <span class="btn-text">PDF</span>
+                </button>
                 <button class="btn btn-log btn-icon-only" onclick="showEditLog('${order.id}')" title="Ver Log Completo">
                     <i class="fas fa-history"></i>
                     <span class="btn-text">Ver Log</span>
                 </button>
             `;
             
-            if (!isOrderCancelled && !isOrderSent) {
+            if (!isOrderCancelled && !isOrderFinalized) {
                 actionButtons += `
                     <button class="btn btn-secondary btn-icon-only" onclick="confirmEditOrder('${order.id}')" title="Editar">
                         <i class="fas fa-edit"></i>
                         <span class="btn-text">Editar</span>
                     </button>
-                    <button class="btn btn-received btn-icon-only" onclick="sendToWarehouse('${order.id}')" title="Enviar a Bodega">
-                        <i class="fas fa-paper-plane"></i>
-                        <span class="btn-text">Enviar</span>
+                    <button class="btn btn-finalized btn-icon-only" onclick="finalizeOrder('${order.id}')" title="Finalizar">
+                        <i class="fas fa-check-circle"></i>
+                        <span class="btn-text">Finalizar</span>
                     </button>
                     <button class="btn btn-danger btn-icon-only" onclick="cancelOrder('${order.id}')" title="Anular">
                         <i class="fas fa-ban"></i>
