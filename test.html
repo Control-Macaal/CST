@@ -1308,48 +1308,53 @@
         }
 
         // ==============================
-        // FUNCIÓN PARA GENERAR PDF DE PICKING (ACTUALIZADA)
+        // FUNCIÓN PARA GENERAR PDF DE PICKING (ESTILO EXCEL - OPTIMIZADO PARA AHORRAR PAPEL)
         // ==============================
         
         function generatePickingPDF(order) {
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
             
-            // Configurar posición inicial
-            let startY = 20;
+            // Configurar posición inicial (más compacta)
+            let startY = 15;
             
-            // Título en negrita
-            doc.setFontSize(18);
+            // Título en negrita - tamaño reducido para ahorrar espacio
+            doc.setFontSize(14);
             doc.setFont(undefined, 'bold');
-            doc.setTextColor(67, 97, 238);
-            doc.text('LISTA DE PICKING', 14, startY);
+            doc.setTextColor(0, 0, 0); // Negro para ahorrar tinta
+            doc.text('LISTA DE PICKING', 10, startY);
             
-            // Número de pedido abajo del título (mismo tamaño de letra)
-            doc.setFontSize(18);
+            // Número de pedido abajo del título (mismo tamaño)
+            doc.setFontSize(14);
             doc.setFont(undefined, 'bold');
-            doc.text(`Pedido: ${order.id}`, 14, startY + 10);
+            doc.text(`Pedido: ${order.id}`, 10, startY + 6);
             
-            // Información del pedido a la derecha con "Solicita" en lugar de "Responsable"
-            doc.setFontSize(10);
+            // Información del pedido a la derecha con "Solicita" - más compacta
+            doc.setFontSize(9);
             doc.setFont(undefined, 'normal');
-            doc.setTextColor(0, 0, 0);
+            doc.setTextColor(0, 0, 0); // Negro para ahorrar tinta
             
-            // Calcular posición X para alinear a la derecha (margen derecho 14, ancho de página 210)
-            const rightMargin = 14;
+            // Calcular posición X para alinear a la derecha
+            const rightMargin = 10;
             const pageWidth = 210;
             const textX = pageWidth - rightMargin;
             
-            // Textos alineados a la derecha
+            // Textos alineados a la derecha - más juntos
             doc.text(`Tienda: ${order.store}`, textX, startY, { align: 'right' });
-            doc.text(`Fecha: ${new Date(order.date).toLocaleDateString('es-ES')}`, textX, startY + 7, { align: 'right' });
-            doc.text(`Solicita: ${order.responsible || 'No especificado'}`, textX, startY + 14, { align: 'right' });
+            doc.text(`Fecha: ${new Date(order.date).toLocaleDateString('es-ES')}`, textX, startY + 5, { align: 'right' });
+            doc.text(`Solicita: ${order.responsible || 'No especificado'}`, textX, startY + 10, { align: 'right' });
             
-            // Línea separadora después de la información
-            startY += 25;
-            doc.setDrawColor(200, 200, 200);
-            doc.line(14, startY, 196, startY);
+            // Línea separadora delgada (ahorra tinta)
+            startY += 18;
+            doc.setDrawColor(0, 0, 0);
+            doc.setLineWidth(0.1);
+            doc.line(10, startY, 200, startY);
             
-            // Tabla de productos SIN Cód. Fábrica
+            // Tabla de productos - ESTILO EXCEL (más compacta, líneas delgadas, sin colores de fondo)
             const tableColumn = ["SKU", "Descripción", "Cantidad", "Picking"];
             const tableRows = [];
             
@@ -1366,39 +1371,45 @@
             doc.autoTable({
                 head: [tableColumn],
                 body: tableRows,
-                startY: startY + 5,
-                theme: 'grid',
+                startY: startY + 2,
+                theme: 'plain', // Tema sin colores de fondo
                 styles: { 
-                    fontSize: 9, 
-                    cellPadding: 4,
+                    fontSize: 8, // Fuente más pequeña para más líneas
+                    cellPadding: 1.5, // Padding mínimo
                     lineColor: [0, 0, 0],
-                    lineWidth: 0.1,
+                    lineWidth: 0.05, // Líneas muy delgadas (ahorra tinta)
                     textColor: [0, 0, 0],
                     fillColor: [255, 255, 255] // Fondo blanco
                 },
                 headStyles: { 
-                    fillColor: [67, 97, 238], 
-                    textColor: 255,
+                    fillColor: [255, 255, 255], // Fondo blanco en cabecera
+                    textColor: [0, 0, 0],
                     lineColor: [0, 0, 0],
-                    lineWidth: 0.1
+                    lineWidth: 0.1,
+                    fontStyle: 'bold',
+                    halign: 'center'
                 },
                 bodyStyles: {
                     fillColor: [255, 255, 255], // Fondo blanco para todas las celdas
                     textColor: [0, 0, 0],
                     lineColor: [0, 0, 0],
-                    lineWidth: 0.1
+                    lineWidth: 0.05
                 },
                 alternateRowStyles: {
                     fillColor: [255, 255, 255] // Sin alternancia de colores, todo blanco
                 },
                 columnStyles: {
-                    0: { cellWidth: 40 }, // SKU
-                    1: { cellWidth: 80 }, // Descripción
-                    2: { cellWidth: 25, halign: 'center' }, // Cantidad
-                    3: { cellWidth: 25, halign: 'center' }  // Picking
+                    0: { cellWidth: 25, halign: 'center' }, // SKU más angosto
+                    1: { cellWidth: 90 }, // Descripción más ancha
+                    2: { cellWidth: 20, halign: 'center' }, // Cantidad
+                    3: { cellWidth: 20, halign: 'center' }  // Picking
                 },
-                // Altura de fila: 12.75 puntos (equivalente a ~0.45 cm)
-                rowHeight: 12.75
+                // Altura de fila mínima (más compacta)
+                rowHeight: 6, // Altura reducida para más líneas por página
+                margin: { left: 10, right: 10 },
+                tableWidth: 'auto',
+                showHead: 'everyPage', // Repite cabecera en cada página
+                pageBreak: 'auto' // Salto de página automático cuando sea necesario
             });
             
             // Guardar PDF
