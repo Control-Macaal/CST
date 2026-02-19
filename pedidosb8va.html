@@ -568,12 +568,9 @@
             background-color: white;
         }
 
-        .factory-code-input {
-            min-width: 60px;
-            width: auto;
-            max-width: 150px;
-            transition: width 0.2s ease;
-            background-color: white;
+        .sku-duplicate-error {
+            border-color: var(--danger) !important;
+            background-color: rgba(239, 35, 60, 0.05) !important;
         }
 
         .add-row-btn {
@@ -651,6 +648,7 @@
             margin-top: 1rem;
         }
 
+        /* MODAL PANTALLA COMPLETA */
         .modal {
             display: none;
             position: fixed;
@@ -662,52 +660,164 @@
             z-index: 1000;
             justify-content: center;
             align-items: center;
-            padding: 1.5rem;
+            padding: 0;
         }
 
         .modal-content {
             background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
             width: 100%;
-            max-width: 850px;
-            max-height: 90vh;
+            height: 100%;
             overflow-y: auto;
-            padding: 1.5rem;
+            padding: 2rem;
             position: relative;
-            border: var(--border-light);
+            border: none;
+            border-radius: 0;
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
             border-bottom: var(--border-light);
         }
 
         .modal-header h2 {
-            font-size: 1.3rem;
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+
+        .modal-body {
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         .modal-body .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 1.2rem;
         }
 
         .modal-body .form-group label {
             display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .modal-body .form-control {
             width: 100%;
-            padding: 0.6rem;
+            padding: 0.7rem;
             font-size: 0.9rem;
             background-color: white;
             border: var(--border-light);
+            border-radius: var(--border-radius);
+        }
+
+        /* Tabla en modal - FUENTE MÁS PEQUEÑA */
+        .order-products {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+        }
+
+        .order-products th {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.6rem;
+            text-align: left;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .order-products td {
+            padding: 0.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 0.8rem;
+        }
+
+        .order-products tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Título de productos en modal */
+        .products-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-light);
+            margin: 1rem 0 0.3rem 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .products-count {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-left: 0.5rem;
+            font-weight: normal;
+        }
+
+        /* Información del pedido en modal */
+        .order-info-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .order-info-item {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .order-info-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.2rem;
+        }
+
+        .order-info-value {
+            font-size: 0.9rem;
+            padding: 0.5rem;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+            border: var(--border-light);
+        }
+
+        /* Acciones del modal */
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: var(--border-light);
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .modal-actions .btn {
+            padding: 0.7rem 1.2rem;
+            font-size: 0.85rem;
+        }
+
+        .close-modal-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: var(--transition);
+        }
+
+        .close-modal-btn:hover {
+            color: var(--danger);
         }
 
         /* Dropdown de acciones */
@@ -880,6 +990,13 @@
             display: inline-block;
         }
 
+        .sku-duplicate-message {
+            color: var(--danger);
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+            display: none;
+        }
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -957,6 +1074,23 @@
                 flex-direction: column;
                 align-items: flex-end;
                 gap: 0.5rem;
+            }
+
+            .modal-header h2 {
+                font-size: 1.2rem;
+            }
+
+            .modal-actions {
+                flex-wrap: wrap;
+            }
+
+            .modal-actions .btn {
+                flex: 1;
+                min-width: 100px;
+            }
+
+            .order-info-row {
+                gap: 1rem;
             }
         }
     </style>
@@ -1091,23 +1225,25 @@
             <table class="products-table" id="productsTable">
                 <thead>
                     <tr>
-                        <th style="width: 100px;">SKU</th>
-                        <th style="width: 80px;">Cód. Fábrica</th>
+                        <th style="width: 120px;">SKU</th>
                         <th>Descripción</th>
-                        <th style="width: 70px;">Cantidad</th>
+                        <th style="width: 100px;">Cantidad</th>
                         <th style="width: 50px;"></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><input type="text" class="code-input" id="productSku1" name="productSku1" placeholder="SKU" maxlength="9" required></td>
-                        <td><input type="text" class="factory-code-input" id="factoryCode1" name="factoryCode1" placeholder="Cód. Fab"></td>
                         <td><input type="text" id="productDescription1" name="productDescription1" placeholder="Descripción" required></td>
                         <td><input type="number" id="productQuantity1" name="productQuantity1" placeholder="0" min="1" required></td>
                         <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                     </tr>
                 </tbody>
             </table>
+            
+            <div id="skuDuplicateMessage" class="sku-duplicate-message">
+                <i class="fas fa-exclamation-circle"></i> No se permiten SKU duplicados en el mismo pedido
+            </div>
             
             <button class="btn add-row-btn" id="addRowBtn">
                 <i class="fas fa-plus"></i>
@@ -1136,17 +1272,17 @@
         </div>
     </div>
 
-    <!-- Modal para ver pedido completo -->
+    <!-- Modal para ver pedido completo (PANTALLA COMPLETA) -->
     <div class="modal" id="orderModal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2><i class="fas fa-file-alt"></i> Detalle del Pedido</h2>
-                <button onclick="window.closeModal()" style="background: none; border: none; cursor: pointer; font-size: 1.5rem;">&times;</button>
+                <button onclick="window.closeModal()" class="close-modal-btn">&times;</button>
             </div>
             <div class="modal-body" id="modalOrderContent">
                 <!-- Contenido del pedido se cargará aquí -->
             </div>
-            <div class="order-actions" id="modalOrderActions">
+            <div class="modal-actions" id="modalOrderActions">
                 <!-- Acciones del pedido se cargarán aquí -->
             </div>
         </div>
@@ -1173,13 +1309,13 @@
         // CONFIGURACIÓN DE FIREBASE CORREGIDA
         // ==============================
         const firebaseConfig = {
-  apiKey: "AIzaSyBik7MpyjtyIzKtYjBJY-AV7OX7j0zn_vg",
-  authDomain: "pedbo8va.firebaseapp.com",
-  projectId: "pedbo8va",
-  storageBucket: "pedbo8va.firebasestorage.app",
-  messagingSenderId: "912545680126",
-  appId: "1:912545680126:web:334f91e3ebfe79f58a33af"
-};
+            apiKey: "AIzaSyBik7MpyjtyIzKtYjBJY-AV7OX7j0zn_vg",
+            authDomain: "pedbo8va.firebaseapp.com",
+            projectId: "pedbo8va",
+            storageBucket: "pedbo8va.firebasestorage.app",
+            messagingSenderId: "912545680126",
+            appId: "1:912545680126:web:334f91e3ebfe79f58a33af"
+        };
 
         // Inicializa Firebase
         firebase.initializeApp(firebaseConfig);
@@ -1435,10 +1571,6 @@
                         productChanges.push(`Cantidad: ${oldProduct.quantity} → ${newProduct.quantity}`);
                     }
                     
-                    if (oldProduct.factoryCode !== newProduct.factoryCode) {
-                        productChanges.push(`Cód. Fab: ${oldProduct.factoryCode || '-'} → ${newProduct.factoryCode || '-'}`);
-                    }
-                    
                     if (oldProduct.description !== newProduct.description) {
                         productChanges.push(`Descripción: "${oldProduct.description}" → "${newProduct.description}"`);
                     }
@@ -1450,6 +1582,46 @@
             }
             
             return changes;
+        }
+
+        // ==============================
+        // FUNCIÓN PARA VALIDAR SKU DUPLICADOS
+        // ==============================
+        
+        function validateNoDuplicateSkus() {
+            const rows = document.getElementById('productsTable').querySelectorAll('tbody tr');
+            const skuMap = new Map();
+            let hasDuplicates = false;
+            
+            // Limpiar estilos de error previos
+            rows.forEach(row => {
+                const skuInput = row.querySelector('input.code-input');
+                skuInput.classList.remove('sku-duplicate-error');
+            });
+            
+            // Verificar duplicados
+            for (let i = 0; i < rows.length; i++) {
+                const skuInput = rows[i].querySelector('input.code-input');
+                const sku = skuInput.value.trim().toUpperCase();
+                
+                if (sku && skuMap.has(sku)) {
+                    skuInput.classList.add('sku-duplicate-error');
+                    rows[skuMap.get(sku)].querySelector('input.code-input').classList.add('sku-duplicate-error');
+                    hasDuplicates = true;
+                } else if (sku) {
+                    skuMap.set(sku, i);
+                }
+            }
+            
+            // Mostrar/ocultar mensaje
+            const duplicateMessage = document.getElementById('skuDuplicateMessage');
+            if (hasDuplicates) {
+                duplicateMessage.style.display = 'block';
+            } else {
+                duplicateMessage.style.display = 'none';
+            }
+            
+            return !hasDuplicates;
         }
 
         // ==============================
@@ -1507,6 +1679,11 @@
             document.addEventListener('input', function(e) {
                 if (e.target.matches('#productsTable input[type="text"]:not(.code-input)')) {
                     e.target.value = e.target.value.toUpperCase();
+                }
+                
+                // Validar duplicados cuando se ingresa un SKU
+                if (e.target.matches('#productsTable input.code-input')) {
+                    validateNoDuplicateSkus();
                 }
             });
 
@@ -1618,9 +1795,8 @@
                 const inputs = row.querySelectorAll('input, textarea');
                 formData.products.push({
                     sku: inputs[0].value,
-                    factoryCode: inputs[1].value,
-                    description: inputs[2].value,
-                    quantity: inputs[3].value
+                    description: inputs[1].value,
+                    quantity: inputs[2].value
                 });
             });
             
@@ -1650,15 +1826,11 @@
                         const newRow = document.createElement('tr');
                         newRow.innerHTML = `
                             <td><input type="text" class="code-input" id="productSku${index+1}" name="productSku${index+1}" value="${product.sku || ''}" placeholder="SKU" maxlength="9" required></td>
-                            <td><input type="text" class="factory-code-input" id="factoryCode${index+1}" name="factoryCode${index+1}" value="${product.factoryCode || ''}" placeholder="Cód. Fab"></td>
                             <td><input type="text" id="productDescription${index+1}" name="productDescription${index+1}" value="${product.description || ''}" placeholder="Descripción" required></td>
                             <td><input type="number" id="productQuantity${index+1}" name="productQuantity${index+1}" value="${product.quantity || ''}" placeholder="0" min="1" required></td>
                             <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                         `;
                         tbody.appendChild(newRow);
-                        
-                        const factoryInput = newRow.querySelector('.factory-code-input');
-                        resizeInput(factoryInput);
                     });
                 } else {
                     addDefaultRow();
@@ -1673,7 +1845,7 @@
                 isCreatingNewOrder = true;
                 
                 addDeleteRowListeners();
-                addInputResizeListeners();
+                validateNoDuplicateSkus();
             }
         }
 
@@ -1682,7 +1854,6 @@
             tbody.innerHTML = `
                 <tr>
                     <td><input type="text" class="code-input" id="productSku1" name="productSku1" placeholder="SKU" maxlength="9" required></td>
-                    <td><input type="text" class="factory-code-input" id="factoryCode1" name="factoryCode1" placeholder="Cód. Fab"></td>
                     <td><input type="text" id="productDescription1" name="productDescription1" placeholder="Descripción" required></td>
                     <td><input type="number" id="productQuantity1" name="productQuantity1" placeholder="0" min="1" required></td>
                     <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
@@ -1724,7 +1895,6 @@
                 document.getElementById('saveOrderBtn').innerHTML = '<span class="spinner" style="display: none;"></span><span class="btn-text"><i class="fas fa-save"></i> Guardar</span>';
                 
                 addDeleteRowListeners();
-                addInputResizeListeners();
                 originalProducts = [];
                 
                 document.getElementById('ordersList').style.display = 'none';
@@ -1735,6 +1905,9 @@
                 document.getElementById('orderForm').style.display = 'block';
                 isCreatingNewOrder = true;
                 clearFormLocalStorage();
+                
+                // Ocultar mensaje de duplicados al inicio
+                document.getElementById('skuDuplicateMessage').style.display = 'none';
             } catch (error) {
                 console.error("Error al crear nuevo pedido:", error);
                 Swal.fire({
@@ -1781,43 +1954,12 @@
             }
         }
 
-        function addInputResizeListeners() {
-            const factoryCodeInputs = document.querySelectorAll('.factory-code-input');
-            
-            factoryCodeInputs.forEach(input => {
-                resizeInput(input);
-                input.addEventListener('input', function() {
-                    resizeInput(this);
-                });
-            });
-        }
-
-        function resizeInput(input) {
-            const minWidth = 60;
-            const maxWidth = 150;
-            const tempSpan = document.createElement('span');
-            
-            tempSpan.style.visibility = 'hidden';
-            tempSpan.style.whiteSpace = 'nowrap';
-            tempSpan.style.fontSize = window.getComputedStyle(input).fontSize;
-            tempSpan.style.fontFamily = window.getComputedStyle(input).fontFamily;
-            tempSpan.style.padding = window.getComputedStyle(input).padding;
-            tempSpan.innerHTML = input.value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            
-            document.body.appendChild(tempSpan);
-            const width = Math.min(Math.max(tempSpan.offsetWidth + 20, minWidth), maxWidth);
-            document.body.removeChild(tempSpan);
-            
-            input.style.width = width + 'px';
-        }
-
         function addProductRow() {
             const tbody = document.getElementById('productsTable').querySelector('tbody');
             const rowCount = tbody.childElementCount + 1;
             const newRow = document.createElement('tr');
             newRow.innerHTML = `
                 <td><input type="text" class="code-input" id="productSku${rowCount}" name="productSku${rowCount}" placeholder="SKU" maxlength="9" required></td>
-                <td><input type="text" class="factory-code-input" id="factoryCode${rowCount}" name="factoryCode${rowCount}" placeholder="Cód. Fab"></td>
                 <td><input type="text" id="productDescription${rowCount}" name="productDescription${rowCount}" placeholder="Descripción" required></td>
                 <td><input type="number" id="productQuantity${rowCount}" name="productQuantity${rowCount}" placeholder="0" min="1" required></td>
                 <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
@@ -1831,15 +1973,12 @@
                 } else {
                     const inputs = newRow.querySelectorAll('input, textarea');
                     inputs.forEach(input => input.value = '');
-                    const factoryInput = newRow.querySelector('.factory-code-input');
-                    resizeInput(factoryInput);
                 }
+                validateNoDuplicateSkus();
             });
             
-            const factoryInput = newRow.querySelector('.factory-code-input');
-            factoryInput.addEventListener('input', function() {
-                resizeInput(this);
-            });
+            const skuInput = newRow.querySelector('.code-input');
+            skuInput.addEventListener('input', validateNoDuplicateSkus);
         }
 
         function addDeleteRowListeners() {
@@ -1854,10 +1993,14 @@
                     } else {
                         const inputs = row.querySelectorAll('input, textarea');
                         inputs.forEach(input => input.value = '');
-                        const factoryInput = row.querySelector('.factory-code-input');
-                        resizeInput(factoryInput);
                     }
+                    validateNoDuplicateSkus();
                 });
+            });
+            
+            // Agregar event listeners a los inputs de SKU existentes
+            document.querySelectorAll('#productsTable .code-input').forEach(input => {
+                input.addEventListener('input', validateNoDuplicateSkus);
             });
         }
 
@@ -1868,14 +2011,12 @@
             rows.forEach(row => {
                 const inputs = row.querySelectorAll('input');
                 const sku = toUpperCase(inputs[0].value.trim());
-                const factoryCode = toUpperCase(inputs[1].value.trim()) || '-';
-                const description = toUpperCase(inputs[2].value.trim());
-                const quantity = inputs[3].value.trim();
+                const description = toUpperCase(inputs[1].value.trim());
+                const quantity = inputs[2].value.trim();
                 
                 if (sku && description && quantity) {
                     products.push({
                         sku: sku,
-                        factoryCode: factoryCode,
                         description: description,
                         quantity: parseInt(quantity)
                     });
@@ -1921,12 +2062,23 @@
                 return false;
             }
             
+            // Validar que no haya SKU duplicados
+            if (!validateNoDuplicateSkus()) {
+                Swal.fire({
+                    title: 'SKU duplicados',
+                    text: 'No puedes tener productos con el mismo SKU en el mismo pedido',
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6'
+                });
+                return false;
+            }
+            
             const rows = document.getElementById('productsTable').querySelectorAll('tbody tr');
             for (let i = 0; i < rows.length; i++) {
                 const inputs = rows[i].querySelectorAll('input');
                 const sku = inputs[0].value.trim();
-                const description = inputs[2].value.trim();
-                const quantity = inputs[3].value.trim();
+                const description = inputs[1].value.trim();
+                const quantity = inputs[2].value.trim();
                 
                 if (!sku || !description || !quantity) {
                     Swal.fire({
@@ -1937,13 +2089,13 @@
                     });
                     
                     if (!sku) inputs[0].style.borderColor = 'var(--danger)';
-                    if (!description) inputs[2].style.borderColor = 'var(--danger)';
-                    if (!quantity) inputs[3].style.borderColor = 'var(--danger)';
+                    if (!description) inputs[1].style.borderColor = 'var(--danger)';
+                    if (!quantity) inputs[2].style.borderColor = 'var(--danger)';
                     
                     setTimeout(() => {
                         inputs[0].style.borderColor = '';
+                        inputs[1].style.borderColor = '';
                         inputs[2].style.borderColor = '';
-                        inputs[3].style.borderColor = '';
                     }, 2000);
                     
                     return false;
@@ -2325,22 +2477,17 @@
                     const newRow = document.createElement('tr');
                     newRow.innerHTML = `
                         <td><input type="text" class="code-input" id="productSku${index+1}" name="productSku${index+1}" value="${product.sku || ''}" placeholder="SKU" maxlength="9" required></td>
-                        <td><input type="text" class="factory-code-input" id="factoryCode${index+1}" name="factoryCode${index+1}" value="${product.factoryCode || ''}" placeholder="Cód. Fab"></td>
                         <td><input type="text" id="productDescription${index+1}" name="productDescription${index+1}" value="${product.description}" placeholder="Descripción" required></td>
                         <td><input type="number" id="productQuantity${index+1}" name="productQuantity${index+1}" value="${product.quantity}" placeholder="0" min="1" required></td>
                         <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
                     `;
                     tbody.appendChild(newRow);
-                    
-                    const factoryInput = newRow.querySelector('.factory-code-input');
-                    resizeInput(factoryInput);
                 });
             } else {
                 addDefaultRow();
             }
             
             addDeleteRowListeners();
-            addInputResizeListeners();
             
             document.getElementById('ordersList').style.display = 'none';
             document.getElementById('searchContainer').style.display = 'none';
@@ -2352,6 +2499,8 @@
             saveFormToLocalStorage();
             window.closeModal();
             document.getElementById('orderForm').scrollIntoView({ behavior: 'smooth' });
+            
+            validateNoDuplicateSkus();
         };
 
         window.finalizeOrder = function(orderId) {
@@ -2365,6 +2514,21 @@
                     confirmButtonColor: '#3085d6'
                 });
                 return;
+            }
+
+            // Verificar si el usuario es macaal
+            const currentAuth = localStorage.getItem(STORAGE_KEY);
+            if (currentAuth) {
+                const authData = JSON.parse(currentAuth);
+                if (authData.auth.toLowerCase() !== 'macaal') {
+                    Swal.fire({
+                        title: 'Permiso denegado',
+                        text: 'Solo el usuario "macaal" puede finalizar pedidos.',
+                        icon: 'error',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    return;
+                }
             }
             
             Swal.fire({
@@ -2483,104 +2647,112 @@
             }
             
             document.getElementById('modalOrderContent').innerHTML = `
-                <div class="order-header">
+                <div class="order-header" style="margin-bottom: 1.5rem;">
                     <div>
-                        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                            <span class="order-id">${order.id}</span>
+                        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                            <span class="order-id" style="font-size: 1.2rem;">${order.id}</span>
                             ${statusBadge}
                         </div>
-                        <span class="order-date">${formatDate(order.date)}</span>
-                        <div style="margin-top: 0.3rem; font-size: 0.95rem;">
+                        <div class="order-info-row">
+                            <div class="order-info-item">
+                                <div class="order-info-label">Fecha</div>
+                                <div class="order-info-value">${formatDate(order.date)}</div>
+                            </div>
+                            ${order.createdByName ? `
+                            <div class="order-info-item">
+                                <div class="order-info-label">Creado por</div>
+                                <div class="order-info-value">${order.createdByName}</div>
+                            </div>
+                            ` : ''}
+                            ${order.finalizedByName ? `
+                            <div class="order-info-item">
+                                <div class="order-info-label">Finalizado por</div>
+                                <div class="order-info-value">${order.finalizedByName}</div>
+                            </div>
+                            ` : ''}
+                        </div>
+                        <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-light);">
                             ${order.cancelledAt ? `<span>Anulado el: ${formatDateTime(order.cancelledAt)}</span>` : ''}
                             ${order.finalizedDate ? `<span>Finalizado el: ${formatDateTime(order.finalizedDate)}</span>` : ''}
-                            ${isOrderFinalized ? `<div style="color: var(--finalized); margin-top: 0.5rem;"><i class="fas fa-check-circle"></i> Este pedido está finalizado</div>` : ''}
+                            ${order.editCount > 0 ? `<span>Editado ${order.editCount} vez(es)</span>` : ''}
                         </div>
-                        ${order.createdByName ? `
-                        <div style="margin-top: 0.3rem; font-size: 0.85rem; color: var(--text-light);">
-                            Creado por: ${order.createdByName}
-                        </div>
-                        ` : ''}
-                        ${order.finalizedByName ? `
-                        <div style="margin-top: 0.3rem; font-size: 0.85rem; color: var(--text-light);">
-                            Finalizado por: ${order.finalizedByName}
-                        </div>
-                        ` : ''}
-                        ${order.editCount > 0 ? `
-                        <div style="margin-top: 0.3rem; font-size: 0.85rem; color: var(--text-light);">
-                            Editado ${order.editCount} vez(es)
-                        </div>
-                        ` : ''}
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>Tienda</label>
-                    <div class="form-control" style="background: #f8f9fa;">${order.store}</div>
+
+                <div class="order-info-row">
+                    <div class="order-info-item">
+                        <div class="order-info-label">Tienda</div>
+                        <div class="order-info-value">${order.store}</div>
+                    </div>
+                    <div class="order-info-item">
+                        <div class="order-info-label">Solicita</div>
+                        <div class="order-info-value">${order.responsible || 'No especificado'}</div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Fecha del Pedido</label>
-                    <div class="form-control" style="background: #f8f9fa;">${formatDate(order.date)}</div>
+                
+                <div class="products-title">
+                    Productos solicitados <span class="products-count">(${order.products ? order.products.length : 0})</span>
                 </div>
-                <div class="form-group">
-                    <label>Solicita</label>
-                    <div class="form-control" style="background: #f8f9fa;">${order.responsible || 'No especificado'}</div>
-                </div>
-                <div class="form-group">
-                    <label>Productos solicitados (${order.products ? order.products.length : 0})</label>
-                    <table class="order-products" style="width: 100%; margin-top: 0;">
-                        <thead>
+                
+                <table class="order-products">
+                    <thead>
+                        <tr>
+                            <th style="width: 120px;">SKU</th>
+                            <th>Descripción</th>
+                            <th style="width: 100px;">Cantidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${order.products ? order.products.map(product => `
                             <tr>
-                                <th style="width: 100px;">SKU</th>
-                                <th style="width: 80px;">Cód. Fábrica</th>
-                                <th>Descripción</th>
-                                <th style="width: 70px;">Cantidad</th>
+                                <td>${product.sku || ''}</td>
+                                <td>${product.description}</td>
+                                <td>${product.quantity}</td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            ${order.products ? order.products.map(product => `
-                                <tr>
-                                    <td>${product.sku || ''}</td>
-                                    <td>${product.factoryCode || '-'}</td>
-                                    <td>${product.description}</td>
-                                    <td>${product.quantity}</td>
-                                </tr>
-                            `).join('') : ''}
-                        </tbody>
-                    </table>
-                </div>
+                        `).join('') : ''}
+                    </tbody>
+                </table>
             `;
             
             let actionButtons = `
-                <button class="btn btn-pdf btn-icon-only" onclick="generatePickingPDF(${JSON.stringify(order).replace(/"/g, '&quot;')})" title="PDF Picking">
-                    <i class="fas fa-file-pdf"></i>
-                    <span class="btn-text">PDF</span>
+                <button class="btn btn-pdf" onclick="generatePickingPDF(${JSON.stringify(order).replace(/"/g, '&quot;')})" title="PDF Picking">
+                    <i class="fas fa-file-pdf"></i> PDF Picking
                 </button>
-                <button class="btn btn-log btn-icon-only" onclick="showEditLog('${order.id}')" title="Ver Log Completo">
-                    <i class="fas fa-history"></i>
-                    <span class="btn-text">Ver Log</span>
+                <button class="btn btn-log" onclick="showEditLog('${order.id}')" title="Ver Log Completo">
+                    <i class="fas fa-history"></i> Ver Log
                 </button>
             `;
             
             if (!isOrderCancelled && !isOrderFinalized) {
                 actionButtons += `
-                    <button class="btn btn-secondary btn-icon-only" onclick="confirmEditOrder('${order.id}')" title="Editar">
-                        <i class="fas fa-edit"></i>
-                        <span class="btn-text">Editar</span>
+                    <button class="btn btn-secondary" onclick="confirmEditOrder('${order.id}')" title="Editar">
+                        <i class="fas fa-edit"></i> Editar
                     </button>
-                    <button class="btn btn-finalized btn-icon-only" onclick="finalizeOrder('${order.id}')" title="Finalizar">
-                        <i class="fas fa-check-circle"></i>
-                        <span class="btn-text">Finalizar</span>
-                    </button>
-                    <button class="btn btn-danger btn-icon-only" onclick="cancelOrder('${order.id}')" title="Anular">
-                        <i class="fas fa-ban"></i>
-                        <span class="btn-text">Anular</span>
+                `;
+                
+                // Verificar si el usuario es macaal para mostrar botón de finalizar
+                const currentAuth = localStorage.getItem(STORAGE_KEY);
+                if (currentAuth) {
+                    const authData = JSON.parse(currentAuth);
+                    if (authData.auth.toLowerCase() === 'macaal') {
+                        actionButtons += `
+                            <button class="btn btn-finalized" onclick="finalizeOrder('${order.id}')" title="Finalizar">
+                                <i class="fas fa-check-circle"></i> Finalizar
+                            </button>
+                        `;
+                    }
+                }
+                
+                actionButtons += `
+                    <button class="btn btn-danger" onclick="cancelOrder('${order.id}')" title="Anular">
+                        <i class="fas fa-ban"></i> Anular
                     </button>
                 `;
             }
             
             actionButtons += `
-                <button class="btn btn-icon-only" onclick="window.closeModal()" title="Cerrar">
-                    <i class="fas fa-times"></i>
-                    <span class="btn-text">Cerrar</span>
+                <button class="btn" onclick="window.closeModal()" title="Cerrar">
+                    <i class="fas fa-times"></i> Cerrar
                 </button>
             `;
             
