@@ -1100,7 +1100,7 @@
             
             <div class="form-row">
                 <div class="form-group">
-                    <label for="responsible">Responsable (Nombre y Apellido)</label>
+                    <label for="responsible">Solicita (Nombre y Apellido)</label>
                     <input type="text" class="form-control" id="responsible" name="responsible" placeholder="Nombre completo" required>
                 </div>
             </div>
@@ -1195,7 +1195,7 @@
             apiKey: "AIzaSyDQe0HfkrnRJAH8Dtzh-gesTsq_UdHnOHE",
             authDomain: "pos-tda.firebaseapp.com",
             projectId: "pos-tda",
-            storageBucket: "pos-tda.appspot.com", // Corregido: .firebasestorage.app → .appspot.com
+            storageBucket: "pos-tda.appspot.com",
             messagingSenderId: "732089248607",
             appId: "1:732089248607:web:895d8588d384b05a26a4ea",
             measurementId: "G-QTRZV9X9ML"
@@ -1205,7 +1205,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         
-        // Habilitar persistencia offline para evitar errores de conexión
+        // Habilitar persistencia offline
         db.enablePersistence()
             .catch((err) => {
                 if (err.code == 'failed-precondition') {
@@ -1308,40 +1308,57 @@
         }
 
         // ==============================
-        // FUNCIÓN PARA GENERAR PDF DE PICKING
+        // FUNCIÓN PARA GENERAR PDF DE PICKING (ACTUALIZADA)
         // ==============================
         
         function generatePickingPDF(order) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            // Título
+            // Configurar posición inicial
+            let startY = 20;
+            
+            // Título en negrita
             doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
             doc.setTextColor(67, 97, 238);
-            doc.text('LISTA DE PICKING', 14, 20);
+            doc.text('LISTA DE PICKING', 14, startY);
             
-            // Información del pedido
-            doc.setFontSize(11);
+            // Número de pedido abajo del título (mismo tamaño de letra)
+            doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
+            doc.text(`Pedido: ${order.id}`, 14, startY + 10);
+            
+            // Información del pedido a la derecha con "Solicita" en lugar de "Responsable"
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
             doc.setTextColor(0, 0, 0);
-            doc.text(`Pedido: ${order.id}`, 14, 30);
-            doc.text(`Tienda: ${order.store}`, 14, 37);
-            doc.text(`Fecha: ${new Date(order.date).toLocaleDateString('es-ES')}`, 14, 44);
-            doc.text(`Responsable: ${order.responsible || 'No especificado'}`, 14, 51);
             
-            // Línea separadora
+            // Calcular posición X para alinear a la derecha (margen derecho 14, ancho de página 210)
+            const rightMargin = 14;
+            const pageWidth = 210;
+            const textX = pageWidth - rightMargin;
+            
+            // Textos alineados a la derecha
+            doc.text(`Tienda: ${order.store}`, textX, startY, { align: 'right' });
+            doc.text(`Fecha: ${new Date(order.date).toLocaleDateString('es-ES')}`, textX, startY + 7, { align: 'right' });
+            doc.text(`Solicita: ${order.responsible || 'No especificado'}`, textX, startY + 14, { align: 'right' });
+            
+            // Línea separadora después de la información
+            startY += 25;
             doc.setDrawColor(200, 200, 200);
-            doc.line(14, 58, 196, 58);
+            doc.line(14, startY, 196, startY);
             
-            // Tabla de productos
-            const tableColumn = ["SKU", "Cód. Fábrica", "Descripción", "Cantidad"];
+            // Tabla de productos SIN Cód. Fábrica
+            const tableColumn = ["SKU", "Descripción", "Cantidad", "Picking"];
             const tableRows = [];
             
             order.products.forEach(product => {
                 const productData = [
                     product.sku,
-                    product.factoryCode || '-',
                     product.description,
-                    product.quantity.toString()
+                    product.quantity.toString(),
+                    '' // Celda vacía para Picking
                 ];
                 tableRows.push(productData);
             });
@@ -1349,28 +1366,40 @@
             doc.autoTable({
                 head: [tableColumn],
                 body: tableRows,
-                startY: 65,
+                startY: startY + 5,
                 theme: 'grid',
-                styles: { fontSize: 9, cellPadding: 3 },
-                headStyles: { fillColor: [67, 97, 238], textColor: 255 },
-                alternateRowStyles: { fillColor: [240, 240, 240] }
+                styles: { 
+                    fontSize: 9, 
+                    cellPadding: 4,
+                    lineColor: [0, 0, 0],
+                    lineWidth: 0.1,
+                    textColor: [0, 0, 0],
+                    fillColor: [255, 255, 255] // Fondo blanco
+                },
+                headStyles: { 
+                    fillColor: [67, 97, 238], 
+                    textColor: 255,
+                    lineColor: [0, 0, 0],
+                    lineWidth: 0.1
+                },
+                bodyStyles: {
+                    fillColor: [255, 255, 255], // Fondo blanco para todas las celdas
+                    textColor: [0, 0, 0],
+                    lineColor: [0, 0, 0],
+                    lineWidth: 0.1
+                },
+                alternateRowStyles: {
+                    fillColor: [255, 255, 255] // Sin alternancia de colores, todo blanco
+                },
+                columnStyles: {
+                    0: { cellWidth: 40 }, // SKU
+                    1: { cellWidth: 80 }, // Descripción
+                    2: { cellWidth: 25, halign: 'center' }, // Cantidad
+                    3: { cellWidth: 25, halign: 'center' }  // Picking
+                },
+                // Altura de fila: 12.75 puntos (equivalente a ~0.45 cm)
+                rowHeight: 12.75
             });
-            
-            // Espacio para firmas
-            const finalY = doc.lastAutoTable.finalY + 15;
-            
-            doc.setFontSize(10);
-            doc.text('__________________________', 14, finalY);
-            doc.text('Firma de quien prepara', 14, finalY + 5);
-            
-            doc.text('__________________________', 120, finalY);
-            doc.text('Firma de quien recibe', 120, finalY + 5);
-            
-            // Nota
-            doc.setFontSize(8);
-            doc.setTextColor(100, 100, 100);
-            doc.text('Este documento es generado automáticamente por el sistema de Pedidos a Bodega', 14, finalY + 20);
-            doc.text(`Fecha de generación: ${new Date().toLocaleString('es-ES')}`, 14, finalY + 25);
             
             // Guardar PDF
             doc.save(`Picking_${order.id.replace('#', '')}.pdf`);
@@ -1882,7 +1911,7 @@
             if (!responsibleInput.value.trim()) {
                 Swal.fire({
                     title: 'Validación requerida',
-                    text: 'Por favor ingresa el nombre del responsable',
+                    text: 'Por favor ingresa el nombre de quien solicita',
                     icon: 'info',
                     confirmButtonColor: '#3085d6'
                 });
@@ -2186,7 +2215,7 @@
                     </div>
                     <div class="order-store">Tienda: ${order.store}</div>
                     <div class="order-responsible">
-                        <i class="fas fa-user"></i> Responsable: ${order.responsible || 'No especificado'}
+                        <i class="fas fa-user"></i> Solicita: ${order.responsible || 'No especificado'}
                     </div>
                     <table class="order-products">
                         <thead>
@@ -2517,7 +2546,7 @@
                     <div class="form-control" style="background: #f8f9fa;">${formatDate(order.date)}</div>
                 </div>
                 <div class="form-group">
-                    <label>Responsable</label>
+                    <label>Solicita</label>
                     <div class="form-control" style="background: #f8f9fa;">${order.responsible || 'No especificado'}</div>
                 </div>
                 <div class="form-group">
