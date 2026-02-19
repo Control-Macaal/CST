@@ -1,0 +1,1940 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Productos por Proveedor</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-hover: #3a56d4;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --dark: #1b263b;
+            --light: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #2b2d42;
+            --text-light: #8d99ae;
+            --danger: #ef233c;
+            --warning: #fc7703;
+            --success: #4cc9f0;
+            --info: #17a2b8;
+            --border-radius: 6px;
+            --shadow: 0 1px 5px rgba(0, 0, 0, 0.03);
+            --transition: all 0.2s ease;
+            --border-light: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--text);
+            padding: 1.5rem;
+            min-height: 100vh;
+            font-size: 0.85rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: var(--border-light);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.4rem;
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .header-title i {
+            font-size: 1.6rem;
+            color: var(--primary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.2rem;
+            border: var(--border-light);
+        }
+
+        /* Proveedores Grid */
+        .proveedores-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.2rem;
+            margin-top: 1.2rem;
+        }
+
+        .proveedor-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: var(--border-light);
+            overflow: hidden;
+        }
+
+        .proveedor-header {
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .proveedor-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .proveedor-header .badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+
+        .proveedor-body {
+            padding: 0.8rem;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .producto-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            border-bottom: var(--border-light);
+            transition: var(--transition);
+        }
+
+        .producto-item:hover {
+            background: #f8f9fa;
+        }
+
+        .producto-item:last-child {
+            border-bottom: none;
+        }
+
+        .producto-info {
+            flex: 1;
+        }
+
+        .producto-sku {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.8rem;
+            font-family: monospace;
+        }
+
+        .producto-nombre {
+            font-size: 0.8rem;
+            margin-top: 0.1rem;
+        }
+
+        .producto-actions {
+            display: flex;
+            gap: 0.3rem;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            transition: var(--transition);
+            font-size: 0.8rem;
+        }
+
+        .btn-icon:hover {
+            color: var(--danger);
+            background: rgba(239, 35, 60, 0.1);
+        }
+
+        .btn-icon.edit:hover {
+            color: var(--primary);
+            background: rgba(67, 97, 238, 0.1);
+        }
+
+        /* Formularios */
+        .form-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 0.8rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-weight: 500;
+            font-size: 0.75rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+            font-family: monospace;
+            font-size: 0.8rem;
+        }
+
+        /* Botones */
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-hover);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: #3aa8d8;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #d90429;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-warning:hover:not(:disabled) {
+            background: #e06702;
+        }
+
+        .btn-info {
+            background: var(--info);
+            color: white;
+        }
+
+        .btn-info:hover:not(:disabled) {
+            background: #138496;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: var(--text);
+        }
+
+        .btn-outline:hover:not(:disabled) {
+            background: var(--light);
+        }
+
+        .btn-icon-only {
+            padding: 0.5rem;
+        }
+
+        /* Spinner en botones */
+        .btn .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 0.3rem;
+        }
+
+        .btn-loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.3rem;
+            margin-bottom: 1.2rem;
+            border-bottom: var(--border-light);
+            padding-bottom: 0.8rem;
+        }
+
+        .tab {
+            padding: 0.5rem 1.2rem;
+            background: none;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            transition: var(--transition);
+        }
+
+        .tab:hover {
+            background: var(--light);
+            color: var(--text);
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Tabla de productos */
+        .products-table-container {
+            overflow-x: auto;
+            margin-top: 0.8rem;
+        }
+
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            font-size: 0.8rem;
+        }
+
+        .products-table th {
+            background: var(--primary);
+            color: white;
+            padding: 0.7rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .products-table td {
+            padding: 0.6rem 0.7rem;
+            border-bottom: var(--border-light);
+        }
+
+        .products-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .products-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Buscador */
+        .search-box {
+            position: relative;
+            margin-bottom: 0.8rem;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 0.8rem;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.6rem 1rem 0.6rem 2.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            font-size: 0.85rem;
+        }
+
+        /* Estadísticas */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            border: var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(67, 97, 238, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .stat-info h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--dark);
+            line-height: 1.2;
+        }
+
+        .stat-info p {
+            color: var(--text-light);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.2rem;
+            color: var(--dark);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.8rem;
+            justify-content: flex-end;
+            margin-top: 1.2rem;
+        }
+
+        /* Radio buttons */
+        .radio-group {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1rem 0;
+            padding: 0.5rem;
+            background: var(--light);
+            border-radius: var(--border-radius);
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            cursor: pointer;
+        }
+
+        .radio-option input[type="radio"] {
+            cursor: pointer;
+        }
+
+        .radio-option label {
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        /* Resumen de importación */
+        .import-summary {
+            margin: 1rem 0;
+            padding: 0.8rem;
+            background: var(--light);
+            border-radius: var(--border-radius);
+            font-size: 0.8rem;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.3rem;
+        }
+
+        .summary-item.total {
+            font-weight: 600;
+            color: var(--primary);
+            border-top: 1px solid rgba(0,0,0,0.1);
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+        }
+
+        .badge-success {
+            background: rgba(76, 201, 240, 0.2);
+            color: var(--success);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+        }
+
+        .badge-warning {
+            background: rgba(252, 119, 3, 0.1);
+            color: var(--warning);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+        }
+
+        /* Loading */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Utilidades */
+        .text-muted {
+            color: var(--text-light);
+            font-size: 0.8rem;
+        }
+
+        .mt-4 {
+            margin-top: 1.5rem;
+        }
+
+        .mb-3 {
+            margin-bottom: 1.2rem;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            margin-bottom: 0.8rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .empty-state p {
+            font-size: 0.8rem;
+        }
+
+        /* Alertas */
+        .alert {
+            padding: 0.8rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8rem;
+        }
+
+        .alert-success {
+            background: rgba(76, 201, 240, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(76, 201, 240, 0.2);
+        }
+
+        .alert-danger {
+            background: rgba(239, 35, 60, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 35, 60, 0.2);
+        }
+
+        .alert-info {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(67, 97, 238, 0.2);
+        }
+
+        .alert-warning {
+            background: rgba(252, 119, 3, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(252, 119, 3, 0.2);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 0.8rem;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 0.8rem;
+                align-items: flex-start;
+            }
+
+            .header-title h1 {
+                font-size: 1.2rem;
+            }
+
+            .proveedores-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 1.2rem;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab {
+                flex: 1;
+                text-align: center;
+            }
+
+            .radio-group {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title">
+                <i class="fas fa-boxes"></i>
+                <h1>Gestión de Productos</h1>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="showAddProveedorModal()">
+                    <i class="fas fa-plus"></i> Nuevo Proveedor
+                </button>
+                <button class="btn btn-success" onclick="showImportModal()">
+                    <i class="fas fa-file-import"></i> Importar
+                </button>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="stats-grid" id="statsContainer">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="totalProveedores">0</h3>
+                    <p>Proveedores</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-box"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="totalProductos">0</h3>
+                    <p>Productos</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('proveedores')" id="tabProveedores">
+                <i class="fas fa-building"></i> Por Proveedor
+            </button>
+            <button class="tab" onclick="switchTab('todos')" id="tabTodos">
+                <i class="fas fa-list"></i> Todos los Productos
+            </button>
+        </div>
+
+        <!-- Vista por Proveedores -->
+        <div id="proveedoresView">
+            <!-- Buscador de productos por proveedor -->
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchProveedorProducto" placeholder="Buscar producto por SKU o nombre...">
+            </div>
+
+            <!-- Grid de Proveedores -->
+            <div class="proveedores-grid" id="proveedoresGrid">
+                <!-- Se llenará dinámicamente -->
+            </div>
+        </div>
+
+        <!-- Vista Todos los Productos -->
+        <div id="todosView" style="display: none;">
+            <!-- Buscador general -->
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchTodos" placeholder="Buscar producto por SKU, nombre o proveedor...">
+            </div>
+
+            <!-- Filtro por proveedor -->
+            <div class="form-row" style="margin-bottom: 0.8rem;">
+                <div class="form-group">
+                    <select class="form-control" id="filtroProveedor">
+                        <option value="">Todos los proveedores</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Tabla de productos -->
+            <div class="products-table-container">
+                <table class="products-table">
+                    <thead>
+                        <tr>
+                            <th>Proveedor</th>
+                            <th>SKU</th>
+                            <th>Producto</th>
+                            <th style="width: 80px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="todosProductosTable">
+                        <tr>
+                            <td colspan="4" class="text-center">Cargando productos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Agregar/Editar Proveedor -->
+    <div class="modal" id="proveedorModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="proveedorModalTitle">Nuevo Proveedor</h2>
+                <button class="close-modal" onclick="closeProveedorModal()">&times;</button>
+            </div>
+            <form id="proveedorForm" onsubmit="event.preventDefault(); saveProveedor();">
+                <div class="form-group">
+                    <label>Nombre del Proveedor</label>
+                    <input type="text" class="form-control" id="proveedorNombre" required placeholder="Ej: PROVEEDOR A">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeProveedorModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="saveProveedorBtn">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Agregar/Editar Producto -->
+    <div class="modal" id="productoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="productoModalTitle">Nuevo Producto</h2>
+                <button class="close-modal" onclick="closeProductoModal()">&times;</button>
+            </div>
+            <form id="productoForm" onsubmit="event.preventDefault(); saveProducto();">
+                <input type="hidden" id="productoProveedorId">
+                <div class="form-group">
+                    <label>Proveedor</label>
+                    <select class="form-control" id="productoProveedor" required>
+                        <option value="">Seleccionar proveedor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>SKU</label>
+                    <input type="text" class="form-control" id="productoSku" required placeholder="Ej: SPA021">
+                </div>
+                <div class="form-group">
+                    <label>Nombre del Producto</label>
+                    <input type="text" class="form-control" id="productoNombre" required placeholder="Ej: MACETA CLASICA VERDE">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeProductoModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="saveProductoBtn">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Importar Productos -->
+    <div class="modal" id="importModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Importar Productos</h2>
+                <button class="close-modal" onclick="closeImportModal()">&times;</button>
+            </div>
+            <form id="importForm" onsubmit="event.preventDefault(); importProductos();">
+                <div class="form-group">
+                    <label>Proveedor</label>
+                    <select class="form-control" id="importProveedor" required>
+                        <option value="">Seleccionar proveedor</option>
+                    </select>
+                </div>
+
+                <!-- Opciones de importación -->
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" name="importMode" id="modeNuevos" value="nuevos" checked>
+                        <label for="modeNuevos">Solo agregar nuevos</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="importMode" id="modeActualizar" value="actualizar">
+                        <label for="modeActualizar">Actualizar existentes</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="importMode" id="modeTodo" value="todo">
+                        <label for="modeTodo">Agregar y actualizar</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Formato: SKU NOMBRE (uno por línea)</label>
+                    <textarea class="form-control" id="importData" rows="8" placeholder="Ejemplo:
+FIE035 MACETA PREMIUM RED C/P #1
+FIE036 MACETA PREMIUM BLUE C/P #2
+FIE037 MACETA PREMIUM GREEN C/P #3" required></textarea>
+                </div>
+
+                <!-- Nota sobre formato -->
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Acepta espacios o tabulaciones entre SKU y nombre. Los SKU se convierten a mayúsculas.</span>
+                </div>
+
+                <!-- Resumen de importación -->
+                <div id="importSummary" style="display: none;"></div>
+
+                <div class="alert alert-info" id="modeDescription">
+                    <i class="fas fa-info-circle"></i>
+                    Solo se agregarán productos nuevos (SKU no existentes)
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeImportModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-success" id="importBtn">Importar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Vaciar Proveedor -->
+    <div class="modal" id="vaciarModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Vaciar Proveedor</h2>
+                <button class="close-modal" onclick="closeVaciarModal()">&times;</button>
+            </div>
+            <div id="vaciarModalContent">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==============================
+        // CONFIGURACIÓN DE FIREBASE
+        // ==============================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBik7MpyjtyIzKtYjBJY-AV7OX7j0zn_vg",
+            authDomain: "pedbo8va.firebaseapp.com",
+            projectId: "pedbo8va",
+            storageBucket: "pedbo8va.firebasestorage.app",
+            messagingSenderId: "912545680126",
+            appId: "1:912545680126:web:334f91e3ebfe79f58a33af"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // ==============================
+        // VARIABLES GLOBALES
+        // ==============================
+        let proveedores = [];
+        let productos = [];
+        let currentProveedorId = null;
+        let currentProductoId = null;
+
+        // ==============================
+        // INICIALIZACIÓN
+        // ==============================
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProveedores();
+            loadProductos();
+            
+            // Event listeners para el modo de importación
+            document.querySelectorAll('input[name="importMode"]').forEach(radio => {
+                radio.addEventListener('change', updateModeDescription);
+            });
+        });
+
+        // ==============================
+        // FUNCIONES DE CARGA DE DATOS
+        // ==============================
+        async function loadProveedores() {
+            try {
+                const snapshot = await db.collection("proveedores")
+                    .orderBy("nombre")
+                    .get();
+                
+                proveedores = [];
+                snapshot.forEach(doc => {
+                    proveedores.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                updateStats();
+                renderProveedoresGrid();
+                updateProveedorSelects();
+            } catch (error) {
+                console.error("Error al cargar proveedores:", error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudieron cargar los proveedores',
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+            }
+        }
+
+        async function loadProductos() {
+            try {
+                const snapshot = await db.collection("productos")
+                    .orderBy("sku")
+                    .get();
+                
+                productos = [];
+                snapshot.forEach(doc => {
+                    productos.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                updateStats();
+                renderProveedoresGrid();
+                renderTodosProductos();
+            } catch (error) {
+                console.error("Error al cargar productos:", error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudieron cargar los productos',
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+            }
+        }
+
+        // ==============================
+        // ACTUALIZAR ESTADÍSTICAS
+        // ==============================
+        function updateStats() {
+            document.getElementById('totalProveedores').textContent = proveedores.length;
+            document.getElementById('totalProductos').textContent = productos.length;
+        }
+
+        // ==============================
+        // RENDERIZAR PROVEEDORES GRID
+        // ==============================
+        function renderProveedoresGrid() {
+            const grid = document.getElementById('proveedoresGrid');
+            const searchTerm = document.getElementById('searchProveedorProducto').value.toLowerCase();
+            
+            if (proveedores.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <i class="fas fa-building"></i>
+                        <h3>No hay proveedores</h3>
+                        <p>Haz clic en "Nuevo Proveedor" para comenzar</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            
+            proveedores.forEach(proveedor => {
+                const productosProveedor = productos.filter(p => p.proveedorId === proveedor.id);
+                
+                // Filtrar productos por búsqueda
+                let productosFiltrados = productosProveedor;
+                if (searchTerm) {
+                    productosFiltrados = productosProveedor.filter(p => 
+                        p.sku.toLowerCase().includes(searchTerm) || 
+                        p.nombre.toLowerCase().includes(searchTerm)
+                    );
+                }
+
+                html += `
+                    <div class="proveedor-card">
+                        <div class="proveedor-header">
+                            <h3>${proveedor.nombre}</h3>
+                            <span class="badge">${productosProveedor.length}</span>
+                        </div>
+                        <div class="proveedor-body">
+                            <div style="display: flex; gap: 0.3rem; margin-bottom: 0.8rem; flex-wrap: wrap;">
+                                <button class="btn btn-primary btn-icon-only" onclick="showAddProductoModal('${proveedor.id}')" title="Agregar Producto">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <button class="btn btn-outline btn-icon-only" onclick="editProveedor('${proveedor.id}')" title="Editar Proveedor">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-warning btn-icon-only" onclick="showVaciarProveedorModal('${proveedor.id}')" title="Vaciar Productos">
+                                    <i class="fas fa-eraser"></i>
+                                </button>
+                                <button class="btn btn-danger btn-icon-only" onclick="deleteProveedor('${proveedor.id}')" title="Eliminar Proveedor">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            ${productosFiltrados.length > 0 ? productosFiltrados.map(p => `
+                                <div class="producto-item">
+                                    <div class="producto-info">
+                                        <div class="producto-sku">${p.sku}</div>
+                                        <div class="producto-nombre">${p.nombre}</div>
+                                    </div>
+                                    <div class="producto-actions">
+                                        <button class="btn-icon edit" onclick="editProducto('${p.id}')" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn-icon" onclick="deleteProducto('${p.id}')" title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('') : `
+                                <div class="text-muted text-center" style="padding: 0.8rem;">
+                                    No hay productos
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            grid.innerHTML = html;
+        }
+
+        // ==============================
+        // RENDERIZAR TODOS LOS PRODUCTOS
+        // ==============================
+        function renderTodosProductos() {
+            const tbody = document.getElementById('todosProductosTable');
+            const searchTerm = document.getElementById('searchTodos').value.toLowerCase();
+            const filtroProveedor = document.getElementById('filtroProveedor').value;
+            
+            let productosFiltrados = [...productos];
+            
+            // Aplicar filtro de búsqueda
+            if (searchTerm) {
+                productosFiltrados = productosFiltrados.filter(p => 
+                    p.sku.toLowerCase().includes(searchTerm) || 
+                    p.nombre.toLowerCase().includes(searchTerm) ||
+                    (getProveedorNombre(p.proveedorId) || '').toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // Aplicar filtro por proveedor
+            if (filtroProveedor) {
+                productosFiltrados = productosFiltrados.filter(p => p.proveedorId === filtroProveedor);
+            }
+            
+            if (productosFiltrados.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-muted text-center" style="padding: 2rem;">
+                            No se encontraron productos
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = productosFiltrados.map(p => `
+                <tr>
+                    <td>${getProveedorNombre(p.proveedorId) || 'Sin proveedor'}</td>
+                    <td><span class="producto-sku">${p.sku}</span></td>
+                    <td>${p.nombre}</td>
+                    <td>
+                        <button class="btn-icon edit" onclick="editProducto('${p.id}')" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-icon" onclick="deleteProducto('${p.id}')" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // ==============================
+        // FUNCIONES DE UTILIDAD
+        // ==============================
+        function getProveedorNombre(proveedorId) {
+            const proveedor = proveedores.find(p => p.id === proveedorId);
+            return proveedor ? proveedor.nombre : null;
+        }
+
+        function updateProveedorSelects() {
+            const selects = ['productoProveedor', 'filtroProveedor', 'importProveedor'];
+            
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    const currentValue = select.value;
+                    select.innerHTML = '<option value="">Seleccionar proveedor</option>';
+                    
+                    proveedores.forEach(proveedor => {
+                        select.innerHTML += `<option value="${proveedor.id}" ${currentValue === proveedor.id ? 'selected' : ''}>${proveedor.nombre}</option>`;
+                    });
+                }
+            });
+        }
+
+        function updateModeDescription() {
+            const mode = document.querySelector('input[name="importMode"]:checked').value;
+            const description = document.getElementById('modeDescription');
+            
+            let text = '';
+            switch(mode) {
+                case 'nuevos':
+                    text = 'Solo se agregarán productos nuevos (SKU no existentes)';
+                    break;
+                case 'actualizar':
+                    text = 'Solo se actualizarán productos existentes (se mantienen los no existentes)';
+                    break;
+                case 'todo':
+                    text = 'Se agregarán productos nuevos y se actualizarán los existentes';
+                    break;
+            }
+            description.innerHTML = `<i class="fas fa-info-circle"></i> ${text}`;
+        }
+
+        // ==============================
+        // CAMBIAR TABS
+        // ==============================
+        function switchTab(tab) {
+            document.getElementById('tabProveedores').classList.toggle('active', tab === 'proveedores');
+            document.getElementById('tabTodos').classList.toggle('active', tab === 'todos');
+            
+            document.getElementById('proveedoresView').style.display = tab === 'proveedores' ? 'block' : 'none';
+            document.getElementById('todosView').style.display = tab === 'todos' ? 'block' : 'none';
+            
+            if (tab === 'todos') {
+                updateProveedorSelects();
+                renderTodosProductos();
+            }
+        }
+
+        // ==============================
+        // EVENT LISTENERS PARA BÚSQUEDA
+        // ==============================
+        document.getElementById('searchProveedorProducto').addEventListener('input', () => {
+            renderProveedoresGrid();
+        });
+
+        document.getElementById('searchTodos').addEventListener('input', () => {
+            renderTodosProductos();
+        });
+
+        document.getElementById('filtroProveedor').addEventListener('change', () => {
+            renderTodosProductos();
+        });
+
+        // ==============================
+        // CRUD PROVEEDORES
+        // ==============================
+        function showAddProveedorModal() {
+            currentProveedorId = null;
+            document.getElementById('proveedorModalTitle').textContent = 'Nuevo Proveedor';
+            document.getElementById('proveedorNombre').value = '';
+            document.getElementById('proveedorModal').style.display = 'flex';
+        }
+
+        function editProveedor(id) {
+            const proveedor = proveedores.find(p => p.id === id);
+            if (proveedor) {
+                currentProveedorId = id;
+                document.getElementById('proveedorModalTitle').textContent = 'Editar Proveedor';
+                document.getElementById('proveedorNombre').value = proveedor.nombre;
+                document.getElementById('proveedorModal').style.display = 'flex';
+            }
+        }
+
+        async function saveProveedor() {
+            const nombre = document.getElementById('proveedorNombre').value.trim().toUpperCase();
+            
+            if (!nombre) {
+                Swal.fire({
+                    title: 'Validación',
+                    text: 'El nombre del proveedor es requerido',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            const saveBtn = document.getElementById('saveProveedorBtn');
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<span class="spinner"></span> Guardando...';
+            saveBtn.disabled = true;
+
+            try {
+                if (currentProveedorId) {
+                    await db.collection("proveedores").doc(currentProveedorId).update({
+                        nombre: nombre,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    Swal.fire({
+                        title: 'Actualizado',
+                        text: 'Proveedor actualizado',
+                        icon: 'success',
+                        timer: 1000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    await db.collection("proveedores").add({
+                        nombre: nombre,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    Swal.fire({
+                        title: 'Creado',
+                        text: 'Proveedor creado',
+                        icon: 'success',
+                        timer: 1000,
+                        showConfirmButton: false
+                    });
+                }
+                
+                closeProveedorModal();
+                await loadProveedores();
+            } catch (error) {
+                console.error("Error al guardar proveedor:", error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo guardar el proveedor',
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+            } finally {
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+            }
+        }
+
+        async function deleteProveedor(id) {
+            const productosProveedor = productos.filter(p => p.proveedorId === id);
+            
+            if (productosProveedor.length > 0) {
+                Swal.fire({
+                    title: 'No se puede eliminar',
+                    text: `Tiene ${productosProveedor.length} producto(s) asociado(s). Usa "Vaciar" primero.`,
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            const result = await Swal.fire({
+                title: '¿Eliminar proveedor?',
+                text: 'Esta acción no se puede deshacer',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    await db.collection("proveedores").doc(id).delete();
+                    
+                    Swal.fire({
+                        title: 'Eliminado',
+                        text: 'Proveedor eliminado',
+                        icon: 'success',
+                        timer: 1000,
+                        showConfirmButton: false
+                    });
+                    
+                    await loadProveedores();
+                } catch (error) {
+                    console.error("Error al eliminar proveedor:", error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se pudo eliminar',
+                        icon: 'error',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            }
+        }
+
+        function closeProveedorModal() {
+            document.getElementById('proveedorModal').style.display = 'none';
+            currentProveedorId = null;
+        }
+
+        // ==============================
+        // CRUD PRODUCTOS
+        // ==============================
+        function showAddProductoModal(proveedorId = null) {
+            currentProductoId = null;
+            document.getElementById('productoModalTitle').textContent = 'Nuevo Producto';
+            document.getElementById('productoSku').value = '';
+            document.getElementById('productoNombre').value = '';
+            document.getElementById('productoProveedorId').value = proveedorId || '';
+            
+            updateProveedorSelects();
+            
+            if (proveedorId) {
+                document.getElementById('productoProveedor').value = proveedorId;
+            }
+            
+            document.getElementById('productoModal').style.display = 'flex';
+        }
+
+        function editProducto(id) {
+            const producto = productos.find(p => p.id === id);
+            if (producto) {
+                currentProductoId = id;
+                document.getElementById('productoModalTitle').textContent = 'Editar Producto';
+                document.getElementById('productoSku').value = producto.sku;
+                document.getElementById('productoNombre').value = producto.nombre;
+                document.getElementById('productoProveedorId').value = producto.proveedorId;
+                
+                updateProveedorSelects();
+                document.getElementById('productoProveedor').value = producto.proveedorId;
+                
+                document.getElementById('productoModal').style.display = 'flex';
+            }
+        }
+
+        async function saveProducto() {
+            const proveedorId = document.getElementById('productoProveedor').value;
+            const sku = document.getElementById('productoSku').value.trim().toUpperCase();
+            const nombre = document.getElementById('productoNombre').value.trim().toUpperCase();
+            
+            if (!proveedorId || !sku || !nombre) {
+                Swal.fire({
+                    title: 'Validación',
+                    text: 'Todos los campos son requeridos',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            // Validar SKU único
+            const skuExists = productos.some(p => 
+                p.sku === sku && p.id !== currentProductoId
+            );
+            
+            if (skuExists) {
+                Swal.fire({
+                    title: 'SKU duplicado',
+                    text: 'Ya existe un producto con este SKU',
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            const saveBtn = document.getElementById('saveProductoBtn');
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<span class="spinner"></span> Guardando...';
+            saveBtn.disabled = true;
+
+            try {
+                if (currentProductoId) {
+                    await db.collection("productos").doc(currentProductoId).update({
+                        proveedorId: proveedorId,
+                        sku: sku,
+                        nombre: nombre,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    Swal.fire({
+                        title: 'Actualizado',
+                        text: 'Producto actualizado',
+                        icon: 'success',
+                        timer: 1000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    await db.collection("productos").add({
+                        proveedorId: proveedorId,
+                        sku: sku,
+                        nombre: nombre,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    Swal.fire({
+                        title: 'Creado',
+                        text: 'Producto creado',
+                        icon: 'success',
+                        timer: 1000,
+                        showConfirmButton: false
+                    });
+                }
+                
+                closeProductoModal();
+                await loadProductos();
+            } catch (error) {
+                console.error("Error al guardar producto:", error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo guardar',
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+            } finally {
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+            }
+        }
+
+        async function deleteProducto(id) {
+            const result = await Swal.fire({
+                title: '¿Eliminar producto?',
+                text: 'Esta acción no se puede deshacer',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    await db.collection("productos").doc(id).delete();
+                    
+                    Swal.fire({
+                        title: 'Eliminado',
+                        text: 'Producto eliminado',
+                        icon: 'success',
+                        timer: 1000,
+                        showConfirmButton: false
+                    });
+                    
+                    await loadProductos();
+                } catch (error) {
+                    console.error("Error al eliminar producto:", error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se pudo eliminar',
+                        icon: 'error',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            }
+        }
+
+        function closeProductoModal() {
+            document.getElementById('productoModal').style.display = 'none';
+            currentProductoId = null;
+        }
+
+        // ==============================
+        // VACIAR PROVEEDOR (ELIMINAR TODOS SUS PRODUCTOS)
+        // ==============================
+        function showVaciarProveedorModal(proveedorId) {
+            const proveedor = proveedores.find(p => p.id === proveedorId);
+            if (!proveedor) return;
+            
+            const productosProveedor = productos.filter(p => p.proveedorId === proveedorId);
+            
+            if (productosProveedor.length === 0) {
+                Swal.fire({
+                    title: 'Sin productos',
+                    text: 'Este proveedor no tiene productos para vaciar',
+                    icon: 'info',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            const modalContent = document.getElementById('vaciarModalContent');
+            modalContent.innerHTML = `
+                <div style="margin-bottom: 1.5rem;">
+                    <p><strong>Proveedor:</strong> ${proveedor.nombre}</p>
+                    <p><strong>Productos a eliminar:</strong> ${productosProveedor.length}</p>
+                    <div style="max-height: 200px; overflow-y: auto; margin: 1rem 0; padding: 0.5rem; background: var(--light); border-radius: 4px;">
+                        ${productosProveedor.slice(0, 10).map(p => `
+                            <div style="padding: 0.3rem; border-bottom: 1px solid rgba(0,0,0,0.05);">
+                                <span class="producto-sku">${p.sku}</span> - ${p.nombre}
+                            </div>
+                        `).join('')}
+                        ${productosProveedor.length > 10 ? `<div style="padding: 0.3rem; color: var(--text-light);">... y ${productosProveedor.length - 10} más</div>` : ''}
+                    </div>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Esta acción eliminará TODOS los productos de este proveedor. No se puede deshacer.
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-outline" onclick="closeVaciarModal()">Cancelar</button>
+                    <button class="btn btn-danger" onclick="vaciarProveedor('${proveedorId}')" id="vaciarBtn">
+                        Vaciar Productos
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('vaciarModal').style.display = 'flex';
+        }
+
+        async function vaciarProveedor(proveedorId) {
+            const proveedor = proveedores.find(p => p.id === proveedorId);
+            if (!proveedor) return;
+
+            const vaciarBtn = document.getElementById('vaciarBtn');
+            const originalText = vaciarBtn.innerHTML;
+            vaciarBtn.innerHTML = '<span class="spinner"></span> Eliminando...';
+            vaciarBtn.disabled = true;
+
+            try {
+                const productosProveedor = productos.filter(p => p.proveedorId === proveedorId);
+                
+                if (productosProveedor.length === 0) {
+                    Swal.fire({
+                        title: 'Sin productos',
+                        text: 'No hay productos para eliminar',
+                        icon: 'info',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'OK'
+                    });
+                    closeVaciarModal();
+                    return;
+                }
+
+                // Eliminar en batches de 500 (límite de Firestore)
+                const batchSize = 500;
+                const batches = [];
+                
+                for (let i = 0; i < productosProveedor.length; i += batchSize) {
+                    const batch = db.batch();
+                    const batchProducts = productosProveedor.slice(i, i + batchSize);
+                    
+                    batchProducts.forEach(producto => {
+                        batch.delete(db.collection("productos").doc(producto.id));
+                    });
+                    
+                    batches.push(batch.commit());
+                }
+
+                await Promise.all(batches);
+
+                Swal.fire({
+                    title: 'Productos eliminados',
+                    text: `Se eliminaron ${productosProveedor.length} producto(s) de ${proveedor.nombre}`,
+                    icon: 'success',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+
+                closeVaciarModal();
+                await loadProductos();
+
+            } catch (error) {
+                console.error("Error al vaciar proveedor:", error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudieron eliminar los productos',
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+            } finally {
+                vaciarBtn.innerHTML = originalText;
+                vaciarBtn.disabled = false;
+            }
+        }
+
+        function closeVaciarModal() {
+            document.getElementById('vaciarModal').style.display = 'none';
+        }
+
+        // ==============================
+        // IMPORTAR PRODUCTOS CON ACTUALIZACIÓN
+        // ==============================
+        function showImportModal() {
+            updateProveedorSelects();
+            document.getElementById('importData').value = '';
+            document.getElementById('importSummary').style.display = 'none';
+            document.getElementById('importSummary').innerHTML = '';
+            document.getElementById('importModal').style.display = 'flex';
+        }
+
+        async function importProductos() {
+            const proveedorId = document.getElementById('importProveedor').value;
+            const data = document.getElementById('importData').value.trim();
+            const mode = document.querySelector('input[name="importMode"]:checked').value;
+            
+            if (!proveedorId) {
+                Swal.fire({
+                    title: 'Validación',
+                    text: 'Selecciona un proveedor',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+            
+            if (!data) {
+                Swal.fire({
+                    title: 'Validación',
+                    text: 'Ingresa los productos a importar',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            const importBtn = document.getElementById('importBtn');
+            const originalText = importBtn.innerHTML;
+            importBtn.innerHTML = '<span class="spinner"></span> Procesando...';
+            importBtn.disabled = true;
+
+            try {
+                // Procesar líneas - MEJORADO PARA MANEJAR ESPACIOS Y TABULACIONES
+                const lines = data.split('\n');
+                const productosToAdd = [];
+                const productosToUpdate = [];
+                const errores = [];
+                const skuRepetidos = new Set();
+
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+
+                    // Buscar el primer espacio o tabulación
+                    const spaceIndex = line.search(/[\s\t]/);
+                    
+                    if (spaceIndex === -1) {
+                        errores.push(`Línea ${i + 1}: Formato incorrecto. Debe ser "SKU NOMBRE"`);
+                        continue;
+                    }
+
+                    const sku = line.substring(0, spaceIndex).trim().toUpperCase();
+                    const nombre = line.substring(spaceIndex + 1).trim().toUpperCase();
+
+                    if (!sku || !nombre) {
+                        errores.push(`Línea ${i + 1}: SKU o nombre vacío`);
+                        continue;
+                    }
+
+                    // Verificar SKU duplicado en el archivo
+                    if (skuRepetidos.has(sku)) {
+                        errores.push(`Línea ${i + 1}: SKU duplicado: ${sku}`);
+                        continue;
+                    }
+                    skuRepetidos.add(sku);
+
+                    // Verificar si el producto ya existe
+                    const productoExistente = productos.find(p => p.sku === sku);
+                    
+                    if (productoExistente) {
+                        // Producto existente - depende del modo
+                        if (mode === 'nuevos') {
+                            // Modo solo nuevos: ignorar existentes
+                            continue;
+                        } else {
+                            // Modo actualizar o todo: preparar para actualizar
+                            productosToUpdate.push({
+                                id: productoExistente.id,
+                                proveedorId: proveedorId,
+                                sku: sku,
+                                nombre: nombre,
+                                nombreAnterior: productoExistente.nombre
+                            });
+                        }
+                    } else {
+                        // Producto nuevo
+                        if (mode !== 'actualizar') {
+                            // Modo nuevos o todo: agregar
+                            productosToAdd.push({
+                                proveedorId: proveedorId,
+                                sku: sku,
+                                nombre: nombre
+                            });
+                        }
+                    }
+                }
+
+                if (errores.length > 0) {
+                    Swal.fire({
+                        title: 'Errores de formato',
+                        html: errores.join('<br>'),
+                        icon: 'error',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+
+                // Mostrar resumen
+                const totalNuevos = productosToAdd.length;
+                const totalActualizar = productosToUpdate.length;
+                
+                if (totalNuevos === 0 && totalActualizar === 0) {
+                    Swal.fire({
+                        title: 'Sin cambios',
+                        text: 'No hay productos para importar con la configuración actual',
+                        icon: 'info',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+
+                // Confirmar importación con resumen
+                const confirmMessage = `
+                    <div style="text-align: left;">
+                        <p><strong>Resumen de importación:</strong></p>
+                        <p>✅ Nuevos: ${totalNuevos}</p>
+                        <p>🔄 Actualizar: ${totalActualizar}</p>
+                        ${totalActualizar > 0 ? '<p style="color: var(--warning);">Los productos existentes serán actualizados</p>' : ''}
+                    </div>
+                `;
+
+                const result = await Swal.fire({
+                    title: 'Confirmar importación',
+                    html: confirmMessage,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Importar',
+                    cancelButtonText: 'Cancelar'
+                });
+
+                if (!result.isConfirmed) {
+                    return;
+                }
+
+                // Ejecutar importación
+                importBtn.innerHTML = '<span class="spinner"></span> Importando...';
+                
+                const batch = db.batch();
+                let operaciones = 0;
+
+                // Agregar nuevos productos
+                for (const producto of productosToAdd) {
+                    const docRef = db.collection("productos").doc();
+                    batch.set(docRef, {
+                        ...producto,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    operaciones++;
+                }
+
+                // Actualizar productos existentes
+                for (const producto of productosToUpdate) {
+                    const docRef = db.collection("productos").doc(producto.id);
+                    batch.update(docRef, {
+                        proveedorId: proveedorId,
+                        nombre: producto.nombre,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        previousName: producto.nombreAnterior,
+                        lastUpdate: new Date().toISOString()
+                    });
+                    operaciones++;
+                }
+
+                if (operaciones > 0) {
+                    await batch.commit();
+                }
+
+                Swal.fire({
+                    title: 'Importación exitosa',
+                    html: `
+                        <div style="text-align: left;">
+                            <p>✅ Se agregaron ${totalNuevos} producto(s) nuevo(s)</p>
+                            <p>🔄 Se actualizaron ${totalActualizar} producto(s) existente(s)</p>
+                        </div>
+                    `,
+                    icon: 'success',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+
+                closeImportModal();
+                await loadProductos();
+
+            } catch (error) {
+                console.error("Error al importar:", error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Error durante la importación: ' + error.message,
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+            } finally {
+                importBtn.innerHTML = originalText;
+                importBtn.disabled = false;
+            }
+        }
+
+        function closeImportModal() {
+            document.getElementById('importModal').style.display = 'none';
+        }
+
+        // Hacer funciones globales
+        window.switchTab = switchTab;
+        window.showAddProveedorModal = showAddProveedorModal;
+        window.editProveedor = editProveedor;
+        window.deleteProveedor = deleteProveedor;
+        window.closeProveedorModal = closeProveedorModal;
+        window.showAddProductoModal = showAddProductoModal;
+        window.editProducto = editProducto;
+        window.deleteProducto = deleteProducto;
+        window.closeProductoModal = closeProductoModal;
+        window.showImportModal = showImportModal;
+        window.closeImportModal = closeImportModal;
+        window.showVaciarProveedorModal = showVaciarProveedorModal;
+        window.vaciarProveedor = vaciarProveedor;
+        window.closeVaciarModal = closeVaciarModal;
+    </script>
+</body>
+</html>
