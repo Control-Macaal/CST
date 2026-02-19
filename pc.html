@@ -955,17 +955,6 @@
             transform: scale(0.98);
         }
 
-        /* Botón personalizado para Pedidos a Bodega */
-        .btn-bodega {
-            background-color: var(--accent);
-            color: white;
-        }
-
-        .btn-bodega:active {
-            background-color: #1aa57b;
-            transform: scale(0.98);
-        }
-
         /* Efecto Ripple (Onda) para botones - Solo desktop */
         @media (hover: hover) {
             .ripple {
@@ -1499,8 +1488,8 @@
                 </div>
                 <div class="card-body">
                     <div class="btn-group">
-                        <!-- NUEVO BOTÓN: Pedidos a Bodega (arriba de Reportes Mal Estado) -->
-                        <button onclick="window.open('pedidos_bodega.html', '_self')" class="btn btn-bodega">
+                        <!-- NUEVO BOTÓN: Pedidos a Bodega (arriba de Reportes Mal Estado) - CON EL MISMO COLOR QUE LOS DEMÁS -->
+                        <button onclick="window.open('pedidos_bodega.html', '_self')" class="btn btn-secondary">
                             <i class="fas fa-box"></i>
                             Pedidos a Bodega
                         </button>
@@ -2515,4 +2504,3 @@
     </script>
 </body>
 </html>
-
