@@ -245,34 +245,6 @@
             background: #218838;
         }
 
-        .load-more-container {
-            text-align: center;
-            margin-top: 1.5rem;
-        }
-
-        .load-more-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-size: 0.9rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: var(--transition);
-        }
-
-        .load-more-btn:hover {
-            background: var(--primary-hover);
-        }
-
-        .load-more-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
         .search-container {
             margin-bottom: 1.5rem;
             display: flex;
@@ -430,6 +402,10 @@
 
         .btn-success {
             background: var(--primary);
+        }
+
+        .btn-log {
+            background: #6c757d;
         }
 
         .btn-warning {
@@ -970,6 +946,76 @@
             color: var(--cerrado);
         }
 
+        .edit-attempts {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: rgba(252, 119, 3, 0.1);
+            color: var(--warning);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+            font-weight: 500;
+        }
+
+        /* Log de ediciones */
+        .edit-log {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            border: var(--border-light);
+        }
+
+        .edit-log h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .edit-log-list {
+            list-style-type: none;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .edit-log-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 0.85rem;
+        }
+
+        .edit-log-item:last-child {
+            border-bottom: none;
+        }
+
+        .edit-log-time {
+            color: var(--text-light);
+            font-size: 0.8rem;
+            margin-top: 0.2rem;
+        }
+
+        .edit-log-fingerprint {
+            color: var(--primary);
+            font-size: 0.75rem;
+            margin-top: 0.2rem;
+            font-style: italic;
+        }
+
+        .product-change {
+            background-color: rgba(67, 97, 238, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            margin: 0.2rem 0;
+            font-family: monospace;
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+
         .sku-duplicate-message {
             color: var(--danger);
             font-size: 0.8rem;
@@ -1247,13 +1293,12 @@
         </div>
 
         <!-- Lista de pedidos -->
-        <div class="orders-list" id="ordersList"></div>
-        
-        <!-- Botón Cargar Más -->
-        <div class="load-more-container" id="loadMoreContainer">
-            <button class="load-more-btn" id="loadMoreBtn" onclick="loadMoreOrders()">
-                <i class="fas fa-arrow-down"></i> Cargar más pedidos
-            </button>
+        <div class="orders-list" id="ordersList">
+            <div class="no-orders" style="text-align: center; padding: 2.5rem; color: var(--text-light);">
+                <i class="fas fa-box-open" style="font-size: 2.5rem; margin-bottom: 1.2rem; opacity: 0.5;"></i>
+                <h3>No hay pedidos registrados</h3>
+                <p>Haz clic en "Nuevo Pedido" para crear tu primer pedido</p>
+            </div>
         </div>
     </div>
 
@@ -1306,11 +1351,15 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         
-        // Variables para paginación
-        let lastVisible = null;
-        let loadingMore = false;
-        let hasMore = true;
-        const PAGE_SIZE = 20;
+        // Habilitar persistencia offline
+        db.enablePersistence()
+            .catch((err) => {
+                if (err.code == 'failed-precondition') {
+                    console.log('Persistencia falló - múltiples pestañas abiertas');
+                } else if (err.code == 'unimplemented') {
+                    console.log('Persistencia no disponible en este navegador');
+                }
+            });
 
         // ==============================
         // VARIABLES GLOBALES
@@ -1320,13 +1369,13 @@
         let orderCounter = 0;
         let isCreatingNewOrder = false;
         let isFilterOpen = false;
-        let productosCatalogo = [];
+        let productosCatalogo = []; // Para almacenar los productos de la base de datos
 
         // Variables para comparación de productos
         let originalProducts = [];
 
         // ==============================
-        // FUNCIÓN DE HUELLA DEL NAVEGADOR
+        // FUNCIONES DE HUELLA DEL NAVEGADOR
         // ==============================
         
         function getBrowserFingerprint() {
@@ -1436,11 +1485,13 @@
         // ==============================
         function autoCompletarDescripcion(input) {
             const sku = input.value.trim().toUpperCase();
-            if (sku.length < 3) return;
+            if (sku.length < 3) return; // Esperar a que tenga al menos 3 caracteres
             
+            // Buscar el producto en el catálogo
             const producto = productosCatalogo.find(p => p.sku === sku);
             
             if (producto) {
+                // Encontrar la fila correspondiente
                 const row = input.closest('tr');
                 const descripcionInput = row.querySelector('input[id^="productDescription"]');
                 if (descripcionInput && !descripcionInput.value) {
@@ -1450,8 +1501,9 @@
         }
 
         // ==============================
-        // FUNCIÓN PARA GENERAR PDF
+        // FUNCIÓN PARA GENERAR PDF DE PICKING
         // ==============================
+        
         function generatePickingPDF(order) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({
@@ -1460,60 +1512,70 @@
                 format: 'a4'
             });
             
+            // Configurar posición inicial (más compacta)
             let startY = 15;
             
+            // Título en negrita - tamaño reducido para ahorrar espacio
             doc.setFontSize(14);
             doc.setFont(undefined, 'bold');
-            doc.setTextColor(0, 0, 0);
+            doc.setTextColor(0, 0, 0); // Negro para ahorrar tinta
             doc.text('LISTA DE PICKING', 10, startY);
             
+            // Número de pedido abajo del título (mismo tamaño)
             doc.setFontSize(14);
             doc.setFont(undefined, 'bold');
             doc.text(`Pedido: ${order.id}`, 10, startY + 6);
             
+            // Información del pedido a la derecha con "Solicita" - más compacta
             doc.setFontSize(9);
             doc.setFont(undefined, 'bold');
+            doc.setTextColor(0, 0, 0); // Negro para ahorrar tinta
             
+            // Calcular posición X para alinear a la derecha
             const rightMargin = 10;
             const pageWidth = 210;
             const textX = pageWidth - rightMargin;
             
+            // Textos alineados a la derecha - más juntos
             doc.text(`Tienda: ${order.store}`, textX, startY, { align: 'right' });
             doc.text(`Fecha: ${new Date(order.date).toLocaleDateString('es-ES')}`, textX, startY + 5, { align: 'right' });
             doc.text(`Solicita: ${order.responsible || 'No especificado'}`, textX, startY + 10, { align: 'right' });
             
+            // Línea separadora delgada (ahorra tinta)
             startY += 18;
             doc.setDrawColor(0, 0, 0);
             doc.setLineWidth(0.1);
             doc.line(10, startY, 200, startY);
             
+            // Tabla de productos - ESTILO EXCEL (más compacta, líneas delgadas, sin colores de fondo)
             const tableColumn = ["SKU", "Descripción", "Cantidad", "Picking"];
             const tableRows = [];
             
             order.products.forEach(product => {
-                tableRows.push([
+                const productData = [
                     product.sku,
                     product.description,
                     product.quantity.toString(),
-                    ''
-                ]);
+                    '' // Celda vacía para Picking
+                ];
+                tableRows.push(productData);
             });
             
             doc.autoTable({
                 head: [tableColumn],
                 body: tableRows,
                 startY: startY + 2,
-                theme: 'plain',
+                theme: 'plain', // Tema sin colores de fondo
                 styles: { 
-                    fontSize: 8,
-                    cellPadding: 1.5,
+                    fontSize: 8, // Fuente más pequeña para más líneas
+                    cellPadding: 1.5, // Padding mínimo
                     lineColor: [0, 0, 0],
-                    lineWidth: 0.05,
+                    lineWidth: 0.05, // Líneas muy delgadas (ahorra tinta)
                     textColor: [0, 0, 0],
-                    fillColor: [255, 255, 255]
+                    fillColor: [255, 255, 255] // Fondo blanco
                 },
                 headStyles: { 
-                    fillColor: [255, 255, 255],
+                    fillColor: [255, 255, 255], // Fondo blanco en cabecera
                     textColor: [0, 0, 0],
                     lineColor: [0, 0, 0],
                     lineWidth: 0.1,
@@ -1521,27 +1583,29 @@
                     halign: 'center'
                 },
                 bodyStyles: {
-                    fillColor: [255, 255, 255],
+                    fillColor: [255, 255, 255], // Fondo blanco para todas las celdas
                     textColor: [0, 0, 0],
                     lineColor: [0, 0, 0],
                     lineWidth: 0.05
                 },
                 alternateRowStyles: {
-                    fillColor: [255, 255, 255]
+                    fillColor: [255, 255, 255] // Sin alternancia de colores, todo blanco
                 },
                 columnStyles: {
-                    0: { cellWidth: 25, halign: 'center' },
-                    1: { cellWidth: 125, halign: 'left' },
-                    2: { cellWidth: 20, halign: 'center' },
-                    3: { cellWidth: 20, halign: 'center' }
+                    0: { cellWidth: 25, halign: 'center' }, // SKU más angosto
+                    1: { cellWidth: 125, halign: 'left' }, // Descripción más ancha
+                    2: { cellWidth: 20, halign: 'center' }, // Cantidad
+                    3: { cellWidth: 20, halign: 'center' }  // Picking
                 },
-                rowHeight: 6,
+                // Altura de fila mínima (más compacta)
+                rowHeight: 6, // Altura reducida para más líneas por página
                 margin: { left: 10, right: 10 },
                 tableWidth: 'auto',
-                showHead: 'everyPage',
-                pageBreak: 'auto'
+                showHead: 'everyPage', // Repite cabecera en cada página
+                pageBreak: 'auto' // Salto de página automático cuando sea necesario
             });
             
+            // Guardar PDF
             doc.save(`Picking_${order.id.replace('#', '')}.pdf`);
         }
 
@@ -1606,11 +1670,13 @@
             const skuMap = new Map();
             let hasDuplicates = false;
             
+            // Limpiar estilos de error previos
             rows.forEach(row => {
                 const skuInput = row.querySelector('input.code-input');
                 skuInput.classList.remove('sku-duplicate-error');
             });
             
+            // Verificar duplicados
             for (let i = 0; i < rows.length; i++) {
                 const skuInput = rows[i].querySelector('input.code-input');
                 const sku = skuInput.value.trim().toUpperCase();
@@ -1624,6 +1690,7 @@
                 }
             }
             
+            // Mostrar/ocultar mensaje
             const duplicateMessage = document.getElementById('skuDuplicateMessage');
             if (hasDuplicates) {
                 duplicateMessage.style.display = 'block';
@@ -1635,84 +1702,475 @@
         }
 
         // ==============================
-        // FUNCIÓN PARA CARGAR PEDIDOS CON PAGINACIÓN
+        // FUNCIÓN PARA INICIALIZAR EL CONTADOR (CORREGIDA)
         // ==============================
-        async function loadOrders(reset = true) {
-            if (reset) {
-                lastVisible = null;
-                hasMore = true;
-                orders = [];
-            }
-            
-            if (!hasMore || loadingMore) return;
-            
-            loadingMore = true;
-            toggleInitialLoader(true);
-            
+        async function initializeOrderCounter() {
             try {
-                let query = db.collection("pedidosBodega")
-                    .orderBy("createdAt", "desc")
-                    .limit(PAGE_SIZE);
+                const counterRef = db.collection("metadata").doc("orderCounter");
+                const counterDoc = await counterRef.get();
                 
-                if (lastVisible) {
-                    query = query.startAfter(lastVisible);
+                if (!counterDoc.exists) {
+                    // Obtener el último pedido existente para inicializar el contador
+                    const snapshot = await db.collection("pedidosBodega")
+                        .orderBy("orderNumber", "desc")
+                        .limit(1)
+                        .get();
+                    
+                    let lastNumber = 0;
+                    if (!snapshot.empty) {
+                        const lastOrder = snapshot.docs[0].data();
+                        lastNumber = lastOrder.orderNumber || 0;
+                    }
+                    
+                    // Si no hay pedidos, empezar desde 0
+                    // Al generar el primer número será 0+1 = 1
+                    await counterRef.set({
+                        lastOrderNumber: lastNumber, // Si no hay pedidos, será 0
+                        initializedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    console.log('Contador inicializado con:', lastNumber);
+                } else {
+                    // Verificar que el contador no esté desfasado con los pedidos existentes
+                    const counterData = counterDoc.data();
+                    const currentCounter = counterData.lastOrderNumber || 0;
+                    
+                    // Obtener el último pedido para verificar consistencia
+                    const snapshot = await db.collection("pedidosBodega")
+                        .orderBy("orderNumber", "desc")
+                        .limit(1)
+                        .get();
+                    
+                    let maxOrderNumber = 0;
+                    if (!snapshot.empty) {
+                        const lastOrder = snapshot.docs[0].data();
+                        maxOrderNumber = lastOrder.orderNumber || 0;
+                    }
+                    
+                    // Si el contador es menor que el último pedido, actualizarlo
+                    if (currentCounter < maxOrderNumber) {
+                        await counterRef.update({
+                            lastOrderNumber: maxOrderNumber,
+                            lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                            updatedBy: 'Sistema (Corrección automática)'
+                        });
+                        console.log(`Contador corregido: ${currentCounter} → ${maxOrderNumber}`);
+                    }
                 }
-                
-                const snapshot = await query.get();
-                
-                if (snapshot.empty) {
-                    hasMore = false;
-                    document.getElementById('loadMoreBtn').style.display = 'none';
-                    loadingMore = false;
-                    toggleInitialLoader(false);
-                    renderOrdersList();
-                    return;
-                }
-                
-                lastVisible = snapshot.docs[snapshot.docs.length - 1];
-                
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    orders.push(data);
-                });
-                
-                hasMore = snapshot.docs.length === PAGE_SIZE;
-                document.getElementById('loadMoreBtn').style.display = hasMore ? 'inline-flex' : 'none';
-                
-                filterOrders();
-                
             } catch (error) {
-                console.error("Error al cargar pedidos:", error);
-                const cachedOrders = localStorage.getItem('cachedOrders');
-                if (cachedOrders) {
-                    orders = JSON.parse(cachedOrders);
-                    filterOrders();
-                }
-                Swal.fire({
-                    title: 'Modo offline',
-                    text: 'No se pudo conectar a la base de datos. Mostrando datos locales.',
-                    icon: 'warning',
-                    confirmButtonColor: '#3085d6'
-                });
-            } finally {
-                loadingMore = false;
-                toggleInitialLoader(false);
+                console.error("Error al inicializar contador:", error);
             }
         }
 
-        // Función para cargar más pedidos
-        window.loadMoreOrders = function() {
-            loadOrders(false);
-        };
+        // ==============================
+        // FUNCIÓN CORREGIDA PARA GENERAR NÚMERO DE PEDIDO
+        // ==============================
+        async function generateOrderNumber() {
+            const maxRetries = 5;
+            let retryCount = 0;
+            
+            while (retryCount < maxRetries) {
+                try {
+                    // Usar una transacción para garantizar atomicidad
+                    return await db.runTransaction(async (transaction) => {
+                        // 1. Obtener el documento de contador
+                        const counterRef = db.collection("metadata").doc("orderCounter");
+                        const counterDoc = await transaction.get(counterRef);
+                        
+                        let currentCounter = 0;
+                        
+                        if (counterDoc.exists) {
+                            currentCounter = counterDoc.data().lastOrderNumber || 0;
+                        }
+                        
+                        // 2. Incrementar el contador
+                        const newCounter = currentCounter + 1;
+                        
+                        // 3. Verificar que no exista ya un pedido con este número (doble validación)
+                        const existingOrderRef = db.collection("pedidosBodega").doc(`#${newCounter}`);
+                        const existingOrder = await transaction.get(existingOrderRef);
+                        
+                        if (existingOrder.exists) {
+                            // Si ya existe, significa que el contador está desfasado
+                            throw new Error('Contador desfasado, buscando siguiente número');
+                        }
+                        
+                        // 4. Actualizar el documento contador
+                        transaction.set(counterRef, {
+                            lastOrderNumber: newCounter,
+                            lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                            updatedBy: currentUserName || 'Sistema'
+                        }, { merge: true });
+                        
+                        // 5. Devolver el nuevo número formateado
+                        console.log(`Número generado: #${newCounter} (anterior: ${currentCounter})`);
+                        return `#${newCounter}`;
+                    });
+                } catch (error) {
+                    console.error(`Intento ${retryCount + 1} falló:`, error);
+                    retryCount++;
+                    
+                    if (retryCount === maxRetries) {
+                        // Si falla después de varios intentos, buscar el siguiente número disponible manualmente
+                        try {
+                            const fallbackNumber = await findNextAvailableNumber();
+                            console.warn('Usando número de fallback:', fallbackNumber);
+                            
+                            // Guardar el número de fallback para auditoría
+                            await db.collection("pedidosFallback").add({
+                                orderNumber: fallbackNumber,
+                                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                                originalError: error.message,
+                                retryCount: retryCount
+                            });
+                            
+                            return fallbackNumber;
+                        } catch (fallbackError) {
+                            console.error('Error en fallback:', fallbackError);
+                            throw new Error('No se pudo generar un número de pedido');
+                        }
+                    }
+                    
+                    // Esperar un momento antes de reintentar (backoff exponencial)
+                    await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, retryCount)));
+                }
+            }
+            
+            throw new Error('No se pudo generar un número de pedido después de múltiples intentos');
+        }
+
+        // ==============================
+        // FUNCIÓN AUXILIAR PARA ENCONTRAR EL SIGUIENTE NÚMERO DISPONIBLE
+        // ==============================
+        async function findNextAvailableNumber() {
+            // Obtener todos los números de pedido existentes
+            const snapshot = await db.collection("pedidosBodega")
+                .select() // Solo obtener IDs para eficiencia
+                .get();
+            
+            const existingNumbers = new Set();
+            snapshot.forEach(doc => {
+                const id = doc.id;
+                if (id.startsWith('#')) {
+                    const num = parseInt(id.substring(1));
+                    if (!isNaN(num)) {
+                        existingNumbers.add(num);
+                    }
+                }
+            });
+            
+            // Encontrar el primer número disponible desde 1
+            let nextNumber = 1;
+            while (existingNumbers.has(nextNumber)) {
+                nextNumber++;
+            }
+            
+            // Actualizar el contador con el número encontrado
+            const counterRef = db.collection("metadata").doc("orderCounter");
+            await counterRef.set({
+                lastOrderNumber: nextNumber - 1, // Restar 1 porque luego se incrementará
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedBy: 'Sistema (Fallback)'
+            }, { merge: true });
+            
+            return `#${nextNumber}`;
+        }
+
+        // ==============================
+        // FUNCIÓN PARA VERIFICAR Y REPARAR EL CONTADOR
+        // ==============================
+        async function verifyAndRepairCounter() {
+            try {
+                // Obtener todos los pedidos ordenados por número
+                const snapshot = await db.collection("pedidosBodega")
+                    .orderBy("orderNumber", "asc")
+                    .get();
+                
+                let expectedNumber = 1;
+                let hasGap = false;
+                const gaps = [];
+                
+                snapshot.forEach(doc => {
+                    const order = doc.data();
+                    const orderNum = order.orderNumber;
+                    
+                    if (orderNum !== expectedNumber) {
+                        hasGap = true;
+                        gaps.push({
+                            expected: expectedNumber,
+                            found: orderNum,
+                            id: doc.id
+                        });
+                        // Saltar al número encontrado
+                        expectedNumber = orderNum + 1;
+                    } else {
+                        expectedNumber++;
+                    }
+                });
+                
+                if (hasGap) {
+                    console.warn('Se encontraron gaps en la numeración:', gaps);
+                    
+                    // Actualizar el contador al último número válido
+                    const lastValidNumber = expectedNumber - 1;
+                    const counterRef = db.collection("metadata").doc("orderCounter");
+                    await counterRef.set({
+                        lastOrderNumber: lastValidNumber,
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedBy: 'Sistema (Verificación)',
+                        gapsDetected: gaps
+                    }, { merge: true });
+                    
+                    console.log(`Contador ajustado a: ${lastValidNumber}`);
+                } else {
+                    console.log('Numeración consecutiva verificada');
+                }
+            } catch (error) {
+                console.error('Error al verificar contador:', error);
+            }
+        }
+
+        // ==============================
+        // FUNCIÓN MODIFICADA DE showNewOrderForm (SIN ANIMACIÓN)
+        // ==============================
+        async function showNewOrderForm() {
+            if (isCreatingNewOrder) {
+                Swal.fire({
+                    title: 'Operación en curso',
+                    text: 'Ya tienes un pedido en proceso. Termina o cancela el actual antes de crear uno nuevo.',
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+
+            const newOrderBtn = document.getElementById('newOrderBtn');
+            newOrderBtn.classList.add('btn-loading');
+            newOrderBtn.querySelector('.spinner').style.display = 'inline-block';
+            newOrderBtn.querySelector('.btn-text').style.display = 'none';
+
+            try {
+                // Generar número único usando transacción (sin animación)
+                currentOrderId = await generateOrderNumber();
+                
+                document.getElementById('orderNumber').textContent = currentOrderId;
+                
+                document.getElementById('store').value = '';
+                setCurrentDate();
+                document.getElementById('responsible').value = '';
+                
+                addDefaultRow();
+                
+                document.getElementById('saveOrderBtn').innerHTML = '<span class="spinner" style="display: none;"></span><span class="btn-text"><i class="fas fa-save"></i> Guardar</span>';
+                
+                addDeleteRowListeners();
+                originalProducts = [];
+                
+                document.getElementById('ordersList').style.display = 'none';
+                document.getElementById('searchContainer').style.display = 'none';
+                document.querySelector('.header-actions').style.display = 'none';
+                document.getElementById('backButton').style.display = 'none';
+                
+                document.getElementById('orderForm').style.display = 'block';
+                isCreatingNewOrder = true;
+                clearFormLocalStorage();
+                
+                document.getElementById('skuDuplicateMessage').style.display = 'none';
+            } catch (error) {
+                console.error("Error al crear nuevo pedido:", error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Ocurrió un error al crear el nuevo pedido. Por favor intenta de nuevo.',
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6'
+                });
+            } finally {
+                newOrderBtn.classList.remove('btn-loading');
+                newOrderBtn.querySelector('.spinner').style.display = 'none';
+                newOrderBtn.querySelector('.btn-text').style.display = 'inline';
+            }
+        }
+
+        // ==============================
+        // FUNCIÓN MODIFICADA DE saveOrder CON VALIDACIÓN ADICIONAL
+        // ==============================
+        async function saveOrder() {
+            if (!validateForm()) return;
+            
+            const storeInput = document.getElementById('store');
+            const orderDateInput = document.getElementById('orderDate');
+            const responsibleInput = document.getElementById('responsible');
+            const saveOrderBtn = document.getElementById('saveOrderBtn');
+            
+            const orderData = {
+                id: currentOrderId,
+                store: storeInput.value,
+                date: orderDateInput.value,
+                responsible: responsibleInput.value.trim(),
+                products: getProductsFromTable(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                orderNumber: parseInt(currentOrderId.replace('#', '')),
+                createdBy: currentUserName || 'Sistema',
+                createdByName: currentUserName || 'Usuario'
+            };
+            
+            const isEditing = saveOrderBtn.querySelector('.btn-text').innerHTML.includes('Actualizar');
+            
+            try {
+                saveOrderBtn.classList.add('btn-loading');
+                saveOrderBtn.querySelector('.spinner').style.display = 'inline-block';
+                saveOrderBtn.querySelector('.btn-text').style.display = 'none';
+                
+                if (isEditing) {
+                    const originalOrder = orders.find(o => o.id === currentOrderId);
+                    if (originalOrder) {
+                        const updateData = {
+                            ...orderData,
+                            status: originalOrder.status || 'active',
+                            createdAt: originalOrder.createdAt || firebase.firestore.FieldValue.serverTimestamp(),
+                            orderNumber: originalOrder.orderNumber || parseInt(currentOrderId.replace('#', '')),
+                            finalized: originalOrder.finalized || false,
+                            createdBy: originalOrder.createdBy || currentUserName || 'Sistema',
+                            createdByName: originalOrder.createdByName || currentUserName || 'Usuario',
+                            editCount: (originalOrder.editCount || 0) + 1,
+                            estadoSecundario: originalOrder.estadoSecundario || 'pendiente'
+                        };
+                        
+                        if (originalOrder.finalizedDate) {
+                            updateData.finalizedDate = originalOrder.finalizedDate;
+                        }
+                        
+                        const productChanges = compareProducts(originalProducts, orderData.products);
+                        let detailsText = 'Pedido modificado';
+                        
+                        if (productChanges.length > 0) {
+                            detailsText = `Cambios en productos:<br>${productChanges.join('<br>')}`;
+                        }
+                        
+                        const newLogEntry = {
+                            timestamp: new Date().toISOString(),
+                            action: 'editado',
+                            details: detailsText,
+                            browserFingerprint: browserFingerprint.id,
+                            user: currentUserName || 'Desconocido'
+                        };
+                        
+                        const existingLog = originalOrder.editLog || [];
+                        const updatedLog = [newLogEntry, ...existingLog];
+                        updateData.editLog = updatedLog;
+                        
+                        await db.collection("pedidosBodega").doc(currentOrderId).update(updateData);
+                    } else {
+                        throw new Error('Pedido original no encontrado');
+                    }
+                    
+                    await Swal.fire({
+                        title: 'Pedido actualizado',
+                        text: 'El pedido se ha actualizado correctamente',
+                        icon: 'success',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    
+                    hideOrderForm(false);
+                } else {
+                    // Para nuevos pedidos, verificar que el número aún no exista
+                    const existingOrder = await db.collection("pedidosBodega").doc(currentOrderId).get();
+                    
+                    if (existingOrder.exists) {
+                        throw new Error('El número de pedido ya fue tomado por otro usuario. Por favor intenta crear el pedido nuevamente.');
+                    }
+                    
+                    orderData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                    orderData.status = 'active';
+                    orderData.finalized = false;
+                    orderData.editCount = 0;
+                    orderData.estadoSecundario = 'pendiente';
+                    
+                    orderData.editLog = [{
+                        timestamp: new Date().toISOString(),
+                        action: 'creado',
+                        details: 'Pedido creado inicialmente',
+                        browserFingerprint: browserFingerprint.id,
+                        user: currentUserName || 'Desconocido'
+                    }];
+                    
+                    await db.collection("pedidosBodega").doc(currentOrderId).set(orderData);
+                    
+                    // Actualizar el contador para asegurar consistencia (por si acaso)
+                    try {
+                        const orderNum = parseInt(currentOrderId.replace('#', ''));
+                        const counterRef = db.collection("metadata").doc("orderCounter");
+                        await counterRef.set({
+                            lastOrderNumber: orderNum,
+                            lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                            updatedBy: currentUserName || 'Sistema (Post-guardado)'
+                        }, { merge: true });
+                    } catch (counterError) {
+                        console.warn('No se pudo actualizar el contador después de guardar:', counterError);
+                        // No es crítico, el contador ya debería estar actualizado por la transacción
+                    }
+                    
+                    await Swal.fire({
+                        title: 'Pedido guardado',
+                        text: 'El pedido se ha guardado correctamente',
+                        icon: 'success',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    
+                    hideOrderForm(false);
+                }
+                
+                await loadOrders();
+                clearFormLocalStorage();
+            } catch (error) {
+                console.error("Error al guardar el pedido:", error);
+                
+                // Si es error de número duplicado, ofrecer reintentar
+                if (error.message.includes('número de pedido ya fue tomado')) {
+                    const result = await Swal.fire({
+                        title: 'Conflicto de números',
+                        text: error.message,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Intentar de nuevo',
+                        cancelButtonText: 'Cancelar'
+                    });
+                    
+                    if (result.isConfirmed) {
+                        // Regresar al formulario para generar nuevo número
+                        hideOrderForm(false);
+                        showNewOrderForm();
+                    } else {
+                        hideOrderForm(true);
+                    }
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Ocurrió un error al guardar el pedido: ' + error.message,
+                        icon: 'error',
+                        confirmButtonColor: '#3085d6'
+                    });
+                }
+            } finally {
+                saveOrderBtn.classList.remove('btn-loading');
+                saveOrderBtn.querySelector('.spinner').style.display = 'none';
+                saveOrderBtn.querySelector('.btn-text').style.display = 'inline';
+                saveOrderBtn.querySelector('.btn-text').innerHTML = isEditing ? '<i class="fas fa-save"></i> Actualizar' : '<i class="fas fa-save"></i> Guardar';
+            }
+        }
 
         // ==============================
         // INICIALIZACIÓN DE LA APLICACIÓN
         // ==============================
         
-        function initializeApp() {
+        async function initializeApp() {
             toggleInitialLoader(false);
-            loadOrders(true);
-            loadProductosCatalogo();
+            await initializeOrderCounter();
+            await verifyAndRepairCounter(); // Verificar y reparar contador
+            await loadOrders();
+            await loadProductosCatalogo();
             setupEventListeners();
             loadFormFromLocalStorage();
             setCurrentDate();
@@ -1763,8 +2221,10 @@
                     e.target.value = e.target.value.toUpperCase();
                 }
                 
+                // Validar duplicados cuando se ingresa un SKU
                 if (e.target.matches('#productsTable input.code-input')) {
                     validateNoDuplicateSkus();
+                    // Auto-completar descripción
                     autoCompletarDescripcion(e.target);
                 }
             });
@@ -1821,6 +2281,7 @@
                     return showFinalized;
                 }
                 
+                // Los pedidos cerrados se muestran en el filtro de pendientes
                 return showActive;
             });
             
@@ -1839,27 +2300,6 @@
             }
             
             renderOrdersList(filteredOrders);
-        }
-
-        async function generateOrderNumber() {
-            try {
-                const snapshot = await db.collection("pedidosBodega")
-                    .orderBy("orderNumber", "desc")
-                    .limit(1)
-                    .get();
-                
-                if (!snapshot.empty) {
-                    const lastOrder = snapshot.docs[0].data();
-                    orderCounter = lastOrder.orderNumber;
-                }
-                
-                orderCounter++;
-                return `#${orderCounter}`;
-            } catch (error) {
-                console.error("Error al obtener último pedido:", error);
-                orderCounter++;
-                return `#${orderCounter}`;
-            }
         }
 
         function saveFormToLocalStorage() {
@@ -1948,62 +2388,6 @@
             localStorage.removeItem('currentOrderId');
         }
 
-        async function showNewOrderForm() {
-            if (isCreatingNewOrder) {
-                Swal.fire({
-                    title: 'Operación en curso',
-                    text: 'Ya tienes un pedido en proceso. Termina o cancela el actual antes de crear uno nuevo.',
-                    icon: 'error',
-                    confirmButtonColor: '#3085d6'
-                });
-                return;
-            }
-
-            const newOrderBtn = document.getElementById('newOrderBtn');
-            newOrderBtn.classList.add('btn-loading');
-            newOrderBtn.querySelector('.spinner').style.display = 'inline-block';
-            newOrderBtn.querySelector('.btn-text').style.display = 'none';
-
-            try {
-                currentOrderId = await generateOrderNumber();
-                document.getElementById('orderNumber').textContent = currentOrderId;
-                
-                document.getElementById('store').value = '';
-                setCurrentDate();
-                document.getElementById('responsible').value = '';
-                
-                addDefaultRow();
-                
-                document.getElementById('saveOrderBtn').innerHTML = '<span class="spinner" style="display: none;"></span><span class="btn-text"><i class="fas fa-save"></i> Guardar</span>';
-                
-                addDeleteRowListeners();
-                originalProducts = [];
-                
-                document.getElementById('ordersList').style.display = 'none';
-                document.getElementById('searchContainer').style.display = 'none';
-                document.querySelector('.header-actions').style.display = 'none';
-                document.getElementById('backButton').style.display = 'none';
-                
-                document.getElementById('orderForm').style.display = 'block';
-                isCreatingNewOrder = true;
-                clearFormLocalStorage();
-                
-                document.getElementById('skuDuplicateMessage').style.display = 'none';
-            } catch (error) {
-                console.error("Error al crear nuevo pedido:", error);
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Ocurrió un error al crear el nuevo pedido',
-                    icon: 'error',
-                    confirmButtonColor: '#3085d6'
-                });
-            } finally {
-                newOrderBtn.classList.remove('btn-loading');
-                newOrderBtn.querySelector('.spinner').style.display = 'none';
-                newOrderBtn.querySelector('.btn-text').style.display = 'inline';
-            }
-        }
-
         function actuallyHideForm() {
             document.getElementById('orderForm').style.display = 'none';
             document.getElementById('ordersList').style.display = 'grid';
@@ -2082,6 +2466,7 @@
                 });
             });
             
+            // Agregar event listeners a los inputs de SKU existentes
             document.querySelectorAll('#productsTable .code-input').forEach(input => {
                 input.addEventListener('input', function() {
                     validateNoDuplicateSkus();
@@ -2148,6 +2533,7 @@
                 return false;
             }
             
+            // Validar que no haya SKU duplicados
             if (!validateNoDuplicateSkus()) {
                 Swal.fire({
                     title: 'SKU duplicados',
@@ -2190,106 +2576,46 @@
             return true;
         }
 
-        async function saveOrder() {
-            if (!validateForm()) return;
-            
-            const storeInput = document.getElementById('store');
-            const orderDateInput = document.getElementById('orderDate');
-            const responsibleInput = document.getElementById('responsible');
-            const saveOrderBtn = document.getElementById('saveOrderBtn');
-            
-            const orderData = {
-                id: currentOrderId,
-                store: storeInput.value,
-                date: orderDateInput.value,
-                responsible: responsibleInput.value.trim(),
-                products: getProductsFromTable(),
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                orderNumber: parseInt(currentOrderId.replace('#', '')),
-                createdBy: currentUserName || 'Sistema',
-                createdByName: currentUserName || 'Usuario'
-            };
-            
-            const isEditing = saveOrderBtn.querySelector('.btn-text').innerHTML.includes('Actualizar');
-            
-            try {
-                saveOrderBtn.classList.add('btn-loading');
-                saveOrderBtn.querySelector('.spinner').style.display = 'inline-block';
-                saveOrderBtn.querySelector('.btn-text').style.display = 'none';
-                
-                if (isEditing) {
-                    const originalOrder = orders.find(o => o.id === currentOrderId);
-                    if (originalOrder) {
-                        const updateData = {
-                            ...orderData,
-                            status: originalOrder.status || 'active',
-                            createdAt: originalOrder.createdAt || firebase.firestore.FieldValue.serverTimestamp(),
-                            orderNumber: originalOrder.orderNumber || parseInt(currentOrderId.replace('#', '')),
-                            finalized: originalOrder.finalized || false,
-                            createdBy: originalOrder.createdBy || currentUserName || 'Sistema',
-                            createdByName: originalOrder.createdByName || currentUserName || 'Usuario',
-                            editCount: (originalOrder.editCount || 0) + 1,
-                            estadoSecundario: originalOrder.estadoSecundario || 'pendiente'
-                        };
-                        
-                        if (originalOrder.finalizedDate) {
-                            updateData.finalizedDate = originalOrder.finalizedDate;
-                        }
-                        
-                        await db.collection("pedidosBodega").doc(currentOrderId).update(updateData);
-                    } else {
-                        throw new Error('Pedido original no encontrado');
-                    }
-                    
-                    await Swal.fire({
-                        title: 'Pedido actualizado',
-                        text: 'El pedido se ha actualizado correctamente',
-                        icon: 'success',
-                        confirmButtonColor: '#3085d6'
-                    });
-                    
-                    hideOrderForm(false);
-                } else {
-                    orderData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-                    orderData.status = 'active';
-                    orderData.finalized = false;
-                    orderData.editCount = 0;
-                    orderData.estadoSecundario = 'pendiente';
-                    
-                    await db.collection("pedidosBodega").doc(currentOrderId).set(orderData);
-                    await Swal.fire({
-                        title: 'Pedido guardado',
-                        text: 'El pedido se ha guardado correctamente',
-                        icon: 'success',
-                        confirmButtonColor: '#3085d6'
-                    });
-                    
-                    hideOrderForm(false);
-                }
-                
-                await loadOrders(true);
-                clearFormLocalStorage();
-            } catch (error) {
-                console.error("Error al guardar el pedido:", error);
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Ocurrió un error al guardar el pedido: ' + error.message,
-                    icon: 'error',
-                    confirmButtonColor: '#3085d6'
-                });
-            } finally {
-                saveOrderBtn.classList.remove('btn-loading');
-                saveOrderBtn.querySelector('.spinner').style.display = 'none';
-                saveOrderBtn.querySelector('.btn-text').style.display = 'inline';
-                saveOrderBtn.querySelector('.btn-text').innerHTML = isEditing ? '<i class="fas fa-save"></i> Actualizar' : '<i class="fas fa-save"></i> Guardar';
-            }
-        }
-
         function searchOrders() {
             filterOrders();
         }
 
+        async function loadOrders() {
+            toggleInitialLoader(true);
+            
+            try {
+                const querySnapshot = await db.collection("pedidosBodega")
+                    .orderBy("createdAt", "desc")
+                    .get();
+                
+                orders = [];
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    orders.push(data);
+                });
+                
+                filterOrders();
+            } catch (error) {
+                console.error("Error al cargar pedidos:", error);
+                // Intentar cargar desde caché local
+                const cachedOrders = localStorage.getItem('cachedOrders');
+                if (cachedOrders) {
+                    orders = JSON.parse(cachedOrders);
+                    filterOrders();
+                }
+                Swal.fire({
+                    title: 'Modo offline',
+                    text: 'No se pudo conectar a la base de datos. Mostrando datos locales.',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6'
+                });
+            } finally {
+                toggleInitialLoader(false);
+            }
+        }
+
         function renderOrdersList(ordersToRender = orders) {
+            // Guardar en caché local
             localStorage.setItem('cachedOrders', JSON.stringify(ordersToRender));
             
             const ordersList = document.getElementById('ordersList');
@@ -2312,6 +2638,7 @@
                 orderCard.className = 'order-card';
                 const isOrderFinalized = order.finalized;
                 const isOrderCancelled = order.status === 'cancelled';
+                const editCount = order.editCount || 0;
                 const productCount = order.products ? order.products.length : 0;
                 const estadoSecundario = order.estadoSecundario || 'pendiente';
                 
@@ -2335,6 +2662,11 @@
                             <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                                 <span class="order-id">${order.id}</span>
                                 <span class="${statusClass}">${statusText}</span>
+                                ${editCount > 0 ? `
+                                <span class="edit-attempts" title="Editado ${editCount} vez(es)">
+                                    <i class="fas fa-edit"></i> ${editCount}
+                                </span>
+                                ` : ''}
                             </div>
                             <span class="order-date">${formatDate(order.date)}</span>
                             ${order.createdByName ? `
@@ -2353,6 +2685,9 @@
                                 </a>
                                 <a href="#" onclick="generatePickingPDF(${JSON.stringify(order).replace(/"/g, '&quot;')}); return false;" class="btn-pdf-action">
                                     <i class="fas fa-file-pdf"></i> PDF Picking
+                                </a>
+                                <a href="#" onclick="showEditLog('${order.id}'); return false;" class="btn-log-action">
+                                    <i class="fas fa-history"></i> Ver Log
                                 </a>
                                 ${!isOrderCancelled && !isOrderFinalized && estadoSecundario !== 'cerrado' ? `
                                 <a href="#" onclick="cambiarEstadoSecundario('${order.id}', 'cerrado'); return false;" style="color: var(--cerrado);">
@@ -2400,6 +2735,8 @@
             const order = orders.find(o => o.id === orderId);
             if (!order) return;
 
+            const estadoAnterior = order.estadoSecundario || 'pendiente';
+            
             const result = await Swal.fire({
                 title: '¿Cerrar pedido?',
                 text: 'Un pedido cerrado no se podrá editar. ¿Estás seguro?',
@@ -2413,37 +2750,32 @@
 
             if (result.isConfirmed) {
                 try {
-                    // Mostrar loading
-                    Swal.fire({
-                        title: 'Cerrando pedido...',
-                        text: 'Por favor espera',
-                        allowOutsideClick: false,
-                        didOpen: () => {
-                            Swal.showLoading();
+                    await db.collection("pedidosBodega").doc(orderId).update({
+                        estadoSecundario: 'cerrado',
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        [`estadoLog.${new Date().toISOString()}`]: {
+                            anterior: estadoAnterior,
+                            nuevo: 'cerrado',
+                            usuario: currentUserName,
+                            fingerprint: browserFingerprint.id
                         }
                     });
 
-                    // Actualizar estado en Firebase
-                    await db.collection("pedidosBodega").doc(orderId).update({
-                        estadoSecundario: 'cerrado',
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-
                     Swal.fire({
-                        title: 'Pedido cerrado',
-                        text: 'El pedido ha sido cerrado correctamente',
+                        title: 'Estado actualizado',
+                        text: 'El pedido ahora está Cerrado',
                         icon: 'success',
-                        timer: 2000,
+                        timer: 1500,
                         showConfirmButton: false
                     });
 
-                    await loadOrders(true);
+                    await loadOrders();
                     window.closeModal();
                 } catch (error) {
-                    console.error("Error al cerrar pedido:", error);
+                    console.error("Error al cambiar estado:", error);
                     Swal.fire({
                         title: 'Error',
-                        text: 'No se pudo cerrar el pedido',
+                        text: 'No se pudo cambiar el estado del pedido',
                         icon: 'error',
                         confirmButtonColor: '#3085d6'
                     });
@@ -2617,6 +2949,7 @@
                 return;
             }
 
+            // Verificar si el usuario es macaal
             const currentAuth = localStorage.getItem(STORAGE_KEY);
             if (currentAuth) {
                 const authData = JSON.parse(currentAuth);
@@ -2657,7 +2990,7 @@
                                 icon: 'success',
                                 confirmButtonColor: '#3085d6'
                             }).then(() => {
-                                loadOrders(true);
+                                loadOrders();
                                 window.closeModal();
                             });
                         })
@@ -2713,7 +3046,7 @@
                                 icon: 'success',
                                 confirmButtonColor: '#3085d6'
                             }).then(() => {
-                                loadOrders(true);
+                                loadOrders();
                                 window.closeModal();
                             });
                         })
@@ -2777,6 +3110,7 @@
                         <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-light);">
                             ${order.cancelledAt ? `<span>Anulado el: ${formatDateTime(order.cancelledAt)}</span>` : ''}
                             ${order.finalizedDate ? `<span>Finalizado el: ${formatDateTime(order.finalizedDate)}</span>` : ''}
+                            ${order.editCount > 0 ? `<span>Editado ${order.editCount} vez(es)</span>` : ''}
                         </div>
                     </div>
                 </div>
@@ -2820,6 +3154,9 @@
                 <button class="btn btn-pdf" onclick="generatePickingPDF(${JSON.stringify(order).replace(/"/g, '&quot;')})" title="PDF Picking">
                     <i class="fas fa-file-pdf"></i> PDF Picking
                 </button>
+                <button class="btn btn-log" onclick="showEditLog('${order.id}')" title="Ver Log Completo">
+                    <i class="fas fa-history"></i> Ver Log
+                </button>
             `;
             
             if (!isOrderCancelled && !isOrderFinalized) {
@@ -2837,6 +3174,7 @@
                     `;
                 }
                 
+                // Verificar si el usuario es macaal para mostrar botón de finalizar
                 const currentAuth = localStorage.getItem(STORAGE_KEY);
                 if (currentAuth) {
                     const authData = JSON.parse(currentAuth);
@@ -2865,6 +3203,60 @@
             document.getElementById('modalOrderActions').innerHTML = actionButtons;
             document.getElementById('orderModal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
+        };
+
+        window.showEditLog = function(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+            
+            let logHtml = '<div style="max-height: 70vh; overflow-y: auto; padding: 1rem;">';
+            logHtml += '<h3 style="margin-bottom: 1rem; color: var(--dark);"><i class="fas fa-history"></i> Historial Completo de Ediciones</h3>';
+            logHtml += `<p style="margin-bottom: 1rem; color: var(--text-light);">Pedido: ${order.id} - ${order.store}</p>`;
+            logHtml += `<p style="margin-bottom: 1rem; color: var(--primary); font-size: 0.9rem;">
+                <strong>Creado por:</strong> Huella digital del navegador: ${browserFingerprint.id}</p>`;
+            
+            if (order.editLog && order.editLog.length > 0) {
+                logHtml += '<ul class="edit-log-list" style="max-height: 60vh; overflow-y: auto;">';
+                
+                order.editLog.forEach((log, index) => {
+                    const time = formatDateTime(log.timestamp);
+                    
+                    logHtml += `
+                        <li class="edit-log-item" style="background: ${index % 2 === 0 ? '#f8f9fa' : 'white'}; padding: 0.8rem; border-radius: 4px; margin-bottom: 0.5rem; border: 1px solid rgba(0,0,0,0.05);">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div>
+                                    <strong style="color: var(--primary);">${log.action.toUpperCase()}</strong>
+                                    <div style="margin-top: 0.3rem;">${log.details || 'Sin detalles'}</div>
+                                </div>
+                                <div style="text-align: right; font-size: 0.85rem; color: var(--text-light);">
+                                    ${time}
+                                    ${log.user ? `<div style="color: var(--primary); margin-top: 0.3rem;">Usuario: ${log.user}</div>` : ''}
+                                </div>
+                            </div>
+                            <div style="font-size: 0.75rem; color: var(--primary); margin-top: 0.5rem; font-style: italic;">
+                                Huella digital del navegador: ${log.browserFingerprint || 'No disponible'}
+                            </div>
+                        </li>
+                    `;
+                });
+                
+                logHtml += '</ul>';
+            } else {
+                logHtml += '<p style="text-align: center; padding: 2rem; color: var(--text-light);">No hay registro de ediciones para este pedido.</p>';
+            }
+            
+            logHtml += '</div>';
+            
+            Swal.fire({
+                title: 'Log de Ediciones',
+                html: logHtml,
+                width: '800px',
+                showCloseButton: true,
+                showConfirmButton: false,
+                customClass: {
+                    popup: 'log-modal'
+                }
+            });
         };
 
         window.closeModal = function() {
