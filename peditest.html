@@ -31,7 +31,6 @@
             --info: #17a2b8;
             --finalized: #6c757d;
             --cerrado: #28a745;
-            --telegram: #0088cc;
             --border-radius: 8px;
             --shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             --transition: all 0.2s ease;
@@ -447,15 +446,6 @@
         
         .btn-pdf:hover {
             background: #c0392b;
-        }
-
-        .btn-telegram {
-            background: var(--telegram);
-            color: white;
-        }
-
-        .btn-telegram:hover {
-            background: #006699;
         }
 
         .btn-finalized {
@@ -1297,10 +1287,6 @@
         
         const STORAGE_KEY = 'traslados_auth';
         
-        // Token y chat ID de Telegram (configurar con los tuyos)
-        const TELEGRAM_BOT_TOKEN = '8413134558:AAEXmae_6YigahjESn-4Sq5pqFGyoVB8lzI'; // Reemplazar con tu token
-        const TELEGRAM_CHAT_ID = '1003670308956'; // Reemplazar con tu chat ID
-        
         let currentUserRole = '';
         let currentUserName = '';
 
@@ -1338,140 +1324,6 @@
 
         // Variables para comparación de productos
         let originalProducts = [];
-
-        // ==============================
-        // FUNCIÓN PARA ENVIAR PDF A TELEGRAM
-        // ==============================
-        async function sendPDFToTelegram(pdfBlob, orderId) {
-            const formData = new FormData();
-            formData.append('chat_id', TELEGRAM_CHAT_ID);
-            formData.append('document', pdfBlob, `Pedido_${orderId}.pdf`);
-            formData.append('caption', `📦 *Pedido Cerrado: ${orderId}*`);
-
-            try {
-                const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument`, {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Error al enviar a Telegram');
-                }
-                
-                console.log('PDF enviado a Telegram exitosamente');
-            } catch (error) {
-                console.error('Error enviando a Telegram:', error);
-                throw error;
-            }
-        }
-
-        // ==============================
-        // FUNCIÓN PARA GENERAR PDF Y ENVIAR
-        // ==============================
-        async function generateAndSendPDF(order) {
-            return new Promise(async (resolve, reject) => {
-                try {
-                    const { jsPDF } = window.jspdf;
-                    const doc = new jsPDF({
-                        orientation: 'portrait',
-                        unit: 'mm',
-                        format: 'a4'
-                    });
-                    
-                    // Configurar posición inicial
-                    let startY = 15;
-                    
-                    // Título
-                    doc.setFontSize(14);
-                    doc.setFont(undefined, 'bold');
-                    doc.setTextColor(0, 0, 0);
-                    doc.text('LISTA DE PICKING', 10, startY);
-                    
-                    // Número de pedido
-                    doc.setFontSize(14);
-                    doc.setFont(undefined, 'bold');
-                    doc.text(`Pedido: ${order.id}`, 10, startY + 6);
-                    
-                    // Información del pedido
-                    doc.setFontSize(9);
-                    doc.setFont(undefined, 'bold');
-                    
-                    const rightMargin = 10;
-                    const pageWidth = 210;
-                    const textX = pageWidth - rightMargin;
-                    
-                    doc.text(`Tienda: ${order.store}`, textX, startY, { align: 'right' });
-                    doc.text(`Fecha: ${new Date(order.date).toLocaleDateString('es-ES')}`, textX, startY + 5, { align: 'right' });
-                    doc.text(`Solicita: ${order.responsible || 'No especificado'}`, textX, startY + 10, { align: 'right' });
-                    
-                    // Línea separadora
-                    startY += 18;
-                    doc.setDrawColor(0, 0, 0);
-                    doc.setLineWidth(0.1);
-                    doc.line(10, startY, 200, startY);
-                    
-                    // Tabla de productos
-                    const tableColumn = ["SKU", "Descripción", "Cantidad", "Picking"];
-                    const tableRows = [];
-                    
-                    order.products.forEach(product => {
-                        tableRows.push([
-                            product.sku,
-                            product.description,
-                            product.quantity.toString(),
-                            ''
-                        ]);
-                    });
-                    
-                    doc.autoTable({
-                        head: [tableColumn],
-                        body: tableRows,
-                        startY: startY + 2,
-                        theme: 'plain',
-                        styles: { 
-                            fontSize: 8,
-                            cellPadding: 1.5,
-                            lineColor: [0, 0, 0],
-                            lineWidth: 0.05,
-                            textColor: [0, 0, 0],
-                            fillColor: [255, 255, 255]
-                        },
-                        headStyles: { 
-                            fillColor: [255, 255, 255],
-                            textColor: [0, 0, 0],
-                            lineColor: [0, 0, 0],
-                            lineWidth: 0.1,
-                            fontStyle: 'bold',
-                            halign: 'center'
-                        },
-                        bodyStyles: {
-                            fillColor: [255, 255, 255],
-                            textColor: [0, 0, 0],
-                            lineColor: [0, 0, 0],
-                            lineWidth: 0.05
-                        },
-                        columnStyles: {
-                            0: { cellWidth: 25, halign: 'center' },
-                            1: { cellWidth: 125, halign: 'left' },
-                            2: { cellWidth: 20, halign: 'center' },
-                            3: { cellWidth: 20, halign: 'center' }
-                        },
-                        rowHeight: 6,
-                        margin: { left: 10, right: 10 },
-                        tableWidth: 'auto'
-                    });
-                    
-                    // Convertir PDF a Blob
-                    const pdfBlob = doc.output('blob');
-                    
-                    // Enviar a Telegram
-                    await sendPDFToTelegram(pdfBlob, order.id);
-                    resolve();
-                } catch (error) {
-                    reject(error);
-                }
-            });
-        }
 
         // ==============================
         // FUNCIÓN DE HUELLA DEL NAVEGADOR
@@ -2563,16 +2415,13 @@
                 try {
                     // Mostrar loading
                     Swal.fire({
-                        title: 'Generando PDF...',
+                        title: 'Cerrando pedido...',
                         text: 'Por favor espera',
                         allowOutsideClick: false,
                         didOpen: () => {
                             Swal.showLoading();
                         }
                     });
-
-                    // Generar PDF y enviar a Telegram
-                    await generateAndSendPDF(order);
 
                     // Actualizar estado en Firebase
                     await db.collection("pedidosBodega").doc(orderId).update({
@@ -2582,7 +2431,7 @@
 
                     Swal.fire({
                         title: 'Pedido cerrado',
-                        html: 'El pedido ha sido cerrado y el PDF ha sido enviado a Telegram',
+                        text: 'El pedido ha sido cerrado correctamente',
                         icon: 'success',
                         timer: 2000,
                         showConfirmButton: false
@@ -2594,7 +2443,7 @@
                     console.error("Error al cerrar pedido:", error);
                     Swal.fire({
                         title: 'Error',
-                        text: 'No se pudo cerrar el pedido o enviar el PDF a Telegram',
+                        text: 'No se pudo cerrar el pedido',
                         icon: 'error',
                         confirmButtonColor: '#3085d6'
                     });
