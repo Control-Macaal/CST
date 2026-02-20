@@ -1367,7 +1367,7 @@
         // ==============================
         let orders = [];
         let currentOrderId = null;
-        let temporaryOrderId = null; // ID temporal para formularios no guardados
+        let temporaryOrderId = null;
         let isCreatingNewOrder = false;
         let isFilterOpen = false;
         let productosCatalogo = [];
@@ -1870,7 +1870,7 @@
         }
 
         // ==============================
-        // FUNCIÓN MODIFICADA DE showNewOrderForm (SIN GENERAR NÚMERO)
+        // FUNCIÓN showNewOrderForm
         // ==============================
         async function showNewOrderForm() {
             if (isCreatingNewOrder) {
@@ -1891,32 +1891,22 @@
             newOrderBtn.querySelector('.btn-text').style.display = 'none';
 
             try {
-                // Generar un ID temporal para el formulario (NO es el número final)
                 temporaryOrderId = 'temp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                
-                // Mostrar "PENDIENTE" en el número de pedido
                 document.getElementById('orderNumber').textContent = '# En Curso';
-                
                 document.getElementById('store').value = '';
                 setCurrentDate();
                 document.getElementById('responsible').value = '';
-                
                 addDefaultRow();
-                
                 document.getElementById('saveOrderBtn').innerHTML = '<span class="spinner" style="display: none;"></span><span class="btn-text"><i class="fas fa-save"></i> Guardar</span>';
-                
                 addDeleteRowListeners();
                 originalProducts = [];
-                
                 document.getElementById('ordersList').style.display = 'none';
                 document.getElementById('searchContainer').style.display = 'none';
                 document.querySelector('.header-actions').style.display = 'none';
                 document.getElementById('backButton').style.display = 'none';
-                
                 document.getElementById('orderForm').style.display = 'block';
                 isCreatingNewOrder = true;
                 clearFormLocalStorage();
-                
                 document.getElementById('skuDuplicateMessage').style.display = 'none';
             } catch (error) {
                 console.error("Error al crear nuevo pedido:", error);
@@ -1936,7 +1926,7 @@
         }
 
         // ==============================
-        // FUNCIÓN MODIFICADA DE saveOrder (SIN BOTÓN OK EN ANIMACIONES)
+        // FUNCIÓN saveOrder (SIN BOTÓN OK EN TODAS LAS ALERTAS)
         // ==============================
         async function saveOrder() {
             if (!validateForm()) return;
@@ -1954,7 +1944,6 @@
                 saveOrderBtn.querySelector('.btn-text').style.display = 'none';
                 
                 if (isEditing) {
-                    // MANTENER EL MISMO NÚMERO PARA EDICIONES
                     const originalOrder = orders.find(o => o.id === currentOrderId);
                     if (originalOrder) {
                         const orderData = {
@@ -2004,8 +1993,9 @@
                             text: 'El pedido se ha actualizado correctamente',
                             icon: 'success',
                             confirmButtonColor: '#3085d6',
-                            showConfirmButton: true,
-                            showCancelButton: false
+                            showConfirmButton: false,
+                            showCancelButton: false,
+                            timer: 2000
                         });
                         
                         hideOrderForm(false);
@@ -2013,7 +2003,6 @@
                         throw new Error('Pedido original no encontrado');
                     }
                 } else {
-                    // NUEVO PEDIDO: Generar número SOLO al guardar
                     Swal.fire({
                         title: 'Generando número de pedido...',
                         text: 'Por favor espera',
@@ -2024,7 +2013,6 @@
                         }
                     });
                     
-                    // Generar número único usando transacción
                     const newOrderId = await generateOrderNumberOnSave();
                     
                     const orderData = {
@@ -2066,8 +2054,9 @@
                         text: `El pedido ${newOrderId} se ha guardado correctamente`,
                         icon: 'success',
                         confirmButtonColor: '#3085d6',
-                        showConfirmButton: true,
-                        showCancelButton: false
+                        showConfirmButton: false,
+                        showCancelButton: false,
+                        timer: 2000
                     });
                     
                     hideOrderForm(false);
@@ -2094,7 +2083,6 @@
                     });
                     
                     if (result.isConfirmed) {
-                        // Reintentar guardar (volverá a generar número)
                         saveOrder();
                     }
                 } else {
@@ -2273,7 +2261,6 @@
                 });
             });
             
-            // Guardar el ID temporal si existe
             if (temporaryOrderId) {
                 localStorage.setItem('currentOrderId', temporaryOrderId);
             } else if (currentOrderId) {
@@ -2291,7 +2278,6 @@
                 const formData = JSON.parse(savedForm);
                 
                 currentOrderId = savedOrderId;
-                // Si es un pedido temporal, mostrar "PENDIENTE"
                 if (savedOrderId.startsWith('temp_')) {
                     document.getElementById('orderNumber').textContent = 'PENDIENTE';
                     temporaryOrderId = savedOrderId;
