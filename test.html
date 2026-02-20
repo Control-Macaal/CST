@@ -1339,14 +1339,13 @@
         // CONFIGURACIÓN DE FIREBASE CORREGIDA
         // ==============================
         const firebaseConfig = {
-  apiKey: "AIzaSyDQe0HfkrnRJAH8Dtzh-gesTsq_UdHnOHE",
-  authDomain: "pos-tda.firebaseapp.com",
-  projectId: "pos-tda",
-  storageBucket: "pos-tda.firebasestorage.app",
-  messagingSenderId: "732089248607",
-  appId: "1:732089248607:web:895d8588d384b05a26a4ea",
-  measurementId: "G-QTRZV9X9ML"
-};
+            apiKey: "AIzaSyBik7MpyjtyIzKtYjBJY-AV7OX7j0zn_vg",
+            authDomain: "pedbo8va.firebaseapp.com",
+            projectId: "pedbo8va",
+            storageBucket: "pedbo8va.firebasestorage.app",
+            messagingSenderId: "912545680126",
+            appId: "1:912545680126:web:334f91e3ebfe79f58a33af"
+        };
 
         // Inicializa Firebase
         firebase.initializeApp(firebaseConfig);
@@ -1703,7 +1702,7 @@
         }
 
         // ==============================
-        // FUNCIÓN PARA INICIALIZAR EL CONTADOR (NUEVA)
+        // FUNCIÓN PARA INICIALIZAR EL CONTADOR (CORREGIDA)
         // ==============================
         async function initializeOrderCounter() {
             try {
@@ -1723,12 +1722,40 @@
                         lastNumber = lastOrder.orderNumber || 0;
                     }
                     
+                    // Si no hay pedidos, empezar desde 0
+                    // Al generar el primer número será 0+1 = 1
                     await counterRef.set({
-                        lastOrderNumber: lastNumber,
+                        lastOrderNumber: lastNumber, // Si no hay pedidos, será 0
                         initializedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                     
                     console.log('Contador inicializado con:', lastNumber);
+                } else {
+                    // Verificar que el contador no esté desfasado con los pedidos existentes
+                    const counterData = counterDoc.data();
+                    const currentCounter = counterData.lastOrderNumber || 0;
+                    
+                    // Obtener el último pedido para verificar consistencia
+                    const snapshot = await db.collection("pedidosBodega")
+                        .orderBy("orderNumber", "desc")
+                        .limit(1)
+                        .get();
+                    
+                    let maxOrderNumber = 0;
+                    if (!snapshot.empty) {
+                        const lastOrder = snapshot.docs[0].data();
+                        maxOrderNumber = lastOrder.orderNumber || 0;
+                    }
+                    
+                    // Si el contador es menor que el último pedido, actualizarlo
+                    if (currentCounter < maxOrderNumber) {
+                        await counterRef.update({
+                            lastOrderNumber: maxOrderNumber,
+                            lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                            updatedBy: 'Sistema (Corrección automática)'
+                        });
+                        console.log(`Contador corregido: ${currentCounter} → ${maxOrderNumber}`);
+                    }
                 }
             } catch (error) {
                 console.error("Error al inicializar contador:", error);
@@ -1736,7 +1763,7 @@
         }
 
         // ==============================
-        // FUNCIÓN CORREGIDA PARA GENERAR NÚMERO DE PEDIDO USANDO TRANSACCIÓN (NUEVA)
+        // FUNCIÓN CORREGIDA PARA GENERAR NÚMERO DE PEDIDO
         // ==============================
         async function generateOrderNumber() {
             const maxRetries = 5;
@@ -1746,7 +1773,7 @@
                 try {
                     // Usar una transacción para garantizar atomicidad
                     return await db.runTransaction(async (transaction) => {
-                        // 1. Obtener el documento de contador (lo creamos si no existe)
+                        // 1. Obtener el documento de contador
                         const counterRef = db.collection("metadata").doc("orderCounter");
                         const counterDoc = await transaction.get(counterRef);
                         
@@ -1759,14 +1786,24 @@
                         // 2. Incrementar el contador
                         const newCounter = currentCounter + 1;
                         
-                        // 3. Actualizar el documento contador
+                        // 3. Verificar que no exista ya un pedido con este número (doble validación)
+                        const existingOrderRef = db.collection("pedidosBodega").doc(`#${newCounter}`);
+                        const existingOrder = await transaction.get(existingOrderRef);
+                        
+                        if (existingOrder.exists) {
+                            // Si ya existe, significa que el contador está desfasado
+                            throw new Error('Contador desfasado, buscando siguiente número');
+                        }
+                        
+                        // 4. Actualizar el documento contador
                         transaction.set(counterRef, {
                             lastOrderNumber: newCounter,
                             lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
                             updatedBy: currentUserName || 'Sistema'
                         }, { merge: true });
                         
-                        // 4. Devolver el nuevo número formateado
+                        // 5. Devolver el nuevo número formateado
+                        console.log(`Número generado: #${newCounter} (anterior: ${currentCounter})`);
                         return `#${newCounter}`;
                     });
                 } catch (error) {
@@ -1774,23 +1811,27 @@
                     retryCount++;
                     
                     if (retryCount === maxRetries) {
-                        // Si falla después de varios intentos, usar timestamp como fallback
-                        const timestamp = Date.now();
-                        const fallbackNumber = `#${Math.floor(timestamp / 1000)}`;
-                        
-                        console.warn('Usando número de fallback:', fallbackNumber);
-                        
-                        // Guardar el número de fallback en una colección separada para reconciliación
-                        await db.collection("pedidosFallback").add({
-                            orderNumber: fallbackNumber,
-                            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                            originalError: error.message
-                        });
-                        
-                        return fallbackNumber;
+                        // Si falla después de varios intentos, buscar el siguiente número disponible manualmente
+                        try {
+                            const fallbackNumber = await findNextAvailableNumber();
+                            console.warn('Usando número de fallback:', fallbackNumber);
+                            
+                            // Guardar el número de fallback para auditoría
+                            await db.collection("pedidosFallback").add({
+                                orderNumber: fallbackNumber,
+                                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                                originalError: error.message,
+                                retryCount: retryCount
+                            });
+                            
+                            return fallbackNumber;
+                        } catch (fallbackError) {
+                            console.error('Error en fallback:', fallbackError);
+                            throw new Error('No se pudo generar un número de pedido');
+                        }
                     }
                     
-                    // Esperar un momento antes de reintentar
+                    // Esperar un momento antes de reintentar (backoff exponencial)
                     await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, retryCount)));
                 }
             }
@@ -1799,7 +1840,98 @@
         }
 
         // ==============================
-        // FUNCIÓN MODIFICADA DE showNewOrderForm
+        // FUNCIÓN AUXILIAR PARA ENCONTRAR EL SIGUIENTE NÚMERO DISPONIBLE
+        // ==============================
+        async function findNextAvailableNumber() {
+            // Obtener todos los números de pedido existentes
+            const snapshot = await db.collection("pedidosBodega")
+                .select() // Solo obtener IDs para eficiencia
+                .get();
+            
+            const existingNumbers = new Set();
+            snapshot.forEach(doc => {
+                const id = doc.id;
+                if (id.startsWith('#')) {
+                    const num = parseInt(id.substring(1));
+                    if (!isNaN(num)) {
+                        existingNumbers.add(num);
+                    }
+                }
+            });
+            
+            // Encontrar el primer número disponible desde 1
+            let nextNumber = 1;
+            while (existingNumbers.has(nextNumber)) {
+                nextNumber++;
+            }
+            
+            // Actualizar el contador con el número encontrado
+            const counterRef = db.collection("metadata").doc("orderCounter");
+            await counterRef.set({
+                lastOrderNumber: nextNumber - 1, // Restar 1 porque luego se incrementará
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedBy: 'Sistema (Fallback)'
+            }, { merge: true });
+            
+            return `#${nextNumber}`;
+        }
+
+        // ==============================
+        // FUNCIÓN PARA VERIFICAR Y REPARAR EL CONTADOR
+        // ==============================
+        async function verifyAndRepairCounter() {
+            try {
+                // Obtener todos los pedidos ordenados por número
+                const snapshot = await db.collection("pedidosBodega")
+                    .orderBy("orderNumber", "asc")
+                    .get();
+                
+                let expectedNumber = 1;
+                let hasGap = false;
+                const gaps = [];
+                
+                snapshot.forEach(doc => {
+                    const order = doc.data();
+                    const orderNum = order.orderNumber;
+                    
+                    if (orderNum !== expectedNumber) {
+                        hasGap = true;
+                        gaps.push({
+                            expected: expectedNumber,
+                            found: orderNum,
+                            id: doc.id
+                        });
+                        // Saltar al número encontrado
+                        expectedNumber = orderNum + 1;
+                    } else {
+                        expectedNumber++;
+                    }
+                });
+                
+                if (hasGap) {
+                    console.warn('Se encontraron gaps en la numeración:', gaps);
+                    
+                    // Actualizar el contador al último número válido
+                    const lastValidNumber = expectedNumber - 1;
+                    const counterRef = db.collection("metadata").doc("orderCounter");
+                    await counterRef.set({
+                        lastOrderNumber: lastValidNumber,
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedBy: 'Sistema (Verificación)',
+                        gapsDetected: gaps
+                    }, { merge: true });
+                    
+                    console.log(`Contador ajustado a: ${lastValidNumber}`);
+                } else {
+                    console.log('Numeración consecutiva verificada');
+                }
+            } catch (error) {
+                console.error('Error al verificar contador:', error);
+            }
+        }
+
+        // ==============================
+        // FUNCIÓN MODIFICADA DE showNewOrderForm (SIN ANIMACIÓN)
         // ==============================
         async function showNewOrderForm() {
             if (isCreatingNewOrder) {
@@ -1818,20 +1950,8 @@
             newOrderBtn.querySelector('.btn-text').style.display = 'none';
 
             try {
-                // Mostrar indicador de carga
-                Swal.fire({
-                    title: 'Generando número de pedido...',
-                    text: 'Por favor espera',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-
-                // Generar número único usando transacción
+                // Generar número único usando transacción (sin animación)
                 currentOrderId = await generateOrderNumber();
-                
-                Swal.close();
                 
                 document.getElementById('orderNumber').textContent = currentOrderId;
                 
@@ -1975,6 +2095,21 @@
                     }];
                     
                     await db.collection("pedidosBodega").doc(currentOrderId).set(orderData);
+                    
+                    // Actualizar el contador para asegurar consistencia (por si acaso)
+                    try {
+                        const orderNum = parseInt(currentOrderId.replace('#', ''));
+                        const counterRef = db.collection("metadata").doc("orderCounter");
+                        await counterRef.set({
+                            lastOrderNumber: orderNum,
+                            lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                            updatedBy: currentUserName || 'Sistema (Post-guardado)'
+                        }, { merge: true });
+                    } catch (counterError) {
+                        console.warn('No se pudo actualizar el contador después de guardar:', counterError);
+                        // No es crítico, el contador ya debería estar actualizado por la transacción
+                    }
+                    
                     await Swal.fire({
                         title: 'Pedido guardado',
                         text: 'El pedido se ha guardado correctamente',
@@ -2030,11 +2165,12 @@
         // INICIALIZACIÓN DE LA APLICACIÓN
         // ==============================
         
-        function initializeApp() {
+        async function initializeApp() {
             toggleInitialLoader(false);
-            initializeOrderCounter(); // NUEVA LÍNEA
-            loadOrders();
-            loadProductosCatalogo();
+            await initializeOrderCounter();
+            await verifyAndRepairCounter(); // Verificar y reparar contador
+            await loadOrders();
+            await loadProductosCatalogo();
             setupEventListeners();
             loadFormFromLocalStorage();
             setCurrentDate();
