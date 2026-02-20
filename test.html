@@ -2047,6 +2047,7 @@
                     Swal.update({
                         title: 'Guardando pedido...',
                         text: 'Por favor espera'
+                        showConfirmButton: false
                     });
                     
                     await db.collection("pedidosBodega").doc(newOrderId).set(orderData);
