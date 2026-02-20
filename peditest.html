@@ -616,57 +616,6 @@
             border: var(--border-light);
         }
 
-        /* Estilos para pedidos en draft (clickeables) */
-        .order-card.draft-order {
-            border-left: 4px solid var(--primary);
-            transition: all 0.2s ease;
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-        }
-
-        .order-card.draft-order:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.2);
-            border-color: var(--primary-hover);
-        }
-
-        .order-card.draft-order::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 0;
-            height: 0;
-            border-style: solid;
-            border-width: 0 40px 40px 0;
-            border-color: transparent var(--primary) transparent transparent;
-            opacity: 0.1;
-            pointer-events: none;
-        }
-
-        .order-card.draft-order .order-id {
-            background: var(--primary);
-            color: white;
-        }
-
-        /* Animación sutil para indicar que es clickeable */
-        @keyframes pulse-border {
-            0% {
-                border-left-color: var(--primary);
-            }
-            50% {
-                border-left-color: var(--primary-hover);
-            }
-            100% {
-                border-left-color: var(--primary);
-            }
-        }
-
-        .order-card.draft-order {
-            animation: pulse-border 2s infinite;
-        }
-
         .order-header {
             display: flex;
             justify-content: space-between;
@@ -1072,17 +1021,6 @@
             font-size: 0.8rem;
             margin-top: 0.3rem;
             display: none;
-        }
-
-        /* Responsive para móviles */
-        @media (max-width: 768px) {
-            .order-card.draft-order:hover {
-                transform: none;
-            }
-            
-            .order-card.draft-order:active {
-                background-color: rgba(67, 97, 238, 0.05);
-            }
         }
 
         @keyframes spin {
@@ -1998,7 +1936,7 @@
         }
 
         // ==============================
-        // FUNCIÓN MODIFICADA DE saveOrder (SIN "OK" EN LA ANIMACIÓN)
+        // FUNCIÓN MODIFICADA DE saveOrder (SIN BOTÓN OK EN ANIMACIONES)
         // ==============================
         async function saveOrder() {
             if (!validateForm()) return;
@@ -2113,7 +2051,6 @@
                         }]
                     };
                     
-                    // Actualizar el mensaje de Swal sin botón "OK"
                     Swal.update({
                         title: 'Guardando pedido...',
                         text: 'Por favor espera',
@@ -2142,7 +2079,6 @@
             } catch (error) {
                 console.error("Error al guardar el pedido:", error);
                 
-                // Cerrar cualquier Swal abierto
                 Swal.close();
                 
                 if (error.message.includes('número de pedido ya fue tomado') || error.message.includes('Contador desfasado')) {
@@ -2177,66 +2113,6 @@
                 saveOrderBtn.querySelector('.btn-text').style.display = 'inline';
                 saveOrderBtn.querySelector('.btn-text').innerHTML = isEditing ? '<i class="fas fa-save"></i> Actualizar' : '<i class="fas fa-save"></i> Guardar';
             }
-        }
-
-        // ==============================
-        // FUNCIÓN PARA ABRIR PEDIDO EN DRAFT (CLICK EN LA TARJETA)
-        // ==============================
-        window.openDraftOrder = function(orderId) {
-            const order = orders.find(o => o.id === orderId);
-            if (!order) return;
-            
-            // Verificar si realmente está en estado editable
-            const isEditable = !order.finalized && order.status !== 'cancelled' && order.estadoSecundario !== 'cerrado';
-            
-            if (!isEditable) {
-                // Si no es editable, solo mostrar vista previa
-                viewOrder(orderId);
-                return;
-            }
-            
-            // Mostrar confirmación antes de editar
-            Swal.fire({
-                title: '¿Editar pedido?',
-                text: `Vas a editar el pedido ${orderId}`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, editar',
-                cancelButtonText: 'Cancelar',
-                showDenyButton: true,
-                denyButtonText: 'Solo ver',
-                denyButtonColor: '#6c757d'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Editar el pedido
-                    editOrder(orderId);
-                } else if (result.isDenied) {
-                    // Solo ver el pedido
-                    viewOrder(orderId);
-                }
-            });
-        };
-
-        // ==============================
-        // FUNCIÓN PARA CONFIGURAR HANDLERS DE CLICK EN CARDS DRAFT
-        // ==============================
-        function setupDraftOrderClickHandlers() {
-            document.querySelectorAll('.order-card.draft-order').forEach(card => {
-                // Remover onclick anterior para evitar duplicados
-                card.removeAttribute('onclick');
-                
-                card.addEventListener('click', function(e) {
-                    // Verificar que no se hizo clic en el dropdown o sus hijos
-                    if (!e.target.closest('.dropdown')) {
-                        const orderId = this.getAttribute('data-order-id');
-                        if (orderId) {
-                            window.openDraftOrder(orderId);
-                        }
-                    }
-                });
-            });
         }
 
         // ==============================
@@ -2691,17 +2567,12 @@
                 });
                 
                 filterOrders();
-                
-                // Configurar handlers después de cargar
-                setTimeout(setupDraftOrderClickHandlers, 100);
-                
             } catch (error) {
                 console.error("Error al cargar pedidos:", error);
                 const cachedOrders = localStorage.getItem('cachedOrders');
                 if (cachedOrders) {
                     orders = JSON.parse(cachedOrders);
                     filterOrders();
-                    setTimeout(setupDraftOrderClickHandlers, 100);
                 }
                 Swal.fire({
                     title: 'Modo offline',
@@ -2737,16 +2608,6 @@
             ordersToRender.forEach(order => {
                 const orderCard = document.createElement('div');
                 orderCard.className = 'order-card';
-                
-                // Determinar si el pedido está en estado draft (editable)
-                const isDraft = !order.finalized && order.status !== 'cancelled' && order.estadoSecundario !== 'cerrado';
-                
-                // Agregar clase y atributo data-order-id si está en draft
-                if (isDraft) {
-                    orderCard.classList.add('draft-order');
-                    orderCard.setAttribute('data-order-id', order.id);
-                }
-                
                 const isOrderFinalized = order.finalized;
                 const isOrderCancelled = order.status === 'cancelled';
                 const editCount = order.editCount || 0;
@@ -2773,7 +2634,6 @@
                             <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                                 <span class="order-id">${order.id}</span>
                                 <span class="${statusClass}">${statusText}</span>
-                                ${isDraft ? '<span class="status-badge pending" style="background: rgba(67, 97, 238, 0.1); color: var(--primary);"><i class="fas fa-pencil-alt"></i> BORRADOR</span>' : ''}
                                 ${editCount > 0 ? `
                                 <span class="edit-attempts" title="Editado ${editCount} vez(es)">
                                     <i class="fas fa-edit"></i> ${editCount}
@@ -2787,11 +2647,11 @@
                             </div>
                             ` : ''}
                         </div>
-                        <div class="dropdown" style="display: flex; gap: 0.8rem;" onclick="event.stopPropagation();">
-                            <button class="dropdown-btn" onclick="event.stopPropagation();">
+                        <div class="dropdown" style="display: flex; gap: 0.8rem;">
+                            <button class="dropdown-btn">
                                 <i class="fas fa-ellipsis-v"></i> Acciones
                             </button>
-                            <div class="dropdown-content" onclick="event.stopPropagation();">
+                            <div class="dropdown-content">
                                 <a href="#" onclick="viewOrder('${order.id}'); return false;">
                                     <i class="fas fa-eye"></i> Ver
                                 </a>
@@ -2836,18 +2696,10 @@
                     <div class="order-products-count">
                         <i class="fas fa-box"></i> ${productCount} producto(s) solicitado(s)
                     </div>
-                    ${isDraft ? `
-                    <div style="margin-top: 0.8rem; text-align: right; color: var(--primary); font-size: 0.8rem;">
-                        <i class="fas fa-hand-pointer"></i> Haz clic en la tarjeta para editar
-                    </div>
-                    ` : ''}
                 `;
                 
                 ordersList.appendChild(orderCard);
             });
-            
-            // Configurar handlers de click para las cards draft
-            setupDraftOrderClickHandlers();
         }
 
         window.cambiarEstadoSecundario = async function(orderId, nuevoEstado) {
