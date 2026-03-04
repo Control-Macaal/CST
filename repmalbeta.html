@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -406,6 +408,7 @@
             background: var(--success);
         }
 
+        /* Botones solo con icono */
         .btn-icon-only {
             padding: 0.8rem;
             width: 45px;
@@ -497,6 +500,7 @@
             background-color: white;
         }
 
+        /* ELIMINAR EL FONDO CELESTE EN INPUTS LLENOS */
         .form-control:not(:placeholder-shown) {
             background-color: white !important;
         }
@@ -521,6 +525,7 @@
             background-color: white;
         }
 
+        /* Input de número de salida - tamaño normal */
         .output-input {
             font-family: monospace;
             letter-spacing: 1px;
@@ -587,11 +592,14 @@
             background-color: rgba(239, 35, 60, 0.05) !important;
         }
 
+        /* Mensaje de SKU duplicado - EN LA MISMA POSICIÓN QUE EL PROYECTO ANTERIOR */
         .sku-duplicate-message {
             color: var(--danger);
             font-size: 0.8rem;
             margin-top: 0.3rem;
+            margin-bottom: 0.5rem;
             display: none;
+            padding-left: 0.5rem;
         }
 
         .factory-code-input {
@@ -602,6 +610,7 @@
             background-color: white;
         }
 
+        /* ELIMINAR EL FONDO CELESTE EN TODOS LOS INPUTS CUANDO TIENEN CONTENIDO */
         input:not(:placeholder-shown), textarea:not(:placeholder-shown) {
             background-color: white !important;
         }
@@ -618,13 +627,14 @@
             gap: 1rem;
         }
 
+        /* CARD DE REPORTE CON MARCO */
         .report-card {
             background: var(--card-bg);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
             padding: 1.2rem;
             transition: var(--transition);
-            border: var(--border-light);
+            border: var(--border-light); /* MARCO AGREGADO */
         }
 
         .report-header {
@@ -757,6 +767,7 @@
             border: var(--border-light);
         }
 
+        /* Dropdown de acciones */
         .dropdown {
             position: relative;
             display: inline-block;
@@ -809,6 +820,7 @@
             display: block;
         }
 
+        /* Spinner */
         .spinner {
             display: inline-block;
             width: 16px;
@@ -828,6 +840,7 @@
             display: none;
         }
 
+        /* Badge de estado recibido */
         .received-badge {
             display: inline-flex;
             align-items: center;
@@ -845,6 +858,7 @@
             font-size: 0.9rem;
         }
 
+        /* Intentos de edición */
         .edit-attempts {
             display: inline-flex;
             align-items: center;
@@ -858,6 +872,7 @@
             font-weight: 500;
         }
 
+        /* Log de ediciones */
         .edit-log {
             margin-top: 1rem;
             padding: 1rem;
@@ -1136,7 +1151,7 @@
             
             <h3 style="margin: 1rem 0 0.5rem; font-size: 1.1rem;">Productos en mal estado</h3>
             
-            <!-- Mensaje de SKU duplicados -->
+            <!-- Mensaje de SKU duplicado - EN LA MISMA POSICIÓN QUE EL PROYECTO ANTERIOR -->
             <div id="skuDuplicateMessage" class="sku-duplicate-message">
                 <i class="fas fa-exclamation-circle"></i> No se permiten SKU duplicados en el mismo reporte
             </div>
@@ -1225,7 +1240,7 @@
         let currentUserName = '';
 
         // ==============================
-        // CONFIGURACIÓN DE FIREBASE
+        // CONFIGURACIÓN DE FIREBASE (PRIMERA BASE - REPORTES)
         // ==============================
         const firebaseConfig = {
             apiKey: "AIzaSyBAZUuJ9BDe3vnAEPwcoQSGiziZT6Qy5Jc",
@@ -1237,11 +1252,13 @@
         };
 
         // Inicializa Firebase para reportes
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.firestore();
 
         // ==============================
-        // CONFIGURACIÓN DE FIREBASE PARA CATÁLOGO DE PRODUCTOS
+        // CONFIGURACIÓN DE FIREBASE (SEGUNDA BASE - CATÁLOGO DE PRODUCTOS)
         // ==============================
         const firebaseConfigProductos = {
             apiKey: "AIzaSyBik7MpyjtyIzKtYjBJY-AV7OX7j0zn_vg",
@@ -1253,21 +1270,32 @@
         };
 
         // Inicializar segunda instancia de Firebase para productos
-        const appProductos = !firebase.apps.find(app => app.name === 'productosApp') 
-            ? firebase.initializeApp(firebaseConfigProductos, 'productosApp')
-            : firebase.app('productosApp');
-        const dbProductos = appProductos.firestore();
+        let appProductos;
+        let dbProductos;
+        
+        try {
+            // Verificar si ya existe la app con nombre 'productosApp'
+            if (!firebase.apps.find(app => app && app.name === 'productosApp')) {
+                appProductos = firebase.initializeApp(firebaseConfigProductos, 'productosApp');
+            } else {
+                appProductos = firebase.app('productosApp');
+            }
+            dbProductos = appProductos.firestore();
+            console.log('✅ Segunda base de datos (productos) conectada');
+        } catch (error) {
+            console.error('❌ Error conectando segunda base de datos:', error);
+        }
 
         // ==============================
         // VARIABLES GLOBALES
         // ==============================
         let reports = [];
         let currentReportId = null;
-        let reportCounter = 0;
+        let temporaryReportId = null;
         let isCreatingNewReport = false;
         let isFilterOpen = false;
+        let productosCatalogo = [];
         let originalProducts = [];
-        let productosCatalogo = []; // Productos de la base de datos externa
 
         // ==============================
         // FUNCIONES DE HUELLA DEL NAVEGADOR
@@ -1307,6 +1335,191 @@
         }
 
         const browserFingerprint = getBrowserFingerprint();
+
+        // ==============================
+        // FUNCIÓN PARA INICIALIZAR EL CONTADOR
+        // ==============================
+        async function initializeReportCounter() {
+            try {
+                const counterRef = db.collection("metadata").doc("reportCounter");
+                const counterDoc = await counterRef.get();
+                
+                if (!counterDoc.exists) {
+                    const snapshot = await db.collection("reportesMalEstado")
+                        .orderBy("reportNumber", "desc")
+                        .limit(1)
+                        .get();
+                    
+                    let lastNumber = 0;
+                    if (!snapshot.empty) {
+                        const lastReport = snapshot.docs[0].data();
+                        lastNumber = lastReport.reportNumber || 0;
+                    }
+                    
+                    await counterRef.set({
+                        lastReportNumber: lastNumber,
+                        initializedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    console.log('Contador de reportes inicializado con:', lastNumber);
+                }
+            } catch (error) {
+                console.error("Error al inicializar contador:", error);
+            }
+        }
+
+        // ==============================
+        // FUNCIÓN PARA GENERAR NÚMERO DE REPORTE (SOLO AL GUARDAR)
+        // ==============================
+        async function generateReportNumberOnSave() {
+            const maxRetries = 5;
+            let retryCount = 0;
+            
+            while (retryCount < maxRetries) {
+                try {
+                    return await db.runTransaction(async (transaction) => {
+                        const counterRef = db.collection("metadata").doc("reportCounter");
+                        const counterDoc = await transaction.get(counterRef);
+                        
+                        let currentCounter = 0;
+                        
+                        if (counterDoc.exists) {
+                            currentCounter = counterDoc.data().lastReportNumber || 0;
+                        }
+                        
+                        const newCounter = currentCounter + 1;
+                        const newReportId = `#${newCounter}`;
+                        
+                        const existingReportRef = db.collection("reportesMalEstado").doc(newReportId);
+                        const existingReport = await transaction.get(existingReportRef);
+                        
+                        if (existingReport.exists) {
+                            throw new Error('Contador desfasado, buscando siguiente número');
+                        }
+                        
+                        transaction.set(counterRef, {
+                            lastReportNumber: newCounter,
+                            lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                            updatedBy: currentUserName || 'Sistema'
+                        }, { merge: true });
+                        
+                        console.log(`Número generado al guardar: ${newReportId} (anterior: ${currentCounter})`);
+                        return newReportId;
+                    });
+                } catch (error) {
+                    console.error(`Intento ${retryCount + 1} falló:`, error);
+                    retryCount++;
+                    
+                    if (retryCount === maxRetries) {
+                        try {
+                            const fallbackNumber = await findNextAvailableNumber();
+                            console.warn('Usando número de fallback al guardar:', fallbackNumber);
+                            
+                            await db.collection("reportesFallback").add({
+                                reportNumber: fallbackNumber,
+                                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                                originalError: error.message,
+                                retryCount: retryCount
+                            });
+                            
+                            return fallbackNumber;
+                        } catch (fallbackError) {
+                            console.error('Error en fallback:', fallbackError);
+                            throw new Error('No se pudo generar un número de reporte');
+                        }
+                    }
+                    
+                    await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, retryCount)));
+                }
+            }
+            
+            throw new Error('No se pudo generar un número de reporte después de múltiples intentos');
+        }
+
+        // ==============================
+        // FUNCIÓN AUXILIAR PARA ENCONTRAR EL SIGUIENTE NÚMERO DISPONIBLE
+        // ==============================
+        async function findNextAvailableNumber() {
+            const snapshot = await db.collection("reportesMalEstado")
+                .select()
+                .get();
+            
+            const existingNumbers = new Set();
+            snapshot.forEach(doc => {
+                const id = doc.id;
+                if (id.startsWith('#')) {
+                    const num = parseInt(id.substring(1));
+                    if (!isNaN(num)) {
+                        existingNumbers.add(num);
+                    }
+                }
+            });
+            
+            let nextNumber = 1;
+            while (existingNumbers.has(nextNumber)) {
+                nextNumber++;
+            }
+            
+            const counterRef = db.collection("metadata").doc("reportCounter");
+            await counterRef.set({
+                lastReportNumber: nextNumber - 1,
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedBy: 'Sistema (Fallback)'
+            }, { merge: true });
+            
+            return `#${nextNumber}`;
+        }
+
+        // ==============================
+        // FUNCIÓN PARA VERIFICAR Y REPARAR EL CONTADOR
+        // ==============================
+        async function verifyAndRepairCounter() {
+            try {
+                const snapshot = await db.collection("reportesMalEstado")
+                    .orderBy("reportNumber", "asc")
+                    .get();
+                
+                let expectedNumber = 1;
+                let hasGap = false;
+                const gaps = [];
+                
+                snapshot.forEach(doc => {
+                    const report = doc.data();
+                    const reportNum = report.reportNumber;
+                    
+                    if (reportNum !== expectedNumber) {
+                        hasGap = true;
+                        gaps.push({
+                            expected: expectedNumber,
+                            found: reportNum,
+                            id: doc.id
+                        });
+                        expectedNumber = reportNum + 1;
+                    } else {
+                        expectedNumber++;
+                    }
+                });
+                
+                if (hasGap) {
+                    console.warn('Se encontraron gaps en la numeración:', gaps);
+                    
+                    const lastValidNumber = expectedNumber - 1;
+                    const counterRef = db.collection("metadata").doc("reportCounter");
+                    await counterRef.set({
+                        lastReportNumber: lastValidNumber,
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedBy: 'Sistema (Verificación)',
+                        gapsDetected: gaps
+                    }, { merge: true });
+                    
+                    console.log(`Contador ajustado a: ${lastValidNumber}`);
+                } else {
+                    console.log('Numeración consecutiva verificada');
+                }
+            } catch (error) {
+                console.error('Error al verificar contador:', error);
+            }
+        }
 
         // ==============================
         // VERIFICACIÓN DE SESIÓN AUTOMÁTICA
@@ -1355,6 +1568,11 @@
         // FUNCIÓN PARA CARGAR PRODUCTOS DEL CATÁLOGO EXTERNO
         // ==============================
         async function loadProductosCatalogo() {
+            if (!dbProductos) {
+                console.warn('Base de datos de productos no disponible');
+                return;
+            }
+            
             try {
                 const snapshot = await dbProductos.collection("productos").get();
                 productosCatalogo = [];
@@ -1364,14 +1582,16 @@
                         ...doc.data()
                     });
                 });
-                console.log('Productos cargados del catálogo externo:', productosCatalogo.length);
+                console.log('✅ Productos cargados del catálogo externo:', productosCatalogo.length);
             } catch (error) {
-                console.error("Error al cargar productos del catálogo externo:", error);
+                console.error("❌ Error al cargar productos del catálogo externo:", error);
                 Swal.fire({
                     title: 'Advertencia',
                     text: 'No se pudo cargar el catálogo de productos. El autocompletado no estará disponible.',
                     icon: 'warning',
-                    confirmButtonColor: '#3085d6'
+                    confirmButtonColor: '#3085d6',
+                    showConfirmButton: true,
+                    showCancelButton: false
                 });
             }
         }
@@ -1495,16 +1715,25 @@
         // INICIALIZACIÓN DE LA APLICACIÓN
         // ==============================
         
-        function initializeApp() {
+        async function initializeApp() {
             toggleInitialLoader(false);
-            loadReports();
-            loadProductosCatalogo(); // Cargar productos del catálogo externo
+            await initializeReportCounter();
+            await verifyAndRepairCounter();
+            await loadReports();
+            await loadProductosCatalogo();
             setupEventListeners();
             loadFormFromLocalStorage();
+            setCurrentDate();
         }
 
         function toggleInitialLoader(show) {
             document.getElementById('initialLoader').style.display = show ? 'flex' : 'none';
+        }
+
+        function setCurrentDate() {
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            document.getElementById('reportDate').value = formattedDate;
         }
 
         function setupEventListeners() {
@@ -1549,7 +1778,6 @@
                     e.target.value = e.target.value.toUpperCase();
                 }
                 
-                // Validar SKU duplicados cuando se ingresa un SKU
                 if (e.target.matches('#productsTable input.code-input')) {
                     validateNoDuplicateSkus();
                     autoCompletarDescripcion(e.target);
@@ -1628,27 +1856,6 @@
             renderReportsList(filteredReports);
         }
 
-        async function generateReportNumber() {
-            try {
-                const snapshot = await db.collection("reportesMalEstado")
-                    .orderBy("reportNumber", "desc")
-                    .limit(1)
-                    .get();
-                
-                if (!snapshot.empty) {
-                    const lastReport = snapshot.docs[0].data();
-                    reportCounter = lastReport.reportNumber;
-                }
-                
-                reportCounter++;
-                return `#${reportCounter}`;
-            } catch (error) {
-                console.error("Error al obtener último reporte:", error);
-                reportCounter++;
-                return `#${reportCounter}`;
-            }
-        }
-
         function saveFormToLocalStorage() {
             if (!isCreatingNewReport) return;
             
@@ -1673,8 +1880,13 @@
                 });
             });
             
+            if (temporaryReportId) {
+                localStorage.setItem('currentReportId', temporaryReportId);
+            } else if (currentReportId) {
+                localStorage.setItem('currentReportId', currentReportId);
+            }
+            
             localStorage.setItem('currentReportForm', JSON.stringify(formData));
-            localStorage.setItem('currentReportId', currentReportId);
         }
 
         function loadFormFromLocalStorage() {
@@ -1685,32 +1897,41 @@
                 const formData = JSON.parse(savedForm);
                 
                 currentReportId = savedReportId;
-                document.getElementById('reportNumber').textContent = currentReportId;
+                if (savedReportId.startsWith('temp_')) {
+                    document.getElementById('reportNumber').textContent = 'PENDIENTE';
+                    temporaryReportId = savedReportId;
+                } else {
+                    document.getElementById('reportNumber').textContent = savedReportId;
+                }
                 
-                document.getElementById('store').value = formData.store;
-                document.getElementById('reportDate').value = formData.reportDate;
-                document.getElementById('outputNumber').value = formData.outputNumber;
-                document.getElementById('entryDate').value = formData.entryDate;
-                document.getElementById('notes').value = formData.notes;
+                document.getElementById('store').value = formData.store || '';
+                document.getElementById('reportDate').value = formData.reportDate || '';
+                document.getElementById('outputNumber').value = formData.outputNumber || '';
+                document.getElementById('entryDate').value = formData.entryDate || '';
+                document.getElementById('notes').value = formData.notes || '';
                 
                 const tbody = document.getElementById('productsTable').querySelector('tbody');
                 tbody.innerHTML = '';
                 
-                formData.products.forEach((product, index) => {
-                    const newRow = document.createElement('tr');
-                    newRow.innerHTML = `
-                        <td><input type="text" class="code-input" id="productSku${index+1}" name="productSku${index+1}" value="${product.sku || ''}" placeholder="Sku" maxlength="9" required></td>
-                        <td><input type="text" class="factory-code-input" id="factoryCode${index+1}" name="factoryCode${index+1}" value="${product.factoryCode || ''}" placeholder="Cód. Fab"></td>
-                        <td><input type="text" id="productDescription${index+1}" name="productDescription${index+1}" value="${product.description || ''}" placeholder="Descripción" required></td>
-                        <td><input type="number" id="productQuantity${index+1}" name="productQuantity${index+1}" value="${product.quantity || ''}" placeholder="0" min="1" required></td>
-                        <td><textarea class="form-control" id="productReason${index+1}" name="productReason${index+1}" placeholder="Ej: Dañado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;">${product.reason || ''}</textarea></td>
-                        <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
-                    `;
-                    tbody.appendChild(newRow);
-                    
-                    const factoryInput = newRow.querySelector('.factory-code-input');
-                    resizeInput(factoryInput);
-                });
+                if (formData.products && formData.products.length > 0) {
+                    formData.products.forEach((product, index) => {
+                        const newRow = document.createElement('tr');
+                        newRow.innerHTML = `
+                            <td><input type="text" class="code-input" id="productSku${index+1}" name="productSku${index+1}" value="${product.sku || ''}" placeholder="Sku" maxlength="9" required></td>
+                            <td><input type="text" class="factory-code-input" id="factoryCode${index+1}" name="factoryCode${index+1}" value="${product.factoryCode || ''}" placeholder="Cód. Fab"></td>
+                            <td><input type="text" id="productDescription${index+1}" name="productDescription${index+1}" value="${product.description || ''}" placeholder="Descripción" required></td>
+                            <td><input type="number" id="productQuantity${index+1}" name="productQuantity${index+1}" value="${product.quantity || ''}" placeholder="0" min="1" required></td>
+                            <td><textarea class="form-control" id="productReason${index+1}" name="productReason${index+1}" placeholder="Ej: Dañado" required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;">${product.reason || ''}</textarea></td>
+                            <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
+                        `;
+                        tbody.appendChild(newRow);
+                        
+                        const factoryInput = newRow.querySelector('.factory-code-input');
+                        resizeInput(factoryInput);
+                    });
+                } else {
+                    addDefaultRow();
+                }
                 
                 document.getElementById('returnForm').style.display = 'block';
                 document.getElementById('reportsList').style.display = 'none';
@@ -1726,86 +1947,23 @@
             }
         }
 
+        function addDefaultRow() {
+            const tbody = document.getElementById('productsTable').querySelector('tbody');
+            tbody.innerHTML = `
+                <tr>
+                    <td><input type="text" class="code-input" id="productSku1" name="productSku1" placeholder="Sku" maxlength="9" required></td>
+                    <td><input type="text" class="factory-code-input" id="factoryCode1" name="factoryCode1" placeholder="Cód. Fab"></td>
+                    <td><input type="text" id="productDescription1" name="productDescription1" placeholder="Descripción" required></td>
+                    <td><input type="number" id="productQuantity1" name="productQuantity1" placeholder="0" min="1" required></td>
+                    <td><textarea class="form-control" id="productReason1" name="productReason1" placeholder="Ej: Dañado, Roto, etc." required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;"></textarea></td>
+                    <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
+                </tr>
+            `;
+        }
+
         function clearFormLocalStorage() {
             localStorage.removeItem('currentReportForm');
             localStorage.removeItem('currentReportId');
-        }
-
-        async function showNewReportForm() {
-            if (isCreatingNewReport) {
-                Swal.fire({
-                    title: 'Operación en curso',
-                    text: 'Ya tienes un reporte en proceso. Termina o cancela la actual antes de crear uno nuevo.',
-                    icon: 'error',
-                    confirmButtonColor: '#3085d6',
-                    showConfirmButton: true,
-                    showCancelButton: false
-                });
-                return;
-            }
-
-            const newReportBtn = document.getElementById('newReportBtn');
-            newReportBtn.classList.add('btn-loading');
-            newReportBtn.querySelector('.spinner').style.display = 'inline-block';
-            newReportBtn.querySelector('.btn-text').style.display = 'none';
-
-            try {
-                currentReportId = await generateReportNumber();
-                document.getElementById('reportNumber').textContent = currentReportId;
-                
-                document.getElementById('store').value = '';
-                
-                const today = new Date();
-                const formattedDate = today.toISOString().split('T')[0];
-                document.getElementById('reportDate').value = formattedDate;
-                document.getElementById('entryDate').value = '';
-                
-                document.getElementById('outputNumber').value = '';
-                document.getElementById('notes').value = '';
-                
-                const tbody = document.getElementById('productsTable').querySelector('tbody');
-                tbody.innerHTML = `
-                    <tr>
-                        <td><input type="text" class="code-input" id="productSku1" name="productSku1" placeholder="Sku" maxlength="9" required></td>
-                        <td><input type="text" class="factory-code-input" id="factoryCode1" name="factoryCode1" placeholder="Cód. Fab"></td>
-                        <td><input type="text" id="productDescription1" name="productDescription1" placeholder="Descripción" required></td>
-                        <td><input type="number" id="productQuantity1" name="productQuantity1" placeholder="0" min="1" required></td>
-                        <td><textarea class="form-control" id="productReason1" name="productReason1" placeholder="Ej: Dañado, Roto, etc." required style="height: 38px; resize: none; overflow: hidden; font-size: 0.95rem; text-transform: uppercase;"></textarea></td>
-                        <td style="text-align: center;"><i class="fas fa-trash-alt" style="color: var(--danger); cursor: pointer;"></i></td>
-                    </tr>
-                `;
-                
-                document.getElementById('saveReportBtn').innerHTML = '<span class="spinner" style="display: none;"></span><span class="btn-text"><i class="fas fa-save"></i> Guardar</span>';
-                
-                addDeleteRowListeners();
-                addInputResizeListeners();
-                originalProducts = [];
-                
-                document.getElementById('reportsList').style.display = 'none';
-                document.getElementById('searchContainer').style.display = 'none';
-                document.querySelector('.header-actions').style.display = 'none';
-                document.getElementById('backButton').style.display = 'none';
-                
-                document.getElementById('returnForm').style.display = 'block';
-                isCreatingNewReport = true;
-                clearFormLocalStorage();
-                
-                document.getElementById('skuDuplicateMessage').style.display = 'none';
-            } catch (error) {
-                console.error("Error al crear nuevo reporte:", error);
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Ocurrió un error al crear el nuevo reporte',
-                    icon: 'error',
-                    confirmButtonColor: '#3085d6',
-                    showConfirmButton: true,
-                    showCancelButton: false
-                });
-            } finally {
-                newReportBtn.classList.remove('btn-loading');
-                newReportBtn.querySelector('.spinner').style.display = 'none';
-                newReportBtn.querySelector('.btn-text').style.display = 'inline';
-            }
         }
 
         function actuallyHideForm() {
@@ -1815,6 +1973,7 @@
             document.querySelector('.header-actions').style.display = 'flex';
             document.getElementById('backButton').style.display = 'flex';
             isCreatingNewReport = false;
+            temporaryReportId = null;
             clearFormLocalStorage();
         }
 
@@ -2083,6 +2242,62 @@
             return true;
         }
 
+        async function showNewReportForm() {
+            if (isCreatingNewReport) {
+                Swal.fire({
+                    title: 'Operación en curso',
+                    text: 'Ya tienes un reporte en proceso. Termina o cancela el actual antes de crear uno nuevo.',
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6',
+                    showConfirmButton: true,
+                    showCancelButton: false
+                });
+                return;
+            }
+
+            const newReportBtn = document.getElementById('newReportBtn');
+            newReportBtn.classList.add('btn-loading');
+            newReportBtn.querySelector('.spinner').style.display = 'inline-block';
+            newReportBtn.querySelector('.btn-text').style.display = 'none';
+
+            try {
+                temporaryReportId = 'temp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                document.getElementById('reportNumber').textContent = 'En Proceso';
+                document.getElementById('store').value = '';
+                setCurrentDate();
+                document.getElementById('outputNumber').value = '';
+                document.getElementById('entryDate').value = '';
+                document.getElementById('notes').value = '';
+                addDefaultRow();
+                document.getElementById('saveReportBtn').innerHTML = '<span class="spinner" style="display: none;"></span><span class="btn-text"><i class="fas fa-save"></i> Guardar</span>';
+                addDeleteRowListeners();
+                addInputResizeListeners();
+                originalProducts = [];
+                document.getElementById('reportsList').style.display = 'none';
+                document.getElementById('searchContainer').style.display = 'none';
+                document.querySelector('.header-actions').style.display = 'none';
+                document.getElementById('backButton').style.display = 'none';
+                document.getElementById('returnForm').style.display = 'block';
+                isCreatingNewReport = true;
+                clearFormLocalStorage();
+                document.getElementById('skuDuplicateMessage').style.display = 'none';
+            } catch (error) {
+                console.error("Error al crear nuevo reporte:", error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Ocurrió un error al crear el nuevo reporte. Por favor intenta de nuevo.',
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6',
+                    showConfirmButton: true,
+                    showCancelButton: false
+                });
+            } finally {
+                newReportBtn.classList.remove('btn-loading');
+                newReportBtn.querySelector('.spinner').style.display = 'none';
+                newReportBtn.querySelector('.btn-text').style.display = 'inline';
+            }
+        }
+
         async function saveReport() {
             if (!validateForm()) return;
             
@@ -2092,25 +2307,6 @@
             const entryDateInput = document.getElementById('entryDate');
             const notesInput = document.getElementById('notes');
             const saveReportBtn = document.getElementById('saveReportBtn');
-            
-            const inputDate = new Date(reportDateInput.value);
-            const tomorrow = new Date(inputDate);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            const isoDate = tomorrow.toISOString().split('T')[0];
-            
-            const reportData = {
-                id: currentReportId,
-                store: storeInput.value,
-                date: isoDate,
-                outputNumber: outputNumberInput.value.trim() || '',
-                entryDate: entryDateInput.value || '',
-                notes: notesInput.value.trim(),
-                products: getProductsFromTable(),
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                reportNumber: parseInt(currentReportId.replace('#', '')),
-                createdBy: currentUserName || 'Sistema',
-                createdByName: currentUserName || 'Usuario'
-            };
             
             const isEditing = saveReportBtn.querySelector('.btn-text').innerHTML.includes('Actualizar');
             
@@ -2122,19 +2318,26 @@
                 if (isEditing) {
                     const originalReport = reports.find(r => r.id === currentReportId);
                     if (originalReport) {
-                        const updateData = {
-                            ...reportData,
-                            status: originalReport.status || 'active',
-                            createdAt: originalReport.createdAt || firebase.firestore.FieldValue.serverTimestamp(),
-                            reportNumber: originalReport.reportNumber || parseInt(currentReportId.replace('#', '')),
-                            receivedInWarehouse: originalReport.receivedInWarehouse || false,
+                        const reportData = {
+                            id: currentReportId,
+                            store: storeInput.value,
+                            date: reportDateInput.value,
+                            outputNumber: outputNumberInput.value.trim() || '',
+                            entryDate: entryDateInput.value || '',
+                            notes: notesInput.value.trim(),
+                            products: getProductsFromTable(),
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            reportNumber: parseInt(currentReportId.replace('#', '')),
                             createdBy: originalReport.createdBy || currentUserName || 'Sistema',
                             createdByName: originalReport.createdByName || currentUserName || 'Usuario',
+                            status: originalReport.status || 'active',
+                            createdAt: originalReport.createdAt || firebase.firestore.FieldValue.serverTimestamp(),
+                            receivedInWarehouse: originalReport.receivedInWarehouse || false,
                             editCount: (originalReport.editCount || 0) + 1
                         };
                         
                         if (originalReport.receivedDate) {
-                            updateData.receivedDate = originalReport.receivedDate;
+                            reportData.receivedDate = originalReport.receivedDate;
                         }
                         
                         const productChanges = compareProducts(originalProducts, reportData.products);
@@ -2154,17 +2357,18 @@
                         
                         const existingLog = originalReport.editLog || [];
                         const updatedLog = [newLogEntry, ...existingLog];
-                        updateData.editLog = updatedLog;
+                        reportData.editLog = updatedLog;
                         
-                        await db.collection("reportesMalEstado").doc(currentReportId).update(updateData);
+                        await db.collection("reportesMalEstado").doc(currentReportId).update(reportData);
                         
                         await Swal.fire({
                             title: 'Reporte actualizado',
                             text: 'El reporte se ha actualizado correctamente',
                             icon: 'success',
                             confirmButtonColor: '#3085d6',
-                            showConfirmButton: true,
-                            showCancelButton: false
+                            showConfirmButton: false,
+                            showCancelButton: false,
+                            timer: 2000
                         });
                         
                         hideReturnForm(false);
@@ -2172,29 +2376,61 @@
                         throw new Error('Reporte original no encontrado');
                     }
                 } else {
-                    reportData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-                    reportData.status = 'active';
-                    reportData.receivedInWarehouse = false;
-                    reportData.editCount = 0;
+                    Swal.fire({
+                        title: 'Generando número de reporte...',
+                        text: 'Por favor espera',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        willOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
                     
-                    reportData.editLog = [{
-                        timestamp: new Date().toISOString(),
-                        action: 'creado',
-                        details: 'Reporte creado inicialmente',
-                        browserFingerprint: browserFingerprint.id,
-                        user: currentUserName || 'Desconocido'
-                    }];
+                    const newReportId = await generateReportNumberOnSave();
                     
-                    await db.collection("reportesMalEstado").doc(currentReportId).set(reportData);
+                    const reportData = {
+                        id: newReportId,
+                        store: storeInput.value,
+                        date: reportDateInput.value,
+                        outputNumber: outputNumberInput.value.trim() || '',
+                        entryDate: entryDateInput.value || '',
+                        notes: notesInput.value.trim(),
+                        products: getProductsFromTable(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        reportNumber: parseInt(newReportId.replace('#', '')),
+                        createdBy: currentUserName || 'Sistema',
+                        createdByName: currentUserName || 'Usuario',
+                        status: 'active',
+                        receivedInWarehouse: false,
+                        editCount: 0,
+                        editLog: [{
+                            timestamp: new Date().toISOString(),
+                            action: 'creado',
+                            details: 'Reporte creado inicialmente',
+                            browserFingerprint: browserFingerprint.id,
+                            user: currentUserName || 'Desconocido'
+                        }]
+                    };
                     
-                    // Mostrar el número de reporte después de guardar
+                    Swal.update({
+                        title: 'Guardando reporte...',
+                        text: 'Por favor espera',
+                        showConfirmButton: false
+                    });
+                    
+                    await db.collection("reportesMalEstado").doc(newReportId).set(reportData);
+                    
+                    Swal.close();
+                    
                     await Swal.fire({
                         title: 'Reporte guardado',
-                        html: `El reporte <strong>${currentReportId}</strong> se ha guardado correctamente`,
+                        html: `El reporte <strong>${newReportId}</strong> se ha guardado correctamente`,
                         icon: 'success',
                         confirmButtonColor: '#3085d6',
-                        showConfirmButton: true,
-                        showCancelButton: false
+                        showConfirmButton: false,
+                        showCancelButton: false,
+                        timer: 1500
                     });
                     
                     hideReturnForm(false);
@@ -2202,16 +2438,37 @@
                 
                 await loadReports();
                 clearFormLocalStorage();
+                temporaryReportId = null;
             } catch (error) {
                 console.error("Error al guardar el reporte:", error);
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Ocurrió un error al guardar el reporte: ' + error.message,
-                    icon: 'error',
-                    confirmButtonColor: '#3085d6',
-                    showConfirmButton: true,
-                    showCancelButton: false
-                });
+                
+                Swal.close();
+                
+                if (error.message.includes('número de reporte ya fue tomado') || error.message.includes('Contador desfasado')) {
+                    const result = await Swal.fire({
+                        title: 'Conflicto de números',
+                        text: 'Hubo un conflicto al generar el número. ¿Intentar de nuevo?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Intentar de nuevo',
+                        cancelButtonText: 'Cancelar'
+                    });
+                    
+                    if (result.isConfirmed) {
+                        saveReport();
+                    }
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Ocurrió un error al guardar el reporte: ' + error.message,
+                        icon: 'error',
+                        confirmButtonColor: '#3085d6',
+                        showConfirmButton: true,
+                        showCancelButton: false
+                    });
+                }
             } finally {
                 saveReportBtn.classList.remove('btn-loading');
                 saveReportBtn.querySelector('.spinner').style.display = 'none';
@@ -2475,7 +2732,7 @@
             document.getElementById('saveReportBtn').innerHTML = '<span class="spinner" style="display: none;"></span><span class="btn-text"><i class="fas fa-save"></i> Actualizar</span>';
             
             document.getElementById('store').value = report.store;
-            document.getElementById('reportDate').value = report.date.split('T')[0];
+            document.getElementById('reportDate').value = report.date;
             document.getElementById('outputNumber').value = report.outputNumber || '';
             document.getElementById('entryDate').value = report.entryDate || '';
             document.getElementById('notes').value = report.notes || '';
