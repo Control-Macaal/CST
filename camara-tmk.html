@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Cámara Tmk</title>
+<link rel="manifest" id="manifest-link">
+<meta name="theme-color" content="#0A2F5C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+  :root{
+    --primary-dark:#08213F;
+    --primary:#0E4C8C;
+    --primary-mid:#1565C0;
+    --accent:#2E9BF0;
+    --accent-soft:#6FC3FF;
+    --success:#22C55E;
+    --danger:#E5484D;
+    --warn:#F2A93B;
+    --bg-cam:#020914;
+    --panel:#0C2A4D;
+    --panel-light:#F2F6FB;
+    --ink:#0A2340;
+    --ink-soft:#5A7796;
+    --white:#FFFFFF;
+    --line:rgba(255,255,255,0.14);
+    --radius:18px;
+    --radius-sm:12px;
+    --safe-top:env(safe-area-inset-top,0px);
+    --safe-bottom:env(safe-area-inset-bottom,0px);
+    --glass-bg:rgba(255,255,255,0.14);
+    --glass-bg-strong:rgba(255,255,255,0.24);
+    --glass-border:rgba(255,255,255,0.38);
+    --glass-blur:blur(22px) saturate(190%);
+    --glass-shadow:0 10px 34px rgba(2,9,20,0.5), inset 0 1px 0 rgba(255,255,255,0.25);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{
+    margin:0; padding:0; height:100%; width:100%;
+    background:var(--bg-cam);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    overflow:hidden; color:var(--white);
+    overscroll-behavior:none;
+  }
+  #app{position:fixed; inset:0; display:flex; flex-direction:column;}
+
+  /* ---------- CONTROLES FLOTANTES (sin header/footer) ---------- */
+  .float-tl, .float-tr{
+    position:absolute; top:calc(var(--safe-top) + 16px); z-index:30;
+  }
+  .float-tl{left:16px;}
+  .float-tr{right:16px;}
+  .brand{
+    display:flex; align-items:center; gap:8px;
+    font-weight:700; font-size:15px; letter-spacing:.2px;
+    background:var(--glass-bg); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
+    padding:8px 12px; border-radius:999px; border:1px solid var(--glass-border);
+  }
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent-soft);box-shadow:0 0 8px var(--accent-soft);}
+  .icon-btn{
+    width:44px; height:44px; border-radius:50%;
+    background:var(--glass-bg); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
+    border:1px solid var(--glass-border); color:var(--white);
+    box-shadow:var(--glass-shadow);
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px; cursor:pointer; transition:transform .15s ease, background .15s ease;
+  }
+  .icon-btn:active{transform:scale(.92); background:rgba(46,155,240,.4);}
+  .icon-btn.active{background:rgba(46,155,240,.55); border-color:var(--accent-soft);}
+  .top-actions{display:flex; gap:10px;}
+
+  /* ---------- CAMERA VIEW ---------- */
+  #camera-screen{position:absolute; inset:0; display:none;}
+  #camera-screen.visible{display:block;}
+  #video{
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; background:#000;
+  }
+  #flashOverlay{
+    position:absolute; inset:0; background:#fff; opacity:0;
+    pointer-events:none; z-index:40;
+  }
+  .grid-overlay{
+    position:absolute; inset:0; pointer-events:none; z-index:5;
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,.18) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,.18) 1px, transparent 1px);
+    background-size:33.33% 33.33%;
+    opacity:0; transition:opacity .2s ease;
+  }
+  .grid-overlay.on{opacity:1;}
+
+  .cam-placeholder{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:14px; text-align:center; padding:30px;
+    background:radial-gradient(circle at 50% 30%, var(--primary) 0%, var(--bg-cam) 70%);
+  }
+  .cam-placeholder .emoji{font-size:44px;}
+  .cam-placeholder h2{margin:0; font-size:19px;}
+  .cam-placeholder p{margin:0; color:#A9C3DE; font-size:14px; line-height:1.5; max-width:320px;}
+  .btn{
+    border:none; border-radius:999px; padding:12px 22px; font-size:15px; font-weight:600;
+    cursor:pointer; transition:transform .15s ease, filter .15s ease;
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  }
+  .btn:active{transform:scale(.96);}
+  .btn:disabled{opacity:.85; cursor:default;}
+  .btn:disabled:active{transform:none;}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),var(--primary-mid)); color:#fff; box-shadow:0 6px 18px rgba(21,101,192,.45);}
+  .btn-ghost{background:rgba(255,255,255,.08); color:#fff; border:1px solid var(--line);}
+
+  /* bottom controls: bandeja de vidrio flotante, no un footer de ancho completo */
+  .control-tray{
+    position:absolute; left:50%; bottom:calc(var(--safe-bottom) + 22px);
+    transform:translateX(-50%); z-index:30;
+    display:flex; align-items:center; gap:22px;
+    background:var(--glass-bg); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
+    border:1px solid var(--glass-border); border-radius:40px;
+    padding:10px 16px; box-shadow:var(--glass-shadow);
+  }
+  .thumb-btn{
+    width:46px; height:46px; border-radius:14px; overflow:hidden;
+    border:1px solid var(--glass-border); background:rgba(255,255,255,.08);
+    display:flex; align-items:center; justify-content:center; font-size:19px;
+    cursor:pointer;
+  }
+  .thumb-btn img{width:100%; height:100%; object-fit:cover;}
+  .shutter-wrap{display:flex; flex-direction:column; align-items:center; gap:6px;}
+  .shutter{
+    width:68px; height:68px; border-radius:50%;
+    background:rgba(255,255,255,.9); border:3px solid var(--glass-border);
+    cursor:pointer; position:relative; box-shadow:0 4px 18px rgba(0,0,0,.35);
+  }
+  .shutter::after{
+    content:""; position:absolute; inset:5px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--accent-soft), var(--primary-mid));
+  }
+  .shutter:active{transform:scale(.9);}
+  .shutter-label{display:none;}
+  .switch-cam{
+    width:46px; height:46px; border-radius:50%;
+    background:rgba(255,255,255,.08); border:1px solid var(--glass-border);
+    display:flex; align-items:center; justify-content:center; font-size:19px; cursor:pointer;
+  }
+  .switch-cam:active{transform:scale(.9) rotate(90deg);}
+
+  .quality-chip{
+    position:absolute; bottom:104px; left:50%; transform:translateX(-50%);
+    background:var(--glass-bg); border:1px solid var(--glass-border);
+    backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
+    padding:6px 14px; border-radius:999px; font-size:11.5px; color:#EAF4FF;
+    z-index:25; display:flex; align-items:center; gap:6px; box-shadow:var(--glass-shadow);
+  }
+  .quality-chip b{color:#fff;}
+
+  /* ---------- PREVIEW / RESULT ---------- */
+  #preview-screen{
+    position:absolute; inset:0; display:none; flex-direction:column;
+    background:var(--bg-cam); z-index:60;
+  }
+  #preview-screen.visible{display:flex;}
+  .preview-imgwrap{flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#000;}
+  .preview-imgwrap img{max-width:100%; max-height:100%; object-fit:contain;}
+  .preview-info{
+    padding:14px 18px; background:var(--panel);
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;
+    border-top:1px solid var(--line);
+  }
+  .size-tag{display:flex; flex-direction:column; gap:2px;}
+  .size-tag .label{font-size:11px; color:#93B4D9; text-transform:uppercase; letter-spacing:.5px;}
+  .size-tag .value{font-size:16px; font-weight:700;}
+  .size-tag .value.ok{color:var(--success);}
+  .preview-actions{
+    display:flex; gap:10px; padding:14px 18px calc(var(--safe-bottom) + 14px);
+    background:var(--panel);
+  }
+  .preview-actions .btn{flex:1;}
+
+  /* ---------- GALLERY ---------- */
+  #gallery-screen{
+    position:absolute; inset:0; display:none; flex-direction:column;
+    background:var(--panel-light); color:var(--ink); z-index:20;
+  }
+  #gallery-screen.visible{display:flex;}
+  .gallery-header{
+    padding:calc(var(--safe-top) + 14px) 18px 14px;
+    background:linear-gradient(135deg, var(--primary-dark), var(--primary));
+    color:#fff; display:flex; flex-direction:column; gap:10px;
+  }
+  .gallery-header .row{display:flex; align-items:center; justify-content:space-between;}
+  .gallery-title{font-size:20px; font-weight:800; margin:0;}
+  .gallery-sub{font-size:12.5px; color:#BFE0FF; margin:0;}
+  .storage-bar{
+    height:6px; border-radius:4px; background:rgba(255,255,255,.18); overflow:hidden; margin-top:2px;
+  }
+  .storage-bar-fill{height:100%; background:var(--accent-soft); border-radius:4px; transition:width .3s ease;}
+
+  .gallery-body{flex:1; overflow-y:auto; padding:16px; -webkit-overflow-scrolling:touch;}
+  .gallery-grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;
+  }
+  .g-item{
+    position:relative; aspect-ratio:1/1; border-radius:12px; overflow:hidden;
+    background:#dfe9f5; cursor:pointer; border:1px solid rgba(10,35,64,.08);
+  }
+  .g-item img{width:100%; height:100%; object-fit:cover; display:block;}
+  .g-item .g-size{
+    position:absolute; bottom:4px; right:4px; font-size:9.5px; font-weight:700;
+    background:rgba(8,33,63,.75); color:#fff; padding:2px 6px; border-radius:6px;
+  }
+  .empty-state{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:10px; padding:60px 20px; text-align:center; color:var(--ink-soft);
+  }
+  .empty-state .emoji{font-size:40px;}
+
+  /* photo detail modal */
+  #detail-modal{
+    position:fixed; inset:0; background:#000; z-index:80; display:none;
+    flex-direction:column;
+  }
+  #detail-modal.visible{display:flex;}
+  .detail-top{
+    padding:calc(var(--safe-top) + 12px) 14px 10px; display:flex; justify-content:space-between; align-items:center;
+  }
+  .detail-imgwrap{flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden;}
+  .detail-imgwrap img{max-width:100%; max-height:100%; object-fit:contain;}
+  .detail-actions{
+    display:flex; gap:10px; padding:14px 18px calc(var(--safe-bottom) + 14px); background:#0b0f16;
+  }
+  .detail-actions .btn{flex:1;}
+  .btn-danger{background:rgba(229,72,77,.15); color:#FF8A8D; border:1px solid rgba(229,72,77,.4);}
+
+  .toast{
+    position:fixed; left:50%; bottom:calc(var(--safe-bottom) + 128px); transform:translateX(-50%) translateY(20px);
+    background:rgba(12,28,51,.85); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    color:#fff; padding:11px 18px; border-radius:12px; font-size:13.5px;
+    box-shadow:0 8px 24px rgba(0,0,0,.4); z-index:200; opacity:0; pointer-events:none;
+    transition:all .25s ease; border:1px solid var(--glass-border); max-width:88%; text-align:center;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  .toast.err{border-color:rgba(229,72,77,.5); background:#331214;}
+  .toast.ok{border-color:rgba(34,197,94,.4);}
+
+  .spinner{
+    width:22px; height:22px; border-radius:50%;
+    border:3px solid rgba(255,255,255,.25); border-top-color:#fff;
+    animation:spin .7s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  ::-webkit-scrollbar{display:none;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ CAMERA SCREEN ============ -->
+  <section id="camera-screen" class="visible">
+    <video id="video" playsinline autoplay muted></video>
+    <div class="grid-overlay" id="gridOverlay"></div>
+    <div id="flashOverlay"></div>
+
+    <div id="camPlaceholder" class="cam-placeholder" style="display:none;">
+      <div class="emoji">📷</div>
+      <h2 id="placeholderTitle">Activar la cámara</h2>
+      <p id="placeholderText">Necesitamos tu permiso para usar la cámara y así poder tomar y guardar tus fotos.</p>
+      <button class="btn btn-primary" id="btnEnableCam">Permitir acceso a la cámara</button>
+    </div>
+
+    <div class="float-tl">
+      <button class="icon-btn" id="btnGrid" title="Cuadrícula">▦</button>
+    </div>
+    <div class="float-tr">
+      <button class="icon-btn" id="btnTorch" title="Flash">⚡</button>
+    </div>
+
+    <div class="quality-chip" id="qualityChip">Límite de guardado: <b>≤ 2.0 MB</b> por foto</div>
+
+    <div class="control-tray">
+      <div class="thumb-btn" id="btnLastThumb">🖼️</div>
+      <div class="shutter-wrap">
+        <div class="shutter" id="btnShutter"></div>
+      </div>
+      <div class="switch-cam" id="btnSwitchCam">🔄</div>
+    </div>
+  </section>
+
+  <!-- ============ PREVIEW SCREEN ============ -->
+  <section id="preview-screen">
+    <div class="float-tl" style="position:absolute;">
+      <button class="icon-btn" id="btnClosePreview">✕</button>
+    </div>
+    <div class="preview-imgwrap"><img id="previewImg" alt="Foto capturada"></div>
+    <div class="preview-info">
+      <div class="size-tag">
+        <span class="label">Tamaño original</span>
+        <span class="value" id="origSize">—</span>
+      </div>
+      <div class="size-tag">
+        <span class="label">Comprimida a</span>
+        <span class="value ok" id="finalSize">—</span>
+      </div>
+      <div class="size-tag">
+        <span class="label">Resolución</span>
+        <span class="value" id="finalRes">—</span>
+      </div>
+    </div>
+    <div class="preview-actions">
+      <button class="btn btn-ghost" id="btnDiscard">Descartar</button>
+      <button class="btn btn-primary" id="btnSaveGallery">💾 Guardar en galería</button>
+    </div>
+  </section>
+
+  <!-- ============ GALLERY SCREEN ============ -->
+  <section id="gallery-screen">
+    <div class="gallery-header">
+      <div class="row">
+        <button class="icon-btn" id="btnBackToCamera" style="background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.3);">←</button>
+        <h1 class="gallery-title" style="flex:1; text-align:center;">Galería</h1>
+        <button class="icon-btn" id="btnRefreshGallery" style="background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.3);">⟳</button>
+      </div>
+      <p class="gallery-sub" id="gallerySub">0 fotos · 0 MB usados</p>
+      <div class="storage-bar"><div class="storage-bar-fill" id="storageFill" style="width:0%;"></div></div>
+    </div>
+    <div class="gallery-body">
+      <div class="gallery-grid" id="galleryGrid"></div>
+      <div class="empty-state" id="emptyState">
+        <div class="emoji">🌤️</div>
+        <div><b>Todavía no hay fotos</b></div>
+        <div style="font-size:13px;">Las fotos que tomes y guardes aparecerán aquí.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DETAIL MODAL ============ -->
+  <div id="detail-modal">
+    <div class="detail-top">
+      <button class="icon-btn" id="btnCloseDetail">✕</button>
+      <div class="brand" id="detailMeta">Foto</div>
+      <div style="width:42px;"></div>
+    </div>
+    <div class="detail-imgwrap"><img id="detailImg" alt="Foto"></div>
+    <div class="detail-actions">
+      <button class="btn btn-danger" id="btnDeletePhoto">🗑️ Eliminar</button>
+      <button class="btn btn-primary" id="btnResavePhoto">💾 Guardar en galería</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<canvas id="workCanvas" style="display:none;"></canvas>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- CONFIG ---------------- */
+  const MAX_BYTES = 2 * 1024 * 1024; // 2 MB límite duro
+  const DB_NAME = "camaraTmkDB";
+  const DB_VERSION = 1;
+  const STORE = "photos";
+
+  /* ---------------- STATE ---------------- */
+  let stream = null;
+  let facingMode = "environment";
+  let torchOn = false;
+  let currentTrack = null;
+  let pendingBlob = null;   // blob listo para guardar (preview)
+  let pendingMeta = null;
+  let db = null;
+  let lastPhotoUrl = null;
+
+  /* ---------------- DOM ---------------- */
+  const $ = (id) => document.getElementById(id);
+  const video = $("video");
+  const camScreen = $("camera-screen");
+  const galleryScreen = $("gallery-screen");
+  const previewScreen = $("preview-screen");
+  const detailModal = $("detail-modal");
+  const camPlaceholder = $("camPlaceholder");
+  const workCanvas = $("workCanvas");
+  const toastEl = $("toast");
+
+  /* ---------------- TOAST ---------------- */
+  let toastTimer = null;
+  function toast(msg, type){
+    clearTimeout(toastTimer);
+    toastEl.textContent = msg;
+    toastEl.className = "toast show" + (type ? " " + type : "");
+    toastTimer = setTimeout(()=> toastEl.classList.remove("show"), 2600);
+  }
+
+  /* ---------------- INDEXEDDB ---------------- */
+  function openDB(){
+    return new Promise((resolve, reject)=>{
+      const req = indexedDB.open(DB_NAME, DB_VERSION);
+      req.onupgradeneeded = (e)=>{
+        const _db = e.target.result;
+        if(!_db.objectStoreNames.contains(STORE)){
+          const store = _db.createObjectStore(STORE, { keyPath: "id" });
+          store.createIndex("createdAt", "createdAt");
+        }
+      };
+      req.onsuccess = (e)=> resolve(e.target.result);
+      req.onerror = (e)=> reject(e.target.error);
+    });
+  }
+
+  function dbAdd(record){
+    return new Promise((resolve, reject)=>{
+      const tx = db.transaction(STORE, "readwrite");
+      tx.objectStore(STORE).add(record);
+      tx.oncomplete = ()=> resolve();
+      tx.onerror = (e)=> reject(e.target.error);
+    });
+  }
+
+  function dbDelete(id){
+    return new Promise((resolve, reject)=>{
+      const tx = db.transaction(STORE, "readwrite");
+      tx.objectStore(STORE).delete(id);
+      tx.oncomplete = ()=> resolve();
+      tx.onerror = (e)=> reject(e.target.error);
+    });
+  }
+
+  function dbAll(){
+    return new Promise((resolve, reject)=>{
+      const tx = db.transaction(STORE, "readonly");
+      const req = tx.objectStore(STORE).getAll();
+      req.onsuccess = ()=> resolve(req.result.sort((a,b)=> b.createdAt - a.createdAt));
+      req.onerror = (e)=> reject(e.target.error);
+    });
+  }
+
+  /* ---------------- CAMERA ---------------- */
+  async function startCamera(){
+    stopCamera();
+    camPlaceholder.style.display = "none";
+    try{
+      const constraints = {
+        audio:false,
+        video:{
+          facingMode: { ideal: facingMode },
+          width: { ideal: 4032 },
+          height:{ ideal: 3024 }
+        }
+      };
+      stream = await navigator.mediaDevices.getUserMedia(constraints);
+      video.srcObject = stream;
+      currentTrack = stream.getVideoTracks()[0];
+      await video.play().catch(()=>{});
+      torchOn = false;
+      $("btnTorch").classList.remove("active");
+    }catch(err){
+      showCamError(err);
+    }
+  }
+
+  function stopCamera(){
+    if(stream){
+      stream.getTracks().forEach(t=> t.stop());
+      stream = null;
+    }
+  }
+
+  function showCamError(err){
+    camPlaceholder.style.display = "flex";
+    if(err && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")){
+      $("placeholderTitle").textContent = "Permiso de cámara bloqueado";
+      $("placeholderText").textContent = "Actívalo en los ajustes de tu navegador (icono de candado o Configuración > Sitios > Cámara) y vuelve a intentar.";
+    } else if (err && err.name === "NotFoundError"){
+      $("placeholderTitle").textContent = "No se encontró ninguna cámara";
+      $("placeholderText").textContent = "Este dispositivo no tiene una cámara disponible para el navegador.";
+    } else {
+      $("placeholderTitle").textContent = "Activar la cámara";
+      $("placeholderText").textContent = "Toca el botón para dar permiso y empezar a tomar fotos.";
+    }
+  }
+
+  $("btnEnableCam").addEventListener("click", startCamera);
+
+  $("btnSwitchCam").addEventListener("click", ()=>{
+    facingMode = facingMode === "environment" ? "user" : "environment";
+    startCamera();
+  });
+
+  $("btnGrid").addEventListener("click", ()=>{
+    $("gridOverlay").classList.toggle("on");
+    $("btnGrid").classList.toggle("active");
+  });
+
+  $("btnTorch").addEventListener("click", async ()=>{
+    if(!currentTrack) return;
+    const caps = currentTrack.getCapabilities ? currentTrack.getCapabilities() : {};
+    if(!caps.torch){
+      toast("Este dispositivo no permite controlar el flash desde el navegador", "err");
+      return;
+    }
+    try{
+      torchOn = !torchOn;
+      await currentTrack.applyConstraints({ advanced:[{ torch: torchOn }] });
+      $("btnTorch").classList.toggle("active", torchOn);
+    }catch(e){
+      toast("No se pudo controlar el flash", "err");
+    }
+  });
+
+  /* ---------------- CAPTURE + COMPRESS ---------------- */
+  function flashEffect(){
+    const f = $("flashOverlay");
+    f.style.transition = "none";
+    f.style.opacity = "0.85";
+    requestAnimationFrame(()=>{
+      f.style.transition = "opacity .35s ease";
+      f.style.opacity = "0";
+    });
+  }
+
+  async function captureFrame(){
+    // Preferir ImageCapture.takePhoto() para máxima resolución/calidad si está disponible
+    if(window.ImageCapture && currentTrack){
+      try{
+        const ic = new ImageCapture(currentTrack);
+        const blob = await ic.takePhoto();
+        return await blobToCanvas(blob);
+      }catch(e){ /* fallback abajo */ }
+    }
+    // Fallback: dibujar el frame actual del <video> en un canvas
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 720;
+    const ctx = canvas.getContext("2d");
+    if(facingMode === "user"){
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1,1);
+    }
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    return canvas;
+  }
+
+  function blobToCanvas(blob){
+    return new Promise((resolve, reject)=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img,0,0);
+        URL.revokeObjectURL(img.src);
+        resolve(canvas);
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(blob);
+    });
+  }
+
+  function canvasToBlob(canvas, quality){
+    return new Promise((resolve)=>{
+      canvas.toBlob((b)=> resolve(b), "image/jpeg", quality);
+    });
+  }
+
+  function scaleCanvas(canvas, factor){
+    const c2 = document.createElement("canvas");
+    c2.width = Math.max(1, Math.round(canvas.width * factor));
+    c2.height = Math.max(1, Math.round(canvas.height * factor));
+    c2.getContext("2d").drawImage(canvas, 0, 0, c2.width, c2.height);
+    return c2;
+  }
+
+  // Comprime priorizando calidad: primero baja el "quality" de JPEG,
+  // y solo si con la calidad mínima aceptable sigue pesando de más,
+  // reduce la resolución en pasos pequeños.
+  async function compressToLimit(sourceCanvas, maxBytes){
+    let canvas = sourceCanvas;
+    let quality = 0.95;
+    let blob = await canvasToBlob(canvas, quality);
+
+    // Ya cumple el límite con calidad máxima
+    if(blob.size <= maxBytes) return { blob, canvas, quality };
+
+    // Fase 1: bajar calidad hasta un piso razonable (0.5)
+    while(blob.size > maxBytes && quality > 0.5){
+      quality -= 0.05;
+      blob = await canvasToBlob(canvas, quality);
+    }
+    if(blob.size <= maxBytes) return { blob, canvas, quality };
+
+    // Fase 2: reducir resolución en pasos del 90%, probando calidad 0.8 en cada paso
+    let scale = 1;
+    while(blob.size > maxBytes && scale > 0.25){
+      scale *= 0.9;
+      canvas = scaleCanvas(sourceCanvas, scale);
+      quality = 0.82;
+      blob = await canvasToBlob(canvas, quality);
+      while(blob.size > maxBytes && quality > 0.45){
+        quality -= 0.05;
+        blob = await canvasToBlob(canvas, quality);
+      }
+    }
+    return { blob, canvas, quality };
+  }
+
+  function fmtBytes(bytes){
+    if(bytes < 1024) return bytes + " B";
+    const mb = bytes / (1024*1024);
+    if(mb >= 0.1) return mb.toFixed(2) + " MB";
+    return (bytes/1024).toFixed(0) + " KB";
+  }
+
+  $("btnShutter").addEventListener("click", async ()=>{
+    if(!stream){ toast("Activa la cámara primero", "err"); return; }
+    $("btnShutter").style.pointerEvents = "none";
+    flashEffect();
+    try{
+      const rawCanvas = await captureFrame();
+      const rawBlob = await canvasToBlob(rawCanvas, 0.98);
+      const result = await compressToLimit(rawCanvas, MAX_BYTES);
+
+      pendingBlob = result.blob;
+      pendingMeta = {
+        originalSize: rawBlob.size,
+        finalSize: result.blob.size,
+        width: result.canvas.width,
+        height: result.canvas.height,
+        quality: result.quality
+      };
+
+      $("previewImg").src = URL.createObjectURL(result.blob);
+      $("origSize").textContent = fmtBytes(rawBlob.size);
+      $("finalSize").textContent = fmtBytes(result.blob.size);
+      $("finalRes").textContent = result.canvas.width + " × " + result.canvas.height;
+      openPreview();
+    }catch(err){
+      console.error(err);
+      toast("No se pudo capturar la foto. Intenta de nuevo.", "err");
+    }finally{
+      $("btnShutter").style.pointerEvents = "auto";
+    }
+  });
+
+  /* ---------------- PREVIEW SCREEN ---------------- */
+  function openPreview(){ previewScreen.classList.add("visible"); }
+  function closePreview(){
+    previewScreen.classList.remove("visible");
+    pendingBlob = null; pendingMeta = null;
+  }
+  $("btnClosePreview").addEventListener("click", closePreview);
+  $("btnDiscard").addEventListener("click", closePreview);
+
+  $("btnSaveGallery").addEventListener("click", async ()=>{
+    if(!pendingBlob) return;
+    const btn = $("btnSaveGallery");
+    const original = btn.innerHTML;
+    btn.disabled = true;
+    btn.classList.add("is-saving");
+    btn.innerHTML = '<span class="spinner"></span><span>Guardando...</span>';
+    try{
+      const id = "p_" + Date.now() + "_" + Math.random().toString(36).slice(2,8);
+      const record = {
+        id,
+        blob: pendingBlob,
+        createdAt: Date.now(),
+        originalSize: pendingMeta.originalSize,
+        finalSize: pendingMeta.finalSize,
+        width: pendingMeta.width,
+        height: pendingMeta.height
+      };
+      await dbAdd(record);
+      await saveToDeviceGallery(pendingBlob, "foto_" + id + ".jpg");
+      updateLastThumb(URL.createObjectURL(pendingBlob));
+      btn.innerHTML = '✅ Guardada';
+      toast("Foto guardada en galería (" + fmtBytes(pendingMeta.finalSize) + ")", "ok");
+      await new Promise(r=> setTimeout(r, 450));
+      closePreview();
+      refreshGallery();
+    }catch(err){
+      console.error(err);
+      toast("No se pudo guardar la foto. Intenta de nuevo.", "err");
+    }finally{
+      btn.disabled = false;
+      btn.classList.remove("is-saving");
+      btn.innerHTML = original;
+    }
+  });
+
+  // Guarda el archivo directamente (sin abrir la hoja de compartir del sistema)
+  async function saveToDeviceGallery(blob, filename){
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=> URL.revokeObjectURL(url), 4000);
+    return "downloaded";
+  }
+
+  function updateLastThumb(url){
+    lastPhotoUrl = url;
+    $("btnLastThumb").innerHTML = '<img src="'+url+'" alt="Última foto">';
+  }
+
+  /* ---------------- GALLERY ---------------- */
+  async function refreshGallery(){
+    const grid = $("galleryGrid");
+    const empty = $("emptyState");
+    let items = [];
+    try{ items = await dbAll(); }catch(e){ console.error(e); }
+
+    if(items.length === 0){
+      grid.innerHTML = "";
+      empty.style.display = "flex";
+    } else {
+      empty.style.display = "none";
+      grid.innerHTML = items.map(it=>{
+        const url = URL.createObjectURL(it.blob);
+        return '<div class="g-item" data-id="'+it.id+'"><img src="'+url+'" loading="lazy"><span class="g-size">'+fmtBytes(it.finalSize)+'</span></div>';
+      }).join("");
+      updateLastThumb(URL.createObjectURL(items[0].blob));
+    }
+
+    const totalBytes = items.reduce((s,it)=> s + it.finalSize, 0);
+    $("gallerySub").textContent = items.length + (items.length===1 ? " foto · " : " fotos · ") + fmtBytes(totalBytes) + " usados";
+    const pct = Math.min(100, (totalBytes / (items.length ? items.length * MAX_BYTES : MAX_BYTES)) * 100);
+    $("storageFill").style.width = pct + "%";
+
+    grid.querySelectorAll(".g-item").forEach(el=>{
+      el.addEventListener("click", ()=> openDetail(el.dataset.id, items));
+    });
+
+    window.__galleryItems = items;
+  }
+
+  $("btnRefreshGallery").addEventListener("click", refreshGallery);
+
+  /* ---------------- DETAIL MODAL ---------------- */
+  let currentDetailId = null;
+  function openDetail(id, items){
+    const it = items.find(x=> x.id === id);
+    if(!it) return;
+    currentDetailId = id;
+    $("detailImg").src = URL.createObjectURL(it.blob);
+    const d = new Date(it.createdAt);
+    $("detailMeta").textContent = fmtBytes(it.finalSize) + " · " + it.width + "×" + it.height;
+    detailModal.classList.add("visible");
+  }
+  $("btnCloseDetail").addEventListener("click", ()=> detailModal.classList.remove("visible"));
+
+  $("btnDeletePhoto").addEventListener("click", async ()=>{
+    if(!currentDetailId) return;
+    await dbDelete(currentDetailId);
+    detailModal.classList.remove("visible");
+    toast("Foto eliminada de la galería de la app", "ok");
+    refreshGallery();
+  });
+
+  $("btnResavePhoto").addEventListener("click", async ()=>{
+    if(!currentDetailId) return;
+    const items = window.__galleryItems || [];
+    const it = items.find(x=> x.id === currentDetailId);
+    if(!it) return;
+    const btn = $("btnResavePhoto");
+    const original = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span><span>Guardando...</span>';
+    try{
+      await saveToDeviceGallery(it.blob, "foto_" + it.id + ".jpg");
+      toast("Foto guardada en galería", "ok");
+    }catch(err){
+      console.error(err);
+      toast("No se pudo guardar la foto.", "err");
+    }finally{
+      btn.disabled = false;
+      btn.innerHTML = original;
+    }
+  });
+
+  /* ---------------- NAVEGACIÓN (sin barra fija) ---------------- */
+  function showCameraScreen(){
+    camScreen.classList.add("visible");
+    galleryScreen.classList.remove("visible");
+    if(!stream) startCamera();
+  }
+  function showGalleryScreen(){
+    camScreen.classList.remove("visible");
+    galleryScreen.classList.add("visible");
+    stopCamera();
+    refreshGallery();
+  }
+  $("btnLastThumb").addEventListener("click", showGalleryScreen);
+  $("btnBackToCamera").addEventListener("click", showCameraScreen);
+
+  /* ---------------- INIT ---------------- */
+  async function init(){
+    try{
+      db = await openDB();
+    }catch(e){
+      console.error("IndexedDB no disponible", e);
+      toast("El almacenamiento local no está disponible en este navegador", "err");
+    }
+
+    // Manifest embebido para permitir "Agregar a pantalla de inicio"
+    const manifest = {
+      name: "Cámara Tmk",
+      short_name: "Cámara Tmk",
+      start_url: ".",
+      display: "standalone",
+      background_color: "#0A2F5C",
+      theme_color: "#0A2F5C",
+      icons: []
+    };
+    const manifestBlob = new Blob([JSON.stringify(manifest)], {type:"application/json"});
+    document.getElementById("manifest-link").href = URL.createObjectURL(manifestBlob);
+
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      showCamError({name:"NotFoundError"});
+      $("placeholderTitle").textContent = "Cámara no disponible en esta vista";
+      $("placeholderText").textContent = "Abre este archivo directamente en Chrome (Android) o Safari (iOS) para poder usar la cámara.";
+    } else {
+      await startCamera();
+    }
+    await refreshGallery();
+  }
+
+  document.addEventListener("visibilitychange", ()=>{
+    if(document.hidden){ stopCamera(); }
+    else if(camScreen.classList.contains("visible")){ startCamera(); }
+  });
+
+  init();
+})();
+</script>
+</body>
+</html>
